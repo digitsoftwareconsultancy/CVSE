@@ -2,8 +2,8 @@
 <style>
  body{font-family:Arial;padding:10px;background:#fafafa}
  table{border-collapse:collapse;width:100%;border:2px solid #8b4513}
- th{border:1px solid #8b4513;padding:6px;text-align:center;font-size:11px;background:#0a1931;color:#fff;height:0.8cm}
- td{border:1px solid #8b4513;padding:4px;text-align:center;font-size:11px;min-height:0.8cm;vertical-align:middle}
+ th{border:1px solid #8b4513;padding:6px;text-align:center;font-size:11px;background:#0a1931;color:#fff}
+ td{border:1px solid #8b4513;padding:4px;text-align:center;font-size:11px;vertical-align:middle}
  td.builder-cell{height:1.8cm !important;background:#fff}
  td.leisure-cell{background:#fff3cd !important;font-weight:bold;color:#8b4513}
  select{width:100%;font-size:11px;padding:2px;margin:1px 0;height:0.8cm}
@@ -15,100 +15,80 @@
 </style></head><body>
 <div class="controls">
   <select id="gradeSel"><option>Loading...</option></select>
-  <button onclick="loadBuilder()">🔄 Load Builder</button>
-  <button onclick="saveAll()" style="background:green">💾 Save Grade</button>
+  <button onclick="loadBuilder()">🔄 Load</button>
+  <button onclick="saveAll()" style="background:green">💾 Save</button>
   <span id="status"></span>
 </div>
 <div class="controls">
-  <select id="teacherPrintSel"><option value="">-- Teacher --</option></select>
-  <button onclick="printTeacherReport()" style="background:#7c3aed">👨‍🏫 Teacher Print</button>
-  <select id="dayPrintSel"><option><option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option><option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option></select>
-  <button onclick="printDayReport()" style="background:#059669">📅 Day Print Like Photo</button>
+  <select id="teacherPrintSel"><option>-- Teacher --</option></select>
+  <button onclick="printTeacherReport()" style="background:#7c3aed">Teacher Print (from Settings)</button>
+  <select id="dayPrintSel"><option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option><option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option></select>
+  <button onclick="printDayReport()" style="background:#059669">Day Print (from Settings)</button>
 </div>
-<div id="builder">Select Grade and click Load Builder</div>
+<div id="builder">Loading...</div>
 <script>
 const WEB_URL="https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
-let cfg={total:8,list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={};
-function toArray(x){if(Array.isArray(x))return x;if(!x)return[];if(typeof x==='string'){try{let j=JSON.parse(x);if(Array.isArray(j))return j;}catch(e){}if(x.includes(','))return x.split(',').map(s=>s.trim()).filter(Boolean);return[x];}if(typeof x==='object'){if(x.teachers)return toArray(x.teachers);if(x.subjects)return toArray(x.subjects);if(x.timetable)return toArray(x.timetable);if(x.list)return toArray(x.list);return Object.values(x);}return[];}
+let cfg={total:7,list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={}, schoolInfo={name:"CAREY'S VISION SCHOOL", address:"MATIPUNG, DIPHU\nKARBI ANGLONG, Assam - 782460", logo:""};
+function toArray(x){if(Array.isArray(x))return x;if(!x)return[];if(typeof x==='string'){try{let j=JSON.parse(x);if(Array.isArray(j))return j;}catch(e){}return[x];}if(typeof x==='object'){if(x.teachers)return toArray(x.teachers);if(x.subjects)return toArray(x.subjects);if(x.timetable)return toArray(x.timetable);if(x.list)return toArray(x.list);return Object.values(x);}return[];}
 async function apiGet(a,p={}){let url=WEB_URL+"?action="+a;for(let k in p)url+="&"+k+"="+encodeURIComponent(p[k]);let r=await fetch(url);let t=await r.text();try{return JSON.parse(t)}catch(e){return{raw:t}}}
 async function apiPost(a,pl={}){let r=await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action:a,...pl})});let t=await r.text();try{return JSON.parse(t)}catch(e){return{raw:t}}}
-function defaultPeriods(){let l=[];for(let i=1;i<=8;i++)l.push({no:i,display:`P${i}`,displayInline:`P${i}`,time:`${8+i}:00`,isTeaching:true});l[3]={no:4,display:'LEISURE',displayInline:'Leisure',time:'12:00',isTeaching:false};return{total:8,list:l};}
-function normalizePeriod(p){let no=p.no||1;let label=p.display||p.label||('P-'+no);let isTeaching=(p.isTeaching!==undefined)?!!p.isTeaching:(label.toLowerCase().indexOf('leisure')==-1);return{no:String(no),display:String(label),displayInline:String(label).replace('\n',' '),time:p.time||'',isTeaching:isTeaching};}
-function normalizeSubject(s){if(!s)return null;if(typeof s==='string')return s.trim();return(s.name||s.subject||'').trim();}
-async function loadClasses(){try{let res=await apiGet('getallclasses');let cls=res.classes||[];document.getElementById('gradeSel').innerHTML=cls.map(c=>`<option value="${c}">${c}</option>`).join('');}catch(e){}}
+function normalizePeriod(p){let no=p.no||1;let label=p.display||p.label||('P-'+no);let isTeaching=(p.isTeaching!==undefined)?!!p.isTeaching:(label.toLowerCase().indexOf('leisure')==-1);return{no:String(no),display:String(label),displayInline:String(label).replace('\n',' '),isTeaching:isTeaching};}
+async function loadSchoolInfo(){try{let r=await apiGet('getschoolinfo');if(r.school){schoolInfo=r.school; console.log('School:',schoolInfo);}}catch(e){}}
+async function loadClasses(){await loadSchoolInfo();try{let res=await apiGet('getallclasses');document.getElementById('gradeSel').innerHTML=res.classes.map(c=>`<option value="${c}">${c}</option>`).join('');}catch(e){}}
 loadClasses();
-async function loadBuilder(){let grade=document.getElementById('gradeSel').value;document.getElementById('status').innerText='⏳ Loading...';try{let cfgRes=await apiGet('getperiodconfig');let raw=toArray(cfgRes.list||[]);cfg.list=raw.length>0?raw.map(normalizePeriod):defaultPeriods().list;cfg.total=cfg.list.length;let tRes=await apiGet('getallteachers');teachers=toArray(tRes.teachers||[]).filter(t=>t.username).map(t=>({username:t.username,name:t.name||t.username}));document.getElementById('teacherPrintSel').innerHTML='<option value="">-- Teacher --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');let sRes=await apiGet('getsubjectsforclass',{className:grade});subjects=toArray(sRes.subjects||[]).map(normalizeSubject).filter(Boolean);let dataRes=await apiGet('gettimetable',{className:grade});existingData=toArray(dataRes.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:r.periodNo||r.Period_No,Subject:r.subject||'',TeacherUsername:r.teacherUsername||'',TeacherName:r.teacher||r.TeacherName||''}));let mapRes=await apiGet('getoccupiedmap');occupiedMap=mapRes.map||{};renderGrid(grade);document.getElementById('status').innerText=`✅ ${grade} Loaded`;}catch(e){document.getElementById('status').innerText='❌ '+e.message;}}
-function renderGrid(grade){let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];let html=`<h3>${grade}</h3><table><tr><th>Day</th>`;cfg.list.forEach(p=>html+=`<th>${(p.display||'P'+p.no).replace('\n','<br>')}</th>`);html+=`</tr>`;days.forEach(day=>{html+=`<tr><td><b>${day}</b></td>`;cfg.list.forEach(p=>{if(!p.isTeaching){html+=`<td class="leisure-cell">Leisure</td>`;return;}let found=existingData.find(r=>r.Day==day&&String(r.Period_No)==String(p.no));let subVal=found?found.Subject:'';let tUser=found?String(found.TeacherUsername).toLowerCase():'';let busy=occupiedMap[day+'-'+p.no]||[];html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Tea--</option>`;teachers.forEach(t=>{if(busy.indexOf(t.username.toLowerCase())!=-1&&t.username.toLowerCase()!=tUser)return;html+=`<option value="${t.username}|${t.name}" ${t.username.toLowerCase()==tUser?'selected':''}>${t.name}</option>`;});html+=`</select></td>`;});html+=`</tr>`;});html+=`</table>`;document.getElementById('builder').innerHTML=html;}
-async function saveAll(){let rows=[];let grade=document.getElementById('gradeSel').value;document.querySelectorAll('td.builder-cell').forEach(td=>{let sub=td.querySelector('.sub');let tea=td.querySelector('.teach');if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname});}});if(!rows.length){alert('Select');return;}let res=await apiPost('savetimetable',{rows:rows,grade:grade});alert(res.ok||res.success?'Saved '+rows.length:'Failed');}
+async function loadBuilder(){let grade=document.getElementById('gradeSel').value;document.getElementById('status').innerText='⏳ Loading...';let cfgRes=await apiGet('getperiodconfig');cfg.list=toArray(cfgRes.list||[]).map(normalizePeriod).filter(p=>p.isTeaching);if(cfg.list.length==0)cfg.list=[1,2,3,4,5,6,7].map(n=>({no:String(n),display:n+'th Period',isTeaching:true}));cfg.list=cfg.list.slice(0,7);let tRes=await apiGet('getallteachers');teachers=toArray(tRes.teachers||[]).map(t=>({username:t.username,name:t.name||t.username}));document.getElementById('teacherPrintSel').innerHTML='<option value="">-- Teacher --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');let sRes=await apiGet('getsubjectsforclass',{className:grade});subjects=toArray(sRes.subjects||[]);let dataRes=await apiGet('gettimetable',{className:grade});existingData=toArray(dataRes.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:r.periodNo||r.Period_No,Subject:r.subject||'',TeacherUsername:r.teacherUsername||'',TeacherName:r.teacher||''}));let mRes=await apiGet('getoccupiedmap');occupiedMap=mRes.map||{};renderGrid(grade);document.getElementById('status').innerText=`✅ ${grade}`;}
+function renderGrid(grade){let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];let html=`<h3>${grade}</h3><table><tr><th>Day</th>`;cfg.list.forEach(p=>html+=`<th>${p.display}</th>`);html+=`</tr>`;days.forEach(day=>{html+=`<tr><td><b>${day}</b></td>`;cfg.list.forEach(p=>{let found=existingData.find(r=>r.Day==day&&String(r.Period_No)==String(p.no));let subVal=found?found.Subject:'';let tUser=found?String(found.TeacherUsername).toLowerCase():'';let busy=occupiedMap[day+'-'+p.no]||[];html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Tea--</option>`;teachers.forEach(t=>{if(busy.indexOf(t.username.toLowerCase())!=-1&&t.username.toLowerCase()!=tUser)return;html+=`<option value="${t.username}|${t.name}" ${t.username.toLowerCase()==tUser?'selected':''}>${t.name}</option>`;});html+=`</select></td>`;});html+=`</tr>`;});html+=`</table>`;document.getElementById('builder').innerHTML=html;}
+async function saveAll(){let rows=[];let grade=document.getElementById('gradeSel').value;document.querySelectorAll('td.builder-cell').forEach(td=>{let sub=td.querySelector('.sub');let tea=td.querySelector('.teach');if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname});}});let res=await apiPost('savetimetable',{rows:rows,grade:grade});alert('Saved');}
 
-// TEACHER PRINT - Photo 1 style (2 rows per day)
+function getSchoolHeaderHTML(){
+  let logoHTML = schoolInfo.logo ? `<img src="${schoolInfo.logo}" style="height:50px;max-width:80px;object-fit:contain">` : '';
+  return `<div style="display:flex; align-items:center; justify-content:center; gap:12px; text-align:center">
+    ${logoHTML}
+    <div>
+      <div style="font-weight:900; font-size:14px">${(schoolInfo.name||"CAREY'S VISION SCHOOL").toUpperCase()}</div>
+      <div style="font-size:10px; white-space:pre-line">${schoolInfo.address||"MATIPUNG, DIPHU\nKARBI ANGLONG, Assam - 782460"}</div>
+    </div>
+  </div>`;
+}
+
 async function printTeacherReport(){
-  let sel=document.getElementById('teacherPrintSel');if(!sel.value){alert('Select Teacher');return;}let tName=sel.options[sel.selectedIndex].text;
-  let res=await apiGet('gettimetableforteacher',{username:sel.value});let rows=toArray(res.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Grade:r.className||r.Grade||'',Subject:r.subject||''}));
-  let teaching=cfg.list.filter(p=>p.isTeaching);if(teaching.length>7)teaching=teaching.slice(0,7);if(teaching.length==0)teaching=[1,2,3,4,5,6,7].map(n=>({no:String(n)}));
+  let sel=document.getElementById('teacherPrintSel');if(!sel.value){alert('Select Teacher');return;}
+  let tName=sel.options[sel.selectedIndex].text;
+  let res=await apiGet('gettimetableforteacher',{username:sel.value});let rows=toArray(res.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Grade:r.className||'',Subject:r.subject||''}));
   let grid={};rows.forEach(r=>{if(!grid[r.Day])grid[r.Day]={};grid[r.Day][r.Period_No]=r;});
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-  let counts={};rows.forEach(r=>{let s=r.Subject||'';counts[s]=(counts[s]||0)+1;});
+  let counts={};rows.forEach(r=>{counts[r.Subject]=(counts[r.Subject]||0)+1;});
   let w=window.open('','_blank');
-  let html=`<style>@page{margin:12mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;font-size:11px;text-align:center}th{background:#eee}.title{text-align:center;font-size:22px;font-weight:900} .sub{text-align:center;font-size:13px;margin:6px}</style>
-  <div class="title">Time Table</div><div class="sub">Teacher's Name: ${tName}</div>
-  <table><tr><th>Day</th>${teaching.map((_,i)=>`<th>${i+1}st Period</th>`.replace('1st','1st').replace('2st','2nd').replace('3st','3rd')).join('')}</tr>`;
+  let html=`<style>@page{margin:10mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;font-size:11px;text-align:center}th{background:#f1f1f1}.title{text-align:center;font-size:20px;font-weight:900;margin:6px}.sub{text-align:center;font-size:13px;margin:4px}</style>
+  ${getSchoolHeaderHTML()}
+  <div class="title">Time Table</div><div class="sub">Teacher's Name : ${tName}</div>
+  <table><tr><th>Day</th>${cfg.list.map((_,i)=>`<th>${i+1}st Period</th>`.replace('1st','1st').replace('2st','2nd').replace('3st','3rd')).join('')}</tr>`;
   days.forEach(d=>{
     html+=`<tr><td rowspan="2"><b>${d.charAt(0)+d.slice(1).toLowerCase()}</b></td>`;
-    teaching.forEach(p=>{let c=(grid[d]||{})[p.no];html+=`<td style="height:16px">${c?c.Subject:''}</td>`;});html+=`</tr><tr>`;
-    teaching.forEach(p=>{let c=(grid[d]||{})[p.no];html+=`<td style="height:16px">${c?`class ${c.Grade}`:''}</td>`;});html+=`</tr>`;
+    cfg.list.forEach(p=>{let c=(grid[d]||{})[p.no];html+=`<td>${c?c.Subject:''}</td>`;});html+=`</tr><tr>`;
+    cfg.list.forEach(p=>{let c=(grid[d]||{})[p.no];html+=`<td>${c?c.Grade:''}</td>`;});html+=`</tr>`;
   });
-  html+=`</table><div style="display:flex;margin-top:12px;border:1px solid #000"><div style="padding:8px;border-right:1px solid #000;width:35%">${Object.keys(counts)[0]||'ENG'} ${rows.length}</div><div style="padding:8px">Total no. of Classes per Week ${rows.length}</div></div><script>window.print()<\/script>`;
+  let first=Object.keys(counts)[0]||'ENG';
+  html+=`</table><div style="display:flex;margin-top:10px;border:1px solid #000"><div style="padding:6px 12px;border-right:1px solid #000">${first} <span style="border:1px solid #000;padding:2px 12px;margin-left:6px">${counts[first]||0}</span></div><div style="padding:6px 12px">Total no. of Classes per Week <span style="border:1px solid #000;padding:2px 12px;margin-left:6px">${rows.length}</span></div></div><script>window.print()<\/script>`;
   w.document.write(html);w.document.close();
 }
 
-// DAY PRINT - Photo 2 style (Sl.No. | Teacher | Periods with Class/Subject stacked)
 async function printDayReport(){
   let day=document.getElementById('dayPrintSel').value||'MONDAY';
-  let res=await apiGet('gettimetable',{day:day});
-  let rows=toArray(res.timetable||[]).map(r=>({TeacherName:r.teacher||r.TeacherName||'',TeacherUsername:r.teacherUsername||'',Period_No:String(r.periodNo||r.Period_No||''),Grade:r.className||r.Grade||'',Subject:r.subject||r.Subject||''}));
-  // Group by teacher
-  let byTeacher={};rows.forEach(r=>{let key=r.TeacherUsername||r.TeacherName;if(!byTeacher[key])byTeacher[key]={name:r.TeacherName||key, periods:{}};byTeacher[key].periods[r.Period_No]=r;});
-  let teaching=cfg.list.filter(p=>p.isTeaching);if(teaching.length>7)teaching=teaching.slice(0,7);if(teaching.length==0)teaching=[1,2,3,4,5,6,7].map(n=>({no:String(n)}));
-  let teachersList=Object.values(byTeacher);
+  let res=await apiGet('gettimetable',{day:day});let rows=toArray(res.timetable||[]).map(r=>({TeacherName:r.teacher||r.TeacherName||'',TeacherUsername:r.teacherUsername||'',Period_No:String(r.periodNo||r.Period_No),Grade:r.className||'',Subject:r.subject||''}));
+  let byTeacher={};rows.forEach(r=>{let k=r.TeacherUsername||r.TeacherName;if(!byTeacher[k])byTeacher[k]={name:r.TeacherName,periods:{}};byTeacher[k].periods[r.Period_No]=r;});
+  let list=Object.values(byTeacher);
   let w=window.open('','_blank');
-  let html=`<style>
-    @page{margin:10mm 8mm} body{font-family:Arial; margin:0; padding:10px}
-    .top{text-align:center; line-height:1.2}
-    .top div:first-child{font-weight:700; font-size:11px}
-    .top div:nth-child(2){font-weight:700; font-size:11px}
-    .title{text-align:center; font-size:18px; font-weight:900; margin:8px 0}
-    table{border-collapse:collapse; width:100%; table-layout:fixed}
-    th,td{border:1px solid #000; padding:3px; font-size:10px; text-align:center}
-    th{background:#f0f0f0; font-weight:700}
-    td.small{font-size:9px; height:14px}
-    .dayHeader{background:#e2e2e2; font-weight:800; text-align:center; padding:4px; border:1px solid #000}
-  </style>
-  <div class="top"><div>CAREY'S VISION SCHOOL</div><div>MATIPUNG, DIPHU<br>KARBI ANGLONG, Assam - 782460</div></div>
-  <div class="title">Time Table</div>
-  <div class="dayHeader">${day}</div>
-  <table>
-    <tr><th style="width:35px">Sl. No.</th><th style="width:110px">Teacher</th>${teaching.map((_,i)=>`<th>${i+1}st Period</th>`.replace('1st Period','1st Period').replace('2st Period','2nd Period').replace('3st Period','3rd Period')).join('')}</tr>`;
-
-  teachersList.forEach((t,idx)=>{
-    // Row 1 - Class
-    html+=`<tr><td rowspan="2">${idx+1}</td><td rowspan="2"><b>${t.name}</b></td>`;
-    teaching.forEach(p=>{
-      let cell=t.periods[p.no]; 
-      html+=`<td class="small">${cell?cell.Grade:''}</td>`;
-    });
-    html+=`</tr><tr>`;
-    teaching.forEach(p=>{
-      let cell=t.periods[p.no];
-      html+=`<td class="small">${cell?cell.Subject:''}</td>`;
-    });
-    html+=`</tr>`;
+  let html=`<style>@page{margin:8mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:3px;font-size:10px;text-align:center}th{background:#eee}.title{text-align:center;font-size:18px;font-weight:900}</style>
+  ${getSchoolHeaderHTML()}
+  <div class="title">Time Table</div><div style="text-align:center;font-weight:700;background:#e2e2e2;padding:4px;border:1px solid #000">${day}</div>
+  <table><tr><th style="width:30px">Sl.No.</th><th style="width:100px">Teacher</th>${cfg.list.map((_,i)=>`<th>${i+1}st Period</th>`.replace('2st','2nd').replace('3st','3rd')).join('')}</tr>`;
+  list.forEach((t,i)=>{
+    html+=`<tr><td rowspan="2">${i+1}</td><td rowspan="2">${t.name}</td>`;
+    cfg.list.forEach(p=>{let c=t.periods[p.no];html+=`<td>${c?c.Grade:''}</td>`;});html+=`</tr><tr>`;
+    cfg.list.forEach(p=>{let c=t.periods[p.no];html+=`<td>${c?c.Subject:''}</td>`;});html+=`</tr>`;
   });
-
-  if(teachersList.length==0){
-    html+=`<tr><td colspan="${teaching.length+2}">No timetable for ${day}</td></tr>`;
-  }
-
+  if(list.length==0) html+=`<tr><td colspan="${cfg.list.length+2}">No data</td></tr>`;
   html+=`</table><script>window.print()<\/script>`;
   w.document.write(html);w.document.close();
 }
