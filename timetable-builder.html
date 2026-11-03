@@ -59,12 +59,11 @@ async function loadBuilder(){
   let sRes=await apiGet('getsubjectsforclass',{className:grade});subjects=toArray(sRes.subjects||[]);
   let dataRes=await apiGet('gettimetable',{className:grade});existingData=toArray(dataRes.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Subject:r.subject||'',TeacherUsername:String(r.teacherUsername||'').toUpperCase(),TeacherName:r.teacher||''}));
   let mRes=await apiGet('getoccupiedmap');occupiedMap=mRes.map||{};electiveLookup=mRes.electiveLookup||{};
-  // Load elective map for this grade
   let eRes=await apiGet('getelectivemap',{grade:grade});let electives=toArray(eRes.electives||eRes.groups||[]);
   electiveByPeriod={};
   electives.forEach(el=>{let p=String(el.periodNo||'').trim();if(!p)return;if(!electiveByPeriod[p])electiveByPeriod[p]=[];electiveByPeriod[p].push(el);});
   renderGrid(grade);
-  document.getElementById('status').innerText=`✅ ${grade} - ${cfg.list.length} Periods | Elective periods: ${Object.keys(electiveByPeriod).join(', ')||'None'}`;
+  document.getElementById('status').innerText=`✅ ${grade} - ${cfg.list.length} Periods | Elective periods: ${Object.keys(electiveByPeriod).join(', ')||'None'} | Subjects: ${subjects.length}`;
 }
 function renderGrid(grade){
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
@@ -89,13 +88,11 @@ function renderGrid(grade){
         let subVal=found?found.Subject:''; let tUser=found?String(found.TeacherUsername).toUpperCase():'';
         let busy=occupiedMap[day+'-'+p.no]||[]; busy=busy.map(b=>String(b).toUpperCase());
         html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Tea--</option>`;
+        // FIXED: Show ALL teachers, don't hide busy ones
         teachers.forEach(t=>{
-          if(busy.indexOf(t.username)!=-1 && t.username!=tUser){
-            // If this grade+period is elective, allow same period teacher (don't skip)
-            let isElectiveSlot=electiveLookup[grade.toUpperCase()+'-'+p.no];
-            if(!isElectiveSlot) return;
-          }
-          html+=`<option value="${t.username}|${t.name}" ${t.username==tUser?'selected':''}>${t.name}</option>`;
+          let isBusy = busy.indexOf(t.username)!=-1 && t.username!=tUser;
+          let label = isBusy ? t.name + ' (Busy)' : t.name;
+          html+=`<option value="${t.username}|${t.name}" ${t.username==tUser?'selected':''} style="${isBusy?'background:#ffcccc;color:#900':''}">${label}</option>`;
         });
         html+=`</select></td>`;
       }
