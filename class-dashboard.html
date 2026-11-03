@@ -1,87 +1,305 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Class Teacher Dashboard - CVSE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teacher Panel - Carey's Vision</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-body{background:#f5f7f5}
-.topbar{background:#1b5e20;color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
-.topbar-left h2{font-size:16px} .topbar-left p{font-size:12px;opacity:0.9}
-.topbar-right{display:flex;gap:10px;align-items:center}
-.btn{padding:8px 14px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
-.btn-switch{background:#ff9800;color:white} .btn-switch:disabled{background:#9e9e9e;cursor:not-allowed;opacity:0.6}
-.btn-logout{background:#c62828;color:white}
-.container{padding:20px;max-width:1200px;margin:auto}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px;margin-top:15px}
-.card{background:white;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:4px solid #2e7d32}
-.card h3{font-size:15px;margin-bottom:8px;color:#1b5e20} .card p{font-size:13px;color:#555}
-.card .big{font-size:28px;font-weight:700;color:#1b5e20;margin:8px 0}
-.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.btn-action{background:#2e7d32;color:white;padding:8px 12px;font-size:12px}
-.btn-action.orange{background:#ef6c00}
-.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px}
-.quick{background:white;padding:15px;border-radius:8px;text-align:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.07);transition:0.2s}
-.quick:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
-.quick .icon{font-size:28px;margin-bottom:6px}
+*{box-sizing:border-box}
+body{font-family:Arial;background:#eef2f7;margin:0;padding:12px;color:#0b2a5c}
+.topbar{background:#0b2a5c;color:#fff;padding:14px 18px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.topbar h2{margin:0;font-size:18px}
+.topbar p{margin:4px 0 0;font-size:12px;opacity:.9}
+.badge{background:#f39c12;color:#000;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800}
+.container{max-width:1100px;margin:18px auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 6px 18px rgba(0,0,0,.1);text-align:center;transition:transform .2s;cursor:pointer;border:2px solid transparent}
+.card:hover{transform:translateY(-4px);border-color:#0b2a5c}
+.card-icon{font-size:48px;margin-bottom:12px}
+.card h3{margin:8px 0;color:#0b2a5c;font-size:18px}
+.card p{font-size:13px;color:#555;margin:6px 0 14px;line-height:1.4;min-height:38px}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px}
+.btn-orange{background:#f39c12;color:#000}
+.btn-blue{background:#0b2a5c;color:#fff}
+.btn-green{background:#16a34a;color:#fff}
+.btn-purple{background:#7c3aed;color:#fff}
+.btn-teal{background:#0d9488;color:#fff}
+.btn-indigo{background:#4f46e5;color:#fff}
+.btn-disabled{background:#ccc;color:#666;cursor:not-allowed}
+.info-box{background:#fff;border-left:4px solid #0b2a5c;padding:12px 16px;border-radius:8px;margin:14px 0;font-size:13px}
+.header-img{width:100%;max-height:90px;object-fit:contain;background:#fff;border-radius:10px;margin-bottom:12px}
+.powered{text-align:center;margin-top:20px;padding:10px;font-size:11px;color:#666;background:#fff;border-radius:8px}
 </style>
 </head>
 <body>
+
 <div class="topbar">
-  <div class="topbar-left"><h2 id="welcome">Class Teacher Dashboard</h2><p id="subInfo">Loading...</p></div>
-  <div class="topbar-right">
-    <button id="switchBtn" class="btn btn-switch" onclick="switchMode()">🔄 Switch to Subject Mode</button>
-    <button class="btn btn-logout" onclick="logout()">Logout</button>
+  <div>
+    <h2 id="welcome">Welcome, Teacher</h2>
+    <p id="teacherMeta">Loading...</p>
+  </div>
+  <div style="text-align:right">
+    <div id="roleBadge" class="badge">TEACHER</div>
+    <div id="examBadge" style="margin-top:6px;font-size:10px;padding:4px 8px;border-radius:10px;background:#fff;color:#0b2a5c;font-weight:800">Exam: Checking...</div>
+    <div style="margin-top:6px">
+      <button id="switchBtn" onclick="switchToSubject()" style="display:none;background:#f39c12;color:#000;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer;font-size:11px;margin-right:6px">🔄 Switch to Subject View</button>
+      <button onclick="logout()" style="background:#fff;color:#0b2a5c;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer;font-size:11px">Logout</button>
+    </div>
   </div>
 </div>
 
 <div class="container">
-  <div class="grid">
-    <div class="card"><h3>Today's Attendance</h3><div class="big" id="attPercent">--%</div><p id="attDetail">Loading...</p><div class="actions"><button class="btn btn-action" onclick="go('teacher-work.html?tab=attendance')">Mark Attendance</button></div></div>
-    <div class="card"><h3>My Class - <span id="className">-</span></h3><p>Subjects: <span id="subj">-</span></p><p>Total Students: <span id="totalStu">-</span></p><div class="actions"><button class="btn btn-action" onclick="go('teacher-work.html?tab=register')">View Register</button></div></div>
-    <div class="card"><h3>Daily Updates</h3><p id="dailyStatus">Check today's timetable</p><div class="actions"><button class="btn btn-action orange" onclick="go('teacher-work.html?tab=daily')">Publish Updates</button></div></div>
+  <img id="headerImg" class="header-img" src="" style="display:none">
+  
+  <div class="info-box">
+    <b>📅 Session:</b> <span id="sessionInfo">2026-2027</span> | 
+    <b>📘 Term:</b> <span id="termInfo">I</span> | 
+    <b>🏫 School:</b> <span id="schoolName">Carey's Vision School</span><br>
+    <b>👤 Assigned Classes:</b> <span id="classInfo">ALL</span> | 
+    <b>📚 Subjects:</b> <span id="subjectInfo">ALL</span>
   </div>
 
-  <h3 style="margin-top:25px;color:#1b5e20">Quick Actions (Same work, preserved)</h3>
-  <div class="quick-grid">
-    <div class="quick" onclick="go('teacher-work.html?tab=attendance')"><div class="icon">📋</div><b>Attendance</b><br><small>Mark & View</small></div>
-    <div class="quick" onclick="go('teacher-work.html?tab=classtest')"><div class="icon">📝</div><b>Class Test</b><br><small>Original work same</small></div>
-    <div class="quick" onclick="go('teacher-work.html?tab=monthly')"><div class="icon">📊</div><b>Monthly Performance</b><br><small>Scholastic Marks</small></div>
-    <div class="quick" onclick="go('teacher-work.html?tab=daily')"><div class="icon">📅</div><b>Daily Updates</b><br><small>Publish / Lock</small></div>
-    <div class="quick" onclick="go('teacher-work.html?tab=register')"><div class="icon">📖</div><b>Class Register</b><br><small>Full Report</small></div>
+  <div class="grid">
+    <div class="card" onclick="goAttendance()" style="border-color:#16a34a">
+      <div class="card-icon">✅</div>
+      <h3>Student Attendance</h3>
+      <p>Mark daily Present/Absent, Late Entry & Incomplete Uniform. Auto-fills Daily Updates & Monthly Report.</p>
+      <button class="btn btn-green">✅ Mark Attendance</button>
+      <p style="font-size:11px;margin-top:8px;color:#16a34a;font-weight:700">NEW: Links to Daily Updates</p>
+    </div>
+
+    <div class="card" onclick="goDailyUpdates()">
+      <div class="card-icon">📚</div>
+      <h3>Daily Class Updates</h3>
+      <p>Enter daily attendance, periods, lessons, homework and remarks. Period times auto-load from Settings sheet.</p>
+      <button class="btn btn-orange">✏️ Open Daily Updates</button>
+      <p style="font-size:11px;margin-top:8px;color:#888">Auto-fills from Attendance</p>
+    </div>
+
+    <div class="card" id="reportCardDiv" onclick="goReportCard()">
+      <div class="card-icon">📝</div>
+      <h3>Report Card Preparation</h3>
+      <p>Enter scholastic marks, co-scholastic grades, attendance and teacher remarks for Term I / II results.</p>
+      <button class="btn btn-blue" id="reportBtn">📊 Open Report Card Panel</button>
+      <p style="font-size:11px;margin-top:8px;color:#888" id="examInfo">Requires Exam Access from Admin</p>
+    </div>
+
+    <div class="card" onclick="goPerformance()" style="border-color:#7c3aed">
+      <div class="card-icon">📈</div>
+      <h3>Student's Performance</h3>
+      <p>Monthly report: Attendance % + Class Test average. View subject-wise tests & print parent report.</p>
+      <button class="btn btn-purple">📈 Open Performance Report</button>
+      <p style="font-size:11px;margin-top:8px;color:#7c3aed;font-weight:700">NEW: Attendance + Class Test</p>
+    </div>
+
+    
+    <div class="card" onclick="printMyClassTimetable()" style="border-color:#0a1931">
+      <div class="card-icon">🏫</div>
+      <h3>My Class Timetable</h3>
+      <p>Print timetable for your assigned class. Clean print with school name, class and page numbers.</p>
+      <button class="btn btn-blue">🖨️ Print Class Timetable</button>
+      <p style="font-size:11px;margin-top:8px;color:#0a1931;font-weight:700" id="myClassLabel">Class: -</p>
+    </div>
+
+    
+    <div class="card" onclick="printMyTimetable()" style="border-color:#7c3aed">
+      <div class="card-icon">👨‍🏫</div>
+      <h3>My Teaching Timetable</h3>
+      <p>Print your weekly teaching schedule across all classes. Day wise + period wise with subject.</p>
+      <button class="btn btn-teal">🖨️ Print My Timetable</button>
+      <p style="font-size:11px;margin-top:8px;color:#0d9488;font-weight:700">Teacher Wise Print</p>
+    </div>
+
+  </div>
+
+  <div class="info-box" style="border-left-color:#f39c12">
+    <b>💡 How it works:</b><br>
+        1. <b>Attendance</b> = Mark P/A + Late + Uniform (Names auto go to Daily Updates)<br>
+        2. <b>Daily Updates</b> = Loads from Attendance automatically<br>
+        3. <b>Performance</b> = Monthly Attendance % + Class Test Avg (NEW)<br>
+        4. <b>Exam Access YES</b> = Can access Report Card Preparation<br>
+        5. <b>Class Teacher = Always Both</b> — You have Class + Subject access. Use Switch button to go to Subject view.
   </div>
 </div>
 
+<div class="powered">Powered by <b>DiGit Software Consultancy</b> | <span id="dateInfo"></span></div>
+
 <script>
-const WEB_APP_URL='https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec';
-function checkAuth(){
-  if(!localStorage.getItem('cvse_username')){window.location.href='login.html';return false;}
-  const isCT=localStorage.getItem('cvse_isClassTeacher')==='true';
-  const name=localStorage.getItem('cvse_name')||localStorage.getItem('cvse_username');
-  const cls=localStorage.getItem('cvse_classes')||'-';
-  const subj=localStorage.getItem('cvse_subjects')||'-';
-  document.getElementById('welcome').textContent='Welcome, '+name+' (Class Teacher)';
-  document.getElementById('subInfo').textContent='Class: '+cls+' | Subjects: '+subj+' | Mode: Class Teacher';
-  document.getElementById('className').textContent=cls;
-  document.getElementById('subj').textContent=subj;
-  document.getElementById('switchBtn').disabled=!isCT;
-  if(!isCT) document.getElementById('switchBtn').title='Only Class Teachers can switch';
-  localStorage.setItem('cvse_currentMode','classTeacher');
-  return true;
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
+var TOKEN = localStorage.getItem('cvse_token') || localStorage.getItem('cvs_token') || '';
+var USER = {};
+try{ USER = JSON.parse(localStorage.getItem('cvse_user') || localStorage.getItem('cvs_user') || '{}'); }catch(e){ USER={}; }
+if(!USER.username && localStorage.getItem('cvse_username')){
+  USER.username = localStorage.getItem('cvse_username');
+  USER.role = localStorage.getItem('cvse_role');
+  USER.name = localStorage.getItem('cvse_name');
+  USER.classes = localStorage.getItem('cvse_classes');
+  USER.subjects = localStorage.getItem('cvse_subjects');
+  USER.examAccess = localStorage.getItem('cvse_examAccess');
+  USER.isClassTeacher = localStorage.getItem('cvse_isClassTeacher')=='true';
 }
-function switchMode(){if(localStorage.getItem('cvse_isClassTeacher')!=='true')return;localStorage.setItem('cvse_currentMode','subjectTeacher');window.location.href='subject-dashboard.html';}
-function go(url){window.location.href=url;}
-function logout(){localStorage.clear();window.location.href='login.html';}
-async function loadStats(){
+var SETTINGS = null;
+var MY_CLASS = '';
+
+async function apiGet(action, params={}){
+  let url = WEB_URL + "?action=" + action;
+  for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]);
+  let r = await fetch(url);
+  return await r.json();
+}
+
+function init(){
+  document.getElementById('dateInfo').innerText = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if(!USER.username){
+    document.getElementById('welcome').innerText = '⚠️ No Login - Please Login Again';
+    setTimeout(()=>window.location.href='index.html',1500);
+    return;
+  }
+  
+  apiGet('getfullsettings').then(s=>{
+    SETTINGS = s;
+    document.getElementById('schoolName').innerText = s.School_Name || s.schoolName || "Carey's Vision School";
+    document.getElementById('sessionInfo').innerText = s.Academic_Session || s.session || '2026-2027';
+    document.getElementById('termInfo').innerText = s.Active_Term || s.activeTerm || 'I';
+    if(s['Header Path']){
+      document.getElementById('headerImg').src = s['Header Path'];
+      document.getElementById('headerImg').style.display='block';
+    }
+  }).catch(e=>{});
+
+  var name = USER.name || USER.username || 'Teacher';
+  var role = (USER.role || 'teacher').toLowerCase();
+  var exam = String(USER.examAccess||'NO').toUpperCase();
+  var isClassTeacher = USER.isClassTeacher || role=='classTeacher' || (USER.classes && USER.classes.trim()!='');
+
+  document.getElementById('welcome').innerText = 'Welcome, ' + name;
+  document.getElementById('roleBadge').innerText = role=='classTeacher' ? 'CLASS TEACHER (ALWAYS BOTH)' : role.toUpperCase();
+  document.getElementById('teacherMeta').innerText = 'Username: ' + (USER.username||'') + ' | Login: ' + new Date().toLocaleTimeString();
+  document.getElementById('classInfo').innerText = USER.classes || 'ALL';
+  document.getElementById('subjectInfo').innerText = USER.subjects || 'ALL';
+
+  // Show Switch button only for Class Teacher (not Admin)
+  if(isClassTeacher && role!='admin'){
+    document.getElementById('switchBtn').style.display='inline-block';
+  }
+
+  MY_CLASS = String(USER.classes || '').split(',')[0].trim().toUpperCase();
+  document.getElementById('myClassLabel').innerText = 'Class: ' + (MY_CLASS || 'ALL');
+
+  var exBadge = document.getElementById('examBadge');
+  var examInfo = document.getElementById('examInfo');
+  var reportBtn = document.getElementById('reportBtn');
+  if(exam=='YES' || role=='admin'){
+    exBadge.innerHTML = '✅ Exam: ENABLED';
+    exBadge.style.background = '#2e7d32';
+    exBadge.style.color = '#fff';
+    examInfo.innerHTML = '<span style="color:green">✅ Exam Access Enabled</span>';
+  } else {
+    exBadge.innerHTML = '⛔ Exam: DISABLED';
+    exBadge.style.background = '#c62828';
+    exBadge.style.color = '#fff';
+    examInfo.innerHTML = '<span style="color:red">⛔ Exam Entry Disabled by Admin - Contact Admin</span>';
+    reportBtn.className = 'btn btn-disabled';
+    reportBtn.innerText = '⛔ Exam Disabled';
+  }
+}
+
+function switchToSubject(){
+  localStorage.setItem('cvse_view','subject');
+  window.location.href='subject-dashboard.html';
+}
+
+function goAttendance(){ window.location.href = 'teacher-work.html?tab=attendance'; }
+function goDailyUpdates(){ window.location.href = 'teacher-work.html?tab=daily'; }
+function goReportCard(){
+  var exam = String(USER.examAccess||'NO').toUpperCase();
+  var role = String(USER.role||'').toLowerCase();
+  if(role!='admin' && exam!='YES'){ alert('⛔ Exam Entry Disabled by Admin\n\nYou can still do Daily Updates.\nContact Admin to enable Exam Access.'); return; }
+  window.location.href = 'teacher-work.html?tab=exam';
+}
+function goPerformance(){ window.location.href = 'teacher-work.html?tab=performance'; }
+
+async function printMyClassTimetable(){
+  var grade = MY_CLASS;
+  if(!grade || grade=='ALL'){ 
+    var input = prompt('Enter your class to print (I,II,III etc):', 'I');
+    if(!input) return;
+    grade = input.trim().toUpperCase();
+  }
   try{
-    let cls=localStorage.getItem('cvse_classes');
-    let r=await fetch(`${WEB_APP_URL}?action=dashboardstats&className=${encodeURIComponent(cls)}`);
-    let d=await r.json();
-    if(d.attendancePercent) document.getElementById('attPercent').textContent=d.attendancePercent+'%';
-    if(d.totalStudents) document.getElementById('totalStu').textContent=d.totalStudents;
-  }catch(e){console.log(e);}
+    let cfgRes = await apiGet('getperiodconfig');
+    let cfg = cfgRes;
+    if(typeof cfgRes === 'string') cfg = JSON.parse(cfgRes);
+    let dataRes = await apiGet('gettimetable', {className:grade});
+    let all = dataRes.timetable || dataRes.rows || [];
+    var w = window.open('','_blank');
+    var html = `<style>
+      @page{margin:15mm 10mm 20mm 10mm}
+      body{font-family:Arial} table{border-collapse:collapse;width:100%;table-layout:fixed}
+      th,td{border:1px solid #000;padding:5px;font-size:11px;text-align:center;height:0.8cm}
+      th{background:#0a1931;color:#fff} td.leisure{background:#fff3cd;font-weight:bold}
+      .header{text-align:center;line-height:1.3}
+      .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:10px}
+      .footer:after{content:"Page " counter(page) " of " counter(pages)}
+      @media print{thead{display:table-header-group} tr{page-break-inside:avoid}}
+    </style>
+    <div class="header">
+      <div style="font-size:18px;font-weight:900">Carey's Vision School</div>
+      <div style="font-size:14px;font-weight:800">Class Timetable</div>
+      <div style="font-size:12px;font-weight:600">Class: ${grade}</div>
+      <hr style="border-top:1.5px solid #000;margin-top:8px">
+    </div>
+    <table><thead><tr><th style="width:80px">Day</th>${(cfg.list||[]).map(p=>`<th>${p.display.replace('\n','<br>')}</th>`).join('')}</tr></thead><tbody>`;
+    ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'].forEach(d=>{
+      html+=`<tr><td><b>${d}</b></td>`;
+      (cfg.list||[]).forEach(p=>{
+        if(!p.isTeaching){ html+=`<td class="leisure">${p.displayInline}</td>`; return; }
+        var f=all.find(r=> String(r.day||r.Day).toUpperCase()==d && String(r.className||r.Grade).toUpperCase()==grade && String(r.periodNo||r.Period_No)==String(p.no));
+        html+=`<td>${f?(f.subject||f.Subject)+'<br><b>'+(f.teacher||f.TeacherName)+'</b>':'--'}</td>`;
+      });
+      html+=`</tr>`;
+    });
+    html+=`</tbody></table><div class="footer"></div><script>window.print()<\/script>`;
+    w.document.write(html); w.document.close();
+  }catch(e){ alert('Error loading timetable: '+e.message); }
 }
-checkAuth();loadStats();
+
+async function printMyTimetable(){
+  var username = USER.username || '';
+  var name = USER.name || username;
+  if(!username){ alert('User not found'); return; }
+  try{
+    let res = await apiGet('gettimetableforteacher', {username:username});
+    var obj = res;
+    var w = window.open('','_blank');
+    var html = `<style>
+      @page{margin:15mm 10mm 20mm 10mm}
+      body{font-family:Arial} table{border-collapse:collapse;width:100%}
+      th,td{border:1px solid #000;padding:6px;font-size:11px;text-align:center}
+      th{background:#000;color:#fff} .header{text-align:center;line-height:1.3}
+      .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:10px}
+      .footer:after{content:"Page " counter(page) " of " counter(pages)}
+      @media print{thead{display:table-header-group} tr{page-break-inside:avoid}}
+    </style>
+    <div class="header">
+      <div style="font-size:18px;font-weight:900">Carey's Vision School</div>
+      <div style="font-size:14px;font-weight:800">Teacher Wise Timetable</div>
+      <div style="font-size:12px;font-weight:600">Teacher: ${name} (${username})</div>
+      <hr style="border-top:1.5px solid #000;margin-top:8px">
+    </div>
+    <table><thead><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Time</th></tr></thead><tbody>`;
+    let rows = obj.timetable || obj.rows || [];
+    if(rows.length==0) html+=`<tr><td colspan="5">No periods allotted</td></tr>`;
+    else rows.forEach(r=>{ html+=`<tr><td>${r.day||r.Day}</td><td>P${r.periodNo||r.Period_No}</td><td>${r.className||r.Grade}</td><td>${r.subject||r.Subject}</td><td>${r.time||r.Time||''}</td></tr>`; });
+    html+=`</tbody></table><div class="footer"></div><script>window.print()<\/script>`;
+    w.document.write(html); w.document.close();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+function logout(){
+  localStorage.clear();
+  window.location.href = 'index.html';
+}
+init();
 </script>
 </body>
 </html>
