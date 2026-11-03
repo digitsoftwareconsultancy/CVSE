@@ -4,10 +4,12 @@
  table{border-collapse:collapse;width:100%;border:2px solid #8b4513}
  th{border:1px solid #8b4513;padding:6px;text-align:center;font-size:11px;background:#0a1931;color:#fff;line-height:1.2}
  th small{font-weight:400;font-size:9px;display:block}
- td{border:1px solid #8b4513;padding:4px;text-align:center;font-size:11px;vertical-align:middle}
- td.builder-cell{height:1.8cm !important;background:#fff}
- td.leisure-cell{background:#fff3cd !important;font-weight:900;color:#8b4513;letter-spacing:0.5px}
- select{width:100%;font-size:11px;padding:2px;margin:1px 0;height:0.8cm}
+ td{border:1px solid #8b4513;padding:4px;text-align:center;font-size:11px;vertical-align:top}
+ td.builder-cell{height:1.8cm;background:#fff}
+ td.leisure-cell{background:#fff3cd !important;font-weight:900;color:#8b4513}
+ td.elective-cell{background:#eef6ff !important;border:2px dashed #0a1931 !important}
+ .ele-item{border:1px solid #aaa;padding:3px;margin:2px 0;background:#fff;border-radius:4px}
+ select{width:100%;font-size:11px;padding:2px;margin:1px 0;height:0.7cm}
  select.sub{font-weight:700;background:#fff9e6}
  select.teach{background:#e6f7ff}
  .controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
@@ -19,71 +21,84 @@
 <div class="controls">
   <select id="gradeSel"><option>Loading...</option></select>
   <button onclick="loadBuilder()">🔄 Load Builder</button>
-  <button onclick="saveAll()" style="background:green">💾 Save</button>
-  <button onclick="printClassReport()" style="background:#d32f2f">📄 Class Print (Keep Break)</button>
+  <button onclick="saveAll()" style="background:green">💾 Save (with Elective)</button>
+  <button onclick="printClassReport()" style="background:#d32f2f">📄 Class Print</button>
   <span id="status"></span>
 </div>
 <div class="controls">
   <select id="teacherPrintSel"><option>-- Teacher --</option></select>
-  <button onclick="printTeacherReport()" style="background:#7c3aed">Teacher Print (Keep Break)</button>
+  <button onclick="printTeacherReport()" style="background:#7c3aed">Teacher Print</button>
   <select id="dayPrintSel"><option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option><option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option></select>
-  <button onclick="printDayReport()" style="background:#059669">Day Print (Keep Break)</button>
+  <button onclick="printDayReport()" style="background:#059669">Day Print</button>
 </div>
 <div id="builder">Select class and Load...</div>
 <script>
 const WEB_URL="https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
-let cfg={list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={}, schoolInfo={name:"",address:"",logo:""};
-function toArray(x){if(Array.isArray(x))return x;if(!x)return[];if(typeof x==='string'){try{let j=JSON.parse(x);if(Array.isArray(j))return j;}catch(e){}return[x];}if(typeof x==='object'){if(x.teachers)return toArray(x.teachers);if(x.subjects)return toArray(x.subjects);if(x.timetable)return toArray(x.timetable);if(x.list)return toArray(x.list);return Object.values(x);}return[];}
+let cfg={list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={}, schoolInfo={name:"",address:"",logo:""}, electiveByPeriod={}, electiveLookup={};
+function toArray(x){if(Array.isArray(x))return x;if(!x)return[];if(typeof x==='string'){try{let j=JSON.parse(x);if(Array.isArray(j))return j;}catch(e){}return[x];}if(typeof x==='object'){if(x.teachers)return toArray(x.teachers);if(x.subjects)return toArray(x.subjects);if(x.timetable)return toArray(x.timetable);if(x.list)return toArray(x.list);if(x.electives)return toArray(x.electives);if(x.groups)return toArray(x.groups);return Object.values(x);}return[];}
 async function apiGet(a,p={}){let url=WEB_URL+"?action="+a;for(let k in p)url+="&"+k+"="+encodeURIComponent(p[k]);let r=await fetch(url);let t=await r.text();try{return JSON.parse(t)}catch(e){return{raw:t,list:[]}}}
 async function apiPost(a,pl={}){let r=await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action:a,...pl})});let t=await r.text();try{return JSON.parse(t)}catch(e){return{raw:t}}}
-function normalizePeriod(p){
-  let no=p.no||p.period||1; let label=p.label||p.display||('P-'+no); let time=p.time||''; let type=(p.type||'Teaching');
-  let isTeaching = (p.isTeaching!==undefined)? !!p.isTeaching : (String(type).toLowerCase().indexOf('leisure')==-1 && String(type).toLowerCase().indexOf('break')==-1 && String(label).toUpperCase().indexOf('LEISURE')==-1 && String(label).toUpperCase().indexOf('BREAK')==-1 ? true : false);
-  // For display we ALWAYS keep break/leisure, but mark isTeaching false for builder skip
-  if(String(type).toLowerCase()==='break' || String(label).toUpperCase()==='BREAK') isTeaching=false;
-  if(String(type).toLowerCase()==='leisure' || String(label).toUpperCase()==='LEISURE') isTeaching=false;
-  return {no:String(no), label:String(label), display:String(label), time:String(time), type:type, isTeaching:isTeaching};
-}
+function normalizePeriod(p){let no=p.no||p.period||1;let label=p.label||p.display||('P-'+no);let time=p.time||'';let type=(p.type||'Teaching');let isTeaching=true;if(String(type).toLowerCase()==='break'||String(type).toLowerCase()==='leisure'||String(label).toUpperCase()==='BREAK'||String(label).toUpperCase()==='LEISURE')isTeaching=false;return{no:String(no),label:String(label),display:String(label),time:String(time),type:type,isTeaching:isTeaching};}
 async function loadSchoolAndPeriods(){
   try{
-    let res = await apiGet('getfullsettings'); let m=res.settings||res||{};
-    schoolInfo.name=m['School_Name']||m['School Name']||"CAREY'S VISION SCHOOL"; schoolInfo.address=m['School_Address']||m['School Address']||"MATIPUNG, DIPHU"; schoolInfo.logo=m['Logo Path']||m['Logo_Path']||"";
-    let total=parseInt(m['Total_Periods']||8)||8; let list=[];
-    for(let i=1;i<=total;i++){ let t=m['Period_'+i]||''; let tp=m['Period_'+i+'_Type']||'Teaching'; let lb=m['Period_'+i+'_Label']||('P-'+i); list.push(normalizePeriod({no:i,time:t,type:tp,label:lb})); }
+    let res=await apiGet('getfullsettings');let m=res.settings||res||{};schoolInfo.name=m['School_Name']||"CAREY'S VISION SCHOOL";schoolInfo.address=m['School_Address']||"MATIPUNG, DIPHU";schoolInfo.logo=m['Logo Path']||"";
+    let total=parseInt(m['Total_Periods']||8)||8;let list=[];for(let i=1;i<=total;i++){let t=m['Period_'+i]||'';let tp=m['Period_'+i+'_Type']||'Teaching';let lb=m['Period_'+i+'_Label']||('P-'+i);list.push(normalizePeriod({no:i,time:t,type:tp,label:lb}));}
     cfg.list=list;
-    if(cfg.list.length==0){ let pRes=await apiGet('getperiodconfig'); cfg.list=toArray(pRes.list||[]).map(normalizePeriod); }
-    document.getElementById('schoolHeaderPreview').innerHTML=getSchoolHeaderHTML()+`<div style="margin-top:6px;font-size:11px"><b>Total Periods from Settings: ${total}</b> | ${cfg.list.map(p=>`${p.no}:${p.label}(${p.type})`).join(' | ')}</div>`;
-  }catch(e){ let pRes=await apiGet('getperiodconfig'); cfg.list=toArray(pRes.list||[]).map(normalizePeriod); }
+    if(cfg.list.length==0){let pRes=await apiGet('getperiodconfig');cfg.list=toArray(pRes.list||[]).map(normalizePeriod);}
+    document.getElementById('schoolHeaderPreview').innerHTML=getSchoolHeaderHTML()+`<div style="margin-top:6px;font-size:11px"><b>Total: ${total}</b> | ${cfg.list.map(p=>`${p.no}:${p.label}(${p.type})`).join(' | ')}</div>`;
+  }catch(e){let pRes=await apiGet('getperiodconfig');cfg.list=toArray(pRes.list||[]).map(normalizePeriod);}
 }
-async function loadClasses(){ await loadSchoolAndPeriods(); try{let res=await apiGet('getallclasses'); document.getElementById('gradeSel').innerHTML=res.classes.map(c=>`<option value="${c}">${c}</option>`).join('');}catch(e){}}
+async function loadClasses(){await loadSchoolAndPeriods();try{let res=await apiGet('getallclasses');document.getElementById('gradeSel').innerHTML=res.classes.map(c=>`<option value="${c}">${c}</option>`).join('');}catch(e){}}
 loadClasses();
 async function loadBuilder(){
-  let grade=document.getElementById('gradeSel').value; if(!grade) return;
+  let grade=document.getElementById('gradeSel').value;if(!grade)return;
   document.getElementById('status').innerText='⏳ Loading...';
   await loadSchoolAndPeriods();
-  let tRes=await apiGet('getallteachers'); teachers=toArray(tRes.teachers||[]).map(t=>({username:t.username,name:t.name||t.username}));
+  let tRes=await apiGet('getallteachers');teachers=toArray(tRes.teachers||[]).map(t=>({username:String(t.username||'').toUpperCase(),name:t.name||t.username}));
   document.getElementById('teacherPrintSel').innerHTML='<option value="">-- Teacher --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');
-  let sRes=await apiGet('getsubjectsforclass',{className:grade}); subjects=toArray(sRes.subjects||[]);
-  let dataRes=await apiGet('gettimetable',{className:grade}); existingData=toArray(dataRes.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Subject:r.subject||'',TeacherUsername:r.teacherUsername||'',TeacherName:r.teacher||''}));
-  let mRes=await apiGet('getoccupiedmap'); occupiedMap=mRes.map||{};
+  let sRes=await apiGet('getsubjectsforclass',{className:grade});subjects=toArray(sRes.subjects||[]);
+  let dataRes=await apiGet('gettimetable',{className:grade});existingData=toArray(dataRes.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Subject:r.subject||'',TeacherUsername:String(r.teacherUsername||'').toUpperCase(),TeacherName:r.teacher||''}));
+  let mRes=await apiGet('getoccupiedmap');occupiedMap=mRes.map||{};electiveLookup=mRes.electiveLookup||{};
+  // Load elective map for this grade
+  let eRes=await apiGet('getelectivemap',{grade:grade});let electives=toArray(eRes.electives||eRes.groups||[]);
+  electiveByPeriod={};
+  electives.forEach(el=>{let p=String(el.periodNo||'').trim();if(!p)return;if(!electiveByPeriod[p])electiveByPeriod[p]=[];electiveByPeriod[p].push(el);});
   renderGrid(grade);
-  document.getElementById('status').innerText=`✅ ${grade} - ${cfg.list.length} Periods (from Settings)`;
+  document.getElementById('status').innerText=`✅ ${grade} - ${cfg.list.length} Periods | Elective periods: ${Object.keys(electiveByPeriod).join(', ')||'None'}`;
 }
 function renderGrid(grade){
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-  let html=`<h3>${grade} - Periods as per Settings (Break/Leisure kept)</h3><table><tr><th>Day</th>`;
-  cfg.list.forEach(p=>{ html+=`<th>${p.display}<br><small>${p.time||''}<br>${p.type}</small></th>`; });
-  html+=`</tr>`;
+  let html=`<h3>${grade} - Builder (Blue dotted = Elective as per ElectiveMap)</h3><table><tr><th>Day</th>`;cfg.list.forEach(p=>{html+=`<th>${p.display}<br><small>${p.time||''}<br>${p.type}</small></th>`;});html+=`</tr>`;
   days.forEach(day=>{
     html+=`<tr><td><b>${day}</b></td>`;
     cfg.list.forEach(p=>{
-      if(!p.isTeaching){ html+=`<td class="leisure-cell">${p.label}<br><small>${p.time||''}</small></td>`; return; }
-      let found=existingData.find(r=>r.Day==day&&String(r.Period_No)==String(p.no));
-      let subVal=found?found.Subject:''; let tUser=found?String(found.TeacherUsername).toLowerCase():'';
-      let busy=occupiedMap[day+'-'+p.no]||[];
-      html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Tea--</option>`;
-      teachers.forEach(t=>{ if(busy.indexOf(t.username.toLowerCase())!=-1 && t.username.toLowerCase()!=tUser) return; html+=`<option value="${t.username}|${t.name}" ${t.username.toLowerCase()==tUser?'selected':''}>${t.name}</option>`; });
-      html+=`</select></td>`;
+      if(!p.isTeaching){html+=`<td class="leisure-cell">${p.label}<br><small>${p.time||''}</small></td>`;return;}
+      let eleList=electiveByPeriod[p.no]||null;
+      if(eleList && eleList.length>0){
+        html+=`<td class="elective-cell"><small style="font-weight:900;color:#0a1931">${eleList[0].groupName||'Elective'} - P${p.no}</small>`;
+        eleList.forEach((el, idx)=>{
+          let found=existingData.filter(r=>r.Day==day&&String(r.Period_No)==String(p.no)&&String(r.Subject).toUpperCase()==String(el.subject).toUpperCase())[0];
+          let subVal=found?found.Subject:el.subject; let tUser=found?String(found.TeacherUsername).toUpperCase():String(el.teacherUsername||'').toUpperCase();
+          html+=`<div class="ele-item"><select class="sub elective-sub" data-day="${day}" data-period="${p.no}" data-elective-idx="${idx}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach elective-teach" data-day="${day}" data-period="${p.no}" data-elective-idx="${idx}"><option value="">--Tea--</option>`;
+          teachers.forEach(t=>{html+=`<option value="${t.username}|${t.name}" ${t.username==tUser?'selected':''}>${t.name}</option>`;});
+          html+=`</select><small style="font-size:9px">${el.room||''} | ${el.subject}</small></div>`;
+        });
+        html+=`</td>`;
+      } else {
+        let found=existingData.find(r=>r.Day==day&&String(r.Period_No)==String(p.no));
+        let subVal=found?found.Subject:''; let tUser=found?String(found.TeacherUsername).toUpperCase():'';
+        let busy=occupiedMap[day+'-'+p.no]||[]; busy=busy.map(b=>String(b).toUpperCase());
+        html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Tea--</option>`;
+        teachers.forEach(t=>{
+          if(busy.indexOf(t.username)!=-1 && t.username!=tUser){
+            // If this grade+period is elective, allow same period teacher (don't skip)
+            let isElectiveSlot=electiveLookup[grade.toUpperCase()+'-'+p.no];
+            if(!isElectiveSlot) return;
+          }
+          html+=`<option value="${t.username}|${t.name}" ${t.username==tUser?'selected':''}>${t.name}</option>`;
+        });
+        html+=`</select></td>`;
+      }
     });
     html+=`</tr>`;
   });
@@ -91,74 +106,61 @@ function renderGrid(grade){
   document.getElementById('builder').innerHTML=html;
 }
 async function saveAll(){
-  let rows=[]; let grade=document.getElementById('gradeSel').value;
+  let rows=[];let grade=document.getElementById('gradeSel').value;
   document.querySelectorAll('td.builder-cell').forEach(td=>{
-    let sub=td.querySelector('.sub'); let tea=td.querySelector('.teach');
-    if(sub&&tea&&sub.value&&tea.value){ let[uname,tname]=tea.value.split('|'); rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname}); }
+    let sub=td.querySelector('.sub');let tea=td.querySelector('.teach');
+    if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname});}
   });
-  let res=await apiPost('savetimetable',{rows:rows,grade:grade}); alert('Saved '+rows.length+' periods');
+  document.querySelectorAll('.ele-item').forEach(div=>{
+    let sub=div.querySelector('.elective-sub');let tea=div.querySelector('.elective-teach');
+    if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname});}
+  });
+  let res=await apiPost('savetimetable',{rows:rows,grade:grade});alert('Saved '+rows.length+' periods (including electives: '+(Object.keys(electiveByPeriod).length>0?'YES':'NO')+')');loadBuilder();
 }
-function getSchoolHeaderHTML(){
-  let logoHTML=schoolInfo.logo?`<img src="${schoolInfo.logo}" style="height:45px;max-width:80px;object-fit:contain" onerror="this.style.display='none'">`:'';
-  return `<div style="display:flex; align-items:center; justify-content:center; gap:12px; text-align:center">${logoHTML}<div><div style="font-weight:900; font-size:15px">${(schoolInfo.name||'').toUpperCase()}</div><div style="font-size:11px; white-space:pre-line">${schoolInfo.address||''}</div></div></div>`;
-}
-
-// ===== CLASS PRINT - NEW + KEEP BREAK =====
+function getSchoolHeaderHTML(){let logoHTML=schoolInfo.logo?`<img src="${schoolInfo.logo}" style="height:45px;max-width:80px;object-fit:contain" onerror="this.style.display='none'">`:'';return `<div style="display:flex; align-items:center; justify-content:center; gap:12px; text-align:center">${logoHTML}<div><div style="font-weight:900; font-size:15px">${(schoolInfo.name||'').toUpperCase()}</div><div style="font-size:11px; white-space:pre-line">${schoolInfo.address||''}</div></div></div>`;}
 async function printClassReport(){
-  let grade=document.getElementById('gradeSel').value; if(!grade){alert('Select class');return;}
-  let res=await apiGet('gettimetable',{className:grade}); let rows=toArray(res.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Subject:r.subject||'',Teacher:r.teacher||''}));
-  let grid={}; rows.forEach(r=>{if(!grid[r.Day])grid[r.Day]={}; grid[r.Day][r.Period_No]=r;});
+  let grade=document.getElementById('gradeSel').value;if(!grade){alert('Select class');return;}
+  let res=await apiGet('gettimetable',{className:grade});let rows=toArray(res.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Subject:r.subject||'',Teacher:r.teacher||''}));
+  let grid={};rows.forEach(r=>{if(!grid[r.Day])grid[r.Day]={};if(!grid[r.Day][r.Period_No])grid[r.Day][r.Period_No]=[];grid[r.Day][r.Period_No].push(r);});
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
   let w=window.open('','_blank');
-  let html=`<style>@page{margin:8mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;font-size:10px;text-align:center}th{background:#0a1931;color:#fff}.breakCell{background:#fff3cd !important;font-weight:900;color:#000}.title{text-align:center;font-size:18px;font-weight:900}</style>
-  ${getSchoolHeaderHTML()}<div class="title">Class Time Table - ${grade}</div>
-  <table><tr><th>Day</th>${cfg.list.map(p=>`<th>${p.display}<br><small>${p.time||''}</small></th>`).join('')}</tr>`;
+  let html=`<style>@page{margin:8mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;font-size:10px;text-align:center}th{background:#0a1931;color:#fff}.breakCell{background:#fff3cd !important;font-weight:900}.eleCell{background:#eef6ff !important}.title{text-align:center;font-size:18px;font-weight:900}</style>${getSchoolHeaderHTML()}<div class="title">Class Time Table - ${grade} (Elective kept)</div><table><tr><th>Day</th>${cfg.list.map(p=>`<th>${p.display}<br><small>${p.time||''}</small></th>`).join('')}</tr>`;
   days.forEach(d=>{
-    html+=`<tr><td rowspan="2"><b>${d.slice(0,3)}</b></td>`;
-    cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell">${p.label}</td>`; return; } let c=(grid[d]||{})[p.no]; html+=`<td>${c?c.Subject:''}</td>`; }); html+=`</tr><tr>`;
-    cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell"><small>${p.type}</small></td>`; return; } let c=(grid[d]||{})[p.no]; html+=`<td><small>${c?c.Teacher:''}</small></td>`; }); html+=`</tr>`;
+    html+=`<tr><td><b>${d.slice(0,3)}</b></td>`;
+    cfg.list.forEach(p=>{if(!p.isTeaching){html+=`<td class="breakCell">${p.label}</td>`;return;}let arr=(grid[d]||{})[p.no]||[];if(arr.length>1){html+=`<td class="eleCell">${arr.map(c=>`${c.Subject}<br><small>${c.Teacher}</small>`).join('<hr style="margin:2px">')}</td>`;}else if(arr.length==1){html+=`<td>${arr[0].Subject}<br><small>${arr[0].Teacher}</small></td>`;}else{html+=`<td></td>`;}});
+    html+=`</tr>`;
   });
-  html+=`</table><script>window.print()<\/script>`; w.document.write(html); w.document.close();
+  html+=`</table><script>window.print()<\/script>`;w.document.write(html);w.document.close();
 }
-
 async function printTeacherReport(){
-  let sel=document.getElementById('teacherPrintSel'); if(!sel.value){alert('Select Teacher'); return;}
-  let tName=sel.options[sel.selectedIndex].text;
-  let res=await apiGet('gettimetableforteacher',{username:sel.value}); let rows=toArray(res.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Grade:r.className||'',Subject:r.subject||''}));
-  let grid={}; rows.forEach(r=>{if(!grid[r.Day])grid[r.Day]={}; grid[r.Day][r.Period_No]=r;});
-  let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-  let counts={}; rows.forEach(r=>{ let sub=(r.Subject||'').trim().toUpperCase(); if(!sub) return; counts[sub]=(counts[sub]||0)+1; });
+  let sel=document.getElementById('teacherPrintSel');if(!sel.value){alert('Select Teacher');return;}let tName=sel.options[sel.selectedIndex].text;
+  let res=await apiGet('gettimetableforteacher',{username:sel.value});let rows=toArray(res.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Grade:r.className||'',Subject:r.subject||''}));
+  let grid={};rows.forEach(r=>{if(!grid[r.Day])grid[r.Day]={};grid[r.Day][r.Period_No]=r;});let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];let counts={};rows.forEach(r=>{let sub=(r.Subject||'').trim().toUpperCase();if(!sub)return;counts[sub]=(counts[sub]||0)+1;});
   let w=window.open('','_blank');
-  let html=`<style>@page{margin:10mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;font-size:11px;text-align:center}th{background:#f1f1f1}.breakCell{background:#fff3cd !important;font-weight:900}.title{text-align:center;font-size:20px;font-weight:900;margin:6px}.sub{text-align:center;font-size:13px;margin:4px}</style>
-  ${getSchoolHeaderHTML()}<div class="title">Time Table</div><div class="sub">Teacher's Name : ${tName}</div>
-  <table><tr><th>Day</th>${cfg.list.map(p=>`<th>${p.display}<br><small>${p.time||''}</small></th>`).join('')}</tr>`;
+  let html=`<style>@page{margin:10mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;font-size:11px;text-align:center}th{background:#f1f1f1}.breakCell{background:#fff3cd !important;font-weight:900}.title{text-align:center;font-size:20px;font-weight:900;margin:6px}.sub{text-align:center;font-size:13px;margin:4px}</style>${getSchoolHeaderHTML()}<div class="title">Time Table</div><div class="sub">Teacher's Name : ${tName}</div><table><tr><th>Day</th>${cfg.list.map(p=>`<th>${p.display}<br><small>${p.time||''}</small></th>`).join('')}</tr>`;
   days.forEach(d=>{
     html+=`<tr><td rowspan="2"><b>${d.charAt(0)+d.slice(1).toLowerCase()}</b></td>`;
-    cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell">${p.label}</td>`; return; } let c=(grid[d]||{})[p.no]; html+=`<td>${c?c.Subject:''}</td>`; }); html+=`</tr><tr>`;
-    cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell"><small>${p.type}</small></td>`; return; } let c=(grid[d]||{})[p.no]; html+=`<td>${c?c.Grade:''}</td>`; }); html+=`</tr>`;
+    cfg.list.forEach(p=>{if(!p.isTeaching){html+=`<td class="breakCell">${p.label}</td>`;return;}let c=(grid[d]||{})[p.no];html+=`<td>${c?c.Subject:''}</td>`;});html+=`</tr><tr>`;
+    cfg.list.forEach(p=>{if(!p.isTeaching){html+=`<td class="breakCell"><small>${p.type}</small></td>`;return;}let c=(grid[d]||{})[p.no];html+=`<td>${c?c.Grade:''}</td>`;});html+=`</tr>`;
   });
-  // FIXED: Show ALL subjects, not just first
-  let allSubHtml = Object.keys(counts).map(sub=>`<div style="padding:6px 12px;border-right:1px solid #000;display:inline-block">${sub} <span style="border:1px solid #000;padding:2px 10px;margin-left:6px;font-weight:900">${counts[sub]}</span></div>`).join('');
+  let allSubHtml=Object.keys(counts).map(sub=>`<div style="padding:6px 12px;border-right:1px solid #000;display:inline-block">${sub} <span style="border:1px solid #000;padding:2px 10px;margin-left:6px;font-weight:900">${counts[sub]}</span></div>`).join('');
   html+=`</table><div style="display:flex;flex-wrap:wrap;margin-top:10px;border:1px solid #000;align-items:center"><div style="display:flex;flex-wrap:wrap">${allSubHtml}</div><div style="padding:6px 12px;font-weight:bold;border-left:1px solid #000;background:#f5f5f5">Total no. of Classes per Week <span style="border:1px solid #000;padding:2px 12px;margin-left:6px;background:#fff">${rows.length}</span></div></div><script>window.print()<\/script>`;
-  w.document.write(html); w.document.close();
+  w.document.write(html);w.document.close();
 }
-
 async function printDayReport(){
   let day=document.getElementById('dayPrintSel').value||'MONDAY';
-  let res=await apiGet('gettimetable',{day:day}); let rows=toArray(res.timetable||[]).map(r=>({TeacherName:r.teacher||r.TeacherName||'',TeacherUsername:r.teacherUsername||'',Period_No:String(r.periodNo||r.Period_No),Grade:r.className||'',Subject:r.subject||''}));
-  let byTeacher={}; rows.forEach(r=>{let k=r.TeacherUsername||r.TeacherName; if(!byTeacher[k])byTeacher[k]={name:r.TeacherName,periods:{}}; byTeacher[k].periods[r.Period_No]=r;});
+  let res=await apiGet('gettimetable',{day:day});let rows=toArray(res.timetable||[]).map(r=>({TeacherName:r.teacher||r.TeacherName||'',TeacherUsername:r.teacherUsername||'',Period_No:String(r.periodNo||r.Period_No),Grade:r.className||'',Subject:r.subject||''}));
+  let byTeacher={};rows.forEach(r=>{let k=r.TeacherUsername||r.TeacherName;if(!byTeacher[k])byTeacher[k]={name:r.TeacherName,periods:{}};byTeacher[k].periods[r.Period_No]=r;});
   let list=Object.values(byTeacher);
   let w=window.open('','_blank');
-  let html=`<style>@page{margin:8mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:3px;font-size:10px;text-align:center}th{background:#eee}.breakCell{background:#fff3cd !important;font-weight:900}.title{text-align:center;font-size:18px;font-weight:900}</style>
-  ${getSchoolHeaderHTML()}<div class="title">Time Table</div><div style="text-align:center;font-weight:700;background:#e2e2e2;padding:4px;border:1px solid #000">${day}</div>
-  <table><tr><th style="width:30px">Sl.No.</th><th style="width:100px">Teacher</th>${cfg.list.map(p=>`<th>${p.display}<br><small>${p.time||''}</small></th>`).join('')}</tr>`;
+  let html=`<style>@page{margin:8mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:3px;font-size:10px;text-align:center}th{background:#eee}.breakCell{background:#fff3cd !important;font-weight:900}.title{text-align:center;font-size:18px;font-weight:900}</style>${getSchoolHeaderHTML()}<div class="title">Time Table</div><div style="text-align:center;font-weight:700;background:#e2e2e2;padding:4px;border:1px solid #000">${day}</div><table><tr><th style="width:30px">Sl.No.</th><th style="width:100px">Teacher</th>${cfg.list.map(p=>`<th>${p.display}<br><small>${p.time||''}</small></th>`).join('')}</tr>`;
   list.forEach((t,i)=>{
     html+=`<tr><td rowspan="2">${i+1}</td><td rowspan="2">${t.name}</td>`;
-    cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell">${p.label}</td>`; return; } let c=t.periods[p.no]; html+=`<td>${c?c.Grade:''}</td>`; }); html+=`</tr><tr>`;
-    cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell"><small>${p.type}</small></td>`; return; } let c=t.periods[p.no]; html+=`<td>${c?c.Subject:''}</td>`; }); html+=`</tr>`;
+    cfg.list.forEach(p=>{if(!p.isTeaching){html+=`<td class="breakCell">${p.label}</td>`;return;}let c=t.periods[p.no];html+=`<td>${c?c.Grade:''}</td>`;});html+=`</tr><tr>`;
+    cfg.list.forEach(p=>{if(!p.isTeaching){html+=`<td class="breakCell"><small>${p.type}</small></td>`;return;}let c=t.periods[p.no];html+=`<td>${c?c.Subject:''}</td>`;});html+=`</tr>`;
   });
-  if(list.length==0) html+=`<tr><td colspan="${cfg.list.length+2}">No data for ${day} - Save timetable first</td></tr>`;
+  if(list.length==0)html+=`<tr><td colspan="${cfg.list.length+2}">No data for ${day} - Save timetable first</td></tr>`;
   html+=`</table><script>window.print()<\/script>`;
-  w.document.write(html); w.document.close();
+  w.document.write(html);w.document.close();
 }
 </script></body></html>
