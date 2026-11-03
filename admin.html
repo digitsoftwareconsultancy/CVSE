@@ -1,186 +1,129 @@
-<!DOCTYPE html>
-<html><head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--primary:#0f172a;--accent:#2563eb;--accent2:#7c3aed;--bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--green:#16a34a;--red:#dc2626;--orange:#ea580c}
-*{box-sizing:border-box;font-family:'Inter',system-ui,Arial}
-body{margin:0;background:var(--bg);color:#0f172a;padding-bottom:90px}
-#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
-.loginCard{background:var(--card);padding:32px;border-radius:24px;box-shadow:0 25px 60px rgba(0,0,0,0.3);width:100%;max-width:380px;text-align:center}
-.loginCard h2{margin:0 0 20px;font-weight:800;line-height:1.2}
-.loginCard input{width:100%!important;padding:14px 16px;border-radius:12px;border:1.5px solid var(--border);margin:8px 0;font-size:15px}
-.loginCard button{width:100%;padding:14px;border-radius:12px;background:var(--accent);font-weight:800;font-size:15px}
-
-/* HEADER */
-.header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-.header h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-0.5px}
-.header small{color:#64748b;font-weight:600}
-
-/* TOP ACTIONS */
-.topActions{display:flex;gap:10px;padding:14px 16px;overflow:auto}
-.topActions button{white-space:nowrap;padding:12px 16px;border-radius:999px;font-weight:700;font-size:13px;letter-spacing:-0.2px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-
-/* TAB PILLS - Desktop */
-.desktopTabs{display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap}
-.tabBtn{padding:10px 16px;border-radius:999px;border:1.5px solid var(--border);background:var(--card);font-weight:700;font-size:13px;cursor:pointer;transition:.2s;min-height:44px}
-.tabBtn.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 6px 16px rgba(15,23,42,0.2)}
-
-/* CARDS */
-.box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;margin:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.04)}
-.box h3{margin:0 0 14px;font-size:16px;font-weight:800;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px}
-input,select{padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);font-size:14px;font-weight:500;background:#fff;min-height:44px;outline:none;transition:.2s}
-input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,0.15)}
-button{font-weight:700;transition:.2s}
-button:active{transform:scale(0.97)}
-.btn-green{background:var(--green)} .btn-del{background:var(--red)} .btn-orange{background:var(--orange)} .btn-gray{background:#64748b}
-
-/* Student inputs grid */
-.inputGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media(max-width:640px){.inputGrid{grid-template-columns:1fr} .desktopTabs{display:none}}
-
-/* Tables */
-.tableWrap{overflow:auto;border-radius:14px;border:1px solid var(--border);margin-top:12px}
-table{border-collapse:collapse;width:100%;min-width:600px}
-th{background:#f8fafc;font-size:11px;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;color:#64748b;padding:12px 10px}
-td{padding:10px;font-size:13px;border-top:1px solid var(--border)}
-.badge{display:inline-flex;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px}
-.badge-green{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}.badge-red{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}.badge-orange{background:#ffedd5;color:#9a3412;border:1px solid #fed7aa}
-.mapTag{display:inline-flex;background:var(--primary);color:#fff;padding:6px 12px;border-radius:999px;margin:4px;font-size:12px;font-weight:700;gap:6px}
-
-/* Bottom nav mobile */
-.bottomNav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:none;grid-template-columns:repeat(6,1fr);padding:6px 4px;z-index:60}
-@media(max-width:640px){.bottomNav{display:grid}}
-.bottomNav button{background:none;border:none;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#64748b}
-.bottomNav button.active{color:var(--accent)}
-.bottomNav button span{font-size:18px}
-
-/* Settings grid */
-.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:800px){.settingsGrid{grid-template-columns:1fr}}
-#periodInputs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:600px){#periodInputs{grid-template-columns:1fr}}
-
-.modal{backdrop-filter:blur(8px)}
-.modalBox{border-radius:20px;box-shadow:0 25px 60px rgba(0,0,0,0.25)}
-</style>
-</head><body>
-
-<div id="loginScreen"><div class="loginCard"><h2>🔐 Carey's Vision<br>Admin Login</h2><input id="l_user" placeholder="Username"><br><input id="l_pass" type="password" placeholder="Password"><br><br><button onclick="doLogin()">Login</button><p id="loginMsg" style="color:#dc2626;font-size:13px;min-height:18px;margin-top:12px"></p></div></div>
-
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>
+body{font-family:Arial;padding:15px;background:#f5f5f5;margin:0}
+.box{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+.tabBtn{padding:10px 18px;border:none;border-radius:8px;margin-right:6px;cursor:pointer;background:#e0e0e0;font-weight:bold;margin-bottom:6px}
+.tabBtn.active{background:#1976d2;color:white}
+input,select{padding:9px;margin:4px;border:1px solid #ccc;border-radius:6px;min-width:120px}
+button{padding:9px 14px;background:#1976d2;color:white;border:none;border-radius:6px;cursor:pointer;margin:2px}
+.btn-del{background:#c62828}.btn-green{background:#2e7d32}.btn-orange{background:#ef6c00}.btn-gray{background:#666}
+table{border-collapse:collapse;width:100%;margin-top:10px} 
+th,td{padding:8px;border:1px solid #ddd;text-align:left;font-size:13px;min-height:0.8cm;height:0.8cm} 
+th{background:#f0f0f0}
+#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#eef2f7;display:flex;align-items:center;justify-content:center;z-index:9999}
+.loginCard{background:white;padding:28px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.15);width:340px;text-align:center}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center}
+.modalBox{background:#fff;padding:20px;border-radius:12px;width:90%;max-width:480px;max-height:90vh;overflow:auto}
+.mapTag{display:inline-block;background:#1976d2;color:#fff;padding:5px 10px;border-radius:15px;margin:3px;font-size:12px}
+.topActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.settingsGrid{grid-template-columns:1fr}}
+.badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:800;color:#fff}
+.badge-green{background:#2e7d32}.badge-red{background:#c62828}.badge-orange{background:#ef6c00}
+</style></head><body>
+<div id="loginScreen"><div class="loginCard"><h2>🔐 Carey's Vision<br>Admin Login</h2><input id="l_user" placeholder="Username" style="width:92%"><br><input id="l_pass" type="password" placeholder="Password" style="width:92%"><br><br><button onclick="doLogin()" style="width:95%;padding:11px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
 <div id="adminContent" style="display:none;">
-<div class="header"><div><h2>Carey's Vision</h2><small>Admin Panel</small></div><button onclick="logout()" class="btn-del" style="padding:10px 16px;border-radius:999px">Logout</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;"><h2>Admin Panel - Carey's Vision</h2><button onclick="logout()" style="background:#c62828;">Logout</button></div>
 
 <div class="topActions">
-<button onclick="openRegister()" style="background:#16a34a">📒 Exam Register</button>
-<button onclick="openTimetableBuilder()" style="background:#0f172a;border:2px solid #000">🗓️ Timetable Builder</button>
+<button onclick="openRegister()" style="background:#2e7d32;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer">📒 Class Wise Exam Register</button>
+<button onclick="openTimetableBuilder()" style="background:#8b4513;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;border:2px solid #5d2e0c">🗓️ TIMETABLE BUILDER - Open</button>
 </div>
 
-<div class="desktopTabs">
+<div style="margin-bottom:15px;">
 <button class="tabBtn active" id="b1" onclick="openTab('tabUsers')">👥 Teachers</button>
 <button class="tabBtn" id="b2" onclick="openTab('tabStudents')">🎓 Students</button>
 <button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();">💰 Fees</button>
 <button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();">📦 Backup</button>
 <button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();">⚙️ Settings</button>
-<button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();">📚 Subjects</button>
+<button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();">📚 Subject Master</button>
 </div>
 
-<div id="tabUsers" class="tab"><div class="box"><h3>👥 Create Teacher / Admin</h3>
-<div class="inputGrid">
+<div id="tabUsers" class="tab"><div class="box"><h3>Create Teacher / Admin</h3>
 <input id="uname" placeholder="username"><input id="pass" placeholder="password">
 <select id="role" onchange="onRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select>
-<input id="classes" placeholder="Classes e.g. III,IV,V"><input id="subjects" placeholder="Subjects"><input id="fname" placeholder="Full Name">
-</div>
-<label style="background:#fff7ed;padding:10px 14px;border-radius:12px;border:1.5px solid #fed7aa;display:inline-flex;align-items:center;gap:8px;margin:8px 0;font-weight:700;font-size:13px"><input type="checkbox" id="examCheck" style="min-height:auto"> ✅ Enable Exam Entry</label><br>
-<button onclick="create()" class="btn-green" style="padding:12px 20px;border-radius:999px">Create User</button>
-<div id="builder" style="display:none;margin-top:16px;background:#eff6ff;padding:14px;border-radius:16px;border:1.5px solid #bfdbfe">
-<b>🎯 Class-Wise Subject Permission</b><br><small style="color:#64748b">Select Class + Subject → Add.</small><br><br>
+<input id="classes" placeholder="Classes e.g. III,IV,V"><input id="subjects" placeholder="Subjects e.g. English,Mathematics"><input id="fname" placeholder="Full Name"><br>
+<label style="background:#fff3e0;padding:8px 12px;border-radius:8px;border:1px solid #ff9800;display:inline-block;margin:4px"><input type="checkbox" id="examCheck"> ✅ Enable Exam Entry</label>
+<button onclick="create()" class="btn-green">Create User</button>
+<div id="builder" style="display:none;margin-top:12px;background:#e3f2fd;padding:12px;border-radius:10px;border:2px solid #1976d2">
+<b>🎯 Class-Wise Subject Permission</b><br><small>Select Class + Subject → Add.</small><br><br>
 <select id="bClass"><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option></select>
 <select id="bSub"><option>English</option><option>Mathematics</option><option>Science/EVS</option><option>Social Science</option><option>Computer</option><option>Hindi</option><option>Assamese</option><option>Karbi</option><option>Art</option><option>GK</option></select>
 <button onclick="addMap()" class="btn-green">+ Add</button><button onclick="clearMap()" class="btn-gray">Clear</button>
 <div id="mapPreview" style="margin-top:10px"></div>
 </div>
-</div><div class="box"><h3>All Users</h3><button onclick="loadUsers()" style="border-radius:999px">🔄 Refresh</button><div class="tableWrap"><div id="ulist">Click Refresh...</div></div></div></div>
+</div><div class="box"><h3>All Users - Login & Exam Control</h3><button onclick="loadUsers()">🔄 Refresh</button><div id="ulist">Click Refresh...</div></div></div>
 
 <div id="tabStudents" class="tab" style="display:none;">
-<div class="box"><h3>➕ Add New Student</h3>
-<div class="inputGrid">
-<input id="adno" placeholder="Adm No"><input id="sname" placeholder="Student Name">
-<input id="roll" placeholder="Roll"><select id="sclass"><option value="">Select Class</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI-A</option><option>XI-B</option><option>XII-A</option></select>
-<input id="dob" placeholder="DOB DD-MM-YYYY"><input id="father" placeholder="Father Name">
-<select id="s_elective" style="display:none;background:#eff6ff;font-weight:800;border-color:#93c5fd"><option value="">Select Elective</option></select>
+<div class="box"><h3>Add New Student</h3>
+<input id="adno" placeholder="Adm No">
+<input id="sname" placeholder="Student Name">
+<input id="roll" placeholder="Roll" style="width:90px">
+<select id="sclass"><option value="">Select Class</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI-A</option><option>XI-B</option><option>XII-A</option></select>
+<input id="dob" placeholder="DOB DD-MM-YYYY" style="min-width:160px" title="DD-MM-YYYY e.g. 03-10-2019">
+<input id="father" placeholder="Father Name">
+<select id="s_elective" style="display:none;background:#e3f2fd;font-weight:bold"><option value="">Select Elective</option></select>
+<br><button onclick="addStu()" class="btn-green">Add Student</button>
 </div>
-<button onclick="addStu()" class="btn-green" style="margin-top:12px;padding:12px 22px;border-radius:999px;width:100%">Add Student</button>
-</div>
-<div class="box"><h3>🔍 Search & Edit — DD-MM-YYYY</h3>
-<div style="display:flex;gap:8px"><input id="searchAd" placeholder="Enter Admission No — e.g. 202513" style="flex:1"><button onclick="searchStudent()" class="btn-orange" style="border-radius:999px;padding:12px 20px">Search</button></div>
-<div id="slist" style="margin-top:16px; display:none; background:#fffbeb; padding:16px; border-radius:16px; border:1.5px solid #fde68a;">
-<div class="inputGrid">
-<input id="e_ad" readonly style="background:#fef3c7;font-weight:800"><input id="e_name" placeholder="Name"><input id="e_roll" placeholder="Roll"><select id="e_class" onchange="loadEditElective()"><option value="">Class</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI-A</option><option>XI-B</option><option>XII-A</option></select>
-<input id="e_dob" placeholder="DD-MM-YYYY"><input id="e_father" placeholder="Father"><input id="e_mother" placeholder="Mother"><input id="e_house" placeholder="House">
-<select id="e_elective" style="display:none;background:#eff6ff;font-weight:800;border-color:#93c5fd"><option value="">-- Elective --</option></select>
-</div>
-<div style="display:flex;gap:8px;margin-top:12px"><button onclick="saveEdit()" class="btn-green" style="flex:1;padding:12px;border-radius:999px">💾 Save</button><button onclick="delStu2()" class="btn-del" style="flex:1;padding:12px;border-radius:999px">Delete</button></div><p id="editMsg" style="font-weight:700"></p></div><div id="stuNotFound" style="color:#dc2626;font-weight:700;margin-top:8px"></div></div></div>
+<div class="box"><h3>🎓 Search & Edit</h3><input id="searchAd" placeholder="Enter Admission No" style="width:280px;" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button>
+<div id="slist" style="margin-top:15px; display:none; background:#fffbe6; padding:15px; border-radius:10px; border:1px solid #ffe082;">
+<input id="e_ad" readonly title="Adm No"><input id="e_name" placeholder="Name"><input id="e_roll" placeholder="Roll" style="width:80px">
+<select id="e_class" onchange="loadEditElective()"><option value="">Class</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI-A</option><option>XI-B</option><option>XII-A</option></select><br>
+<input id="e_dob" placeholder="DD-MM-YYYY" style="min-width:160px" title="DD-MM-YYYY"><input id="e_father" placeholder="Father"><input id="e_mother" placeholder="Mother"><input id="e_house" placeholder="House"><br>
+<select id="e_elective" style="display:none;background:#e3f2fd;font-weight:bold;margin-top:8px;min-width:200px"><option value="">-- Elective --</option></select>
+<br><br><button onclick="saveEdit()" class="btn-green">Save</button><button onclick="delStu2()" class="btn-del">Delete</button><p id="editMsg"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
 
-<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search Adm / Name / Class..." onkeyup="filterFees()" style="flex:1"><button onclick="loadFees()" style="border-radius:999px">Load</button></div><div class="tableWrap"><div id="feeListDiv"></div></div></div></div>
+<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><input id="feeSearch" placeholder="Search..." onkeyup="filterFees()" style="width:320px"><button onclick="loadFees()">Load</button><div id="feeListDiv"></div></div></div>
 
-<div id="backupTab" class="tab" style="display:none;"><div class="box"><h3>📦 Sheet Backup</h3><b style="font-size:12px;color:#64748b">Active Sheet ID:</b><br><span id="activeSheetId" style="word-break:break-all;color:#0f172a;font-weight:800;font-size:12px">Loading...</span><br><br><button onclick="createBackup()" id="btnBackup" class="btn-green" style="border-radius:999px">Backup Now</button><div id="backupMsg" style="margin-top:10px"></div></div><div class="box"><h3>🔄 Switch Sheet</h3><div style="display:flex;gap:8px"><input id="newSheetId" placeholder="Paste New Sheet ID" style="flex:1"><button onclick="switchSheet()" class="btn-orange" style="border-radius:999px">Switch</button></div><div id="switchMsg"></div></div><div class="box"><h3>📂 Recent Backups</h3><button onclick="loadBackupList()" style="border-radius:999px">Show</button><div id="backupList"></div></div></div>
+<div id="backupTab" class="tab" style="display:none;"><div class="box"><h3>📦 Sheet Backup</h3><b>Active Sheet ID:</b><br><span id="activeSheetId" style="word-break:break-all;color:#0b2a5c;font-weight:bold;">Loading...</span><br><br><button onclick="createBackup()" id="btnBackup" class="btn-green">Backup Now</button><div id="backupMsg"></div></div><div class="box"><h3>🔄 Switch Sheet</h3><input id="newSheetId" placeholder="Paste New Sheet ID" style="width:75%;"><button onclick="switchSheet()" class="btn-orange">Switch</button><div id="switchMsg"></div></div><div class="box"><h3>📂 Recent Backups</h3><button onclick="loadBackupList()">Show</button><div id="backupList"></div></div></div>
 
 <div id="resultControlTab" class="tab" style="display:none;">
-<div class="box" style="background:#eff6ff;border-color:#bfdbfe"><h3>⚙️ Full School Settings</h3>
+<div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>⚙️ Full School Settings</h3>
 <div class="settingsGrid">
-<div class="box" style="margin:0"><h4>📚 Academic</h4>
-<label style="font-size:12px;font-weight:700;color:#64748b">Academic Session</label><input id="s_Session" placeholder="2026-2027" style="width:100%"><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Active Term</label><select id="s_ActiveTerm" style="width:100%"><option value="I">I</option><option value="II">II</option></select><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Publish Result</label><select id="s_PublishResult" style="width:100%"><option>YES</option><option>NO</option></select><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Publish Term I</label><select id="s_PubT1" style="width:100%"><option>YES</option><option>NO</option></select><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Publish Term II</label><select id="s_PubT2" style="width:100%"><option>YES</option><option>NO</option></select><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Enable Daily Update</label><select id="s_EnableDaily" style="width:100%"><option>YES</option><option>NO</option></select>
+<div class="box" style="background:#fff"><h4>📚 Academic</h4>
+<label>Academic Session</label><br><input id="s_Session" placeholder="2026-2027" style="width:90%"><br>
+<label>Active Term (I / II)</label><br><select id="s_ActiveTerm" style="width:95%"><option value="I">I</option><option value="II">II</option></select><br>
+<label>Publish Result (YES/NO)</label><br><select id="s_PublishResult" style="width:95%"><option>YES</option><option>NO</option></select><br>
+<label>Publish Term I</label><br><select id="s_PubT1" style="width:95%"><option>YES</option><option>NO</option></select><br>
+<label>Publish Term II</label><br><select id="s_PubT2" style="width:95%"><option>YES</option><option>NO</option></select><br>
+<label>Enable Daily Update</label><br><select id="s_EnableDaily" style="width:95%"><option>YES</option><option>NO</option></select>
 </div>
-<div class="box" style="margin:0"><h4>🏫 School Info</h4>
-<label style="font-size:12px;font-weight:700;color:#64748b">School Name</label><input id="s_SchoolName" style="width:100%"><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Address</label><input id="s_Address" style="width:100%"><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Affiliation No</label><input id="s_Affiliation" style="width:100%"><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Phone</label><input id="s_Phone" style="width:100%"><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Header Path</label><input id="s_Header" style="width:100%"><br><br>
-<label style="font-size:12px;font-weight:700;color:#64748b">Logo Path</label><input id="s_Logo" style="width:100%">
+<div class="box" style="background:#fff"><h4>🏫 School Info - Used in Timetable Prints</h4>
+<label>School Name</label><br><input id="s_SchoolName" style="width:90%"><br>
+<label>School Address</label><br><input id="s_Address" style="width:90%"><br>
+<label>Affiliation No</label><br><input id="s_Affiliation" style="width:90%"><br>
+<label>School Phone</label><br><input id="s_Phone" style="width:90%"><br>
+<label>Header Path (URL)</label><br><input id="s_Header" style="width:90%"><br>
+<label>Logo Path (URL)</label><br><input id="s_Logo" style="width:90%">
 </div>
 </div>
-<div class="box" style="background:#fffbeb;border-color:#fde68a;margin:14px 0 0 0">
-<h4>🕒 Timetable Periods</h4>
-<label style="font-size:12px;font-weight:700">Total Periods</label> <input id="s_TotalPeriods" type="number" min="1" max="10" style="width:90px" onchange="renderPeriodInputs()"><br><br>
-<div id="periodInputs"></div>
+<div class="box" style="background:#fffbe6;border:2px solid #ff9800;margin-top:15px">
+<h4>🕒 Timetable Periods - Label Dropdown + Time (Affects Builder)</h4>
+<small>Select <b>Type</b> from dropdown: Teaching / Leisure / Break / Lunch / etc. These will show in builder & prints.</small><br><br>
+<label>Total Periods</label> <input id="s_TotalPeriods" type="number" min="1" max="10" style="width:80px" onchange="renderPeriodInputs()"><br><br>
+<div id="periodInputs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
 </div>
-<button onclick="saveAllSettings()" class="btn-green" style="padding:14px 24px;border-radius:999px;font-size:14px;width:100%;margin-top:14px">💾 SAVE ALL SETTINGS</button>
-<div id="settingsMsg" style="margin-top:10px;font-weight:800"></div>
-<div id="currentSettings" style="margin-top:12px;background:#fff;padding:12px;border-radius:12px;font-size:11px;border:1px solid var(--border);max-height:200px;overflow:auto"></div>
+<button onclick="saveAllSettings()" class="btn-green" style="padding:12px 22px;font-size:14px;font-weight:bold;margin-top:12px">💾 SAVE ALL SETTINGS</button>
+<div id="settingsMsg" style="margin-top:10px;font-weight:bold"></div>
+<br>
+<div id="publishControlDiv" style="margin-top:10px"></div>
+<div id="currentSettings" style="margin-top:10px;background:#fff;padding:10px;border-radius:6px;font-size:12px"></div>
 </div>
 </div>
 
 <div id="subjectMasterTab" class="tab" style="display:none;">
-<div class="box" style="background:#fff7ed;border-color:#fed7aa">
+<div class="box" style="background:#fff3e0;border:2px solid #ff9800">
 <h3>📚 Subject Master</h3>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
 <select id="smClassFilter" onchange="renderSMTable()"><option value="ALL">All</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option></select>
-<button onclick="loadSM()" style="border-radius:999px">Load</button><button onclick="saveSM()" class="btn-green" style="border-radius:999px">Save All</button><button onclick="addSMRow()" style="background:#f97316;border-radius:999px">+ Add</button>
+<button onclick="loadSM()" class="btn">Load</button><button onclick="saveSM()" class="btn-green">Save All</button><button onclick="addSMRow()" style="background:#ff9800">+ Add</button>
 </div>
-<div class="tableWrap"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center;padding:30px;color:#64748b">Click Load</td></tr></tbody></table></div>
-<div id="smMsg" style="margin-top:8px;font-weight:700"></div>
+<div style="overflow:auto;max-height:550px;border:1px solid #ccc"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center">Click Load</td></tr></tbody></table></div>
+<div id="smMsg"></div>
 </div>
 </div>
-
-</div>
-
-<div class="bottomNav">
-<button id="mb1" class="active" onclick="openTab('tabUsers')"><span>👥</span>Teachers</button>
-<button id="mb2" onclick="openTab('tabStudents')"><span>🎓</span>Students</button>
-<button id="mb3" onclick="openTab('feesTab'); loadFees();"><span>💰</span>Fees</button>
-<button id="mb4" onclick="openTab('backupTab')"><span>📦</span>Backup</button>
-<button id="mb5" onclick="openTab('resultControlTab')"><span>⚙️</span>Settings</button>
-<button id="mb6" onclick="openTab('subjectMasterTab')"><span>📚</span>Subjects</button>
 </div>
 
-<div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher</h3>
+<div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
 <input id="edit_uname" style="width:100%" placeholder="username">
 <input id="edit_pass" placeholder="Password leave blank to keep" style="width:100%">
 <select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select>
@@ -188,22 +131,32 @@ td{padding:10px;font-size:13px;border-top:1px solid var(--border)}
 <input id="edit_subjects" style="width:100%" placeholder="Subjects">
 <div id="editBuilder" style="display:none"><select id="ebClass"><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option></select><select id="ebSub"><option>English</option><option>Mathematics</option><option>Science/EVS</option><option>Social Science</option><option>Computer</option><option>Hindi</option><option>Assamese</option><option>Karbi</option><option>Art</option><option>GK</option></select><button onclick="addEditMap()" class="btn-green">+ Add</button><button onclick="clearEditMap()" class="btn-gray">Clear</button><div id="editMapPreview"></div></div>
 <input id="edit_fname" style="width:100%" placeholder="Full Name">
-<label style="font-size:12px;font-weight:700;color:#64748b">Login Status</label><select id="edit_status" style="width:100%"><option>Active</option><option>Inactive</option></select>
-<label style="font-size:12px;font-weight:700;color:#64748b">Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
-<br><br><div style="display:flex;gap:8px"><button onclick="saveEditUser()" class="btn-green" style="flex:1;border-radius:999px">Save</button><button onclick="closeEdit()" class="btn-gray" style="flex:1;border-radius:999px">Cancel</button></div><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
+<label>Login Status</label><select id="edit_status" style="width:100%"><option>Active</option><option>Inactive</option></select>
+<label>Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
+<br><br><button onclick="saveEditUser()" class="btn-green">Save</button><button onclick="closeEdit()" class="btn-gray">Cancel</button><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
 
 <script>
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
-let mapStore={},editMapStore={},SM_DATA=[],ALL_SETTINGS={};
+let mapStore={}; let editMapStore={}; let SM_DATA=[]; 
+let ALL_SETTINGS={};
 const PERIOD_TYPES = ['Teaching','Leisure','Break','Lunch','Assembly','Library','Games','Zero Period','Prayer','Activity'];
-async function apiGet(action, params={}){ let url = WEB_URL + "?action=" + action; for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]); let r = await fetch(url); return await r.json(); }
-async function apiPost(action, payload={}){ let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, ...payload})}); return await r.json(); }
+
+async function apiGet(action, params={}){
+  let url = WEB_URL + "?action=" + action;
+  for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]);
+  let r = await fetch(url);
+  return await r.json();
+}
+async function apiPost(action, payload={}){
+  let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, ...payload})});
+  return await r.json();
+}
 function isAdminLoggedIn(){ return localStorage.getItem('cvse_role')=='admin' && localStorage.getItem('cvse_username'); }
 function openTimetableBuilder(){ window.open('timetable-builder.html','_blank'); }
 function onRoleChange(){ document.getElementById('builder').style.display=(document.getElementById('role').value=='subjectTeacher')?'block':'none'; }
 function addMap(){ var c=bClass.value.toUpperCase(); var s=bSub.value; if(!mapStore[c]) mapStore[c]=[]; if(mapStore[c].indexOf(s)==-1) mapStore[c].push(s); updateMapPreview(); }
 function clearMap(){ mapStore={}; updateMapPreview(); }
-function updateMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in mapStore){ classes.push(cls); var subs=mapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="removeCls(\''+cls+'\')" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } mapPreview.innerHTML=tags+(finalStr?'<div style="margin-top:8px;font-size:12px"><b>Final:</b> '+finalStr+'</div>':''); subjects.value=finalStr; classes.value=classes.join(','); }
+function updateMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in mapStore){ classes.push(cls); var subs=mapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="removeCls(\''+cls+'\')" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } mapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); subjects.value=finalStr; classes.value=classes.join(','); }
 function removeCls(cls){ delete mapStore[cls]; updateMapPreview(); }
 function parseToMap(str){ var m={}; if(!str||str.indexOf(':')==-1) return m; str.split(/[|;]/).forEach(p=>{ p=p.trim(); if(!p) return; var idx=p.indexOf(':'); if(idx==-1) return; var cls=p.substring(0,idx).trim().toUpperCase(); var subs=p.substring(idx+1).trim().split(',').map(s=>s.trim()).filter(s=>s); m[cls]=subs; }); return m; }
 function onEditRoleChange(){ editBuilder.style.display=(edit_role.value=='subjectTeacher')?'block':'none'; }
@@ -211,58 +164,112 @@ function addEditMap(){ var c=ebClass.value.toUpperCase(); var s=ebSub.value; if(
 function clearEditMap(){ editMapStore={}; updateEditMapPreview(); }
 function updateEditMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in editMapStore){ classes.push(cls); var subs=editMapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="delete editMapStore[\''+cls+'\'];updateEditMapPreview();" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } editMapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); edit_subjects.value=finalStr; edit_classes.value=classes.join(','); }
 
-// DOB DD-MM-YYYY
+// ===== DOB HELPER DD-MM-YYYY =====
 function toDDMMYYYY(v){
   if(!v) return '';
   var s=String(v).trim();
+  // already DD-MM-YYYY
   if(/^\d{2}-\d{2}-\d{4}$/.test(s)) return s;
+  // ISO 2019-10-02T18:30:00.000Z
   if(s.indexOf('T')>-1) s=s.split('T')[0];
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){ var p=s.split('-'); return p[2]+'-'+p[1]+'-'+p[0]; }
-  try{ var d=new Date(v); if(!isNaN(d.getTime())){ var dd=('0'+d.getDate()).slice(-2); var mm=('0'+(d.getMonth()+1)).slice(-2); return dd+'-'+mm+'-'+d.getFullYear(); } }catch(e){}
+  // YYYY-MM-DD
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    var p=s.split('-'); return p[2]+'-'+p[1]+'-'+p[0];
+  }
+  // MM/DD/YYYY or DD/MM/YYYY guess
+  try{
+    var d=new Date(v);
+    if(!isNaN(d.getTime())){
+      var dd=('0'+d.getDate()).slice(-2);
+      var mm=('0'+(d.getMonth()+1)).slice(-2);
+      var yyyy=d.getFullYear();
+      return dd+'-'+mm+'-'+yyyy;
+    }
+  }catch(e){}
+  return s;
+}
+function fromDDMMYYYYtoISO(ddmmyyyy){
+  if(!ddmmyyyy) return '';
+  var s=String(ddmmyyyy).trim();
+  if(/^\d{2}-\d{2}-\d{4}$/.test(s)){
+    var p=s.split('-'); return p[2]+'-'+p[1]+'-'+p[0]; // for storage sortable, but we will store as DD-MM-YYYY as you prefer
+  }
   return s;
 }
 
+// ===== FIXED SETTINGS - PERIODS SAVING/LOADING =====
 async function loadAllSettings(){
-  function gv(m, ...keys){ for(var k=0;k<keys.length;k++){ var search = keys[k].toLowerCase(); for(var mk in m){ if(mk.toLowerCase()===search && String(m[mk]).trim()!=='') return m[mk]; } } for(var i=0;i<keys.length;i++){ if(m[keys[i]]!==undefined && String(m[keys[i]]).trim()!=='') return m[keys[i]]; } return ''; }
-  settingsMsg.innerText='⏳ Loading...';
+  function gv(m, ...keys){ 
+    for(var k=0;k<keys.length;k++){
+      var search = keys[k].toLowerCase();
+      for(var mk in m){ if(mk.toLowerCase()===search && String(m[mk]).trim()!=='') return m[mk]; }
+    }
+    for(var i=0;i<keys.length;i++){ if(m[keys[i]]!==undefined && String(m[keys[i]]).trim()!=='') return m[keys[i]]; }
+    return ''; 
+  }
+  document.getElementById('settingsMsg').innerText='⏳ Loading all settings...';
   try{
-    let map = await apiGet('getfullsettings'); if(map && map.settings) map = map.settings; if(map && map.map) map = map.map; ALL_SETTINGS = map || {};
-    s_Session.value=gv(map,'Academic_Session','Academic Session')||'2026-2027'; s_ActiveTerm.value=gv(map,'Active_Term')||'I'; s_PublishResult.value=gv(map,'Publish_Result')||'YES'; s_PubT1.value=gv(map,'Publish_Term_I')||'YES'; s_PubT2.value=gv(map,'Publish_Term_II')||'YES'; s_EnableDaily.value=gv(map,'Enable_DailyUpdate')||'YES';
-    s_SchoolName.value=gv(map,'School_Name')||''; s_Address.value=gv(map,'School_Address')||''; s_Affiliation.value=gv(map,'Affiliation_No')||''; s_Phone.value=gv(map,'School_Phone')||''; s_Header.value=gv(map,'Header Path')||''; s_Logo.value=gv(map,'Logo Path')||''; s_TotalPeriods.value=gv(map,'Total_Periods')||6;
-    renderPeriodInputs(map); currentSettings.innerHTML=Object.keys(map).map(k=>'<b>'+k+':</b> '+map[k]).join('<br>'); settingsMsg.innerHTML='<span style="color:green">✅ Loaded '+Object.keys(map).length+' keys</span>';
-  }catch(e){ settingsMsg.innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
+    let map = await apiGet('getfullsettings');
+    if(map && map.settings) map = map.settings;
+    if(map && map.map) map = map.map;
+    ALL_SETTINGS = map || {};
+    s_Session.value=gv(map,'Academic_Session','Academic Session','ACAD_SESSION')||'2026-2027';
+    s_ActiveTerm.value=gv(map,'Active_Term','Active Term')||'I';
+    s_PublishResult.value=gv(map,'Publish_Result','Publish Result')||'YES';
+    s_PubT1.value=gv(map,'Publish_Term_I','Publish Term I')||'YES';
+    s_PubT2.value=gv(map,'Publish_Term_II','Publish Term II')||'YES';
+    s_EnableDaily.value=gv(map,'Enable_DailyUpdate','Enable DailyUpdate')||'YES';
+    s_SchoolName.value=gv(map,'School_Name','School Name','SCHOOL_NAME')||'';
+    s_Address.value=gv(map,'School_Address','School Address','SCHOOL_ADDRESS')||'';
+    s_Affiliation.value=gv(map,'Affiliation_No','Affiliation No','Affiliation')||'';
+    s_Phone.value=gv(map,'School_Phone','School Phone','Phone')||'';
+    s_Header.value=gv(map,'Header Path','Header_Path','HeaderPath')||'';
+    s_Logo.value=gv(map,'Logo Path','Logo_Path','LogoPath')||'';
+    s_TotalPeriods.value=gv(map,'Total_Periods','Total Periods')||6;
+    renderPeriodInputs(map);
+    document.getElementById('currentSettings').innerHTML=Object.keys(map).map(k=>'<b>'+k+':</b> '+map[k]).join('<br>');
+    document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Loaded '+Object.keys(map).length+' keys | Periods: '+s_TotalPeriods.value+'</span>';
+  }catch(e){ document.getElementById('settingsMsg').innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
 }
 function renderPeriodInputs(map){
-  map = map || ALL_SETTINGS || {}; var total=parseInt(s_TotalPeriods.value||6); var div=periodInputs; div.innerHTML=''; function getVal(k){ for(var kk in map){ if(kk.toLowerCase()===k.toLowerCase()) return map[kk]; } return ''; }
+  map = map || ALL_SETTINGS || {};
+  var total=parseInt(document.getElementById('s_TotalPeriods').value||6);
+  var div=document.getElementById('periodInputs'); div.innerHTML='';
+  function getVal(key){ for(var k in map){ if(k.toLowerCase()===key.toLowerCase()) return map[k]; } return ''; }
   for(var i=1;i<=total;i++){
-    var savedTime = getVal('Period_'+i) || ''; var savedType = getVal('Period_'+i+'_Type') || 'Teaching'; var savedLabel = getVal('Period_'+i+'_Label') || (i+'th Period');
-    var normType = 'Teaching'; for(var t=0;t<PERIOD_TYPES.length;t++){ if(PERIOD_TYPES[t].toLowerCase()===String(savedType).toLowerCase()){ normType=PERIOD_TYPES[t]; break; } }
+    var savedTime = getVal('Period_'+i) || '';
+    var savedType = getVal('Period_'+i+'_Type') || 'Teaching';
+    var savedLabel = getVal('Period_'+i+'_Label') || (i+'th Period');
+    var normType = 'Teaching';
+    for(var t=0;t<PERIOD_TYPES.length;t++){ if(PERIOD_TYPES[t].toLowerCase()===String(savedType).toLowerCase()){ normType=PERIOD_TYPES[t]; break; } }
     var typeOptions = PERIOD_TYPES.map(pt=>`<option value="${pt}" ${pt===normType?'selected':''}>${pt}</option>`).join('');
-    div.innerHTML+=`<div style="border:1.5px solid #fde68a;padding:12px;border-radius:16px;background:#fff"><label style="font-size:12px;font-weight:800">Period ${i} - Type</label><br><select id="p_type_${i}" style="width:100%;margin-top:6px;background:#fffbeb">${typeOptions}</select><br><label style="font-size:11px;color:#64748b">Time</label><br><input id="p_${i}" value="${savedTime.replace(/"/g,'&quot;')}" placeholder="09:00-09:45" style="width:100%"><br><label style="font-size:11px;color:#64748b">Label</label><br><input id="p_label_${i}" value="${savedLabel.replace(/"/g,'&quot;')}" placeholder="LEISURE" style="width:100%"></div>`;
+    div.innerHTML+=`<div style="border:1px solid #ffb74d;padding:10px;border-radius:8px;background:#fff">
+      <label><b>Period ${i} - Type</b></label><br>
+      <select id="p_type_${i}" style="width:95%;font-weight:bold;background:#fff9e6">${typeOptions}</select><br>
+      <label>Time (e.g. 09:00-09:45)</label><br><input id="p_${i}" value="${savedTime.replace(/"/g,'&quot;')}" placeholder="09:00-09:45" style="width:90%"><br>
+      <label>Custom Label</label><br><input id="p_label_${i}" value="${savedLabel.replace(/"/g,'&quot;')}" placeholder="LEISURE / BREAK" style="width:90%">
+    </div>`;
   }
 }
 async function saveAllSettings(){
   var payload={ Academic_Session: s_Session.value.trim(), Active_Term: s_ActiveTerm.value, Publish_Result: s_PublishResult.value, Publish_Term_I: s_PubT1.value, Publish_Term_II: s_PubT2.value, Enable_DailyUpdate: s_EnableDaily.value, School_Name: s_SchoolName.value.trim(), School_Address: s_Address.value.trim(), Affiliation_No: s_Affiliation.value.trim(), School_Phone: s_Phone.value.trim(), 'Header Path': s_Header.value.trim(), 'Logo Path': s_Logo.value.trim(), Total_Periods: String(s_TotalPeriods.value) };
-  var tot = parseInt(s_TotalPeriods.value||6); for(var i=1;i<=tot;i++){ var typeEl=document.getElementById('p_type_'+i); var timeEl=document.getElementById('p_'+i); var labelEl=document.getElementById('p_label_'+i); payload['Period_'+i]= timeEl ? timeEl.value.trim() : ''; payload['Period_'+i+'_Type']= typeEl ? typeEl.value : 'Teaching'; payload['Period_'+i+'_Label']= labelEl ? labelEl.value.trim() : (i+'th Period'); }
+  var tot = parseInt(s_TotalPeriods.value||6);
+  for(var i=1;i<=tot;i++){ var typeEl=document.getElementById('p_type_'+i); var timeEl=document.getElementById('p_'+i); var labelEl=document.getElementById('p_label_'+i); payload['Period_'+i]= timeEl ? timeEl.value.trim() : ''; payload['Period_'+i+'_Type']= typeEl ? typeEl.value : 'Teaching'; payload['Period_'+i+'_Label']= labelEl ? labelEl.value.trim() : (i+'th Period'); }
   for(var j=tot+1;j<=10;j++){ payload['Period_'+j]=''; payload['Period_'+j+'_Type']=''; payload['Period_'+j+'_Label']=''; }
-  settingsMsg.innerText='⏳ Saving...'; let res = await apiPost('savefullsettings', payload); if(res && res.success){ settingsMsg.innerHTML='<span style="color:green">✅ Saved!</span>'; setTimeout(loadAllSettings, 1000); } else { settingsMsg.innerHTML='<span style="color:red">❌ Failed</span>'; }
+  document.getElementById('settingsMsg').innerText='⏳ Saving...';
+  let res = await apiPost('savefullsettings', payload);
+  if(res && res.success){ document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Saved!</span>'; setTimeout(loadAllSettings, 1000); } else { document.getElementById('settingsMsg').innerHTML='<span style="color:red">❌ Failed</span>'; }
 }
-async function loadSM(){ smMsg.innerText='Loading...'; let list = await apiGet('getsubjectmaster'); SM_DATA=list.subjects||list||[]; renderSMTable(); smMsg.innerHTML='<span style="color:green">Loaded '+SM_DATA.length+'</span>'; }
-function renderSMTable(){ let filter=smClassFilter.value; let tbody=smTbody; tbody.innerHTML=''; let filtered=SM_DATA.filter(r=>filter=='ALL'||r.class==filter); filtered.forEach((row,idx)=>{ let realIdx=SM_DATA.indexOf(row); let tr=document.createElement('tr'); tr.innerHTML=`<td><input value="${row.subjectId||''}" onchange="SM_DATA[${realIdx}].subjectId=this.value" style="width:65px"></td><td><select onchange="SM_DATA[${realIdx}].class=this.value"><option ${row.class=='I'?'selected':''}>I</option><option ${row.class=='II'?'selected':''}>II</option><option ${row.class=='III'?'selected':''}>III</option><option ${row.class=='IV'?'selected':''}>IV</option><option ${row.class=='V'?'selected':''}>V</option><option ${row.class=='VI'?'selected':''}>VI</option><option ${row.class=='VII'?'selected':''}>VII</option><option ${row.class=='VIII'?'selected':''}>VIII</option></select></td><td><input value="${row.subjectName||''}" onchange="SM_DATA[${realIdx}].subjectName=this.value" style="width:100px"></td><td><select onchange="SM_DATA[${realIdx}].subjectType=this.value"><option ${row.subjectType=='SCHOLASTIC'?'selected':''}>SCHOLASTIC</option><option ${row.subjectType=='CO-SCHOLASTIC'?'selected':''}>CO</option><option>PERSONAL</option></select></td><td><input type="number" value="${row.maxPT||0}" onchange="SM_DATA[${realIdx}].maxPT=Number(this.value);renderSMTable()" style="width:50px"></td><td><input type="number" value="${row.maxTerm||0}" onchange="SM_DATA[${realIdx}].maxTerm=Number(this.value);renderSMTable()" style="width:50px"></td><td style="font-weight:bold">${(row.maxPT||0)+(row.maxTerm||0)}</td><td><select onchange="SM_DATA[${realIdx}].isGradeSystem=this.value=='YES'"><option ${!row.isGradeSystem?'selected':''}>NO</option><option ${row.isGradeSystem?'selected':''}>YES</option></select></td><td><input type="number" value="${row.displayOrder||0}" onchange="SM_DATA[${realIdx}].displayOrder=Number(this.value)" style="width:40px"></td><td><button onclick="SM_DATA.splice(${realIdx},1);renderSMTable()" style="background:#dc2626;color:#fff;border-radius:999px">X</button></td>`; tbody.appendChild(tr); }); }
+async function loadSM(){ document.getElementById('smMsg').innerText='Loading...'; let list = await apiGet('getsubjectmaster'); SM_DATA=list.subjects||list||[]; renderSMTable(); smMsg.innerHTML='<span style="color:green">Loaded '+SM_DATA.length+'</span>'; }
+function renderSMTable(){ let filter=smClassFilter.value; let tbody=smTbody; tbody.innerHTML=''; let filtered=SM_DATA.filter(r=>filter=='ALL'||r.class==filter); filtered.forEach((row,idx)=>{ let realIdx=SM_DATA.indexOf(row); let tr=document.createElement('tr'); tr.innerHTML=`<td><input value="${row.subjectId||''}" onchange="SM_DATA[${realIdx}].subjectId=this.value" style="width:65px"></td><td><select onchange="SM_DATA[${realIdx}].class=this.value"><option ${row.class=='I'?'selected':''}>I</option><option ${row.class=='II'?'selected':''}>II</option><option ${row.class=='III'?'selected':''}>III</option><option ${row.class=='IV'?'selected':''}>IV</option><option ${row.class=='V'?'selected':''}>V</option><option ${row.class=='VI'?'selected':''}>VI</option><option ${row.class=='VII'?'selected':''}>VII</option><option ${row.class=='VIII'?'selected':''}>VIII</option></select></td><td><input value="${row.subjectName||''}" onchange="SM_DATA[${realIdx}].subjectName=this.value" style="width:100px"></td><td><select onchange="SM_DATA[${realIdx}].subjectType=this.value"><option ${row.subjectType=='SCHOLASTIC'?'selected':''}>SCHOLASTIC</option><option ${row.subjectType=='CO-SCHOLASTIC'?'selected':''}>CO</option><option>PERSONAL</option></select></td><td><input type="number" value="${row.maxPT||0}" onchange="SM_DATA[${realIdx}].maxPT=Number(this.value);renderSMTable()" style="width:50px"></td><td><input type="number" value="${row.maxTerm||0}" onchange="SM_DATA[${realIdx}].maxTerm=Number(this.value);renderSMTable()" style="width:50px"></td><td style="font-weight:bold">${(row.maxPT||0)+(row.maxTerm||0)}</td><td><select onchange="SM_DATA[${realIdx}].isGradeSystem=this.value=='YES'"><option ${!row.isGradeSystem?'selected':''}>NO</option><option ${row.isGradeSystem?'selected':''}>YES</option></select></td><td><input type="number" value="${row.displayOrder||0}" onchange="SM_DATA[${realIdx}].displayOrder=Number(this.value)" style="width:40px"></td><td><button onclick="SM_DATA.splice(${realIdx},1);renderSMTable()" style="background:red;color:#fff">X</button></td>`; tbody.appendChild(tr); }); }
 function addSMRow(){ SM_DATA.push({subjectId:'SUB'+(SM_DATA.length+1),class:'I',subjectName:'NEW',subjectType:'SCHOLASTIC',maxPT:50,maxTerm:100,isGradeSystem:false,displayOrder:99}); renderSMTable(); }
 async function saveSM(){ if(!confirm('Save '+SM_DATA.length+'?')) return; let res = await apiPost('savesubjectmaster', {data:SM_DATA}); smMsg.innerHTML='<span style="color:green">Saved</span>'; }
 function logout(){ localStorage.clear(); window.location.href='index.html'; }
 async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res = await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); } else { loginMsg.innerText='❌ Not Admin'; } }
 window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); } }
-function openTab(id){
-  var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block';
-  var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active');
-  var mb=document.querySelectorAll('.bottomNav button'); mb.forEach(x=>x.classList.remove('active'));
-  var idx=['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id);
-  if(idx>=0){ document.getElementById('b'+(idx+1))?.classList.add('active'); document.getElementById('mb'+(idx+1))?.classList.add('active'); }
-}
+function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); }
 async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal = document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; let res = await apiPost('addteacher', {username:uname.value, password:pass.value, role:role.value, classes:classes.value, subjects:subjects.value, name:fname.value, examAccess:examVal, status:'Active'}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; clearMap(); loadUsers(); } }
-async function loadUsers(){ ulist.innerHTML='Loading...'; let d = await apiGet('getteachers'); let teachers = d.teachers || []; var h='<table><tr><th>Username</th><th>Role</th><th>Classes</th><th>Subjects</th><th>Name</th><th>Login</th><th>Exam</th><th>Actions</th></tr>'; teachers.forEach(function(r){ var st=r.status||'Active'; var ex=r.examAccess||'NO'; var loginBadge = st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'; var examBadge = ex.toUpperCase()=='YES' ? '<span class="badge badge-green">YES</span>' : '<span class="badge badge-red">NO</span>'; h+='<tr><td><b>'+r.username+'</b></td><td>'+r.role+'</td><td>'+r.classes+'</td><td>'+(r.subjects||'ALL')+'</td><td>'+(r.name||'')+'</td><td>'+loginBadge+'</td><td>'+examBadge+'</td><td style="white-space:nowrap"><button onclick="openEdit(\''+r.username+'\')" style="border-radius:999px">Edit</button><button class="btn-del" style="border-radius:999px" onclick="delUser(\''+r.username+'\')">Del</button></td></tr>'; }); h+='</table>'; ulist.innerHTML=h; }
+async function loadUsers(){ ulist.innerHTML='Loading...'; let d = await apiGet('getteachers'); let teachers = d.teachers || []; var h='<table><tr><th>Username</th><th>Role</th><th>Classes</th><th>Subjects</th><th>Name</th><th>Login</th><th>Exam</th><th>Last Login</th><th>Actions</th></tr>'; teachers.forEach(function(r){ var st=r.status||'Active'; var ex=r.examAccess||'NO'; var loginBadge = st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'; var examBadge = ex.toUpperCase()=='YES' ? '<span class="badge badge-green">YES</span>' : '<span class="badge badge-red">NO</span>'; var typeLabel = r.role=='classTeacher' ? 'Class Teacher (Always Both)' : r.role=='subjectTeacher' ? 'Subject Only' : r.role; h+='<tr><td>'+r.username+'</td><td>'+typeLabel+'</td><td>'+r.classes+'</td><td>'+(r.subjects||'ALL')+'</td><td>'+(r.name||'')+'</td><td>'+loginBadge+'</td><td>'+examBadge+'</td><td><small>'+(r.lastLogin||'-')+'</small></td><td><button onclick="openEdit(\''+r.username+'\')">Edit</button><button class="'+(st.toLowerCase()=='active'?'btn-del':'btn-green')+'" onclick="toggleStatus(\''+r.username+'\')">'+(st.toLowerCase()=='active'?'Login OFF':'Login ON')+'</button><button class="'+(ex.toUpperCase()=='YES'?'btn-orange':'btn-green')+'" onclick="toggleExam(\''+r.username+'\')">'+(ex.toUpperCase()=='YES'?'Exam OFF':'Exam ON')+'</button><button class="btn-del" onclick="delUser(\''+r.username+'\')">Del</button></td></tr>'; }); h+='</table>'; ulist.innerHTML=h; }
 async function openEdit(u){ let d = await apiGet('getteachers'); let teachers = d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=r.classes||''; edit_subjects.value=r.subjects||''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); editMapStore=parseToMap(r.subjects||''); updateEditMapPreview(); editBuilder.style.display=(r.role=='subjectTeacher')?'block':'none'; editModal.style.display='flex'; return; } } }
 function closeEdit(){ editModal.style.display='none'; }
 async function saveEditUser(){ var oldU=edit_old.value; var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:edit_classes.value, subjects:edit_subjects.value, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value}; if(obj.password.trim()==''){ let d = await apiGet('getteachers'); for(var i=0;i<d.teachers.length;i++) if(String(d.teachers[i].username).toLowerCase()==oldU.toLowerCase()) obj.password=d.teachers[i].password||''; } let res = await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
@@ -270,21 +277,75 @@ async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; 
 async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; let res = await apiPost('toggleexamaccess', {username:u}); alert('Exam Access: '+res.examAccess); loadUsers(); }
 async function delUser(u){ if(confirm('Delete '+u+'?')){ await apiPost('deleteuser', {username:u}); alert('Deleted'); loadUsers(); } }
 
-async function loadAddElective(){ let gradeEl=document.getElementById('sclass'); let sel=document.getElementById('s_elective'); if(!gradeEl||!sel) return; let grade=gradeEl.value.toUpperCase(); if(['XI-A','XI-B','XII-A','XI','XII'].includes(grade)){ let res=await apiGet('getelectiveoptions',{grade:grade}); let opts=res.electives||[]; sel.innerHTML='<option value="">Select Elective - '+grade+'</option>'+opts.map(o=>`<option>${o}</option>`).join(''); sel.style.display=opts.length>0?'inline-block':'none'; } else sel.style.display='none'; }
-async function loadEditElective(){ let gradeEl=document.getElementById('e_class'); let sel=document.getElementById('e_elective'); if(!gradeEl||!sel) return; let grade=gradeEl.value.toUpperCase(); let res=await apiGet('getelectiveoptions',{grade:grade}); let opts=res.electives||[]; let cur=window._curElective||''; sel.innerHTML='<option value="">-- Elective '+grade+' --</option>'+opts.map(o=>`<option ${o==cur?'selected':''}>${o}</option>`).join(''); sel.style.display=(['XI-A','XI-B','XII-A','XI','XII'].includes(grade) && opts.length>0)?'inline-block':'none'; if(sel.style.display!='none') sel.value=cur; }
-async function searchStudent(){ var ad=searchAd.value.trim(); if(!ad){ alert('Enter Ad No'); return; } stuNotFound.innerHTML='Searching...'; slist.style.display='none'; let res = await apiGet('getstudentbyadmission', {admissionNo:ad}); if(!res.found){ stuNotFound.innerHTML='Not Found: '+ad; return; } stuNotFound.innerHTML=''; var r=res.row; e_ad.value=r[0]||''; e_name.value=r[1]||''; e_roll.value=r[2]||''; e_class.value=String(r[3]||'').toUpperCase().trim(); e_dob.value=toDDMMYYYY(r[4]||''); e_father.value=r[5]||''; e_mother.value=r[6]||''; e_house.value=r[7]||''; window._curElective=r[8]||''; slist.style.display='block'; await loadEditElective(); }
-async function saveEdit(){ var dobRaw=e_dob.value.trim(); var arr=[e_ad.value, e_name.value, e_roll.value, e_class.value.toUpperCase(), dobRaw, e_father.value, e_mother.value, e_house.value, e_elective.value||window._curElective||'']; await apiPost('updatestudent', {admissionNo:arr[0], data:arr}); editMsg.innerHTML='<span style="color:green">✅ Updated DOB: '+dobRaw+' Elective: '+(arr[8]||'None')+'</span>'; }
+// ===== STUDENT TAB - DD-MM-YYYY + ELECTIVE FIX =====
+async function loadAddElective(){
+  let gradeEl=document.getElementById('sclass');
+  let sel=document.getElementById('s_elective');
+  if(!gradeEl||!sel) return;
+  let grade=gradeEl.value.toUpperCase();
+  if(['XI-A','XI-B','XII-A','XI','XII'].includes(grade)){
+    let res=await apiGet('getelectiveoptions',{grade:grade});
+    let opts=res.electives||[];
+    sel.innerHTML='<option value="">Select Elective - '+grade+'</option>'+opts.map(o=>`<option>${o}</option>`).join('');
+    sel.style.display=opts.length>0?'inline-block':'none';
+  } else sel.style.display='none';
+}
+async function loadEditElective(){
+  let gradeEl=document.getElementById('e_class');
+  let sel=document.getElementById('e_elective');
+  if(!gradeEl||!sel) return;
+  let grade=gradeEl.value.toUpperCase();
+  let res=await apiGet('getelectiveoptions',{grade:grade});
+  let opts=res.electives||[];
+  let cur=window._curElective||'';
+  sel.innerHTML='<option value="">-- Elective '+grade+' --</option>'+opts.map(o=>`<option ${o==cur?'selected':''}>${o}</option>`).join('');
+  sel.style.display=(['XI-A','XI-B','XII-A','XI','XII'].includes(grade) && opts.length>0)?'inline-block':'none';
+  if(sel.style.display!='none') sel.value=cur;
+}
+async function searchStudent(){
+  var ad=searchAd.value.trim(); if(!ad){ alert('Enter Ad No'); return; }
+  stuNotFound.innerHTML='Searching...'; slist.style.display='none';
+  let res = await apiGet('getstudentbyadmission', {admissionNo:ad});
+  if(!res.found){ stuNotFound.innerHTML='Not Found: '+ad; return; }
+  stuNotFound.innerHTML=''; var r=res.row;
+  e_ad.value=r[0]||''; e_name.value=r[1]||''; e_roll.value=r[2]||''; e_class.value=String(r[3]||'').toUpperCase().trim();
+  e_dob.value=toDDMMYYYY(r[4]||'');
+  e_father.value=r[5]||''; e_mother.value=r[6]||''; e_house.value=r[7]||'';
+  window._curElective=r[8]||'';
+  slist.style.display='block';
+  await loadEditElective();
+}
+async function saveEdit(){
+  var dobRaw=e_dob.value.trim(); // keep as DD-MM-YYYY as you prefer
+  var arr=[e_ad.value, e_name.value, e_roll.value, e_class.value.toUpperCase(), dobRaw, e_father.value, e_mother.value, e_house.value, e_elective.value||window._curElective||''];
+  await apiPost('updatestudent', {admissionNo:arr[0], data:arr});
+  editMsg.innerHTML='<span style="color:green">✅ Updated DOB: '+dobRaw+' Elective: '+(arr[8]||'None')+'</span>';
+}
 async function delStu2(){ var ad=e_ad.value; if(!ad) return; if(!confirm('Delete '+ad+'?')) return; await apiPost('deletestudent', {admissionNo:ad}); alert('Deleted '+ad); slist.style.display='none'; }
-async function addStu(){ if(!adno.value||!sname.value||!sclass.value){ alert('Enter Adm No, Name & Class'); return; } var dobRaw=dob.value.trim(); if(dobRaw && !/^\d{2}-\d{2}-\d{4}$/.test(dobRaw)){ alert('Enter DOB as DD-MM-YYYY e.g. 03-10-2019'); return; } var elect=document.getElementById('s_elective').value||''; if(['XI-A','XI-B','XII-A'].includes(sclass.value.toUpperCase()) && !elect){ alert('Select Elective for '+sclass.value); return; } var arr=[adno.value.trim(), sname.value.trim(), roll.value.trim(), sclass.value.toUpperCase().trim(), dobRaw, father.value.trim(), '', '', elect]; await apiPost('addstudent', {data:arr}); alert('Added: '+arr[0]+' DOB:'+dobRaw); adno.value=''; sname.value=''; roll.value=''; dob.value=''; father.value=''; }
+async function addStu(){
+  if(!adno.value||!sname.value||!sclass.value){ alert('Enter Adm No, Name & Class'); return; }
+  var dobRaw=dob.value.trim();
+  if(dobRaw && !/^\d{2}-\d{2}-\d{4}$/.test(dobRaw)){ alert('Enter DOB as DD-MM-YYYY e.g. 03-10-2019'); return; }
+  var elect=document.getElementById('s_elective').value||'';
+  if(['XI-A','XI-B','XII-A'].includes(sclass.value.toUpperCase()) && !elect){ alert('Select Elective for '+sclass.value); return; }
+  var arr=[adno.value.trim(), sname.value.trim(), roll.value.trim(), sclass.value.toUpperCase().trim(), dobRaw, father.value.trim(), '', '', elect];
+  await apiPost('addstudent', {data:arr});
+  alert('Added: '+arr[0]+' DOB:'+dobRaw+' Elective:'+(elect||'None'));
+  adno.value=''; sname.value=''; roll.value=''; dob.value=''; father.value='';
+}
 
 var allFeeData=[]; async function loadFees(){ feeListDiv.innerHTML='Loading...'; let list = await apiGet('getfeelist'); allFeeData=list.feeList||list||[]; renderFees(allFeeData); }
-function renderFees(list){ if(!list||list.length==0){ feeListDiv.innerHTML='<div style="padding:20px;text-align:center;color:#64748b">No students</div>'; return; } var html='<table><tr><th>Adm</th><th>Name</th><th>Class</th><th>Status</th><th>Change</th><th>Action</th></tr>'; for(var i=0;i<list.length;i++){ var r=list[i]; var c=(r.status&&r.status.toLowerCase()=='paid'?'green':'red'); html+='<tr><td><b>'+r.ad+'</b></td><td>'+r.name+'</td><td>'+r.cls+'</td><td><b style="color:'+c+'">'+r.status+'</b></td><td><select id="st_'+r.ad+'" style="width:110px"><option '+(r.status=='Paid'?'selected':'')+'>Paid</option><option '+(r.status=='Withheld'?'selected':'')+'>Withheld</option><option '+(r.status=='Due'?'selected':'')+'>Due</option></select><br><input id="rm_'+r.ad+'" value="'+(r.remark||'')+'" style="width:110px;margin-top:6px"></td><td><button onclick="updateFee(\''+r.ad+'\')" class="btn-green" style="border-radius:999px">Save</button></td></tr>'; } html+='</table>'; feeListDiv.innerHTML=html; }
+function renderFees(list){ if(!list||list.length==0){ feeListDiv.innerHTML='No students'; return; } var html='<table><tr><th>Adm</th><th>Name</th><th>Class</th><th>Status</th><th>Change</th><th>Action</th></tr>'; for(var i=0;i<list.length;i++){ var r=list[i]; var c=(r.status&&r.status.toLowerCase()=='paid'?'green':'red'); html+='<tr><td>'+r.ad+'</td><td>'+r.name+'</td><td>'+r.cls+'</td><td><b style="color:'+c+'">'+r.status+'</b></td><td><select id="st_'+r.ad+'"><option '+(r.status=='Paid'?'selected':'')+'>Paid</option><option '+(r.status=='Withheld'?'selected':'')+'>Withheld</option><option '+(r.status=='Due'?'selected':'')+'>Due</option></select><br><input id="rm_'+r.ad+'" value="'+(r.remark||'')+'"></td><td><button onclick="updateFee(\''+r.ad+'\')" class="btn-green">Save</button></td></tr>'; } html+='</table>'; feeListDiv.innerHTML=html; }
 async function updateFee(ad){ var st=document.getElementById('st_'+ad).value; var rm=document.getElementById('rm_'+ad).value; await apiPost('setfeestatus', {admissionNo:ad, status:st, remark:rm}); alert('Updated '+ad); loadFees(); }
 function filterFees(){ var q=feeSearch.value.toLowerCase(); if(!q){ renderFees(allFeeData); return; } var f=allFeeData.filter(r=> (r.ad+' '+r.name+' '+r.cls).toLowerCase().indexOf(q)>-1); renderFees(f); }
-async function loadBackupInfo(){ activeSheetId.innerText='Loading...'; let info = await apiGet('getactivesheetinfo'); activeSheetId.innerText=info.id||'Loading'; }
+async function loadBackupInfo(){ activeSheetId.innerText='Loading...'; let info = await apiGet('getactivesheetinfo'); activeSheetId.innerText=info.id||'Admin'; }
 async function createBackup(){ btnBackup.disabled=true; btnBackup.innerText='Creating...'; let res = await apiPost('createsheetbackup', {}); btnBackup.disabled=false; btnBackup.innerText='Backup Now'; backupMsg.innerHTML=res.success?'<span style="color:green">✅ '+res.name+'</span>':'<span style="color:red">❌ '+(res.msg||res.error)+'</span>'; }
-async function switchSheet(){ var nid=newSheetId.value.trim(); if(!nid){ alert('Paste ID'); return; } if(!confirm('Switch to '+nid+'?')) return; let res = await apiPost('switchtonewsheet', {sheetId:nid}); switchMsg.innerHTML=res.success?'<span style="color:green">✅ Switched</span>':'<span style="color:red">❌ '+(res.msg||res.error)+'</span>'; }
+async function switchSheet(){ var nid=newSheetId.value.trim(); if(!nid){ alert('Paste ID'); return; } if(!confirm('Switch to '+nid+'?')) return; let res = await apiPost('switchtonewsheet', {sheetId:nid}); switchMsg.innerHTML=res.success?'<span style="color:green">✅ Switched: '+res.name+'</span>':'<span style="color:red">❌ '+(res.msg||res.error)+'</span>'; }
 async function loadBackupList(){ backupList.innerHTML='Loading...'; let list = await apiGet('getbackuplist'); if(!list||!list.length){ backupList.innerHTML='No backups'; return; } var h='<table><tr><th>Name</th><th>Date</th><th>ID</th></tr>'; list.forEach(f=>{ h+='<tr><td>'+f.name+'</td><td>'+f.date+'</td><td style="font-size:10px;word-break:break-all">'+f.id+'</td></tr>'; }); h+='</table>'; backupList.innerHTML=h; }
 function openRegister(){ window.top.location.href="teacher-work.html?tab=exam&role=admin"; }
-document.addEventListener('DOMContentLoaded', function(){ var sc=document.getElementById('sclass'); if(sc) sc.addEventListener('change', loadAddElective); });
+
+// Auto-bind elective change
+document.addEventListener('DOMContentLoaded', function(){
+  var sc=document.getElementById('sclass'); if(sc) sc.addEventListener('change', loadAddElective);
+});
 </script></body></html>
