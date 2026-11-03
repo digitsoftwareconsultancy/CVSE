@@ -269,7 +269,43 @@ async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); 
 window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); } }
 function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); }
 async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal = document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; let res = await apiPost('addteacher', {username:uname.value, password:pass.value, role:role.value, classes:classes.value, subjects:subjects.value, name:fname.value, examAccess:examVal, status:'Active'}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; clearMap(); loadUsers(); } }
-async function loadUsers(){ ulist.innerHTML='Loading...'; let d = await apiGet('getteachers'); let teachers = d.teachers || []; var h='<table><tr><th>Username</th><th>Role</th><th>Classes</th><th>Subjects</th><th>Name</th><th>Login</th><th>Exam</th><th>Last Login</th><th>Actions</th></tr>'; teachers.forEach(function(r){ var st=r.status||'Active'; var ex=r.examAccess||'NO'; var loginBadge = st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'; var examBadge = ex.toUpperCase()=='YES' ? '<span class="badge badge-green">YES</span>' : '<span class="badge badge-red">NO</span>'; var typeLabel = r.role=='classTeacher' ? 'Class Teacher (Always Both)' : r.role=='subjectTeacher' ? 'Subject Only' : r.role; h+='<tr><td>'+r.username+'</td><td>'+typeLabel+'</td><td>'+r.classes+'</td><td>'+(r.subjects||'ALL')+'</td><td>'+(r.name||'')+'</td><td>'+loginBadge+'</td><td>'+examBadge+'</td><td><small>'+(r.lastLogin||'-')+'</small></td><td><button onclick="openEdit(\''+r.username+'\')">Edit</button><button class="'+(st.toLowerCase()=='active'?'btn-del':'btn-green')+'" onclick="toggleStatus(\''+r.username+'\')">'+(st.toLowerCase()=='active'?'Login OFF':'Login ON')+'</button><button class="'+(ex.toUpperCase()=='YES'?'btn-orange':'btn-green')+'" onclick="toggleExam(\''+r.username+'\')">'+(ex.toUpperCase()=='YES'?'Exam OFF':'Exam ON')+'</button><button class="btn-del" onclick="delUser(\''+r.username+'\')">Del</button></td></tr>'; }); h+='</table>'; ulist.innerHTML=h; }
+async function loadUsers(){ 
+  ulist.innerHTML='Loading...'; 
+  try{
+    let d = await apiGet('getteachers');
+    let teachers = d.teachers || d.users || d || [];
+    if(!Array.isArray(teachers)) teachers = [];
+    if(teachers.length==0){ ulist.innerHTML='<div style="padding:20px;text-align:center;color:#64748b">No users found — check Users sheet</div>'; return; }
+    var h='<table><tr><th>Username</th><th>Role</th><th>Classes</th><th>Subjects</th><th>Name</th><th>Login</th><th>Exam</th><th>Actions</th></tr>'; 
+    teachers.forEach(function(r){ 
+      var st=r.status||'Active'; var ex=r.examAccess||'NO';
+      var loginBadge = st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>';
+      var examBadge = ex.toUpperCase()=='YES' ? '<span class="badge badge-green">YES</span>' : '<span class="badge badge-red">NO</span>';
+      h+='<tr><td><b>'+(r.username||'')+'</b></td><td>'+(r.role||'')+'</td><td>'+(r.classes||'')+'</td><td>'+(r.subjects||'ALL')+'</td><td>'+(r.name||'')+'</td><td>'+loginBadge+'</td><td>'+examBadge+'</td><td><button onclick="openEdit(\''+r.username+'\')" style="border-radius:999px">Edit</button> <button class="btn-del" style="border-radius:999px" onclick="delUser(\''+r.username+'\')">Del</button></td></tr>'; 
+    }); 
+    h+='</table>'; ulist.innerHTML=h;
+  }catch(e){ ulist.innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
+}
+
+async function loadSM(){ 
+  smMsg.innerText='Loading...'; 
+  try{
+    let list = await apiGet('getsubjectmaster'); 
+    SM_DATA=list.subjects||list.subjectMaster||list||[]; 
+    if(!Array.isArray(SM_DATA)) SM_DATA=[];
+    // FIX class vs subjectId swap
+    SM_DATA = SM_DATA.map(r=>{
+      if(r.class && String(r.class).toUpperCase().indexOf('SUB')==0){
+        var tmp=r.class; r.class=r.subjectId||'I'; r.subjectId=tmp;
+      }
+      if(!r.class) r.class='I';
+      if(!r.subjectName) r.subjectName=r.subject||'NEW';
+      return r;
+    });
+    renderSMTable(); 
+    smMsg.innerHTML='<span style="color:green">Loaded '+SM_DATA.length+'</span>'; 
+  }catch(e){ smMsg.innerHTML='<span style="color:red">'+e.message+'</span>'; }
+}
 async function openEdit(u){ let d = await apiGet('getteachers'); let teachers = d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=r.classes||''; edit_subjects.value=r.subjects||''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); editMapStore=parseToMap(r.subjects||''); updateEditMapPreview(); editBuilder.style.display=(r.role=='subjectTeacher')?'block':'none'; editModal.style.display='flex'; return; } } }
 function closeEdit(){ editModal.style.display='none'; }
 async function saveEditUser(){ var oldU=edit_old.value; var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:edit_classes.value, subjects:edit_subjects.value, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value}; if(obj.password.trim()==''){ let d = await apiGet('getteachers'); for(var i=0;i<d.teachers.length;i++) if(String(d.teachers[i].username).toLowerCase()==oldU.toLowerCase()) obj.password=d.teachers[i].password||''; } let res = await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
