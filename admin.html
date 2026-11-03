@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - CVSE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#f5f7f5}
+.topbar{background:#1b5e20;color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar h2{font-size:16px} .topbar p{font-size:12px;opacity:0.9}
+.btn{padding:8px 14px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-logout{background:#c62828;color:white}
+.container{padding:20px;max-width:1300px;margin:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:15px}
+.card{background:white;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:4px solid #1b5e20}
+.card h3{font-size:14px;color:#1b5e20;margin-bottom:6px} .card p{font-size:12px;color:#555}
+.card .big{font-size:26px;font-weight:700;color:#1b5e20;margin:6px 0}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.btn-action{background:#2e7d32;color:white;padding:6px 10px;font-size:11px;border:none;border-radius:5px;cursor:pointer}
+.btn-action.orange{background:#ef6c00} .btn-action.blue{background:#1565c0}
+.tabs{display:flex;background:white;margin-top:15px;border-radius:8px;overflow-x:auto;box-shadow:0 2px 4px rgba(0,0,0,0.06)}
+.tab{padding:12px 16px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.tab.active{color:#1b5e20;border-bottom-color:#1b5e20;background:#e8f5e9}
+.panel{display:none;background:white;border-radius:8px;padding:15px;margin-top:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.panel.active{display:block}
+.table-wrap{overflow-x:auto;margin-top:10px} table{width:100%;border-collapse:collapse;font-size:12px} th,td{border:1px solid #e0e0e0;padding:7px} th{background:#e8f5e9;color:#1b5e20}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px} .form-group{flex:1;min-width:160px} .form-group label{font-size:11px;font-weight:600;display:block;margin-bottom:3px}
+.form-group input,.form-group select{width:100%;padding:7px;border:1px solid #ccc;border-radius:5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h2>Admin Dashboard - CVSE</h2><p id="adminInfo">Loading...</p></div>
+  <button class="btn btn-logout" onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+  <div class="grid">
+    <div class="card"><h3>Total Students</h3><div class="big" id="totalStudents">-</div><p>All classes</p><div class="actions"><button class="btn-action" onclick="switchPanel('students')">View Students</button></div></div>
+    <div class="card"><h3>Total Teachers</h3><div class="big" id="totalTeachers">-</div><p>Active staff</p><div class="actions"><button class="btn-action" onclick="switchPanel('users')">Manage Users</button></div></div>
+    <div class="card"><h3>Fee Defaulters</h3><div class="big" id="defaulters" style="color:#c62828">-</div><p>Pending fees</p><div class="actions"><button class="btn-action orange" onclick="switchPanel('fees')">Check Fees</button></div></div>
+    <div class="card"><h3>Today's Attendance</h3><div class="big" id="todayAtt">--%</div><p>Overall</p><div class="actions"><button class="btn-action blue" onclick="switchPanel('reports')">Reports</button></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="users">👥 Users / Teachers</div>
+    <div class="tab" data-tab="timetable">📅 Timetable</div>
+    <div class="tab" data-tab="students">🎓 Students</div>
+    <div class="tab" data-tab="fees">💰 Fees</div>
+    <div class="tab" data-tab="circulars">📢 Circulars</div>
+    <div class="tab" data-tab="reports">📊 Reports</div>
+    <div class="tab" data-tab="duties">📝 Exam Duties</div>
+  </div>
+
+  <div class="panel active" id="panel_users"><h3>Users Management - Teachers</h3><div class="form-row"><div class="form-group"><label>Role Filter</label><select id="userFilter" onchange="loadUsers()"><option value="all">All</option><option value="admin">Admin</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="subjectTeacher">Subject Teacher Only</option></select></div><div class="form-group"><label>&nbsp;</label><button class="btn-action" onclick="loadUsers()">Reload</button></div></div><div id="usersTable" class="table-wrap"></div></div>
+
+  <div class="panel" id="panel_timetable"><h3>Timetable Management</h3><div class="form-row"><div class="form-group"><label>Class</label><select id="ttClass"><option>9A</option><option>9B</option><option>10A</option><option>10B</option><option>11A</option><option>12A</option></select></div><div class="form-group"><label>Day</label><select id="ttDay"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option></select></div><div class="form-group"><label>&nbsp;</label><button class="btn-action" onclick="loadTimetable()">Load</button></div></div><div id="ttTable" class="table-wrap"></div></div>
+
+  <div class="panel" id="panel_students"><h3>All Students</h3><div class="form-row"><div class="form-group"><label>Class Filter</label><select id="stuClass" onchange="loadAllStudents()"><option value="">All Classes</option><option>9A</option><option>9B</option><option>10A</option><option>10B</option></select></div></div><div id="studentsTable" class="table-wrap"></div></div>
+
+  <div class="panel" id="panel_fees"><h3>Fee Status & Defaulters</h3><div id="feesTable" class="table-wrap"></div></div>
+
+  <div class="panel" id="panel_circulars"><h3>Circulars / Communications</h3><div class="form-row"><div class="form-group"><label>Title</label><input id="cirTitle"></div><div class="form-group"><label>Message</label><input id="cirMsg"></div><div class="form-group"><label>&nbsp;</label><button class="btn-action" onclick="postCircular()">Post Circular</button></div></div><div id="cirTable" class="table-wrap"></div></div>
+
+  <div class="panel" id="panel_reports"><h3>Reports & Analytics</h3><div id="reportsTable" class="table-wrap"></div></div>
+
+  <div class="panel" id="panel_duties"><h3>Exam Duties</h3><div id="dutiesTable" class="table-wrap"></div></div>
+</div>
+
+<script>
+const WEB_APP_URL='https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec';
+function checkAdmin(){
+  if(!localStorage.getItem('cvse_username')){window.location.href='index.html';return false;}
+  if(localStorage.getItem('cvse_role')!=='admin'){alert('Admin only!');window.location.href='index.html';return false;}
+  document.getElementById('adminInfo').textContent='Admin: '+(localStorage.getItem('cvse_name')||localStorage.getItem('cvse_username'))+' | Full Access | No Switch Button (Admin is direct)';
+  return true;
+}
+document.querySelectorAll('.tab').forEach(t=>{t.addEventListener('click',()=>switchPanel(t.dataset.tab));});
+function switchPanel(name){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+  document.getElementById('panel_'+name).classList.add('active');
+  if(name==='users') loadUsers();
+  if(name==='timetable') loadTimetable();
+  if(name==='students') loadAllStudents();
+  if(name==='fees') loadFees();
+  if(name==='circulars') loadCirculars();
+  if(name==='reports') loadReports();
+  if(name==='duties') loadDuties();
+}
+function logout(){localStorage.clear();window.location.href='index.html';}
+
+async function loadDashboardStats(){
+  try{let r=await fetch(`${WEB_APP_URL}?action=dashboardstats`); let d=await r.json();
+    if(d.totalStudents) document.getElementById('totalStudents').textContent=d.totalStudents;
+    if(d.totalTeachers) document.getElementById('totalTeachers').textContent=d.totalTeachers;
+    if(d.defaulters) document.getElementById('defaulters').textContent=d.defaulters;
+    if(d.attendancePercent) document.getElementById('todayAtt').textContent=d.attendancePercent+'%';
+  }catch(e){console.log(e);}
+}
+async function loadUsers(){
+  let filter=document.getElementById('userFilter').value;
+  let r=await fetch(`${WEB_APP_URL}?action=getteachers`);
+  let d=await r.json(); let teachers=d.teachers||d.users||[];
+  let html='<table><tr><th>Username</th><th>Name</th><th>Role</th><th>Classes</th><th>Subjects</th><th>Type</th></tr>';
+  teachers.forEach(t=>{
+    let role=(t.role||'').toLowerCase();
+    let type=role.includes('admin')?'Admin':(role.includes('class')||t.classes)?'Class Teacher (Always Both)':'Subject Only';
+    if(filter!=='all'){
+      if(filter==='admin' && !role.includes('admin')) return;
+      if(filter==='classTeacher' && type!=='Class Teacher (Always Both)') return;
+      if(filter==='subjectTeacher' && type!=='Subject Only') return;
+    }
+    html+=`<tr><td>${t.username}</td><td>${t.name}</td><td>${t.role}</td><td>${t.classes||'-'}</td><td>${t.subjects||'-'}</td><td><span style="padding:2px 6px;border-radius:10px;font-size:10px;color:white;background:${type.includes('Class')?'#1b5e20':type==='Admin'?'#1565c0':'#ef6c00'}">${type}</span></td></tr>`;
+  });
+  html+='</table>'; document.getElementById('usersTable').innerHTML=html;
+  document.getElementById('totalTeachers').textContent=teachers.length;
+}
+async function loadAllStudents(){
+  let cls=document.getElementById('stuClass').value;
+  let url=`${WEB_APP_URL}?action=getallstudents`; if(cls) url+=`&className=${encodeURIComponent(cls)}`;
+  let r=await fetch(url); let d=await r.json();
+  let html='<table><tr><th>Adm No</th><th>Name</th><th>Roll</th><th>Class</th></tr>';
+  (d.students||[]).forEach(s=>{html+=`<tr><td>${s.admissionNo||s[0]}</td><td>${s.name||s[1]}</td><td>${s.rollNo||s[2]}</td><td>${s.class||'-'}</td></tr>`;});
+  html+='</table>'; document.getElementById('studentsTable').innerHTML=html;
+  document.getElementById('totalStudents').textContent=(d.students||[]).length;
+}
+async function loadTimetable(){
+  let cls=document.getElementById('ttClass').value; let day=document.getElementById('ttDay').value;
+  let r=await fetch(`${WEB_APP_URL}?action=gettimetable&className=${encodeURIComponent(cls)}&day=${encodeURIComponent(day)}`);
+  let d=await r.json(); let html='<table><tr><th>Period</th><th>Time</th><th>Subject</th><th>Teacher</th></tr>';
+  (d.timetable||[]).forEach(row=>{html+=`<tr><td>${row.periodNo||row.no}</td><td>${row.time||''}</td><td>${row.subject||''}</td><td>${row.teacher||''}</td></tr>`;});
+  html+='</table>'; document.getElementById('ttTable').innerHTML=html;
+}
+async function loadFees(){let r=await fetch(`${WEB_APP_URL}?action=getdefaulters`); let d=await r.json(); let html='<table><tr><th>Adm</th><th>Name</th><th>Class</th><th>Status</th></tr>'; (d.defaulters||[]).forEach(f=>{html+=`<tr><td>${f.admissionNo}</td><td>${f.name}</td><td>${f.class}</td><td>${f.status}</td></tr>`;}); html+='</table>'; document.getElementById('feesTable').innerHTML=html;}
+async function loadCirculars(){let r=await fetch(`${WEB_APP_URL}?action=getcirculars`); let d=await r.json(); let html='<table><tr><th>Date</th><th>Title</th><th>Message</th></tr>'; (d.circulars||[]).forEach(c=>{html+=`<tr><td>${c.date}</td><td>${c.title}</td><td>${c.message}</td></tr>`;}); html+='</table>'; document.getElementById('cirTable').innerHTML=html;}
+async function loadReports(){let r=await fetch(`${WEB_APP_URL}?action=attendancesummary`); let d=await r.json(); document.getElementById('reportsTable').innerHTML='<pre style="font-size:11px">'+JSON.stringify(d,null,2)+'</pre>';}
+async function loadDuties(){let r=await fetch(`${WEB_APP_URL}?action=getduties`); let d=await r.json(); let html='<table><tr><th>Date</th><th>Teacher</th><th>Duty</th></tr>'; (d.duties||[]).forEach(x=>{html+=`<tr><td>${x.date}</td><td>${x.teacher}</td><td>${x.duty}</td></tr>`;}); html+='</table>'; document.getElementById('dutiesTable').innerHTML=html;}
+async function postCircular(){
+  let title=document.getElementById('cirTitle').value; let msg=document.getElementById('cirMsg').value;
+  if(!title||!msg){alert('Enter title and message');return;}
+  let payload={action:'savecircular', title:title, message:msg};
+  let r=await fetch(WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)}); let d=await r.json();
+  alert(d.success?'Circular Posted':'Failed'); loadCirculars();
+}
+
+checkAdmin(); loadDashboardStats(); loadUsers();
+</script>
+</body>
+</html>
