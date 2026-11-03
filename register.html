@@ -1,0 +1,153 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>Exam Register</title>
+<style>
+@page{size:A4 landscape;margin:10mm}
+html,body{margin:0;padding:0;background:#fff;width:100%}
+body{font-family:Arial,sans-serif;font-size:9px}
+.card{width:98%;margin:0 auto;padding:0}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{border:1px solid #000;padding:3px 2px;text-align:center;font-size:8.5px;vertical-align:middle;word-wrap:break-word}
+th{background:#0b2a5c;color:#fff;font-size:8.5px;padding:4px 2px;text-align:center!important}
+td:nth-child(1),th:nth-child(1){width:44px!important}
+td:nth-child(2),th:nth-child(2){width:58px!important}
+td:nth-child(3),th:nth-child(3){width:107px!important}
+td:nth-child(3){text-align:left!important}
+.sel{padding:6px 10px;border:1px solid #aaa;border-radius:6px;background:#fff;color:#000;font-size:12px;min-width:110px}
+.btn{padding:6px 12px;border:none;border-radius:6px;font-weight:bold;color:#fff;cursor:pointer;margin-right:4px}
+.btn-blue{background:#0b2a5c}.btn-gray{background:#555}.btn-green{background:#2e7d32}
+.row-pt{background:#e8f0fe}.row-final{background:#fff}
+.row-cosch{background:#fce4ec}
+.row-rem{background:#fffbe6}
+.total-badge{background:#0b2a5c;color:#fff;padding:3px 6px;border-radius:10px;font-size:10px;font-weight:bold}
+@media print{.noPrint{display:none!important} html,body{margin:0!important;padding:0!important} @page{size:A4 landscape;margin:8mm}.card{width:100%!important;margin:0!important;padding:0!important} table{width:99%!important;margin:0 auto!important} tr{page-break-inside:avoid!important} thead{display:table-header-group} th{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+@media screen{ body{padding:8px;background:#f5f5f5}.card{background:#fff;padding:12px;border-radius:10px;max-width:1600px;margin:auto} }
+</style></head><body>
+<div class="card">
+<div class="noPrint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+<button class="btn btn-gray" onclick="goBack()">⬅ Back</button>
+<select id="classSel" class="sel"><option value="">-- Class --</option></select>
+<select id="termSel" class="sel"><option value="I">Term I</option><option value="II">Term II</option></select>
+<button class="btn btn-blue" onclick="loadRegister()">Load Register</button>
+<button class="btn btn-green" onclick="window.print()">🖨️ Print</button>
+<span id="status" style="font-size:11px;color:#666"></span>
+</div>
+<div id="title" style="text-align:center;font-weight:bold;font-size:14px">Carey's Vision School - Term - I Exam Register</div>
+<div id="subtitle" style="text-align:center;font-size:12px;font-weight:bold;margin:3px 0 8px">Class - I</div>
+<div style="overflow:auto"><table id="regTable"><thead><tr><th colspan="18">Select Class and Load</th></tr></thead></table></div>
+</div>
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
+var USER={};
+try{ USER=JSON.parse(localStorage.getItem('cvse_user')||localStorage.getItem('cvs_user')||'{}'); }catch(e){}
+if(!USER.username && localStorage.getItem('cvse_username')){
+  USER.username=localStorage.getItem('cvse_username');
+  USER.role=localStorage.getItem('cvse_role');
+}
+function goBack(){ window.location.href='admin.html'; }
+
+async function apiGet(action, params={}){
+  let url = WEB_URL + "?action=" + action;
+  for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]);
+  let r = await fetch(url);
+  return await r.json();
+}
+
+function init(){
+  if(String(USER.role||'').toLowerCase()!='admin'){
+    document.body.innerHTML='<div style="text-align:center;padding:50px"><h2 style="color:red">⛔ Admin Only</h2><a href="index.html">Login</a></div>';
+    return;
+  }
+  let s=document.getElementById('classSel'); 
+  s.innerHTML='<option value="">-- Class --</option>';
+  ['I','II','III','IV','V','VI','VII','VIII','IX','X'].forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);
+  document.getElementById('status').innerText='Ready - Select Class';
+}
+
+function getObtFromStr(str){
+  if(!str) return null;
+  str = String(str).trim();
+  if(str.toUpperCase().includes('NA')) return null;
+  if(str.toUpperCase() === 'AB') return 0;
+  if(str.includes('=')){
+    let parts = str.split('=');
+    let last = parts[parts.length-1];
+    let n = parseFloat(last);
+    return isNaN(n) ? 0 : n;
+  }
+  let n = parseFloat(str);
+  return isNaN(n) ? 0 : n;
+}
+
+async function loadRegister(){
+ let cls=document.getElementById('classSel').value;
+ let term=document.getElementById('termSel').value;
+ if(!cls){alert('Select Class');return;}
+ document.getElementById('regTable').innerHTML='<thead><tr><th colspan="18" style="padding:15px">Loading '+cls+' Term '+term+'...</th></tr></thead>';
+ try{
+  let res = await apiGet('getregisterdata', {className:cls, term:term});
+  document.getElementById('title').innerText="Carey's Vision School - Term - "+res.term+" Exam Register";
+  document.getElementById('subtitle').innerText="Class - "+res.class;
+  let subs=res.subjects || ["English","Mathematics","Science/EVS","Social Science","Computer","Hindi","Assamese"];
+  let ptLab=res.term=='I'?'PT1':'PT2';
+  let finLab=res.term=='I'?'HY':'Final';
+  let hdr=['Roll No','Adm No','Name','Exam','Eng (W+IA)','Math','Sci/EVS','SST','Comp','Hindi','Assamese','Total','Karbi','Art','GK','WD','Present','%'];
+  let h='<thead><tr>'; hdr.forEach(x=>h+=`<th>${x}</th>`); h+='</tr></thead><tbody>';
+
+  res.students.forEach(st=>{
+    let totalObt = 0; let totalMax = 0;
+    subs.forEach(sub=>{
+      let d = st.marks[sub];
+      if(!d) return;
+      let sm = st.subjectMaxMap ? st.subjectMaxMap[sub.toUpperCase()] : null;
+      let ptMax = sm ? sm.maxPT : (sub.toLowerCase().includes('assamese') ? 25 : 50);
+      let finMax = sm ? sm.maxTerm : (sub.toLowerCase().includes('assamese') ? 50 : 100);
+      let ptObt = getObtFromStr(d.ptStr);
+      if(ptObt !== null){ totalObt += ptObt; totalMax += ptMax; }
+      let finObt = getObtFromStr(d.finStr);
+      if(finObt !== null){ totalObt += finObt; totalMax += finMax; }
+    });
+    if(totalMax==0 && st.finTotal){
+      totalObt = (parseFloat(st.ptTotal)||0)+(parseFloat(st.finTotal)||0);
+      totalMax = st.ptMaxTotal ? (st.ptMaxTotal+st.finMaxTotal) : 0;
+    }
+    let percValue = totalMax>0 ? (totalObt/totalMax*100).toFixed(2) : (st.aggregatePer||'');
+    let aggText = '';
+    if(totalMax>0){ aggText = `<span class="total-badge">${totalObt}/${totalMax} = ${percValue}%</span>`; } 
+    else if(percValue){ aggText = `(${percValue}%)`; }
+
+    h+=`<tr class="row-pt"><td rowspan="4">${st.rollNo||''}</td><td rowspan="4">${st.ad||''}</td><td rowspan="4">${st.name||''}</td><td><b>${ptLab}</b></td>`;
+    subs.forEach(s=>{let d=st.marks[s]; h+=`<td>${d?d.ptStr:''}</td>`});
+    h+=`<td><b>${st.ptTotal||''}</b></td>`;
+    h+=`<td>${st.karbi_pt1||''}</td><td>${st.art_pt1||''}</td><td>${st.gk_pt1||''}</td>`;
+    h+=`<td>${st.working||''}</td><td>${st.present||''}</td><td>${st.per||''}</td></tr>`;
+
+    h+=`<tr class="row-final"><td><b>${finLab}</b></td>`;
+    subs.forEach(s=>{let d=st.marks[s]; h+=`<td>${d?d.finStr:''}</td>`});
+    h+=`<td><b>${st.finTotal||''}</b></td>`;
+    h+=`<td>${st.karbi_hy||''}</td><td>${st.art_hy||''}</td><td>${st.gk_hy||''}</td>`;
+    h+=`<td>${st.working||''}</td><td>${st.present||''}</td><td>${st.per||''}</td></tr>`;
+
+    h+=`<tr class="row-cosch"><td style="font-weight:bold;background:#f8bbd0">S & P</td>`;
+    let disc = st.disc || st.discipline || ''; let reg = st.reg_punc || st.reg || ''; let hyg = st.hyg || ''; let resp = st.resp || ''; let comm = st.comm || ''; let lead = st.lead || ''; let twork = st.twork || '';
+    if(disc.trim()==='/'||disc.trim()==='') disc='-'; if(reg.trim()==='/'||reg.trim()==='') reg='-'; if(hyg.trim()==='/'||hyg.trim()==='') hyg='-'; if(resp.trim()==='/'||resp.trim()==='') resp='-'; if(comm.trim()==='/'||comm.trim()==='') comm='-'; if(lead.trim()==='/'||lead.trim()==='') lead='-'; if(twork.trim()==='/'||twork.trim()==='') twork='-';
+    h+=`<td colspan="2">Disc : ${disc}</td>`;
+    h+=`<td colspan="2" style="text-align:center!important;">Reg & Punc : ${reg}</td>`;
+    h+=`<td colspan="2">Per. Hyg. : ${hyg}</td>`;
+    h+=`<td colspan="2">Resp. : ${resp}</td>`;
+    h+=`<td colspan="2">Comm : ${comm}</td>`;
+    h+=`<td colspan="2">Lead : ${lead}</td>`;
+    h+=`<td colspan="2">T.Work : ${twork}</td></tr>`;
+
+    h+=`<tr class="row-rem"><td style="font-weight:bold;background:#eee">RESULT</td>`;
+    h+=`<td colspan="4" style="font-weight:bold;background:#e8f5e9;color:#0b2a5c;font-size:10px">${st.result||''} ${aggText}</td>`;
+    h+=`<td colspan="10" style="text-align:left"><b>Remarks:</b> ${st.remark||''}</td></tr>`;
+  });
+
+  h+='</tbody>';
+  document.getElementById('regTable').innerHTML=h;
+  document.getElementById('status').innerText='Loaded '+res.students.length+' students';
+ }catch(err){
+   document.getElementById('regTable').innerHTML='<thead><tr><th colspan="18" style="color:red">Error: '+err.message+'</th></tr></thead>';
+ }
+}
+window.onload=init;
+</script></body></html>
