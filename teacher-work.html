@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Work - CVSE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#f5f7f5}
+.topbar{background:#1b5e20;color:white;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar h2{font-size:15px} .topbar span{font-size:12px;opacity:0.9}
+.btn{padding:7px 12px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-back{background:#fff;color:#1b5e20} .btn-switch{background:#ff9800;color:white} .btn-switch:disabled{opacity:0.5}
+.btn-logout{background:#c62828;color:white}
+.tabs{display:flex;background:white;box-shadow:0 2px 4px rgba(0,0,0,0.08);overflow-x:auto;position:sticky;top:46px;z-index:90}
+.tab{padding:12px 18px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;color:#555}
+.tab.active{color:#1b5e20;border-bottom-color:#1b5e20;background:#e8f5e9}
+.tab.hidden{display:none}
+.container{padding:15px;max-width:1200px;margin:auto}
+.panel{display:none;background:white;border-radius:8px;padding:15px;box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-top:10px}
+.panel.active{display:block}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.form-group{flex:1;min-width:180px}
+.form-group label{font-size:12px;font-weight:600;display:block;margin-bottom:4px}
+.form-group select,.form-group input{width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:13px}
+.btn-save{background:#2e7d32;color:white;padding:10px 18px;border:none;border-radius:6px;font-weight:600;cursor:pointer}
+.btn-save:disabled{background:#9e9e9e}
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #e0e0e0;padding:8px;text-align:left}
+th{background:#e8f5e9;color:#1b5e20}
+input.marks{width:70px;padding:5px;text-align:center}
+.msg{padding:8px;border-radius:5px;font-size:12px;margin-top:10px;display:none}
+.msg.success{background:#e8f5e9;color:#2e7d32;display:block} .msg.error{background:#ffebee;color:#c62828;display:block}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:white}
+.badge-class{background:#1b5e20} .badge-subject{background:#ef6c00}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h2>Teacher Work Panel</h2><span id="roleBadge"></span></div>
+  <div style="display:flex;gap:8px"><button id="switchBtn" class="btn btn-switch" onclick="switchMode()">🔄 Switch</button><button class="btn btn-back" onclick="goBack()">Back</button></div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-tab="daily" id="tab_daily">📅 Daily Updates</div>
+  <div class="tab" data-tab="attendance" id="tab_attendance">📋 Attendance</div>
+  <div class="tab" data-tab="classtest" id="tab_classtest">📝 Class Test (Original)</div>
+  <div class="tab" data-tab="monthly" id="tab_monthly">📊 Monthly Performance</div>
+  <div class="tab" data-tab="register" id="tab_register">📖 Register / Students</div>
+</div>
+
+<div class="container">
+
+<!-- TAB 1: DAILY UPDATES - ORIGINAL FROM 02_Schedule -->
+<div class="panel active" id="panel_daily">
+  <h3>Daily Updates - <span id="dailyClass"></span> <span class="badge badge-class" id="dailyModeBadge"></span></h3>
+  <div class="form-row"><div class="form-group"><label>Select Date</label><input type="date" id="dailyDate"></div><div class="form-group"><label>Class</label><select id="dailyClassSel"></select></div><div class="form-group"><label>&nbsp;</label><button class="btn-save" onclick="loadDaily()">Load Timetable</button></div></div>
+  <div id="dailyTable" class="table-wrap"></div>
+  <div style="margin-top:12px"><button id="dailySaveBtn" class="btn-save" onclick="saveDaily()" style="display:none">💾 Save / Publish</button> <small id="dailyNote" style="font-size:11px;color:#777"></small></div>
+  <div class="msg" id="dailyMsg"></div>
+</div>
+
+<!-- TAB 2: ATTENDANCE - ORIGINAL FROM 03_Attendance -->
+<div class="panel" id="panel_attendance">
+  <h3>Attendance - <span id="attClass"></span></h3>
+  <div class="form-row"><div class="form-group"><label>Date</label><input type="date" id="attDate"></div><div class="form-group"><label>Class</label><select id="attClassSel"></select></div><div class="form-group"><label>Period</label><select id="attPeriod"><option value="1">P1</option><option value="2">P2</option><option value="3">P3</option><option value="4">P4</option><option value="5">P5</option><option value="6">P6</option><option value="7">P7</option><option value="8">P8</option></select></div><div class="form-group"><label>&nbsp;</label><button class="btn-save" onclick="loadAttendance()">Load Students</button></div></div>
+  <div id="attTable" class="table-wrap"></div>
+  <button id="attSaveBtn" class="btn-save" onclick="saveAttendance()" style="display:none;margin-top:10px">💾 Save Attendance</button>
+  <div class="msg" id="attMsg"></div>
+</div>
+
+<!-- TAB 3: CLASS TEST - YOUR ORIGINAL WORK 100% PRESERVED -->
+<div class="panel" id="panel_classtest">
+  <h3>Class Test Entry - Original Work Preserved <span class="badge badge-subject">Subject Filtered</span></h3>
+  <div class="form-row">
+    <div class="form-group"><label>Class</label><select id="ctClass" onchange="ctLoadSubjects()"></select></div>
+    <div class="form-group"><label>Subject</label><select id="ctSubject"></select></div>
+    <div class="form-group"><label>Test Name</label><select id="ctTest"><option value="">Select Test</option><option>Unit Test 1</option><option>Unit Test 2</option><option>Half Yearly</option><option>Unit Test 3</option><option>Annual</option></select></div>
+    <div class="form-group"><label>Date</label><input type="date" id="ctDate"></div>
+    <div class="form-group"><label>&nbsp;</label><button class="btn-save" onclick="ctLoadStudents()">Load Students</button></div>
+  </div>
+  <div id="ctTable" class="table-wrap"></div>
+  <div style="margin-top:10px"><button id="ctSaveBtn" class="btn-save" onclick="ctSaveMarks()" style="display:none">💾 Save Class Test Marks (Original saveClassTest)</button></div>
+  <div class="msg" id="ctMsg"></div>
+  <p style="font-size:11px;color:#888;margin-top:8px">* This tab uses your exact original logic from 05_Exams_Comm_Report.gs - No changes. Same sheet: ClassTest_Master & ClassTest_Marks</p>
+</div>
+
+<!-- TAB 4: MONTHLY PERFORMANCE -->
+<div class="panel" id="panel_monthly">
+  <h3>Monthly / Scholastic Performance</h3>
+  <div class="form-row"><div class="form-group"><label>Class</label><select id="mpClass"></select></div><div class="form-group"><label>Exam</label><select id="mpExam"></select></div><div class="form-group"><label>&nbsp;</label><button class="btn-save" onclick="loadMonthly()">Load</button></div></div>
+  <div id="mpTable" class="table-wrap"></div>
+  <button id="mpSaveBtn" class="btn-save" onclick="saveMonthly()" style="display:none;margin-top:10px">💾 Save Performance</button>
+  <div class="msg" id="mpMsg"></div>
+</div>
+
+<!-- TAB 5: REGISTER -->
+<div class="panel" id="panel_register">
+  <h3>Class Register / Student List</h3>
+  <div class="form-row"><div class="form-group"><label>Class</label><select id="regClass"></select></div><div class="form-group"><label>&nbsp;</label><button class="btn-save" onclick="loadRegister()">Load Register</button></div></div>
+  <div id="regTable" class="table-wrap"></div>
+</div>
+
+</div>
+
+<script>
+const WEB_APP_URL='https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec';
+let currentMode=localStorage.getItem('cvse_currentMode')||'subjectTeacher';
+let isClassTeacher=localStorage.getItem('cvse_isClassTeacher')==='true';
+let myClasses=localStorage.getItem('cvse_classes')||'';
+let mySubjects=localStorage.getItem('cvse_subjects')||'';
+
+function init(){
+  if(!localStorage.getItem('cvse_username')){window.location.href='login.html';return;}
+  document.getElementById('roleBadge').innerHTML=currentMode==='classTeacher'?'<span class="badge badge-class">Class Teacher Mode - '+myClasses+'</span>':'<span class="badge badge-subject">Subject Teacher Mode - '+mySubjects+'</span>';
+  let sb=document.getElementById('switchBtn');
+  sb.disabled=!isClassTeacher;
+  sb.textContent=isClassTeacher?(currentMode==='classTeacher'?'🔄 Switch to Subject':'🔄 Switch to Class'):'🔄 Switch (Inactive)';
+  if(!isClassTeacher) sb.title='Only Class Teachers can switch';
+  
+  // ROLE-BASED TAB VISIBILITY
+  if(!isClassTeacher || currentMode==='subjectTeacher'){
+    // Subject Teacher only: show only ClassTest + Monthly (+ Daily limited)
+    document.getElementById('tab_attendance').classList.add('hidden');
+    document.getElementById('tab_register').classList.add('hidden');
+    // Daily tab stays but Save button will be "Submit" not "Publish"
+  } else {
+    // Class Teacher: all 5 tabs
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('hidden'));
+  }
+  
+  // Fill class dropdowns
+  let classes=[myClasses]; if(myClasses.includes(',')) classes=myClasses.split(',').map(s=>s.trim());
+  ['dailyClassSel','attClassSel','ctClass','mpClass','regClass','attClass','dailyClass'].forEach(id=>{
+    let el=document.getElementById(id); if(!el||el.tagName!=='SELECT') return;
+    el.innerHTML=''; classes.forEach(c=>{if(c){let o=document.createElement('option');o.value=c;o.textContent=c;el.appendChild(o);}});
+  });
+  let today=new Date().toISOString().split('T')[0];
+  ['dailyDate','attDate','ctDate'].forEach(id=>{let el=document.getElementById(id); if(el) el.value=today;});
+  
+  document.getElementById('dailyClass').textContent=myClasses;
+  document.getElementById('attClass').textContent=myClasses;
+  document.getElementById('dailyModeBadge').textContent=currentMode==='classTeacher'?'Can Publish':'Can Submit Only';
+  
+  // Handle tab param ?tab=
+  let urlParams=new URLSearchParams(window.location.search);
+  let tab=urlParams.get('tab'); if(tab) switchTab(tab);
+  
+  loadExamList();
+}
+document.querySelectorAll('.tab').forEach(t=>{t.addEventListener('click',()=>switchTab(t.dataset.tab));});
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  let tabEl=document.getElementById('tab_'+name); if(tabEl) tabEl.classList.add('active');
+  let panEl=document.getElementById('panel_'+name); if(panEl) panEl.classList.add('active');
+}
+function goBack(){window.location.href=currentMode==='classTeacher'?'class-dashboard.html':'subject-dashboard.html';}
+function switchMode(){
+  if(!isClassTeacher){alert('Switch inactive: Only Class Teachers (Always Both) can switch.');return;}
+  if(currentMode==='classTeacher'){localStorage.setItem('cvse_currentMode','subjectTeacher');window.location.href='subject-dashboard.html';}
+  else{localStorage.setItem('cvse_currentMode','classTeacher');window.location.href='class-dashboard.html';}
+}
+function showMsg(id,text,type){let el=document.getElementById(id);el.textContent=text;el.className='msg '+type;el.style.display='block';setTimeout(()=>{el.style.display='none';},4000);}
+
+// ===== DAILY UPDATES ORIGINAL =====
+async function loadDaily(){
+  let date=document.getElementById('dailyDate').value; let cls=document.getElementById('dailyClassSel').value;
+  let r=await fetch(`${WEB_APP_URL}?action=getbygradeday&className=${encodeURIComponent(cls)}&date=${date}`);
+  let d=await r.json(); let html='<table><tr><th>Period</th><th>Time</th><th>Subject</th><th>Teacher</th><th>Homework / Topic</th></tr>';
+  (d.timetable||[]).forEach(row=>{html+=`<tr><td>${row.periodNo||row.no}</td><td>${row.time||''}</td><td><input id="sub_${row.no}" value="${row.subject||''}" style="width:100%"></td><td>${row.teacher||''}</td><td><input id="hw_${row.no}" value="${row.homework||''}" placeholder="Enter homework" style="width:100%"></td></tr>`;});
+  html+='</table>'; document.getElementById('dailyTable').innerHTML=html;
+  document.getElementById('dailySaveBtn').style.display='inline-block';
+  document.getElementById('dailyNote').textContent=currentMode==='classTeacher'?'You can Publish (Lock) - Class Teacher right':'You can Submit only - Subject Teacher';
+}
+async function saveDaily(){
+  let date=document.getElementById('dailyDate').value; let cls=document.getElementById('dailyClassSel').value;
+  let entries=[]; document.querySelectorAll('[id^="hw_"]').forEach(inp=>{let no=inp.id.split('_')[1]; entries.push({periodNo:no, subject:document.getElementById('sub_'+no).value, homework:inp.value});});
+  let payload={action:'saveentry', className:cls, date:date, entries:entries, publish:currentMode==='classTeacher'};
+  let r=await fetch(WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)}); let d=await r.json();
+  showMsg('dailyMsg',d.success?'Saved '+(d.publish?'and Published':'and Submitted'):'Error: '+(d.error||'Failed'), d.success?'success':'error');
+}
+
+// ===== ATTENDANCE ORIGINAL =====
+async function loadAttendance(){
+  let cls=document.getElementById('attClassSel').value; let date=document.getElementById('attDate').value;
+  let r=await fetch(`${WEB_APP_URL}?action=getstudentsforattendance&className=${encodeURIComponent(cls)}&date=${date}`);
+  let d=await r.json(); let html='<table><tr><th>Roll</th><th>Name</th><th>Status</th></tr>';
+  (d.students||[]).forEach(s=>{html+=`<tr><td>${s.rollNo}</td><td>${s.name}</td><td><select id="att_${s.admissionNo}"><option value="Present">Present</option><option value="Absent">Absent</option><option value="Leave">Leave</option></select></td></tr>`;});
+  html+='</table>'; document.getElementById('attTable').innerHTML=html; document.getElementById('attSaveBtn').style.display='inline-block';
+}
+async function saveAttendance(){
+  let cls=document.getElementById('attClassSel').value; let date=document.getElementById('attDate').value; let period=document.getElementById('attPeriod').value;
+  let list=[]; document.querySelectorAll('[id^="att_"]').forEach(sel=>{list.push({admissionNo:sel.id.replace('att_',''), status:sel.value});});
+  let payload={action:'saveattendance', className:cls, date:date, periodNo:period, attendance:list};
+  let r=await fetch(WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)}); let d=await r.json();
+  showMsg('attMsg',d.success?'Attendance Saved':'Error: '+(d.error||'Failed'), d.success?'success':'error');
+}
+
+// ===== CLASS TEST - YOUR ORIGINAL WORK 100% SAME =====
+function ctLoadSubjects(){
+  let subjSel=document.getElementById('ctSubject'); subjSel.innerHTML='';
+  let subs=mySubjects.split(',').map(s=>s.trim()).filter(Boolean);
+  if(currentMode==='classTeacher'){subs=['English','Maths','Science','Social','Hindi','Computer','EVS','GK'];} // allow all for class teacher
+  subs.forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=s;subjSel.appendChild(o);});
+}
+async function ctLoadStudents(){
+  let cls=document.getElementById('ctClass').value; let sub=document.getElementById('ctSubject').value;
+  let r=await fetch(`${WEB_APP_URL}?action=getstudents&className=${encodeURIComponent(cls)}`);
+  let d=await r.json(); let html=`<table><tr><th>Admission</th><th>Name</th><th>Roll</th><th>Marks (Max 20/50/100)</th></tr>`;
+  (d.students||d.data||[]).forEach(s=>{html+=`<tr><td>${s.admissionNo||s[0]}</td><td>${s.name||s[1]}</td><td>${s.rollNo||s[2]}</td><td><input class="marks" id="ct_${s.admissionNo||s[0]}" type="number" placeholder="Marks"></td></tr>`;});
+  html+='</table>'; document.getElementById('ctTable').innerHTML=html; document.getElementById('ctSaveBtn').style.display='inline-block';
+}
+async function ctSaveMarks(){
+  let cls=document.getElementById('ctClass').value; let sub=document.getElementById('ctSubject').value; let test=document.getElementById('ctTest').value; let date=document.getElementById('ctDate').value;
+  if(!test){showMsg('ctMsg','Select Test Name','error');return;}
+  let marks=[]; document.querySelectorAll('[id^="ct_"]').forEach(inp=>{if(inp.value!=='') marks.push({admissionNo:inp.id.replace('ct_',''), marks:parseFloat(inp.value)});});
+  let payload={action:'saveclasstest', className:cls, subject:sub, testName:test, date:date, marks:marks};
+  let r=await fetch(WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)}); let d=await r.json();
+  showMsg('ctMsg',d.success?'Class Test Marks Saved - Original function same':'Error: '+(d.error||'Failed'), d.success?'success':'error');
+}
+
+// ===== MONTHLY & REGISTER - ORIGINAL =====
+async function loadExamList(){try{let r=await fetch(`${WEB_APP_URL}?action=getexams`); let d=await r.json(); let sel=document.getElementById('mpExam'); if(sel && d.exams){sel.innerHTML=''; d.exams.forEach(e=>{let o=document.createElement('option');o.value=e;o.textContent=e;sel.appendChild(o);});}}catch(e){}}
+async function loadMonthly(){
+  let cls=document.getElementById('mpClass').value; let exam=document.getElementById('mpExam').value;
+  let r=await fetch(`${WEB_APP_URL}?action=getmarks&className=${encodeURIComponent(cls)}&exam=${encodeURIComponent(exam)}`);
+  let d=await r.json(); let html='<table><tr><th>Adm</th><th>Name</th><th>Subject</th><th>Marks</th></tr>';
+  (d.marks||[]).forEach(m=>{html+=`<tr><td>${m.admissionNo}</td><td>${m.name}</td><td>${m.subject}</td><td><input class="marks" value="${m.marks||''}"></td></tr>`;});
+  html+='</table>'; document.getElementById('mpTable').innerHTML=html; document.getElementById('mpSaveBtn').style.display='inline-block';
+}
+async function loadRegister(){
+  let cls=document.getElementById('regClass').value;
+  let r=await fetch(`${WEB_APP_URL}?action=getallstudents&className=${encodeURIComponent(cls)}`);
+  let d=await r.json(); let html='<table><tr><th>Adm No</th><th>Name</th><th>Roll</th><th>Class</th></tr>';
+  (d.students||[]).forEach(s=>{html+=`<tr><td>${s.admissionNo||s[0]}</td><td>${s.name||s[1]}</td><td>${s.rollNo||s[2]}</td><td>${s.class||cls}</td></tr>`;});
+  html+='</table>'; document.getElementById('regTable').innerHTML=html;
+}
+
+init();
+</script>
+</body>
+</html>
