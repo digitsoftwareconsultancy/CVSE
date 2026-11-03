@@ -17,7 +17,7 @@
  .print-row select{width:auto;min-width:140px}
 </style></head><body>
 <div class="controls">
-  <select id="gradeSel"><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI-A</option><option>XI-B</option><option>XII</option></select>
+  <select id="gradeSel"><option>Loading classes...</option></select>
   <button onclick="loadBuilder()">🔄 Load Builder</button>
   <button onclick="saveAll()" style="background:green">💾 Save Grade</button>
   <button onclick="printClassReport()">🖨️ Class Print</button>
@@ -86,8 +86,26 @@ function normalizeSubject(s){
   return String(s).trim();
 }
 
+// ===== NEW: LOAD CLASSES FROM SubjectMaster =====
+async function loadClasses(){
+  try{
+    let res = await apiGet('getallclasses');
+    let cls = res.classes || [];
+    let sel = document.getElementById('gradeSel');
+    if(cls.length>0){
+      sel.innerHTML = cls.map(c=>`<option value="${c}">${c}</option>`).join('');
+    } else {
+      sel.innerHTML = '<option value="">No classes in SubjectMaster</option>';
+    }
+  }catch(e){
+    document.getElementById('gradeSel').innerHTML = '<option>I</option><option>II</option><option>III</option>';
+  }
+}
+loadClasses(); // auto load on start
+
 async function loadBuilder(){
   let grade=document.getElementById('gradeSel').value;
+  if(!grade){ alert('Select class'); return; }
   document.getElementById('status').innerText='⏳ Loading...';
   document.getElementById('status').style.color='green';
   try{
@@ -95,6 +113,7 @@ async function loadBuilder(){
       let cfgRes = await apiGet('getperiodconfig');
       if(cfgRes && cfgRes.list && Array.isArray(cfgRes.list) && cfgRes.list.length>0){
         cfg = cfgRes;
+        if(cfgRes.total) cfg.total=cfgRes.total;
       } else {
         cfg = defaultPeriods();
       }
@@ -110,35 +129,13 @@ async function loadBuilder(){
     let tSel=document.getElementById('teacherPrintSel');
     tSel.innerHTML='<option value="">-- Select Teacher --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');
 
-    let sRes=null;
-    try{ sRes = await apiGet('getsubjectsforclass', {className:grade}); }catch(e){}
-    if(!sRes || sRes.error || !sRes.subjects){
-      try{ sRes = await apiGet('getsubjects', {className:grade, grade:grade}); }catch(e){}
-    }
+    let sRes = await apiGet('getsubjectsforclass', {className:grade});
     if(sRes && sRes.subjects && Array.isArray(sRes.subjects) && sRes.subjects.length>0){
       subjects = toArray(sRes.subjects).map(normalizeSubject).filter(Boolean);
-    } else if(sRes && Array.isArray(sRes) && sRes.length>0){
-      subjects = sRes.map(normalizeSubject).filter(Boolean);
     } else {
-      let defaultSubs = {
-        'I':['English','Math','EVS','Hindi','GK','Drawing'],
-        'II':['English','Math','EVS','Hindi','GK','Drawing'],
-        'III':['English','Math','EVS','Hindi','GK','Computer'],
-        'IV':['English','Math','EVS','Hindi','GK','Computer'],
-        'V':['English','Math','Science','SST','Hindi','Computer'],
-        'VI':['English','Math','Science','SST','Hindi','Computer'],
-        'VII':['English','Math','Science','SST','Hindi','Computer'],
-        'VIII':['English','Math','Science','SST','Hindi','Computer'],
-        'IX':['English','Math','Science','SST','Hindi','IP'],
-        'X':['English','Math','Science','SST','Hindi','IP'],
-        'XI-A':['English','Physics','Chemistry','Math','IP','PE'],
-        'XI-B':['English','Physics','Chemistry','Biology','IP','PE'],
-        'XII':['English','Physics','Chemistry','Math','IP','PE']
-      };
-      subjects = defaultSubs[grade] || ['English','Math','Science','SST','Hindi','Computer'];
+      subjects = []; // No hardcoded fallback - pure SubjectMaster
     }
-
-    subjects = [...new Set(subjects)]; // remove duplicates
+    subjects = [...new Set(subjects)];
 
     let dataRes = await apiGet('gettimetable', {className:grade, grade:grade});
     existingData = dataRes.timetable || dataRes.rows || dataRes.data || [];
@@ -152,7 +149,8 @@ async function loadBuilder(){
     }catch(e){ occupiedMap={}; }
 
     renderGrid(grade);
-    document.getElementById('status').innerText='✅ Loaded '+cfg.total+' periods | Teachers:'+teachers.length+' Subjects:'+subjects.length+' ['+subjects.join(', ')+']';
+    let msg = subjects.length>0 ? `✅ Loaded ${cfg.total} periods | Teachers:${teachers.length} Subjects:${subjects.length} [${subjects.join(', ')}]` : `⚠️ No subjects in SubjectMaster for ${grade} - Add in SubjectMaster sheet`;
+    document.getElementById('status').innerText=msg;
   }catch(e){
     document.getElementById('status').innerText='❌ Error: '+e.message;
     document.getElementById('status').style.color='red';
@@ -180,7 +178,7 @@ async function saveAll(){
 
 function renderGrid(grade){
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-  let html=`<h3>GRADE-${grade} - ${cfg.total} Periods - Subjects: ${subjects.join(', ')}</h3><table style="table-layout:fixed"><tr><th style="width:80px">Day</th>`;
+  let html=`<h3>GRADE-${grade} - ${cfg.total} Periods - Subjects: ${subjects.join(', ') || 'NONE'}</h3><table style="table-layout:fixed"><tr><th style="width:80px">Day</th>`;
   cfg.list.forEach(p=>{ let isBreak=!p.isTeaching; let w=isBreak?'60px':''; let bg=isBreak?'#e65100':'#0a1931'; html+=`<th style="${w?'width:'+w:''};background:${bg}">${p.display.replace('\n','<br>')}</th>`; });
   html+=`</tr>`;
   days.forEach(day=>{
