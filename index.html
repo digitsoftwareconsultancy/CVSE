@@ -1,145 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CVSE - School Login</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-body{background:#f0f4f0;min-height:100vh;display:flex;flex-direction:column}
-.topbar{background:#1b5e20;color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.2)}
-.topbar h2{font-size:18px}
-.topbar span{font-size:13px;opacity:0.9}
-.container{flex:1;display:flex;justify-content:center;align-items:center;padding:20px}
-.login-card{background:white;width:100%;max-width:400px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1);overflow:hidden}
-.login-header{background:#2e7d32;color:white;padding:20px;text-align:center}
-.login-body{padding:25px}
-.form-group{margin-bottom:18px}
-.form-group label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:#333}
-.form-group input{width:100%;padding:11px;border:1px solid #ccc;border-radius:6px;font-size:14px;outline:none}
-.form-group input:focus{border-color:#2e7d32}
-.btn-login{width:100%;padding:12px;background:#2e7d32;color:white;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer}
-.btn-login:disabled{background:#9e9e9e}
-.msg{margin-top:15px;padding:10px;border-radius:5px;font-size:13px;display:none;text-align:center}
-.msg.error{background:#ffebee;color:#c62828;display:block}
-.msg.success{background:#e8f5e9;color:#2e7d32;display:block}
-.footer{text-align:center;padding:15px;font-size:12px;color:#777;background:#fafafa}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;z-index:9999;padding:15px}
-.modal-overlay.show{display:flex}
-.modal-box{background:white;width:100%;max-width:420px;border-radius:12px;overflow:hidden;animation:slideUp 0.3s}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-header{background:#1b5e20;color:white;padding:18px;text-align:center}
-.modal-body{padding:20px}
-.role-card{border:2px solid #e0e0e0;border-radius:8px;padding:15px;margin-bottom:12px;cursor:pointer;display:flex;gap:12px;align-items:center}
-.role-card:hover,.role-card.selected{border-color:#2e7d32;background:#e8f5e9}
-.role-icon{font-size:26px}
-.btn-continue{width:100%;padding:12px;background:#2e7d32;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer}
-.btn-continue:disabled{background:#bdbdbd}
-.note{font-size:11px;color:#888;text-align:center;margin-top:10px}
-</style>
-</head>
-<body>
-<div class="topbar"><h2>CVSE - Carey's Vision School of Education</h2><span>School Management</span></div>
-<div class="container">
-  <div class="login-card">
-    <div class="login-header"><h3>School Staff Login</h3><p>Admin / Class Teacher / Subject Teacher</p></div>
-    <div class="login-body">
-      <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="Enter username"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="password" placeholder="Enter password"></div>
-      <button class="btn-login" id="loginBtn" onclick="doLogin()">Login</button>
-      <div class="msg" id="msgBox"></div>
-    </div>
-    <div class="footer">© CVSE • Secure Login<br><small>Student login separate at cvse.in</small></div>
-  </div>
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>DiGit ERP Login</title>
+<style>body{font-family:Arial;background:#eef2f7;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0} .card{background:#fff;padding:28px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:360px;text-align:center} .input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;margin:8px 0;background:#eef6ff;box-sizing:border-box} .btn{width:100%;padding:12px;border:none;border-radius:25px;font-weight:800;cursor:pointer;margin:6px 0} .btn-login{background:#0b2a5c;color:#fff} .btn-class{background:#0b2a5c;color:#fff} .btn-sub{background:#16a34a;color:#fff} .btn-back{background:#e5e7eb;color:#333}</style></head><body>
+<div class="card">
+<div id="loginForm"><h2 style="color:#0b2a5c">DiGit School Management<br>System . ERP</h2>
+<input id="username" class="input" placeholder="Username"><input id="password" type="password" class="input" placeholder="Password">
+<button class="btn btn-login" onclick="doLogin()">Login</button><p id="msg" style="color:red;min-height:18px;font-size:13px"></p></div>
+<div id="roleForm" style="display:none"><h2 style="color:#0b2a5c">DiGit School Management<br>System . ERP</h2><p style="font-weight:700">Select Login Mode</p><p id="welcomeName" style="font-weight:800;color:#0b2a5c"></p><div id="roleList"></div></div>
 </div>
-
-<div class="modal-overlay" id="roleModal">
-  <div class="modal-box">
-    <div class="modal-header"><h3 id="welcomeText">Welcome!</h3><p>You have dual access - Choose Panel</p></div>
-    <div class="modal-body">
-      <div class="role-card" id="cardClass" onclick="selectRole('classTeacher')"><div class="role-icon">🏫</div><div><h4>Class Teacher Panel</h4><p id="classNameText">Attendance, Register, Publish Updates</p></div></div>
-      <div class="role-card" id="cardSubject" onclick="selectRole('subjectTeacher')"><div class="role-icon">📖</div><div><h4>Subject Teacher Panel</h4><p id="subjectNameText">Homework & Subject Tests</p></div></div>
-      <button class="btn-continue" id="continueBtn" disabled onclick="continueToDashboard()">Continue</button>
-      <div class="note">Class Teachers = Always Both. You can switch anytime via Switch Mode button.</div>
-    </div>
-  </div>
-</div>
-
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec';
-let selectedRole = null;
-let loginData = null;
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
+let CAP = null;
 
-function showMsg(t,type){let b=document.getElementById('msgBox');b.textContent=t;b.className='msg '+type;b.style.display='block';}
+async function apiPost(action, payload={}){
+  let r = await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action,...payload})});
+  return await r.json();
+}
 
 async function doLogin(){
-  let u=document.getElementById('username').value.trim();
-  let p=document.getElementById('password').value.trim();
-  let btn=document.getElementById('loginBtn');
-  if(!u||!p){showMsg('Please enter username and password','error');return;}
-  btn.disabled=true; btn.textContent='Logging in...';
-  
+  var u=document.getElementById('username').value.trim();
+  var p=document.getElementById('password').value.trim();
+  if(!u||!p){ document.getElementById('msg').innerText='Enter username & password'; return; }
+  document.getElementById('msg').innerText='Checking...';
   try{
-    let url = `${WEB_APP_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`;
-    let res = await fetch(url);
-    let data = await res.json();
-    handleLoginResponse(data);
-  }catch(err){
-    showMsg('Network error: '+err.message,'error');
-    btn.disabled=false; btn.textContent='Login';
-  }
+    let res = await apiPost('checklogin', {username:u, password:p});
+    if(!res || !res.success){ document.getElementById('msg').innerText='❌ Invalid Login - '+(res.error||''); return; }
+    CAP=res; 
+    // Save both old and new keys for compatibility
+    localStorage.setItem('cvs_user', JSON.stringify(res));
+    localStorage.setItem('cvse_user', JSON.stringify(res));
+    localStorage.setItem('cvs_token', res.token);
+    localStorage.setItem('cvse_token', res.token);
+    localStorage.setItem('token', res.token);
+    localStorage.setItem('cvse_username', res.username);
+    localStorage.setItem('cvse_role', res.role);
+    localStorage.setItem('cvse_name', res.name);
+    localStorage.setItem('cvse_classes', res.classes||'');
+    localStorage.setItem('cvse_subjects', res.subjects||'');
+    localStorage.setItem('cvse_examAccess', res.examAccess||'NO');
+    localStorage.setItem('cvse_isClassTeacher', res.isClassTeacher ? 'true':'false');
+    localStorage.setItem('cvs_username', res.username);
+    localStorage.setItem('cvs_role', res.role);
+    
+    showRoleSwitcher(res);
+  }catch(e){ document.getElementById('msg').innerText='Error: '+e.message; }
 }
 
-function handleLoginResponse(res){
-  let btn=document.getElementById('loginBtn');
-  btn.disabled=false; btn.textContent='Login';
-  if(!res || !res.success){showMsg(res.error||'Invalid username or password','error');return;}
+function showRoleSwitcher(cap){
+  if(!cap.availableRoles || cap.availableRoles.length==0){
+    cap.availableRoles=[{role: cap.role || 'admin', label: (cap.role||'admin').toUpperCase()}];
+  }
   
-  loginData = res.user;
-  // Save for all dashboards
-  localStorage.setItem('cvse_username', res.user.username);
-  localStorage.setItem('cvse_name', res.user.name);
-  localStorage.setItem('cvse_role', res.user.role);
-  localStorage.setItem('cvse_isClassTeacher', res.user.isClassTeacher ? 'true' : 'false');
-  localStorage.setItem('cvse_classes', res.user.classes);
-  localStorage.setItem('cvse_subjects', res.user.subjects);
-  localStorage.setItem('cvse_examAccess', res.user.examAccess);
-
-  if(res.user.role === 'admin'){
-    localStorage.setItem('cvse_currentMode','admin');
-    showMsg('Welcome Admin! Redirecting...','success');
-    setTimeout(()=>{window.location.href='admin.html';},800);
+  if(cap.availableRoles.length==1){
+    enterRole(cap.availableRoles[0].role);
     return;
   }
-  if(res.user.isClassTeacher === true){
-    document.getElementById('welcomeText').textContent='Welcome, '+(res.user.name||res.user.username)+'!';
-    document.getElementById('classNameText').textContent=(res.user.classes||'Your Class')+' - Attendance, Register, Publish';
-    document.getElementById('subjectNameText').textContent=(res.user.subjects||'Your Subjects')+' - Homework & Tests';
-    document.getElementById('roleModal').classList.add('show');
+  
+  var first = cap.availableRoles[0].role;
+  var allSame = true;
+  for(var i=0;i<cap.availableRoles.length;i++){ if(cap.availableRoles[i].role!=first){ allSame=false; break; } }
+  if(allSame){
+    enterRole(first);
     return;
   }
-  localStorage.setItem('cvse_currentMode','subjectTeacher');
-  showMsg('Welcome! Redirecting to Subject Panel...','success');
-  setTimeout(()=>{window.location.href='subject-dashboard.html';},800);
+  
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('roleForm').style.display='block';
+  document.getElementById('welcomeName').innerText='Welcome, '+cap.name+' ('+cap.username.toUpperCase()+')';
+  var html='';
+  cap.availableRoles.forEach(function(r){
+    var cls = r.role=='classTeacher' ? 'btn-class' : 'btn-sub';
+    var icon = r.role=='classTeacher' ? '🏫' : '📚';
+    if(r.role=='admin'){ cls='btn-class'; icon='🛡️'; }
+    html+='<button class="btn '+cls+'" onclick="enterRole(\''+r.role+'\')">'+icon+' '+r.label+'</button>';
+  });
+  html+='<button class="btn btn-back" onclick="backToLogin()">← Back to Login</button>';
+  document.getElementById('roleList').innerHTML=html;
 }
 
-function selectRole(role){
-  selectedRole=role;
-  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
-  if(role==='classTeacher') document.getElementById('cardClass').classList.add('selected');
-  else document.getElementById('cardSubject').classList.add('selected');
-  document.getElementById('continueBtn').disabled=false;
+function enterRole(role){
+  if(!CAP) {
+    try{ CAP=JSON.parse(localStorage.getItem('cvse_user')||localStorage.getItem('cvs_user')||'{}'); }catch(e){ CAP={}; }
+  }
+  localStorage.setItem('cvs_selected_role', role);
+  localStorage.setItem('cvse_view', role=='classTeacher' ? 'class' : role=='subjectTeacher' ? 'subject' : 'admin');
+  localStorage.setItem('role', role);
+  localStorage.setItem('cvse_role', role);
+  localStorage.setItem('cvs_role', role);
+  
+  // GitHub Pages routing - no WEB_URL ?page=
+  if(role=='admin') window.location.href = 'admin.html';
+  else if(role=='subjectTeacher' || role=='subject') window.location.href = 'subject-dashboard.html';
+  else if(role=='classTeacher' || role=='teacher') window.location.href = 'class-dashboard.html';
+  else window.location.href = 'class-dashboard.html';
 }
 
-function continueToDashboard(){
-  if(!selectedRole) return;
-  localStorage.setItem('cvse_currentMode',selectedRole);
-  document.getElementById('roleModal').classList.remove('show');
-  if(selectedRole==='classTeacher') window.location.href='class-dashboard.html';
-  else window.location.href='subject-dashboard.html';
+function backToLogin(){
+  document.getElementById('roleForm').style.display='none';
+  document.getElementById('loginForm').style.display='block';
+  document.getElementById('msg').innerText='';
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Enter') doLogin();});
-</script>
-</body>
-</html>
+// Auto redirect if already logged in
+(function(){
+  try{
+    var u = JSON.parse(localStorage.getItem('cvse_user')||'null');
+    if(u && u.token){
+      CAP = u;
+      var view = localStorage.getItem('cvse_view');
+      if(view=='class') window.location.href='class-dashboard.html';
+      else if(view=='subject') window.location.href='subject-dashboard.html';
+      else if(view=='admin') window.location.href='admin.html';
+    }
+  }catch(e){}
+})();
+</script></body></html>
