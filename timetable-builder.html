@@ -43,8 +43,8 @@ function toArray(x){
   if(!x) return [];
   if(typeof x==='string'){
     try{ let j=JSON.parse(x); if(Array.isArray(j)) return j; }catch(e){}
-    if(x.includes(',')) return x.split(',').map(s=>s.trim()).filter(Boolean).map(name=>({name}));
-    return [{name:x}];
+    if(x.includes(',')) return x.split(',').map(s=>s.trim()).filter(Boolean);
+    return [x];
   }
   if(typeof x==='object'){
     if(x.teachers) return toArray(x.teachers);
@@ -73,9 +73,17 @@ function defaultPeriods(){
   for(let i=1;i<=8;i++){
     list.push({no:i, display:`P${i}`, displayInline:`P${i}`, time:`${8+i}:00`, isTeaching:true});
   }
-  // Add Leisure as P4 example
   list[3]={no:4, display:'LEISURE\nBREAK', displayInline:'Leisure', time:'12:00', isTeaching:false};
   return {total:8, list:list};
+}
+
+function normalizeSubject(s){
+  if(!s) return null;
+  if(typeof s==='string') return s.trim();
+  let nm = s.name || s.subject || s.Subject || s.subjectName || s.SubjectName || s.title || '';
+  if(typeof nm==='string') return nm.trim();
+  if(typeof s==='object' && Object.keys(s).length===1) return Object.values(s)[0];
+  return String(s).trim();
 }
 
 async function loadBuilder(){
@@ -83,7 +91,6 @@ async function loadBuilder(){
   document.getElementById('status').innerText='⏳ Loading...';
   document.getElementById('status').style.color='green';
   try{
-    // 1. Period config - fallback if API not exist
     try{
       let cfgRes = await apiGet('getperiodconfig');
       if(cfgRes && cfgRes.list && Array.isArray(cfgRes.list) && cfgRes.list.length>0){
@@ -94,47 +101,50 @@ async function loadBuilder(){
     }catch(e){ cfg = defaultPeriods(); }
     if(!cfg.list || cfg.list.length==0) cfg = defaultPeriods();
 
-    // 2. Teachers - exists as getteachers / getallteachers
     let tRes = await apiGet('getallteachers');
     if(!tRes.teachers) tRes = await apiGet('getteachers');
     teachers = tRes.teachers || tRes.users || tRes || [];
-    teachers = toArray(teachers).filter(t=>t && t.username);
-    // Fix: your AUTH_getAllTeachers returns {name, username}
-    teachers = teachers.map(t=>({username:t.username||t.user, name:t.name||t.username}));
+    teachers = toArray(teachers).filter(t=>t && (t.username || t.user));
+    teachers = teachers.map(t=>({username:t.username||t.user||t.UserName, name:t.name||t.Name||t.username||t.user}));
 
     let tSel=document.getElementById('teacherPrintSel');
     tSel.innerHTML='<option value="">-- Select Teacher --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');
 
-    // 3. Subjects - YOUR ROUTER DOES NOT HAVE getsubjectsforclass - use fallback
     let sRes=null;
     try{ sRes = await apiGet('getsubjectsforclass', {className:grade}); }catch(e){}
     if(!sRes || sRes.error || !sRes.subjects){
-      // Try alternate actions
-      try{ sRes = await apiGet('getsubjects', {className:grade}); }catch(e){}
+      try{ sRes = await apiGet('getsubjects', {className:grade, grade:grade}); }catch(e){}
     }
     if(sRes && sRes.subjects && Array.isArray(sRes.subjects) && sRes.subjects.length>0){
-      subjects = toArray(sRes.subjects);
+      subjects = toArray(sRes.subjects).map(normalizeSubject).filter(Boolean);
+    } else if(sRes && Array.isArray(sRes) && sRes.length>0){
+      subjects = sRes.map(normalizeSubject).filter(Boolean);
     } else {
-      // FALLBACK: Default subjects for Report Card - IMPORTANT FOR YOUR FLOW
       let defaultSubs = {
         'I':['English','Math','EVS','Hindi','GK','Drawing'],
         'II':['English','Math','EVS','Hindi','GK','Drawing'],
+        'III':['English','Math','EVS','Hindi','GK','Computer'],
+        'IV':['English','Math','EVS','Hindi','GK','Computer'],
+        'V':['English','Math','Science','SST','Hindi','Computer'],
+        'VI':['English','Math','Science','SST','Hindi','Computer'],
+        'VII':['English','Math','Science','SST','Hindi','Computer'],
+        'VIII':['English','Math','Science','SST','Hindi','Computer'],
+        'IX':['English','Math','Science','SST','Hindi','IP'],
+        'X':['English','Math','Science','SST','Hindi','IP'],
         'XI-A':['English','Physics','Chemistry','Math','IP','PE'],
-        'XI-B':['English','Physics','Chemistry','Biology','IP','PE']
+        'XI-B':['English','Physics','Chemistry','Biology','IP','PE'],
+        'XII':['English','Physics','Chemistry','Math','IP','PE']
       };
-      let list = defaultSubs[grade] || ['English','Math','Science','SST','Hindi','Computer'];
-      subjects = list.map(n=>({name:n}));
+      subjects = defaultSubs[grade] || ['English','Math','Science','SST','Hindi','Computer'];
     }
-    subjects = subjects.map(s=> typeof s==='string' ? {name:s} : s);
-    subjects = subjects.filter(s=>s && s.name);
 
-    // 4. Timetable data
+    subjects = [...new Set(subjects)]; // remove duplicates
+
     let dataRes = await apiGet('gettimetable', {className:grade, grade:grade});
     existingData = dataRes.timetable || dataRes.rows || dataRes.data || [];
     if(!Array.isArray(existingData)) existingData=[];
     existingData = existingData.map(r=>({Day:(r.day||r.Day||'').toUpperCase(), Period_No:r.periodNo||r.Period_No||r.period||r.Period, Subject:r.subject||r.Subject, TeacherUsername:r.teacherUsername||r.TeacherUsername||r.username||'', TeacherName:r.teacher||r.TeacherName||r.name||''}));
 
-    // 5. Occupied map - optional
     try{
       let mapRes = await apiGet('getoccupiedmap');
       occupiedMap = mapRes.map || mapRes || {};
@@ -142,11 +152,10 @@ async function loadBuilder(){
     }catch(e){ occupiedMap={}; }
 
     renderGrid(grade);
-    document.getElementById('status').innerText='✅ Loaded '+cfg.total+' periods | Teachers:'+teachers.length+' Subjects:'+subjects.length;
+    document.getElementById('status').innerText='✅ Loaded '+cfg.total+' periods | Teachers:'+teachers.length+' Subjects:'+subjects.length+' ['+subjects.join(', ')+']';
   }catch(e){
     document.getElementById('status').innerText='❌ Error: '+e.message;
     document.getElementById('status').style.color='red';
-    console.error(e);
   }
 }
 
@@ -171,7 +180,7 @@ async function saveAll(){
 
 function renderGrid(grade){
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-  let html=`<h3>GRADE-${grade} - ${cfg.total} Periods</h3><table style="table-layout:fixed"><tr><th style="width:80px">Day</th>`;
+  let html=`<h3>GRADE-${grade} - ${cfg.total} Periods - Subjects: ${subjects.join(', ')}</h3><table style="table-layout:fixed"><tr><th style="width:80px">Day</th>`;
   cfg.list.forEach(p=>{ let isBreak=!p.isTeaching; let w=isBreak?'60px':''; let bg=isBreak?'#e65100':'#0a1931'; html+=`<th style="${w?'width:'+w:''};background:${bg}">${p.display.replace('\n','<br>')}</th>`; });
   html+=`</tr>`;
   days.forEach(day=>{
@@ -182,7 +191,7 @@ function renderGrid(grade){
       let subVal = found ? found.Subject : '';
       let teachUser = found ? String(found.TeacherUsername).toLowerCase() : '';
       let key = day+'-'+p.no; let busyList = occupiedMap[key] || [];
-      html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Subject--</option>`+ subjects.map(s=>`<option value="${s.name}" ${s.name==subVal?'selected':''}>${s.name}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Teacher--</option>`;
+      html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Subject--</option>`+ subjects.map(nm=>`<option value="${nm}" ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Teacher--</option>`;
       teachers.forEach(t=>{ 
         if(busyList.indexOf(String(t.username).toLowerCase())!=-1 && String(t.username).toLowerCase()!=teachUser) return; 
         let tLower=String(t.username).toLowerCase(); 
