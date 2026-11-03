@@ -21,26 +21,47 @@ async function doLogin(){
   if(!u||!p){ document.getElementById('msg').innerText='Enter username & password'; return; }
   document.getElementById('msg').innerText='Checking...';
   try{
-    let res = await apiPost('checklogin', {username:u, password:p});
-    if(!res || !res.success){ document.getElementById('msg').innerText='❌ Invalid Login - '+(res.error||''); return; }
-    CAP=res; 
-    // Save both old and new keys for compatibility
-    localStorage.setItem('cvs_user', JSON.stringify(res));
-    localStorage.setItem('cvse_user', JSON.stringify(res));
-    localStorage.setItem('cvs_token', res.token);
-    localStorage.setItem('cvse_token', res.token);
-    localStorage.setItem('token', res.token);
-    localStorage.setItem('cvse_username', res.username);
-    localStorage.setItem('cvse_role', res.role);
-    localStorage.setItem('cvse_name', res.name);
-    localStorage.setItem('cvse_classes', res.classes||'');
-    localStorage.setItem('cvse_subjects', res.subjects||'');
-    localStorage.setItem('cvse_examAccess', res.examAccess||'NO');
-    localStorage.setItem('cvse_isClassTeacher', res.isClassTeacher ? 'true':'false');
-    localStorage.setItem('cvs_username', res.username);
-    localStorage.setItem('cvs_role', res.role);
+    // FIXED: action is 'login' not 'checklogin' - matches 08_WebRouter.gs
+    let res = await apiPost('login', {username:u, password:p});
     
-    showRoleSwitcher(res);
+    if(!res || !res.success){ 
+      document.getElementById('msg').innerText='❌ Invalid Login - '+(res.error||res.message||'Wrong password'); 
+      return; 
+    }
+    
+    // Handle both formats: {user:{}} or direct {username, role...}
+    let userObj = res.user || res.data || res;
+    let token = res.token || userObj.token || 'ok-'+Date.now();
+    
+    CAP = {
+      username: userObj.username || u,
+      name: userObj.name || userObj.fullName || userObj.username || u,
+      role: userObj.role || 'teacher',
+      classes: userObj.classes || userObj.className || '',
+      subjects: userObj.subjects || userObj.subject || '',
+      examAccess: userObj.examAccess || userObj.ExamAccess || 'NO',
+      isClassTeacher: userObj.isClassTeacher || false,
+      availableRoles: userObj.availableRoles || res.availableRoles || [{role: userObj.role || 'subjectTeacher', label: (userObj.role||'TEACHER').toUpperCase()}],
+      token: token
+    };
+
+    // Save both old and new keys for compatibility
+    localStorage.setItem('cvs_user', JSON.stringify(CAP));
+    localStorage.setItem('cvse_user', JSON.stringify(CAP));
+    localStorage.setItem('cvs_token', CAP.token);
+    localStorage.setItem('cvse_token', CAP.token);
+    localStorage.setItem('token', CAP.token);
+    localStorage.setItem('cvse_username', CAP.username);
+    localStorage.setItem('cvse_role', CAP.role);
+    localStorage.setItem('cvse_name', CAP.name);
+    localStorage.setItem('cvse_classes', CAP.classes||'');
+    localStorage.setItem('cvse_subjects', CAP.subjects||'');
+    localStorage.setItem('cvse_examAccess', CAP.examAccess||'NO');
+    localStorage.setItem('cvse_isClassTeacher', CAP.isClassTeacher ? 'true':'false');
+    localStorage.setItem('cvs_username', CAP.username);
+    localStorage.setItem('cvs_role', CAP.role);
+    
+    showRoleSwitcher(CAP);
   }catch(e){ document.getElementById('msg').innerText='Error: '+e.message; }
 }
 
@@ -86,7 +107,6 @@ function enterRole(role){
   localStorage.setItem('cvse_role', role);
   localStorage.setItem('cvs_role', role);
   
-  // GitHub Pages routing - no WEB_URL ?page=
   if(role=='admin') window.location.href = 'admin.html';
   else if(role=='subjectTeacher' || role=='subject') window.location.href = 'subject-dashboard.html';
   else if(role=='classTeacher' || role=='teacher') window.location.href = 'class-dashboard.html';
@@ -99,7 +119,6 @@ function backToLogin(){
   document.getElementById('msg').innerText='';
 }
 
-// Auto redirect if already logged in
 (function(){
   try{
     var u = JSON.parse(localStorage.getItem('cvse_user')||'null');
