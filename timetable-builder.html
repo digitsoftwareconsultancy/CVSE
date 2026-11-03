@@ -127,7 +127,7 @@ async function printTeacherReport(){
   let res=await apiGet('gettimetableforteacher',{username:sel.value}); let rows=toArray(res.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Grade:r.className||'',Subject:r.subject||''}));
   let grid={}; rows.forEach(r=>{if(!grid[r.Day])grid[r.Day]={}; grid[r.Day][r.Period_No]=r;});
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-  let counts={}; rows.forEach(r=>{counts[r.Subject]=(counts[r.Subject]||0)+1;});
+  let counts={}; rows.forEach(r=>{ let sub=(r.Subject||'').trim().toUpperCase(); if(!sub) return; counts[sub]=(counts[sub]||0)+1; });
   let w=window.open('','_blank');
   let html=`<style>@page{margin:10mm}body{font-family:Arial}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;font-size:11px;text-align:center}th{background:#f1f1f1}.breakCell{background:#fff3cd !important;font-weight:900}.title{text-align:center;font-size:20px;font-weight:900;margin:6px}.sub{text-align:center;font-size:13px;margin:4px}</style>
   ${getSchoolHeaderHTML()}<div class="title">Time Table</div><div class="sub">Teacher's Name : ${tName}</div>
@@ -137,8 +137,9 @@ async function printTeacherReport(){
     cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell">${p.label}</td>`; return; } let c=(grid[d]||{})[p.no]; html+=`<td>${c?c.Subject:''}</td>`; }); html+=`</tr><tr>`;
     cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="breakCell"><small>${p.type}</small></td>`; return; } let c=(grid[d]||{})[p.no]; html+=`<td>${c?c.Grade:''}</td>`; }); html+=`</tr>`;
   });
-  let first=Object.keys(counts)[0]||'ENG';
-  html+=`</table><div style="display:flex;margin-top:10px;border:1px solid #000"><div style="padding:6px 12px;border-right:1px solid #000">${first} <span style="border:1px solid #000;padding:2px 12px;margin-left:6px">${counts[first]||0}</span></div><div style="padding:6px 12px">Total no. of Classes per Week <span style="border:1px solid #000;padding:2px 12px;margin-left:6px">${rows.length}</span></div></div><script>window.print()<\/script>`;
+  // FIXED: Show ALL subjects, not just first
+  let allSubHtml = Object.keys(counts).map(sub=>`<div style="padding:6px 12px;border-right:1px solid #000;display:inline-block">${sub} <span style="border:1px solid #000;padding:2px 10px;margin-left:6px;font-weight:900">${counts[sub]}</span></div>`).join('');
+  html+=`</table><div style="display:flex;flex-wrap:wrap;margin-top:10px;border:1px solid #000;align-items:center"><div style="display:flex;flex-wrap:wrap">${allSubHtml}</div><div style="padding:6px 12px;font-weight:bold;border-left:1px solid #000;background:#f5f5f5">Total no. of Classes per Week <span style="border:1px solid #000;padding:2px 12px;margin-left:6px;background:#fff">${rows.length}</span></div></div><script>window.print()<\/script>`;
   w.document.write(html); w.document.close();
 }
 
