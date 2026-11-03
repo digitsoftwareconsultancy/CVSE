@@ -1,0 +1,142 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#eef2f7;margin:0;padding:12px}
+.card{background:#fff;padding:18px;border-radius:16px;max-width:460px;margin:20px auto;box-shadow:0 5px 20px rgba(0,0,0,.15);text-align:center}
+.badge{padding:8px 10px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:8px;text-align:center}.badge-session{background:#e2f0ff;color:#0b2a5c;border:1px solid #c2d8ff}.badge-term{background:#fff8d0;color:#000;border:1px solid #e0c36a;font-size:13px;font-weight:800}
+.input-small{width:85%;padding:9px;margin:5px auto;border-radius:7px;border:1px solid #bbb;display:block;box-sizing:border-box}
+.btn-go{width:85%;padding:10px;margin:10px auto;color:#fff;border:none;border-radius:7px;font-weight:bold;cursor:pointer;display:block}
+#msg{font-size:12px;font-weight:bold;min-height:16px}
+.powered{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:15px;padding:10px 12px;border-radius:10px;background:#f8faff;border:1px solid #e2e8f0;font-size:12px;color:#555}.powered img{height:26px;width:auto;border-radius:4px;background:#fff}.powered b{color:#0b2a5c}
+.page{width:19.4cm;max-width:100%;background:#fff;border:2px solid #1a4bb5;border-radius:8px;margin:10px auto;padding:4px;position:relative}
+.header-text-only{border:1.5px solid #000;border-radius:6px;padding:10px 8px;text-align:center;background:#fff;margin:2px}
+.header-text-only h1{margin:0;font-size:20px;color:#1a237e}
+.header-text-only h2{margin:3px 0;font-size:12px;font-weight:700}
+.header-text-only.prov{margin:8px auto 2px;background:#fff!important;color:#cc0000!important;border:1.5px solid #cc0000;display:inline-block;padding:4px 18px;border-radius:4px;font-size:14px;font-weight:900}
+.header-text-only.termline{margin-top:6px;font-size:11px;font-weight:800;border:1px solid #000;display:inline-block;padding:2px 10px;border-radius:12px;background:#fff}
+.info{display:flex;justify-content:space-between;background:#fdfcf0;border:1px solid #999;border-radius:4px;padding:10px;margin:3px;font-size:12px;line-height:1.8;text-align:left}
+.il b{width:120px;display:inline-block;font-weight:400}.il span{font-weight:700;margin-left:10px}
+.sch{border:1px solid #333;border-radius:4px;margin:3px;overflow:hidden;background:#fff;text-align:left}.sec{background:#fdf6d0;padding:3px 6px;font-size:10px;font-weight:900;display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse}th,td{border:0.6px solid #333;text-align:center;padding:5px;font-size:10px}.left{text-align:left!important;padding-left:5px!important;font-weight:600}th{background:#fdf6d0;font-size:9px;font-weight:900}td{font-weight:600}
+.term-box{border:1px solid #333;border-radius:4px;margin:3px;padding:12px;text-align:center;background:#fdfcf0}.term-title{font-size:13px;font-weight:900;color:#1a237e;margin-bottom:6px}.term-text{font-size:13px;font-weight:700;color:#000}
+.notice{background:#fff3cd;border:1px dashed #d4af37;color:#856404;padding:8px 10px;font-size:11px;font-weight:700;text-align:center;border-radius:6px;margin:6px 3px}.footer{height:0.6cm;background:#1a237e;color:#ffeb3b;text-align:center;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:3px;margin:3px}
+.captcha-box{background:#f0f4ff;border:1px dashed #1a4bb5;padding:8px;border-radius:8px;width:85%;margin:8px auto;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center}.captcha-q{font-weight:900;font-size:15px;color:#0b2a5c}.captcha-in{width:70px;padding:6px;border-radius:5px;border:1px solid #999;text-align:center}
+@media print{.card,.no-print{display:none!important}body{background:#fff;padding:0}.page{border:2px solid #1a4bb5;width:19.4cm;-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{size:A4;margin:0.8cm}}
+</style></head><body>
+<div class="card" id="loginCard">
+<h3 style="margin:0 0 8px;color:#0b2a5c">Carey's Vision School of Education</h3>
+<div id="publishBadge" class="badge badge-session">📅 Session: 2026-2027</div>
+<div id="termBadge" class="badge badge-term">📘 Term I - Half Yearly</div>
+<input id="ad" class="input-small" placeholder="Admission No">
+<input id="rl" class="input-small" placeholder="Roll No">
+<select id="cl" class="input-small"><option value="">Loading Classes...</option></select>
+<input id="dob" class="input-small" placeholder="Date of Birth (DD-MM-YYYY)" type="text">
+<div class="captcha-box"><span class="captcha-q" id="capQ">5 + 3 =?</span><input id="capA" class="captcha-in" placeholder="Ans"><span style="cursor:pointer" onclick="genCaptcha()">🔄</span></div>
+<button class="btn-go" id="loginBtn" style="background:#1b8a3d" onclick="checkStudent()">🔐 View Result Securely</button>
+<div id="msg">System Ready</div>
+<div class="powered"><span>Powered by <b>DiGit Software Consultancy</b></span><img src="https://digitcda-lab.github.io/CVS//digitlogo.jpg" alt="Digit"></div>
+</div>
+<div id="result"></div>
+<script>
+var WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
+var CUR_SESSION='2026-2027'; var CUR_TERM='I'; var CUR_PUBLISH='NO';
+function getTermText(){ return (CUR_TERM==='II')? 'TERM - II (PT2 + ANNUAL)' : 'TERM - I (PT 1 + HALF YEARLY)'; }
+function getTermTitle(){ return (CUR_TERM==='II')? 'TERM-II RESULT' : 'TERM-I RESULT'; }
+function getTermTotalText(){ return (CUR_TERM==='II')? 'Term II Total (PT2 + Annual)' : 'Term I Total (PT1 + Half Yearly)'; }
+function getPTLabel(){ return (CUR_TERM==='II')? 'PT2' : 'PT1'; }
+function getHYLabel(){ return (CUR_TERM==='II')? 'Annual' : 'Half Yearly'; }
+function updateTopBadge(){ var badge=document.getElementById('publishBadge'); var tBadge=document.getElementById('termBadge'); var isYes=String(CUR_PUBLISH).toUpperCase().indexOf('YES')>-1; if(badge){ badge.innerHTML='📅 Session: '+CUR_SESSION+' | '+(isYes?'🟢 Published':'🔴 Not Published'); badge.style.background=isYes?'#d4edda':'#e2f0ff'; } if(tBadge){ tBadge.innerHTML=(CUR_TERM==='II'?'📙 Term II - Annual':'📘 Term I - Half Yearly'); } }
+
+async function apiGet(action, params={}){
+  let url = WEB_URL + "?action=" + action;
+  for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]);
+  let r = await fetch(url);
+  return await r.json();
+}
+async function apiPost(action, payload={}){
+  let r = await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action,...payload})});
+  return await r.json();
+}
+
+async function loadSettings(){
+ try{
+   let s = await apiGet('getallsettings');
+   CUR_SESSION=s.session||s.Academic_Session||'2026-2027';
+   CUR_TERM=s.activeTerm||s.Active_Term||'I';
+   CUR_PUBLISH=s.publish||s.publishStatus||'NO';
+   updateTopBadge();
+ }catch(e){ updateTopBadge(); }
+}
+
+function goBack(){ document.getElementById('loginCard').style.display='block'; document.getElementById('result').innerHTML=''; document.getElementById('msg').innerHTML='System Ready'; window.scrollTo(0,0); }
+var capAns=8;
+function genCaptcha(){ var a=Math.floor(Math.random()*9)+1; var b=Math.floor(Math.random()*9)+1; capAns=a+b; document.getElementById('capQ').innerText=a+' + '+b+' =?'; document.getElementById('capA').value=''; }
+function checkBlock(){ var blockUntil=localStorage.getItem('cvs_block_until'); if(blockUntil){ var diff=parseInt(blockUntil)-Date.now(); if(diff>0){ document.getElementById('msg').innerHTML='<b style=color:red>⛔ Too many failed attempts. Try after '+Math.ceil(diff/60000)+' min</b>'; return true; } else { localStorage.removeItem('cvs_block_until'); localStorage.removeItem('cvs_fail_count'); } } return false; }
+function addFail(){ var c=parseInt(localStorage.getItem('cvs_fail_count')||'0')+1; localStorage.setItem('cvs_fail_count',c); if(c>=5){ localStorage.setItem('cvs_block_until', Date.now()+10*60*1000); document.getElementById('msg').innerHTML='<b style=color:red>⛔ Blocked for 10 mins after 5 failed attempts</b>'; } }
+
+async function loadStudentClasses(){
+  try{
+    let data = await apiGet('getclasses');
+    let list = data.classes || data || [];
+    var sel=document.getElementById('cl');
+    if(!list||!list.length){ sel.innerHTML='<option value="">No Classes Found</option>'; return; }
+    var html='<option value="">-- Select Class --</option>';
+    list.forEach(function(c){ html+='<option value="'+c+'">'+c+'</option>'; });
+    sel.innerHTML=html;
+  }catch(e){ document.getElementById('cl').innerHTML='<option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option>'; }
+}
+
+async function checkStudent(){
+  if(checkBlock()) return;
+  let ad=document.getElementById('ad').value.trim(), rl=document.getElementById('rl').value.trim();
+  let cl=document.getElementById('cl').value.trim(), dob=document.getElementById('dob').value.trim();
+  let cap=document.getElementById('capA').value.trim();
+  if(!ad||!rl||!cl||!dob){ alert('Enter Admission No, Roll No, Class and Date of Birth'); return; }
+  if(cap==''|| parseInt(cap)!=capAns){ alert('Wrong CAPTCHA answer'); genCaptcha(); return; }
+  document.getElementById('msg').innerHTML='⏳ Verifying securely...';
+  document.getElementById('loginBtn').innerText='Checking...';
+  document.getElementById('loginBtn').disabled=true;
+
+  try{
+    let r = await apiGet('checkstudentresultforstudent', {ad:ad, rollNo:rl, dob:dob, className:cl});
+    document.getElementById('loginBtn').innerText='🔐 View Result Securely';
+    document.getElementById('loginBtn').disabled=false;
+    if(!r.success){
+      document.getElementById('result').innerHTML='<div style="background:#fff;padding:18px;border-radius:12px;max-width:460px;margin:15px auto;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.1);color:#c00;font-weight:800;line-height:1.6;font-size:14px">'+r.msg+'</div>';
+      document.getElementById('msg').innerHTML='System Ready';
+      addFail(); genCaptcha();
+      return;
+    }
+    localStorage.removeItem('cvs_fail_count'); localStorage.removeItem('cvs_block_until');
+    let s=r.student, sch=r.scholastic||[], g=r.grand||{}, oa=r.otherAchievements||{};
+    let term=oa.TermResult||r.TermResult||'Promoted to the next term and wishing success';
+    let map={}; sch.forEach(m=>{map[m.subject]=m;});
+    let cls = String(s.class||cl||'').toUpperCase().trim();
+    let isJunior = (cls=='I' || cls=='II' || cls=='1' || cls=='2');
+    let order=["English","Mathematics","Science/EVS","Social Science","Computer","Hindi","Assamese"];
+    if(isJunior) order = order.filter(sub=>sub!=='Social Science');
+    let rows='',tO=0,tM=0; let ptL=getPTLabel(); let hyL=getHYLabel(); let termTotalTxt=getTermTotalText(); let termTitle=getTermTitle(); let termText=getTermText();
+    order.forEach(sub=>{
+      let m=map[sub]; let max=sub=='Assamese'?75:150;
+      if(!m){ return; }
+      let isBlank = (!m.pt1 &&!m.hy &&!m.obt &&!m.isNA);
+      if(isBlank && sub=='Social Science') return;
+      if(!m.isNA &&!isBlank){ tO+=Number(m.obt||0); tM+=max; }
+      let maxDisplay = isBlank? '' : max; if(m.isNA) maxDisplay='NA';
+      rows+='<tr><td class=left>'+(sub=='Assamese'?'Assamese (25/50)':sub)+'</td><td>'+(m.isNA?'NA':m.pt1||'')+'</td><td>'+(m.isNA?'NA':m.hy||'')+'</td><td>'+maxDisplay+'</td><td>'+(m.isNA?'NA':m.obt||'')+'</td><td>'+(m.isNA?'NA':(m.perc?m.perc+'%':''))+'</td><td>'+(m.isNA?'NA':m.grade||'')+'</td></tr>';
+    });
+    let finalMax = g.max||tM; let finalObt = g.obt||tO;
+    let html='<div class=page><div class=header-text-only><h1>CAREY\'S VISION SCHOOL OF EDUCATION</h1><h2>Rongkhelan, Diphu, Karbi Anglong - 782462<br>Affiliation No.: 15H1012 (ASSEB)</h2><div class=prov>PROVISIONAL</div><div style="font-size:13px;font-weight:900;margin-top:4px;color:#cc0000;">'+termTitle+'</div><div class=termline>Session: '+CUR_SESSION+'</div></div><div class=info><div style="width:100%"><div class=il><b>Name</b>: <span>'+s.name+'</span></div><div class=il><b>Admission No.</b>: <span>'+s.admissionNo+'</span></div><div class=il><b>Roll No.</b>: <span>'+s.rollNo+'</span></div><div class=il><b>Grade</b>: <span>'+s.class+'</span></div></div></div><div class=sch><div class=sec><span>SCHOLASTIC ACHIEVEMENT</span><span style="color:#a00;font-style:italic">'+termTotalTxt+'</span></div><table><tr><th>Subject</th><th>'+ptL+'</th><th>'+hyL+'</th><th>Max Marks</th><th>Marks Obtained</th><th>%</th><th>Grade</th></tr>'+rows+'<tr style="background:#fdf6d0;font-weight:900"><td colspan=3 style="text-align:right">TOTAL</td><td>'+finalMax+'</td><td>'+finalObt+'</td><td>'+(g.perc||'')+'%</td><td>'+(g.grade||'')+'</td></tr></table></div><div class=term-box><div class=term-title>'+termTitle+'</div><div class=term-text>'+term+'</div></div><div class=notice>⚠️ NOTE: This is a provisional result for online viewing, the complete original report card should be collected from the school office only.</div><div class=footer>Good Learners ■ Good Humans ■ Bright Futures</div></div><div class=no-print style="text-align:center"><br><button class="btn-go" style="background:#0b2a5c;max-width:200px" onclick="window.print()">🖨️ Print Result</button> <button class="btn-go" style="background:#444;max-width:200px" onclick="goBack()">🔙 Back</button></div>';
+    document.getElementById('result').innerHTML=html;
+    document.getElementById('msg').innerHTML='<b style="color:green">Result Found - '+termText+'</b>';
+    document.getElementById('loginCard').style.display='none';
+    window.scrollTo(0,0);
+  }catch(e){
+    document.getElementById('loginBtn').innerText='🔐 View Result Securely';
+    document.getElementById('loginBtn').disabled=false;
+    document.getElementById('msg').innerHTML='<b style=color:red>Server: '+e.message+'</b>'; genCaptcha();
+  }
+}
+loadStudentClasses();
+loadSettings();
+genCaptcha();
+</script></body></html>
