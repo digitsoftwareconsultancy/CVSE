@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVSE - School Login</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#f0f4f0;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:#1b5e20;color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.container{flex:1;display:flex;justify-content:center;align-items:center;padding:20px}
+.login-card{background:white;width:100%;max-width:400px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.1);overflow:hidden}
+.login-header{background:#2e7d32;color:white;padding:20px;text-align:center}
+.login-body{padding:25px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.form-group input{width:100%;padding:11px;border:1px solid #ccc;border-radius:6px}
+.btn-login{width:100%;padding:12px;background:#2e7d32;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer}
+.msg{margin-top:15px;padding:10px;border-radius:5px;font-size:13px;display:none;text-align:center}
+.msg.error{background:#ffebee;color:#c62828;display:block}
+.msg.success{background:#e8f5e9;color:#2e7d32;display:block}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;z-index:9999;padding:15px}
+.modal-overlay.show{display:flex}
+.modal-box{background:white;width:100%;max-width:420px;border-radius:12px;overflow:hidden}
+.modal-header{background:#1b5e20;color:white;padding:18px;text-align:center}
+.modal-body{padding:20px}
+.role-card{border:2px solid #e0e0e0;border-radius:8px;padding:15px;margin-bottom:12px;cursor:pointer;display:flex;gap:12px}
+.role-card.selected{border-color:#2e7d32;background:#e8f5e9}
+.btn-continue{width:100%;padding:12px;background:#2e7d32;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="topbar"><h2>CVSE - Central Valley School</h2><span>School Management System</span></div>
+<div class="container">
+  <div class="login-card">
+    <div class="login-header"><h3>School Staff Login</h3><p>Admin / Class Teacher / Subject Teacher</p></div>
+    <div class="login-body">
+      <div class="form-group"><label>Username</label><input id="username" placeholder="Enter username"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="password" placeholder="Enter password"></div>
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">Login</button>
+      <div class="msg" id="msgBox"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="roleModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="welcomeText">Welcome!</h3><p>You have dual access</p></div>
+    <div class="modal-body">
+      <div class="role-card" onclick="selectRole('classTeacher')"><div>🏫</div><div><h4>Class Teacher Panel</h4><p id="classNameText">Attendance, Register, Publish</p></div></div>
+      <div class="role-card" onclick="selectRole('subjectTeacher')"><div>📖</div><div><h4>Subject Teacher Panel</h4><p id="subjectNameText">Homework & Tests</p></div></div>
+      <button class="btn-continue" id="continueBtn" disabled onclick="continueToDashboard()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedRole=null, loginData=null;
+function showMsg(t,type){let b=document.getElementById('msgBox');b.textContent=t;b.className='msg '+type;b.style.display='block';}
+function doLogin(){
+  let u=document.getElementById('username').value.trim(), p=document.getElementById('password').value.trim();
+  if(!u||!p){showMsg('Enter username and password','error');return;}
+  document.getElementById('loginBtn').disabled=true;
+  document.getElementById('loginBtn').textContent='Logging in...';
+  google.script.run.withSuccessHandler(handleLoginResponse).withFailureHandler(e=>{showMsg('Login failed: '+e.message,'error'); document.getElementById('loginBtn').disabled=false; document.getElementById('loginBtn').textContent='Login';}).schoolLogin(u,p);
+}
+function handleLoginResponse(res){
+  document.getElementById('loginBtn').disabled=false; document.getElementById('loginBtn').textContent='Login';
+  if(!res||!res.success){showMsg(res.message||'Invalid','error');return;}
+  loginData=res; sessionStorage.setItem('username',res.username); sessionStorage.setItem('isClassTeacher',res.isClassTeacher?'true':'false');
+  if(res.role==='admin'){sessionStorage.setItem('role','admin'); window.top.location.href='?page=Admin'; return;}
+  if(res.isClassTeacher){document.getElementById('welcomeText').textContent='Welcome, '+(res.name||res.username)+'!'; document.getElementById('roleModal').classList.add('show'); return;}
+  sessionStorage.setItem('role','subjectTeacher'); window.top.location.href='?page=SubjectTeacherDashboard';
+}
+function selectRole(r){selectedRole=r; document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected')); event.currentTarget.classList.add('selected'); document.getElementById('continueBtn').disabled=false;}
+function continueToDashboard(){sessionStorage.setItem('role',selectedRole); sessionStorage.setItem('currentMode',selectedRole); window.top.location.href='?page='+(selectedRole==='classTeacher'?'ClassTeacherDashboard':'SubjectTeacherDashboard');}
+</script>
+</body>
+</html>
