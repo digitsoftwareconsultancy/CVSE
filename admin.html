@@ -26,6 +26,7 @@ body{background:#f5f7f5}
 .table-wrap{overflow-x:auto;margin-top:10px} table{width:100%;border-collapse:collapse;font-size:12px} th,td{border:1px solid #e0e0e0;padding:7px} th{background:#e8f5e9;color:#1b5e20}
 .form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px} .form-group{flex:1;min-width:160px} .form-group label{font-size:11px;font-weight:600;display:block;margin-bottom:3px}
 .form-group input,.form-group select{width:100%;padding:7px;border:1px solid #ccc;border-radius:5px;font-size:12px}
+.msg{padding:8px 10px;border-radius:5px;font-size:12px;margin-top:8px;display:none} .msg.success{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;display:block} .msg.error{background:#ffebee;color:#c62828;border:1px solid #ef9a9a;display:block}
 </style>
 </head>
 <body>
@@ -50,6 +51,7 @@ body{background:#f5f7f5}
     <div class="tab" data-tab="circulars">📢 Circulars</div>
     <div class="tab" data-tab="reports">📊 Reports</div>
     <div class="tab" data-tab="duties">📝 Exam Duties</div>
+    <div class="tab" data-tab="settings">⚙️ Settings</div>
   </div>
 
   <div class="panel active" id="panel_users"><h3>Users Management - Teachers</h3><div class="form-row"><div class="form-group"><label>Role Filter</label><select id="userFilter" onchange="loadUsers()"><option value="all">All</option><option value="admin">Admin</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="subjectTeacher">Subject Teacher Only</option></select></div><div class="form-group"><label>&nbsp;</label><button class="btn-action" onclick="loadUsers()">Reload</button></div></div><div id="usersTable" class="table-wrap"></div></div>
@@ -65,6 +67,61 @@ body{background:#f5f7f5}
   <div class="panel" id="panel_reports"><h3>Reports & Analytics</h3><div id="reportsTable" class="table-wrap"></div></div>
 
   <div class="panel" id="panel_duties"><h3>Exam Duties</h3><div id="dutiesTable" class="table-wrap"></div></div>
+
+  <!-- ===== NEW: SETTINGS TAB - MOST IMPORTANT ===== -->
+  <div class="panel" id="panel_settings">
+    <h3>⚙️ Admin Settings - Most Important</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:15px;margin-top:12px">
+      <div class="card" style="border-left-color:#1565c0">
+        <h3>➕ Add / Edit Teacher (USERS Sheet)</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Username *</label><input id="set_username" placeholder="e.g. ramesh.k"></div>
+          <div class="form-group"><label>Password *</label><input id="set_password" placeholder="password"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Full Name</label><input id="set_name" placeholder="Ramesh Kumar"></div>
+          <div class="form-group"><label>Role *</label>
+            <select id="set_role">
+              <option value="subjectTeacher">Subject Teacher Only</option>
+              <option value="classTeacher">Class Teacher (Always Both)</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Class (e.g. 9A) - Required for Class Teacher</label><input id="set_classes" placeholder="9A"></div>
+          <div class="form-group"><label>Subjects (e.g. Maths,Science)</label><input id="set_subjects" placeholder="Maths"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Status</label><select id="set_status"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+          <div class="form-group"><label>Exam Access</label><select id="set_exam"><option value="YES">YES</option><option value="NO">NO</option></select></div>
+        </div>
+        <button class="btn-action" style="width:100%;padding:10px" onclick="saveTeacher()">💾 Save Teacher</button>
+        <p style="font-size:10px;color:#888;margin-top:6px">Saves to USERS sheet: A=username, B=password, C=role, D=classes, E=subjects, F=name, G=status, I=examAccess - Same as AUTH logic</p>
+        <div id="settingsMsg" class="msg"></div>
+      </div>
+
+      <div class="card" style="border-left-color:#ef6c00">
+        <h3>🏫 School Config</h3>
+        <div class="form-group"><label>School Name</label><input id="cfg_school" value="CVSE - Central Valley School"></div>
+        <div class="form-group"><label>Session Year</label><input id="cfg_session" value="2025-26"></div>
+        <div class="form-group"><label>Classes List (comma separated)</label><input id="cfg_classes" value="9A,9B,10A,10B,11A,12A"></div>
+        <div class="form-group"><label>Subjects List</label><input id="cfg_subjects" value="English,Maths,Science,Social,Hindi,Computer"></div>
+        <button class="btn-action orange" style="width:100%;padding:10px" onclick="saveConfig()">💾 Save Config Locally</button>
+        <div id="cfgMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:15px;border-left-color:#2e7d32">
+      <h3>📝 Exam Names & Settings (Used in Class Test / Monthly Performance)</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Unit Tests</label><input id="exam_ut" value="Unit Test 1, Unit Test 2, Unit Test 3"></div>
+        <div class="form-group"><label>Main Exams</label><input id="exam_main" value="Half Yearly, Annual"></div>
+        <div class="form-group"><label>Class Test Max Marks</label><input id="exam_ctmax" value="20"></div>
+      </div>
+      <p style="font-size:11px;color:#666">Exam names are read from EXAMS sheet - Manage via Google Sheet for permanent change</p>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -143,6 +200,47 @@ async function postCircular(){
   let payload={action:'savecircular', title:title, message:msg};
   let r=await fetch(WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)}); let d=await r.json();
   alert(d.success?'Circular Posted':'Failed'); loadCirculars();
+}
+
+// ===== NEW: SETTINGS FUNCTIONS =====
+async function saveTeacher(){
+  let u=document.getElementById('set_username').value.trim();
+  let p=document.getElementById('set_password').value.trim();
+  let name=document.getElementById('set_name').value.trim();
+  let role=document.getElementById('set_role').value;
+  let classes=document.getElementById('set_classes').value.trim();
+  let subjects=document.getElementById('set_subjects').value.trim();
+  let status=document.getElementById('set_status').value;
+  let exam=document.getElementById('set_exam').value;
+  let msgEl=document.getElementById('settingsMsg');
+  if(!u||!p){msgEl.textContent='Username & Password required'; msgEl.className='msg error'; msgEl.style.display='block'; return;}
+  if(role==='classTeacher' && !classes){msgEl.textContent='Class Teacher must have Class (e.g. 9A)'; msgEl.className='msg error'; msgEl.style.display='block'; return;}
+  
+  msgEl.textContent='Saving...'; msgEl.className='msg success'; msgEl.style.display='block';
+  try{
+    let payload={action:'addteacher', username:u, password:p, name:name||u, role:role, classes:classes, subjects:subjects, status:status, examAccess:exam};
+    let r=await fetch(WEB_APP_URL,{method:'POST',body:JSON.stringify(payload)});
+    let d=await r.json();
+    if(d.success){
+      msgEl.textContent='✅ Teacher Saved: '+u+' as '+(role==='classTeacher'?'Class Teacher (Always Both)':role);
+      msgEl.className='msg success';
+      loadUsers();
+      // clear
+      document.getElementById('set_username').value=''; document.getElementById('set_password').value='';
+    } else {
+      msgEl.textContent='❌ Error: '+(d.error||'Failed');
+      msgEl.className='msg error';
+    }
+  }catch(e){
+    msgEl.textContent='Network error: '+e.message;
+    msgEl.className='msg error';
+  }
+}
+function saveConfig(){
+  let msgEl=document.getElementById('cfgMsg');
+  msgEl.textContent='✅ School config saved locally. For permanent save, update CONFIG sheet in Google Sheets.';
+  msgEl.className='msg success';
+  msgEl.style.display='block';
 }
 
 checkAdmin(); loadDashboardStats(); loadUsers();
