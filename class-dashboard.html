@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Teacher Dashboard - CVSE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#f5f7f5}
+.topbar{background:#1b5e20;color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar-left h2{font-size:16px} .topbar-left p{font-size:12px;opacity:0.9}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.btn{padding:8px 14px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-switch{background:#ff9800;color:white} .btn-switch:disabled{background:#9e9e9e;cursor:not-allowed;opacity:0.6}
+.btn-logout{background:#c62828;color:white}
+.container{padding:20px;max-width:1200px;margin:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px;margin-top:15px}
+.card{background:white;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:4px solid #2e7d32}
+.card h3{font-size:15px;margin-bottom:8px;color:#1b5e20} .card p{font-size:13px;color:#555}
+.card .big{font-size:28px;font-weight:700;color:#1b5e20;margin:8px 0}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn-action{background:#2e7d32;color:white;padding:8px 12px;font-size:12px}
+.btn-action.orange{background:#ef6c00}
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px}
+.quick{background:white;padding:15px;border-radius:8px;text-align:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.07);transition:0.2s}
+.quick:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+.quick .icon{font-size:28px;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left"><h2 id="welcome">Class Teacher Dashboard</h2><p id="subInfo">Loading...</p></div>
+  <div class="topbar-right">
+    <button id="switchBtn" class="btn btn-switch" onclick="switchMode()">🔄 Switch to Subject Mode</button>
+    <button class="btn btn-logout" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="grid">
+    <div class="card"><h3>Today's Attendance</h3><div class="big" id="attPercent">--%</div><p id="attDetail">Loading...</p><div class="actions"><button class="btn btn-action" onclick="go('teacher-work.html?tab=attendance')">Mark Attendance</button></div></div>
+    <div class="card"><h3>My Class - <span id="className">-</span></h3><p>Subjects: <span id="subj">-</span></p><p>Total Students: <span id="totalStu">-</span></p><div class="actions"><button class="btn btn-action" onclick="go('teacher-work.html?tab=register')">View Register</button></div></div>
+    <div class="card"><h3>Daily Updates</h3><p id="dailyStatus">Check today's timetable</p><div class="actions"><button class="btn btn-action orange" onclick="go('teacher-work.html?tab=daily')">Publish Updates</button></div></div>
+  </div>
+
+  <h3 style="margin-top:25px;color:#1b5e20">Quick Actions (Same work, preserved)</h3>
+  <div class="quick-grid">
+    <div class="quick" onclick="go('teacher-work.html?tab=attendance')"><div class="icon">📋</div><b>Attendance</b><br><small>Mark & View</small></div>
+    <div class="quick" onclick="go('teacher-work.html?tab=classtest')"><div class="icon">📝</div><b>Class Test</b><br><small>Original work same</small></div>
+    <div class="quick" onclick="go('teacher-work.html?tab=monthly')"><div class="icon">📊</div><b>Monthly Performance</b><br><small>Scholastic Marks</small></div>
+    <div class="quick" onclick="go('teacher-work.html?tab=daily')"><div class="icon">📅</div><b>Daily Updates</b><br><small>Publish / Lock</small></div>
+    <div class="quick" onclick="go('teacher-work.html?tab=register')"><div class="icon">📖</div><b>Class Register</b><br><small>Full Report</small></div>
+  </div>
+</div>
+
+<script>
+const WEB_APP_URL='https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec';
+function checkAuth(){
+  if(!localStorage.getItem('cvse_username')){window.location.href='login.html';return false;}
+  const isCT=localStorage.getItem('cvse_isClassTeacher')==='true';
+  const name=localStorage.getItem('cvse_name')||localStorage.getItem('cvse_username');
+  const cls=localStorage.getItem('cvse_classes')||'-';
+  const subj=localStorage.getItem('cvse_subjects')||'-';
+  document.getElementById('welcome').textContent='Welcome, '+name+' (Class Teacher)';
+  document.getElementById('subInfo').textContent='Class: '+cls+' | Subjects: '+subj+' | Mode: Class Teacher';
+  document.getElementById('className').textContent=cls;
+  document.getElementById('subj').textContent=subj;
+  document.getElementById('switchBtn').disabled=!isCT;
+  if(!isCT) document.getElementById('switchBtn').title='Only Class Teachers can switch';
+  localStorage.setItem('cvse_currentMode','classTeacher');
+  return true;
+}
+function switchMode(){if(localStorage.getItem('cvse_isClassTeacher')!=='true')return;localStorage.setItem('cvse_currentMode','subjectTeacher');window.location.href='subject-dashboard.html';}
+function go(url){window.location.href=url;}
+function logout(){localStorage.clear();window.location.href='login.html';}
+async function loadStats(){
+  try{
+    let cls=localStorage.getItem('cvse_classes');
+    let r=await fetch(`${WEB_APP_URL}?action=dashboardstats&className=${encodeURIComponent(cls)}`);
+    let d=await r.json();
+    if(d.attendancePercent) document.getElementById('attPercent').textContent=d.attendancePercent+'%';
+    if(d.totalStudents) document.getElementById('totalStu').textContent=d.totalStudents;
+  }catch(e){console.log(e);}
+}
+checkAuth();loadStats();
+</script>
+</body>
+</html>
