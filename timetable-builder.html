@@ -36,8 +36,25 @@
 const WEB_URL="https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
 let cfg={list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={}, schoolInfo={name:"",address:"",logo:""}, electiveByPeriod={}, electiveLookup={};
 function toArray(x){if(Array.isArray(x))return x;if(!x)return[];if(typeof x==='string'){try{let j=JSON.parse(x);if(Array.isArray(j))return j;}catch(e){}return[x];}if(typeof x==='object'){if(x.teachers)return toArray(x.teachers);if(x.users)return toArray(x.users);if(x.list)return toArray(x.list);if(x.data)return toArray(x.data);if(x.subjects)return toArray(x.subjects);if(x.timetable)return toArray(x.timetable);if(x.electives)return toArray(x.electives);if(x.groups)return toArray(x.groups);return Object.values(x);}return[];}
-async function apiGet(a,p={}){let url=WEB_URL+"?action="+a;for(let k in p)url+="&"+k+"="+encodeURIComponent(p[k]);let r=await fetch(url);let t=await r.text();try{return JSON.parse(t)}catch(e){return{raw:t,list:[]}}}
-async function apiPost(a,pl={}){let r=await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action:a,...pl})});let t=await r.text();try{return JSON.parse(t)}catch(e){return{raw:t}}}
+
+async function apiGet(a,p={}){
+  let url=WEB_URL+"?action="+a;for(let k in p)url+="&"+k+"="+encodeURIComponent(p[k]);
+  let r=await fetch(url);let t=await r.text();
+  try{
+    let j=JSON.parse(t);
+    if(typeof j==='string'){ try{ j=JSON.parse(j); }catch(e){} }
+    if(j && typeof j==='object' && j.raw && typeof j.raw==='string'){
+      try{ let inner=JSON.parse(j.raw); if(inner.teachers||inner.users) j=inner; }catch(e){}
+    }
+    // Handle case where API returns [{"teachers":[...]}] wrapped in string
+    if(Array.isArray(j) && j.length>0 && typeof j[0]==='string'){
+      try{ let inner=JSON.parse(j[0]); if(inner.teachers) j=inner; }catch(e){}
+    }
+    return j;
+  }catch(e){return{raw:t,list:[]}}
+}
+async function apiPost(a,pl={}){let r=await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action:a,...pl})});let t=await r.text();try{let j=JSON.parse(t); if(typeof j==='string'){try{j=JSON.parse(j)}catch(e){}} return j;}catch(e){return{raw:t}}}
+
 function normalizePeriod(p){let no=p.no||p.period||1;let label=p.label||p.display||('P-'+no);let time=p.time||'';let type=(p.type||'Teaching');let isTeaching=true;if(String(type).toLowerCase()==='break'||String(type).toLowerCase()==='leisure'||String(label).toUpperCase()==='BREAK'||String(label).toUpperCase()==='LEISURE')isTeaching=false;return{no:String(no),label:String(label),display:String(label),time:String(time),type:type,isTeaching:isTeaching};}
 async function loadSchoolAndPeriods(){
   try{
@@ -51,20 +68,26 @@ async function loadSchoolAndPeriods(){
 async function loadClasses(){await loadSchoolAndPeriods();try{let res=await apiGet('getallclasses');document.getElementById('gradeSel').innerHTML=res.classes.map(c=>`<option value="${c}">${c}</option>`).join('');}catch(e){}}
 loadClasses();
 
-// NEW FIXED TEACHER LOADER
 async function loadTeachersRobust(){
   let tRes = await apiGet('getallteachers');
-  let raw = toArray(tRes.teachers || tRes.users || tRes.list || tRes.data || tRes);
-  if(raw.length==0){
-    let uRes = await apiGet('getusers');
-    raw = toArray(uRes.users || uRes.teachers || uRes.list || uRes);
+  let raw = [];
+  if(Array.isArray(tRes)){
+    if(tRes.length>0 && tRes[0].teachers) raw = tRes[0].teachers;
+    else raw = tRes;
+  } else {
+    raw = tRes.teachers || tRes.users || tRes.list || tRes.data || [];
+    if(typeof raw==='string'){ try{ raw=JSON.parse(raw); }catch(e){} }
   }
-  teachers = raw.map(t=>{
-    let uname = String(t.username || t.user || t.User || t.TeacherUsername || t.name || '').trim().toUpperCase();
-    let name = String(t.name || t.Name || t.displayName || t.TeacherName || t.username || uname).trim();
+  if(!Array.isArray(raw) || raw.length==0){
+    let uRes = await apiGet('getusers');
+    raw = uRes.users || uRes.teachers || uRes.list || [];
+  }
+  if(typeof raw==='string'){ try{ raw=JSON.parse(raw); }catch(e){} }
+  teachers = toArray(raw).map(t=>{
+    let uname = String(t.username || t.user || '').trim().toUpperCase();
+    let name = String(t.name || t.Name || uname).trim();
     return {username:uname, name:name};
   }).filter(t=>t.username);
-  // Deduplicate
   let seen={}; teachers=teachers.filter(t=>{if(seen[t.username])return false; seen[t.username]=1; return true;});
   return teachers;
 }
