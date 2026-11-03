@@ -23,7 +23,6 @@
   <button onclick="printClassReport()">🖨️ Class Print</button>
   <span id="status"></span>
 </div>
-
 <div class="print-row">
   <b style="font-size:12px">Print Reports:</b>
   <select id="teacherPrintSel"><option value="">-- Select Teacher --</option></select>
@@ -31,170 +30,69 @@
   <select id="dayPrintSel"><option value="">-- Select Day --</option><option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option><option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option></select>
   <button onclick="printDayReport()" style="background:#059669">📅 Day Wise Print</button>
 </div>
-
 <div class="legend"><span style="background:#fff3cd;border:1px solid #ffb74d">Leisure - Locked</span> <span style="background:#e6f7ff">Teaching - Busy hidden</span></div>
 <div id="builder">Select Grade and click Load Builder</div>
 <script>
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
 let cfg={total:8,list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={};
-
-function toArray(x){
-  if(Array.isArray(x)) return x;
-  if(!x) return [];
-  if(typeof x==='string'){
-    try{ let j=JSON.parse(x); if(Array.isArray(j)) return j; }catch(e){}
-    if(x.includes(',')) return x.split(',').map(s=>s.trim()).filter(Boolean);
-    return [x];
-  }
-  if(typeof x==='object'){
-    if(x.teachers) return toArray(x.teachers);
-    if(x.subjects) return toArray(x.subjects);
-    if(x.timetable) return toArray(x.timetable);
-    return Object.values(x);
-  }
-  return [];
+function toArray(x){ if(Array.isArray(x)) return x; if(!x) return []; if(typeof x==='string'){ try{ let j=JSON.parse(x); if(Array.isArray(j)) return j; }catch(e){} if(x.includes(',')) return x.split(',').map(s=>s.trim()).filter(Boolean); return [x]; } if(typeof x==='object'){ if(x.teachers) return toArray(x.teachers); if(x.subjects) return toArray(x.subjects); if(x.timetable) return toArray(x.timetable); if(x.list) return toArray(x.list); return Object.values(x); } return []; }
+async function apiGet(action, params={}){ let url = WEB_URL + "?action=" + action; for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]); let r = await fetch(url); let t = await r.text(); try{ return JSON.parse(t); }catch(e){ return {raw:t}; } }
+async function apiPost(action, payload={}){ let r = await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action,...payload})}); let t = await r.text(); try{ return JSON.parse(t); }catch(e){ return {raw:t}; } }
+function defaultPeriods(){ let list=[]; for(let i=1;i<=8;i++){ list.push({no:i, display:`P${i}`, displayInline:`P${i}`, time:`${8+i}:00`, isTeaching:true}); } list[3]={no:4, display:'LEISURE\nBREAK', displayInline:'Leisure', time:'12:00', isTeaching:false}; return {total:8, list:list}; }
+function normalizePeriod(p){
+  let no = p.no || p.No || p.periodNo || p.Period_No || 1;
+  let time = p.time || p.Time || '';
+  let type = (p.type || p.Type || p.isTeaching===false ? 'Leisure' : 'Teaching').toString();
+  let label = p.display || p.displayInline || p.label || p.Label || ('P-'+no);
+  let isTeaching = (p.isTeaching!==undefined) ? !!p.isTeaching : (type.toLowerCase()!=='leisure' && label.toLowerCase().indexOf('leisure')==-1 && label.toLowerCase().indexOf('break')==-1);
+  let disp = label; // keep \n if any
+  return {no: String(no), display: String(disp), displayInline: String(disp).replace('\n',' ').trim(), time: time, isTeaching: isTeaching};
 }
-
-async function apiGet(action, params={}){
-  let url = WEB_URL + "?action=" + action;
-  for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]);
-  let r = await fetch(url);
-  let t = await r.text();
-  try{ return JSON.parse(t); }catch(e){ return {raw:t}; }
-}
-async function apiPost(action, payload={}){
-  let r = await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action,...payload})});
-  let t = await r.text();
-  try{ return JSON.parse(t); }catch(e){ return {raw:t}; }
-}
-
-function defaultPeriods(){
-  let list=[];
-  for(let i=1;i<=8;i++){
-    list.push({no:i, display:`P${i}`, displayInline:`P${i}`, time:`${8+i}:00`, isTeaching:true});
-  }
-  list[3]={no:4, display:'LEISURE\nBREAK', displayInline:'Leisure', time:'12:00', isTeaching:false};
-  return {total:8, list:list};
-}
-
-function normalizeSubject(s){
-  if(!s) return null;
-  if(typeof s==='string') return s.trim();
-  let nm = s.name || s.subject || s.Subject || s.subjectName || s.SubjectName || s.title || '';
-  if(typeof nm==='string') return nm.trim();
-  if(typeof s==='object' && Object.keys(s).length===1) return Object.values(s)[0];
-  return String(s).trim();
-}
-
-// ===== NEW: LOAD CLASSES FROM SubjectMaster =====
-async function loadClasses(){
-  try{
-    let res = await apiGet('getallclasses');
-    let cls = res.classes || [];
-    let sel = document.getElementById('gradeSel');
-    if(cls.length>0){
-      sel.innerHTML = cls.map(c=>`<option value="${c}">${c}</option>`).join('');
-    } else {
-      sel.innerHTML = '<option value="">No classes in SubjectMaster</option>';
-    }
-  }catch(e){
-    document.getElementById('gradeSel').innerHTML = '<option>I</option><option>II</option><option>III</option>';
-  }
-}
-loadClasses(); // auto load on start
-
+function normalizeSubject(s){ if(!s) return null; if(typeof s==='string') return s.trim(); let nm = s.name || s.subject || s.Subject || s.subjectName || s.SubjectName || s.title || ''; if(typeof nm==='string') return nm.trim(); if(typeof s==='object' && Object.keys(s).length===1) return Object.values(s)[0]; return String(s).trim(); }
+async function loadClasses(){ try{ let res = await apiGet('getallclasses'); let cls = res.classes || []; let sel = document.getElementById('gradeSel'); if(cls.length>0){ sel.innerHTML = cls.map(c=>`<option value="${c}">${c}</option>`).join(''); } else { sel.innerHTML = '<option value="I">I</option><option value="II">II</option><option value="III">III</option><option value="XI-A">XI-A</option>'; } }catch(e){ document.getElementById('gradeSel').innerHTML = '<option>I</option><option>II</option><option>III</option>'; } }
+loadClasses();
 async function loadBuilder(){
   let grade=document.getElementById('gradeSel').value;
   if(!grade){ alert('Select class'); return; }
-  document.getElementById('status').innerText='⏳ Loading...';
-  document.getElementById('status').style.color='green';
+  document.getElementById('status').innerText='⏳ Loading...'; document.getElementById('status').style.color='green';
   try{
     try{
       let cfgRes = await apiGet('getperiodconfig');
-      if(cfgRes && cfgRes.list && Array.isArray(cfgRes.list) && cfgRes.list.length>0){
-        cfg = cfgRes;
-        if(cfgRes.total) cfg.total=cfgRes.total;
-      } else {
-        cfg = defaultPeriods();
-      }
+      let rawList = cfgRes.list || cfgRes.periods || cfgRes || [];
+      rawList = toArray(rawList);
+      if(rawList.length>0){ cfg.list = rawList.map(normalizePeriod); cfg.total = cfg.list.length; } else { cfg = defaultPeriods(); }
     }catch(e){ cfg = defaultPeriods(); }
     if(!cfg.list || cfg.list.length==0) cfg = defaultPeriods();
-
-    let tRes = await apiGet('getallteachers');
-    if(!tRes.teachers) tRes = await apiGet('getteachers');
-    teachers = tRes.teachers || tRes.users || tRes || [];
-    teachers = toArray(teachers).filter(t=>t && (t.username || t.user));
-    teachers = teachers.map(t=>({username:t.username||t.user||t.UserName, name:t.name||t.Name||t.username||t.user}));
-
-    let tSel=document.getElementById('teacherPrintSel');
-    tSel.innerHTML='<option value="">-- Select Teacher --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');
-
+    let tRes = await apiGet('getallteachers'); if(!tRes.teachers) tRes = await apiGet('getteachers');
+    teachers = tRes.teachers || tRes.users || tRes || []; teachers = toArray(teachers).filter(t=>t && (t.username || t.user)); teachers = teachers.map(t=>({username:t.username||t.user||t.UserName, name:t.name||t.Name||t.username||t.user}));
+    document.getElementById('teacherPrintSel').innerHTML='<option value="">-- Select Teacher --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');
     let sRes = await apiGet('getsubjectsforclass', {className:grade});
-    if(sRes && sRes.subjects && Array.isArray(sRes.subjects) && sRes.subjects.length>0){
-      subjects = toArray(sRes.subjects).map(normalizeSubject).filter(Boolean);
-    } else {
-      subjects = []; // No hardcoded fallback - pure SubjectMaster
-    }
+    if(sRes && sRes.subjects && Array.isArray(sRes.subjects) && sRes.subjects.length>0){ subjects = toArray(sRes.subjects).map(normalizeSubject).filter(Boolean); } else { subjects = []; }
     subjects = [...new Set(subjects)];
-
     let dataRes = await apiGet('gettimetable', {className:grade, grade:grade});
-    existingData = dataRes.timetable || dataRes.rows || dataRes.data || [];
-    if(!Array.isArray(existingData)) existingData=[];
-    existingData = existingData.map(r=>({Day:(r.day||r.Day||'').toUpperCase(), Period_No:r.periodNo||r.Period_No||r.period||r.Period, Subject:r.subject||r.Subject, TeacherUsername:r.teacherUsername||r.TeacherUsername||r.username||'', TeacherName:r.teacher||r.TeacherName||r.name||''}));
-
-    try{
-      let mapRes = await apiGet('getoccupiedmap');
-      occupiedMap = mapRes.map || mapRes || {};
-      if(typeof occupiedMap==='string') occupiedMap = JSON.parse(occupiedMap);
-    }catch(e){ occupiedMap={}; }
-
+    existingData = dataRes.timetable || dataRes.rows || dataRes.data || []; if(!Array.isArray(existingData)) existingData=[]; existingData = existingData.map(r=>({Day:(r.day||r.Day||'').toUpperCase(), Period_No:r.periodNo||r.Period_No||r.period||r.Period, Subject:r.subject||r.Subject, TeacherUsername:r.teacherUsername||r.TeacherUsername||r.username||'', TeacherName:r.teacher||r.TeacherName||r.name||''}));
+    try{ let mapRes = await apiGet('getoccupiedmap'); occupiedMap = mapRes.map || mapRes || {}; if(typeof occupiedMap==='string') occupiedMap = JSON.parse(occupiedMap); }catch(e){ occupiedMap={}; }
     renderGrid(grade);
-    let msg = subjects.length>0 ? `✅ Loaded ${cfg.total} periods | Teachers:${teachers.length} Subjects:${subjects.length} [${subjects.join(', ')}]` : `⚠️ No subjects in SubjectMaster for ${grade} - Add in SubjectMaster sheet`;
+    let msg = subjects.length>0 ? `✅ Loaded ${cfg.total} periods | Subjects:${subjects.length} [${subjects.join(', ')}]` : `⚠️ No subjects in SubjectMaster for ${grade}`;
     document.getElementById('status').innerText=msg;
-  }catch(e){
-    document.getElementById('status').innerText='❌ Error: '+e.message;
-    document.getElementById('status').style.color='red';
-  }
+  }catch(e){ document.getElementById('status').innerText='❌ Error: '+e.message; document.getElementById('status').style.color='red'; }
 }
-
-async function saveAll(){
-  let rows=[]; let grade=document.getElementById('gradeSel').value;
-  document.querySelectorAll('td.builder-cell').forEach(td=>{
-    let sub=td.querySelector('.sub'); let tea=td.querySelector('.teach');
-    if(sub && tea && sub.value && tea.value){
-      let [uname,tname]=tea.value.split('|');
-      let pNo = sub.dataset.period;
-      let pCfg = cfg.list.find(x=> String(x.no)==String(pNo));
-      rows.push({Day:sub.dataset.day, Grade:grade, className:grade, Period_No:sub.dataset.period, Subject:sub.value, TeacherUsername:uname, TeacherName:tname, Time:pCfg?pCfg.time:''});
-    }
-  });
-  if(rows.length==0){ alert('Select at least one'); return; }
-  document.getElementById('status').innerText='⏳ Saving...';
-  let res = await apiPost('savetimetable', {rows:rows, grade:grade, className:grade});
-  let m = (res.success || res.message) ? '✅ Saved '+rows.length+' periods' : '❌ Failed: '+(res.error||'Unknown');
-  document.getElementById('status').innerText=m;
-  alert(m);
-}
-
+async function saveAll(){ let rows=[]; let grade=document.getElementById('gradeSel').value; document.querySelectorAll('td.builder-cell').forEach(td=>{ let sub=td.querySelector('.sub'); let tea=td.querySelector('.teach'); if(sub && tea && sub.value && tea.value){ let [uname,tname]=tea.value.split('|'); let pNo = sub.dataset.period; let pCfg = cfg.list.find(x=> String(x.no)==String(pNo)); rows.push({Day:sub.dataset.day, Grade:grade, className:grade, Period_No:sub.dataset.period, Subject:sub.value, TeacherUsername:uname, TeacherName:tname, Time:pCfg?pCfg.time:''}); } }); if(rows.length==0){ alert('Select at least one'); return; } document.getElementById('status').innerText='⏳ Saving...'; let res = await apiPost('savetimetable', {rows:rows, grade:grade, className:grade}); let m = (res.success || res.message || res.ok) ? '✅ Saved '+rows.length+' periods' : '❌ Failed: '+(res.error||'Unknown'); document.getElementById('status').innerText=m; alert(m); }
 function renderGrid(grade){
   let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
   let html=`<h3>GRADE-${grade} - ${cfg.total} Periods - Subjects: ${subjects.join(', ') || 'NONE'}</h3><table style="table-layout:fixed"><tr><th style="width:80px">Day</th>`;
-  cfg.list.forEach(p=>{ let isBreak=!p.isTeaching; let w=isBreak?'60px':''; let bg=isBreak?'#e65100':'#0a1931'; html+=`<th style="${w?'width:'+w:''};background:${bg}">${p.display.replace('\n','<br>')}</th>`; });
+  cfg.list.forEach(p=>{ let d = (p.display||'P'+p.no); let isBreak=!p.isTeaching; let w=isBreak?'60px':''; let bg=isBreak?'#e65100':'#0a1931'; html+=`<th style="${w?'width:'+w:''};background:${bg}">${d.replace('\n','<br>')}</th>`; });
   html+=`</tr>`;
   days.forEach(day=>{
     html+=`<tr><td><b>${day}</b></td>`;
     cfg.list.forEach(p=>{
-      if(!p.isTeaching){ html+=`<td class="leisure-cell">${p.displayInline}</td>`; return; }
+      if(!p.isTeaching){ html+=`<td class="leisure-cell">${p.displayInline||'Leisure'}</td>`; return; }
       let found = existingData.find(r=> String(r.Day).toUpperCase()==day && String(r.Period_No)==String(p.no));
       let subVal = found ? found.Subject : '';
       let teachUser = found ? String(found.TeacherUsername).toLowerCase() : '';
       let key = day+'-'+p.no; let busyList = occupiedMap[key] || [];
       html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Subject--</option>`+ subjects.map(nm=>`<option value="${nm}" ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Teacher--</option>`;
-      teachers.forEach(t=>{ 
-        if(busyList.indexOf(String(t.username).toLowerCase())!=-1 && String(t.username).toLowerCase()!=teachUser) return; 
-        let tLower=String(t.username).toLowerCase(); 
-        html+=`<option value="${t.username}|${t.name}" ${tLower==teachUser?'selected':''}>${t.name}</option>`; 
-      });
+      teachers.forEach(t=>{ if(busyList.indexOf(String(t.username).toLowerCase())!=-1 && String(t.username).toLowerCase()!=teachUser) return; let tLower=String(t.username).toLowerCase(); html+=`<option value="${t.username}|${t.name}" ${tLower==teachUser?'selected':''}>${t.name}</option>`; });
       html+=`</select></td>`;
     });
     html+=`</tr>`;
@@ -202,86 +100,7 @@ function renderGrid(grade){
   html+=`</table>`;
   document.getElementById('builder').innerHTML=html;
 }
-
-async function printClassReport(){
-  let grade=document.getElementById('gradeSel').value;
-  let dataRes = await apiGet('gettimetable', {className:grade});
-  let all = dataRes.timetable || dataRes.rows || [];
-  if(!Array.isArray(all)) all=[];
-  all = all.map(r=>({Day:(r.day||r.Day||'').toUpperCase(), Grade:r.className||r.Grade, Period_No:r.periodNo||r.Period_No, Subject:r.subject||r.Subject, TeacherName:r.teacher||r.TeacherName||''}));
-  let w=window.open('','_blank');
-  let html=`<style>
-    @page{margin:15mm 10mm 20mm 10mm}
-    body{font-family:Arial} table{border-collapse:collapse;width:100%;table-layout:fixed}
-    th,td{border:1px solid #000;padding:5px;font-size:11px;text-align:center;height:0.8cm}
-    th{background:#0a1931;color:#fff} td.leisure{background:#fff3cd;font-weight:bold}
-    .header{text-align:center} .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:10px} .footer:after{content:"Page " counter(page) " of " counter(pages)}
-    @media print{thead{display:table-header-group} tr{page-break-inside:avoid}}
-  </style>
-  <div class="header"><div style="font-size:18px;font-weight:900">Carey's Vision School</div><div style="font-size:14px;font-weight:800">Class Timetable</div><div style="font-size:12px;font-weight:600">Class: ${grade}</div><hr style="border-top:1.5px solid #000"></div>
-  <table><tr><th style="width:80px">Day</th>${cfg.list.map(p=>`<th>${p.display.replace('\n','<br>')}</th>`).join('')}</tr>`;
-  ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'].forEach(d=>{
-    html+=`<tr><td><b>${d}</b></td>`; cfg.list.forEach(p=>{
-      if(!p.isTeaching){ html+=`<td class="leisure">${p.displayInline}</td>`; return; }
-      let f=all.find(r=> String(r.Day).toUpperCase()==d && String(r.Grade).toUpperCase()==grade.toUpperCase() && String(r.Period_No)==String(p.no));
-      html+=`<td>${f?f.Subject+'<br><b>'+f.TeacherName+'</b>':'--'}</td>`;
-    }); html+=`</tr>`;
-  });
-  html+=`</table><div class="footer"></div><script>window.print()<\/script>`;
-  w.document.write(html); w.document.close();
-}
-
-async function printTeacherReport(){
-  let tSel=document.getElementById('teacherPrintSel');
-  let username=tSel.value; if(!username){alert('Select Teacher');return;}
-  let tName=tSel.options[tSel.selectedIndex].text;
-  let res = await apiGet('gettimetableforteacher', {username:username});
-  let rows = res.timetable || res.rows || [];
-  if(!Array.isArray(rows)) rows=[];
-  rows = rows.map(r=>({Day:r.day||r.Day, Period_No:r.periodNo||r.Period_No, Grade:r.className||r.Grade, Subject:r.subject||r.Subject, Time:r.time||r.Time||''}));
-  let w=window.open('','_blank');
-  let html=`<style>
-    @page{margin:15mm 10mm 20mm 10mm}
-    body{font-family:Arial} table{border-collapse:collapse;width:100%}
-    th,td{border:1px solid #000;padding:6px;font-size:11px;text-align:center}
-    th{background:#000;color:#fff} .header{text-align:center} .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:10px} .footer:after{content:"Page " counter(page) " of " counter(pages)}
-  </style>
-  <div class="header"><div style="font-size:18px;font-weight:900">Carey's Vision School</div><div style="font-size:14px;font-weight:800">Teacher Wise Timetable</div><div style="font-size:12px;font-weight:600">Teacher: ${tName}</div><hr style="border-top:1.5px solid #000"></div>
-  <table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Time</th></tr>`;
-  if(rows.length==0) html+=`<tr><td colspan="5">No periods allotted</td></tr>`;
-  else rows.forEach(r=>{ html+=`<tr><td>${r.Day}</td><td>P${r.Period_No}</td><td>${r.Grade}</td><td>${r.Subject}</td><td>${r.Time||''}</td></tr>`; });
-  html+=`</table><div class="footer"></div><script>window.print()<\/script>`;
-  w.document.write(html); w.document.close();
-}
-
-async function printDayReport(){
-  let day=document.getElementById('dayPrintSel').value; if(!day){alert('Select Day');return;}
-  let res = await apiGet('gettimetable', {day:day});
-  let rows = res.timetable || res.rows || [];
-  if(!Array.isArray(rows)) rows=[];
-  rows = rows.map(r=>({Grade:r.className||r.Grade, Period_No:r.periodNo||r.Period_No, Subject:r.subject||r.Subject, TeacherName:r.teacher||r.TeacherName||''}));
-  let map={}; rows.forEach(r=>{ if(!map[r.Grade]) map[r.Grade]={}; map[r.Grade][r.Period_No]=r.Subject+'<br><b>'+(r.TeacherName||'')+'</b>'; });
-  let w=window.open('','_blank');
-  let html=`<style>
-    @page{margin:12mm 8mm 18mm 8mm;size:landscape}
-    body{font-family:Arial} table{border-collapse:collapse;width:100%;table-layout:fixed}
-    th,td{border:1px solid #000;padding:5px;font-size:10px;text-align:center;word-wrap:break-word}
-    th{background:#000;color:#fff} .header{text-align:center} .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:9px} .footer:after{content:"Page " counter(page)}
-    @media print{thead{display:table-header-group}}
-  </style>
-  <div class="header"><div style="font-size:18px;font-weight:900">Carey's Vision School</div><div style="font-size:14px;font-weight:800">Day Wise Timetable - All Classes</div><div style="font-size:12px;font-weight:600">Day: ${day}</div><hr style="border-top:1.5px solid #000"></div>
-  <table><tr><th>Class</th>${cfg.list.map(p=>`<th>${p.display.replace('\n','<br>')}</th>`).join('')}</tr>`;
-  let grades=Object.keys(map).sort();
-  if(grades.length==0) html+=`<tr><td colspan="${cfg.list.length+1}">No timetable for ${day}</td></tr>`;
-  else grades.forEach(g=>{
-    html+=`<tr><td style="font-weight:800;background:#f1f5f9">${g}</td>`;
-    cfg.list.forEach(p=>{
-      if(!p.isTeaching) html+=`<td style="background:#fff3cd">${p.displayInline}</td>`;
-      else html+=`<td>${map[g][p.no]||'-'}</td>`;
-    });
-    html+=`</tr>`;
-  });
-  html+=`</table><div class="footer"></div><script>window.print()<\/script>`;
-  w.document.write(html); w.document.close();
-}
+async function printClassReport(){ let grade=document.getElementById('gradeSel').value; let dataRes = await apiGet('gettimetable', {className:grade}); let all = dataRes.timetable || dataRes.rows || []; if(!Array.isArray(all)) all=[]; all = all.map(r=>({Day:(r.day||r.Day||'').toUpperCase(), Grade:r.className||r.Grade, Period_No:r.periodNo||r.Period_No, Subject:r.subject||r.Subject, TeacherName:r.teacher||r.TeacherName||''})); let w=window.open('','_blank'); let html=`<style>@page{margin:15mm 10mm 20mm 10mm} body{font-family:Arial} table{border-collapse:collapse;width:100%;table-layout:fixed} th,td{border:1px solid #000;padding:5px;font-size:11px;text-align:center;height:0.8cm} th{background:#0a1931;color:#fff} td.leisure{background:#fff3cd;font-weight:bold} .header{text-align:center} .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:10px} .footer:after{content:"Page " counter(page) " of " counter(pages)} @media print{thead{display:table-header-group} tr{page-break-inside:avoid}}</style><div class="header"><div style="font-size:18px;font-weight:900">Carey's Vision School</div><div style="font-size:14px;font-weight:800">Class Timetable</div><div style="font-size:12px;font-weight:600">Class: ${grade}</div><hr style="border-top:1.5px solid #000"></div><table><tr><th style="width:80px">Day</th>${cfg.list.map(p=>`<th>${(p.display||'P'+p.no).replace('\n','<br>')}</th>`).join('')}</tr>`; ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'].forEach(d=>{ html+=`<tr><td><b>${d}</b></td>`; cfg.list.forEach(p=>{ if(!p.isTeaching){ html+=`<td class="leisure">${p.displayInline}</td>`; return; } let f=all.find(r=> String(r.Day).toUpperCase()==d && String(r.Grade).toUpperCase()==grade.toUpperCase() && String(r.Period_No)==String(p.no)); html+=`<td>${f?f.Subject+'<br><b>'+f.TeacherName+'</b>':'--'}</td>`; }); html+=`</tr>`; }); html+=`</table><div class="footer"></div><script>window.print()<\/script>`; w.document.write(html); w.document.close(); }
+async function printTeacherReport(){ let tSel=document.getElementById('teacherPrintSel'); let username=tSel.value; if(!username){alert('Select Teacher');return;} let tName=tSel.options[tSel.selectedIndex].text; let res = await apiGet('gettimetableforteacher', {username:username}); let rows = res.timetable || res.rows || []; if(!Array.isArray(rows)) rows=[]; rows = rows.map(r=>({Day:r.day||r.Day, Period_No:r.periodNo||r.Period_No, Grade:r.className||r.Grade, Subject:r.subject||r.Subject, Time:r.time||r.Time||''})); let w=window.open('','_blank'); let html=`<style>@page{margin:15mm 10mm 20mm 10mm} body{font-family:Arial} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:6px;font-size:11px;text-align:center} th{background:#000;color:#fff} .header{text-align:center} .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:10px} .footer:after{content:"Page " counter(page) " of " counter(pages)}</style><div class="header"><div style="font-size:18px;font-weight:900">Carey's Vision School</div><div style="font-size:14px;font-weight:800">Teacher Wise Timetable</div><div style="font-size:12px;font-weight:600">Teacher: ${tName}</div><hr style="border-top:1.5px solid #000"></div><table><tr><th>Day</th><th>Period</th><th>Class</th><th>Subject</th><th>Time</th></tr>`; if(rows.length==0) html+=`<tr><td colspan="5">No periods allotted</td></tr>`; else rows.forEach(r=>{ html+=`<tr><td>${r.Day}</td><td>P${r.Period_No}</td><td>${r.Grade}</td><td>${r.Subject}</td><td>${r.Time||''}</td></tr>`; }); html+=`</table><div class="footer"></div><script>window.print()<\/script>`; w.document.write(html); w.document.close(); }
+async function printDayReport(){ let day=document.getElementById('dayPrintSel').value; if(!day){alert('Select Day');return;} let res = await apiGet('gettimetable', {day:day}); let rows = res.timetable || res.rows || []; if(!Array.isArray(rows)) rows=[]; rows = rows.map(r=>({Grade:r.className||r.Grade, Period_No:r.periodNo||r.Period_No, Subject:r.subject||r.Subject, TeacherName:r.teacher||r.TeacherName||''})); let map={}; rows.forEach(r=>{ if(!map[r.Grade]) map[r.Grade]={}; map[r.Grade][r.Period_No]=r.Subject+'<br><b>'+(r.TeacherName||'')+'</b>'; }); let w=window.open('','_blank'); let html=`<style>@page{margin:12mm 8mm 18mm 8mm;size:landscape} body{font-family:Arial} table{border-collapse:collapse;width:100%;table-layout:fixed} th,td{border:1px solid #000;padding:5px;font-size:10px;text-align:center;word-wrap:break-word} th{background:#000;color:#fff} .header{text-align:center} .footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:9px} .footer:after{content:"Page " counter(page)} @media print{thead{display:table-header-group}}</style><div class="header"><div style="font-size:18px;font-weight:900">Carey's Vision School</div><div style="font-size:14px;font-weight:800">Day Wise Timetable - All Classes</div><div style="font-size:12px;font-weight:600">Day: ${day}</div><hr style="border-top:1.5px solid #000"></div><table><tr><th>Class</th>${cfg.list.map(p=>`<th>${(p.display||'P'+p.no).replace('\n','<br>')}</th>`).join('')}</tr>`; let grades=Object.keys(map).sort(); if(grades.length==0) html+=`<tr><td colspan="${cfg.list.length+1}">No timetable for ${day}</td></tr>`; else grades.forEach(g=>{ html+=`<tr><td style="font-weight:800;background:#f1f5f9">${g}</td>`; cfg.list.forEach(p=>{ if(!p.isTeaching) html+=`<td style="background:#fff3cd">${p.displayInline}</td>`; else html+=`<td>${map[g][p.no]||'-'}</td>`; }); html+=`</tr>`; }); html+=`</table><div class="footer"></div><script>window.print()<\/script>`; w.document.write(html); w.document.close(); }
 </script></body></html>
