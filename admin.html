@@ -90,7 +90,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="formGrid">
 <div class="field"><label>Username</label><input id="uname" placeholder="e.g. niraj"></div>
 <div class="field"><label>Password</label><input id="pass" placeholder="Password"></div>
-<div class="field"><label>Role</label><select id="role" onchange="onRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select></div>
+<div class="field"><label>Role</label><select id="role" onchange="onRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="admin">Admin</option></select></div>
 <div class="field"><label>Classes</label><input id="classes" placeholder="Classes e.g. III,IV,V"></div>
 <div class="field"><label>Subjects</label><input id="subjects" placeholder="Subjects e.g. English,Mathematics"></div>
 <div class="field"><label>Full Name</label><input id="fname" placeholder="Full Name"></div>
@@ -183,7 +183,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
 <label>Username</label><input id="edit_uname" style="width:100%" placeholder="username">
 <label>Password</label><input id="edit_pass" placeholder="Password leave blank to keep" style="width:100%">
-<label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select>
+<label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="admin">Admin</option></select>
 <label>Classes</label><input id="edit_classes" style="width:100%" placeholder="Classes">
 <label>Subjects</label><input id="edit_subjects" style="width:100%" placeholder="Subjects">
 <div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><button onclick="addEditMap()" class="btn-green">+ Add</button><button onclick="clearEditMap()" class="btn-gray">Clear</button><div id="editMapPreview"></div></div>
