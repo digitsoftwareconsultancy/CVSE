@@ -311,10 +311,24 @@ function addSMRow(){
   SM_DATA.forEach(r=>{ var m=String(r.subjectId||'').match(/(\d+)/); if(m) maxId=Math.max(maxId, parseInt(m[1])); });
   var maxOrder = 0;
   SM_DATA.filter(r=>r.class===cls).forEach(r=>{ maxOrder=Math.max(maxOrder, Number(r.displayOrder||0)); });
-  SM_DATA.push({subjectId:'SUB'+String(maxId+1).padStart(3,'0'), class:cls, subjectName:'', subjectType:'SCHOLASTIC', maxPT:50, maxTerm:100, isGradeSystem:'NO', displayOrder:maxOrder+1});
+  var newRow = {subjectId:'SUB'+String(maxId+1).padStart(3,'0'), class:cls, subjectName:'', subjectType:'SCHOLASTIC', maxPT:50, maxTerm:100, isGradeSystem:'NO', displayOrder:maxOrder+1};
+  // INSERT AT TOP of that class so you see it immediately
+  var insertAt = SM_DATA.findIndex(r=>r.class===cls);
+  if(insertAt===-1) SM_DATA.push(newRow);
+  else SM_DATA.splice(insertAt, 0, newRow);
+  // Show ALL so new row is not hidden by filter
+  document.getElementById('smClassFilter').value = 'ALL';
   renderSMTable();
-  var tb=document.getElementById('smTbody');
-  if(tb && tb.lastElementChild){ var inp=tb.lastElementChild.querySelector('input'); }
+  // Highlight + focus + scroll to new row
+  var tb = document.getElementById('smTbody');
+  if(tb && tb.firstElementChild){
+    tb.firstElementChild.style.background = '#fff9c4';
+    var inp = tb.firstElementChild.querySelectorAll('input')[2]; // Subject input
+    if(inp){ inp.focus(); inp.placeholder = 'Type subject name here'; }
+    var box = tb.parentElement; // scroll container
+    if(box) box.scrollTop = 0;
+  }
+  smMsg.innerHTML = '<span style="color:green">✅ New row added at TOP - Type name then Save All</span>';
 }
 async function saveSM(){
   if(!confirm('Save '+SM_DATA.length+'?')) return;
