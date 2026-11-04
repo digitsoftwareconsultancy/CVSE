@@ -43,8 +43,8 @@ th{background:#f0f0f0}
 <button onclick="create()" class="btn-green">Create User</button>
 <div id="builder" style="display:none;margin-top:12px;background:#e3f2fd;padding:12px;border-radius:10px;border:2px solid #1976d2">
 <b>🎯 Class-Wise Subject Permission</b><br><small>Select Class + Subject → Add.</small><br><br>
-<select id="bClass"></select>
-<select id="bSub"></select>
+<select id="bClass"><option value="">Loading classes...</option></select>
+<select id="bSub"><option value="">Loading subjects...</option></select>
 <button onclick="addMap()" class="btn-green">+ Add</button><button onclick="clearMap()" class="btn-gray">Clear</button>
 <div id="mapPreview" style="margin-top:10px"></div>
 </div>
@@ -54,7 +54,7 @@ th{background:#f0f0f0}
 <input id="adno" placeholder="Adm No">
 <input id="sname" placeholder="Student Name">
 <input id="roll" placeholder="Roll" style="width:90px">
-<select id="sclass"><option value="">Select Class</option></select>
+<select id="sclass"><option value="">Loading classes...</option></select>
 <input id="dob" placeholder="DOB DD-MM-YYYY" style="min-width:160px" title="DD-MM-YYYY e.g. 03-10-2019">
 <input id="father" placeholder="Father Name">
 <select id="s_elective" style="display:none;background:#e3f2fd;font-weight:bold"><option value="">Select Elective</option></select>
@@ -63,7 +63,7 @@ th{background:#f0f0f0}
 <div class="box"><h3>🎓 Search & Edit</h3><input id="searchAd" placeholder="Enter Admission No" style="width:280px;" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button>
 <div id="slist" style="margin-top:15px; display:none; background:#fffbe6; padding:15px; border-radius:10px; border:1px solid #ffe082;">
 <input id="e_ad" readonly title="Adm No"><input id="e_name" placeholder="Name"><input id="e_roll" placeholder="Roll" style="width:80px">
-<select id="e_class" onchange="loadEditElective()"><option value="">Class</option></select><br>
+<select id="e_class" onchange="loadEditElective()"><option value="">Loading classes...</option></select><br>
 <input id="e_dob" placeholder="DD-MM-YYYY" style="min-width:160px" title="DD-MM-YYYY"><input id="e_father" placeholder="Father"><input id="e_mother" placeholder="Mother"><input id="e_house" placeholder="House"><br>
 <select id="e_elective" style="display:none;background:#e3f2fd;font-weight:bold;margin-top:8px;min-width:200px"><option value="">-- Elective --</option></select>
 <br><br><button onclick="saveEdit()" class="btn-green">Save</button><button onclick="delStu2()" class="btn-del">Delete</button><p id="editMsg"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
@@ -106,7 +106,7 @@ th{background:#f0f0f0}
 <div class="box" style="background:#fff3e0;border:2px solid #ff9800">
 <h3>📚 Subject Master</h3>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
-<select id="smClassFilter" onchange="renderSMTable()"><option value="ALL">All</option></select>
+<select id="smClassFilter" onchange="renderSMTable()"><option value="ALL">All</option><option value="">Loading classes...</option></select>
 <button onclick="loadSM()" class="btn">Load</button><button onclick="saveSM()" class="btn-green">Save All</button><button onclick="addSMRow()" style="background:#ff9800">+ Add</button>
 </div>
 <div style="overflow:auto;max-height:550px;border:1px solid #ccc"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center">Click Load</td></tr></tbody></table></div>
@@ -120,18 +120,17 @@ th{background:#f0f0f0}
 <select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select>
 <input id="edit_classes" style="width:100%" placeholder="Classes">
 <input id="edit_subjects" style="width:100%" placeholder="Subjects">
-<div id="editBuilder" style="display:none"><select id="ebClass"></select><select id="ebSub"></select><button onclick="addEditMap()" class="btn-green">+ Add</button><button onclick="clearEditMap()" class="btn-gray">Clear</button><div id="editMapPreview"></div></div>
+<div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><button onclick="addEditMap()" class="btn-green">+ Add</button><button onclick="clearEditMap()" class="btn-gray">Clear</button><div id="editMapPreview"></div></div>
 <input id="edit_fname" style="width:100%" placeholder="Full Name">
 <label>Login Status</label><select id="edit_status" style="width:100%"><option>Active</option><option>Inactive</option></select>
 <label>Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
 <br><br><button onclick="saveEditUser()" class="btn-green">Save</button><button onclick="closeEdit()" class="btn-gray">Cancel</button><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
 <script>
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
-let mapStore={}; let editMapStore={}; let SM_DATA=[]; 
+let mapStore={}; let editMapStore={}; let SM_DATA=[];
 let ALL_SETTINGS={};
 const PERIOD_TYPES = ['Teaching','Leisure','Break','Lunch','Assembly','Library','Games','Zero Period','Prayer','Activity'];
 // ===== DYNAMIC - NO FALLBACK, NO HARDCODE =====
-// Empty on purpose. If dropdown is empty, it means backend didn't return data - fix backend, don't edit code.
 let DYNAMIC_CLASSES = [];
 let DYNAMIC_SUBJECTS = [];
 let _classesLoaded=false, _subjectsLoaded=false;
@@ -146,32 +145,62 @@ async function apiPost(action, payload={}){
   let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, ...payload})});
   return await r.json();
 }
-// Keep EXACT order backend / Classes sheet gives. No frontend sorting, no hardcoded order.
-DYNAMIC_CLASSES = fromServer;
+// FIXED: proper function, fromServer only inside here, backend order kept
+async function loadDynamicClasses(){
+  try{
+    let res = await apiGet('getallclasses');
+    let list = res.classes || res.list || res.data || [];
+    let fromServer = list.map(c=>String(c.class||c.Class||c.name||c).trim().toUpperCase()).filter(c=>c);
+    if(fromServer.length>0){
+      DYNAMIC_CLASSES = fromServer;
+      _classesLoaded=true;
+      fillAllClassDropdowns();
+      return DYNAMIC_CLASSES;
+    }
+  }catch(e){ console.warn('getallclasses failed', e); }
+  // Fallback to SubjectMaster distinct classes so dropdown never stays empty
+  try{
+    let res2 = await apiGet('getsubjectmaster');
+    let list2 = res2.subjects || res2.subjectMaster || res2.data || [];
+    let seen={}; let out=[];
+    list2.forEach(r=>{ let c=String(r.class||r.Class||'').trim().toUpperCase(); if(c && !seen[c]){ seen[c]=1; out.push(c); } });
+    if(out.length>0) DYNAMIC_CLASSES = out;
+  }catch(e2){}
+  _classesLoaded=true;
+  fillAllClassDropdowns();
+  return DYNAMIC_CLASSES;
+}
 async function loadDynamicSubjects(){
   try{
     let res = await apiGet('getsubjectmaster');
     let list = res.subjects || res.subjectMaster || res.data || [];
-    if(Array.isArray(list) && list.length>0){
-      let names=[];
-      list.forEach(r=>{ let n=String(r.subjectName||r.SubjectName||'').trim().toUpperCase(); if(n && names.indexOf(n)===-1) names.push(n); });
-      if(names.length>0) DYNAMIC_SUBJECTS=names.sort();
-    }
-  }catch(e){}
-  _subjectsLoaded=true; fillAllSubjectDropdowns(); return DYNAMIC_SUBJECTS;
+    let names=[];
+    list.forEach(r=>{ let n=String(r.subjectName||r.SubjectName||'').trim().toUpperCase(); if(n && names.indexOf(n)===-1) names.push(n); });
+    if(names.length>0) DYNAMIC_SUBJECTS = names;
+  }catch(e){ console.warn('getsubjectmaster failed', e); }
+  _subjectsLoaded=true;
+  fillAllSubjectDropdowns();
+  return DYNAMIC_SUBJECTS;
 }
 async function loadAllDynamic(){
-  await Promise.all([loadDynamicClasses(), loadDynamicSubjects()]);
+  await Promise.allSettled([loadDynamicClasses(), loadDynamicSubjects()]);
 }
 function classOptionsHTML(selected){ return DYNAMIC_CLASSES.map(c=>`<option ${c===String(selected||'').toUpperCase()?'selected':''}>${c}</option>`).join(''); }
-function subjectOptionsHTML(selected){ return DYNAMIC_SUBJECTS.map(s=>`<option ${s===String(selected||'').toUpperCase()?'selected':''}>${s}</option>`).join(''); }
 function fillClassSelect(el, opts){
-  if(!el) return; let cur=el.value; let first=opts.first||'';
+  if(!el) return;
+  let cur = el.value;
+  let first = (opts && opts.first) || '';
+  if(DYNAMIC_CLASSES.length===0){
+    el.innerHTML = first + '<option value="">Loading classes...</option>';
+    return;
+  }
   el.innerHTML = first + DYNAMIC_CLASSES.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
-  if(cur) el.value=cur;
+  if(cur) el.value = cur;
 }
 function fillSubjectSelect(el){
-  if(!el) return; let cur=el.value;
+  if(!el) return;
+  let cur = el.value;
+  if(DYNAMIC_SUBJECTS.length===0){ el.innerHTML='<option value="">Loading subjects...</option>'; return; }
   el.innerHTML = DYNAMIC_SUBJECTS.map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('');
   if(cur && DYNAMIC_SUBJECTS.indexOf(cur)!==-1) el.value=cur;
 }
@@ -258,21 +287,23 @@ function smNormGrade(v){ if(v===true || String(v).toUpperCase()==='YES' || Strin
 function smNormType(v){ var s=String(v||'SCHOLASTIC').toUpperCase().trim(); if(s==='CO' || s==='CO-SCHOLASTIC' || s.indexOf('CO-')===0) return 'CO-SCHOLASTIC'; if(s==='PERSONAL') return 'PERSONAL'; return 'SCHOLASTIC'; }
 async function loadSM(){
   document.getElementById('smMsg').innerText='Loading...';
+  let smPromise = apiGet('getsubjectmaster');
   await loadAllDynamic();
   try{
-    let list = await apiGet('getsubjectmaster');
+    let list = await smPromise;
     SM_DATA = list.subjects || list.subjectMaster || list.data || [];
     if(!Array.isArray(SM_DATA)) SM_DATA=[];
     SM_DATA = SM_DATA.map(r=>{
       if(r.class && String(r.class).toUpperCase().indexOf('SUB')===0){ var tmp=r.class; r.class=r.subjectId||DYNAMIC_CLASSES[0]; r.subjectId=tmp; }
-      return { subjectId: r.subjectId || r.SubjectID || '', class: String(r.class || r.Class || DYNAMIC_CLASSES[0]).toUpperCase(), subjectName: r.subjectName || r.SubjectName || r.subject || '', subjectType: smNormType(r.subjectType || r.SubjectType), maxPT: Number(r.maxPT ?? r.Max_PT ?? 0), maxTerm: Number(r.maxTerm ?? r.Max_Term ?? 0), isGradeSystem: smNormGrade(r.isGradeSystem ?? r.IsGradeSystem ?? 'NO'), displayOrder: Number(r.displayOrder ?? r.DisplayOrder ?? 0) };
+      return { subjectId: r.subjectId || r.SubjectID || '', class: String(r.class || r.Class || DYNAMIC_CLASSES[0]||'').toUpperCase(), subjectName: r.subjectName || r.SubjectName || r.subject || '', subjectType: smNormType(r.subjectType || r.SubjectType), maxPT: Number(r.maxPT ?? r.Max_PT ?? 0), maxTerm: Number(r.maxTerm ?? r.Max_Term ?? 0), isGradeSystem: smNormGrade(r.isGradeSystem ?? r.IsGradeSystem ?? 'NO'), displayOrder: Number(r.displayOrder ?? r.DisplayOrder ?? 0) };
     });
-    SM_DATA.forEach(r=>{ if(DYNAMIC_CLASSES.indexOf(r.class)===-1) DYNAMIC_CLASSES.push(r.class); });
+    SM_DATA.forEach(r=>{ if(r.class && DYNAMIC_CLASSES.indexOf(r.class)===-1) DYNAMIC_CLASSES.push(r.class); });
     let subjNames=[]; SM_DATA.forEach(r=>{ let n=String(r.subjectName||'').toUpperCase(); if(n && subjNames.indexOf(n)===-1) subjNames.push(n); });
-    if(subjNames.length>0) DYNAMIC_SUBJECTS=subjNames.sort();
+    if(subjNames.length>0) DYNAMIC_SUBJECTS=subjNames;
     fillAllClassDropdowns(); fillAllSubjectDropdowns();
     renderSMTable();
     smMsg.innerHTML='<span style="color:green">Loaded '+SM_DATA.length+' | Classes: '+DYNAMIC_CLASSES.join(', ')+'</span>';
+    if(DYNAMIC_CLASSES.length===0) smMsg.innerHTML='<span style="color:red">No classes found - check Classes sheet + deploy backend. Test ?action=getallclasses</span>';
   }catch(e){ smMsg.innerHTML='<span style="color:red">'+e.message+'</span>'; }
 }
 function renderSMTable(){
@@ -286,7 +317,8 @@ function renderSMTable(){
 }
 function addSMRow(){
   var filterCls = (document.getElementById('smClassFilter')||{}).value || 'ALL';
-  var cls = (filterCls && filterCls!=='ALL') ? filterCls : (DYNAMIC_CLASSES[0]||'I');
+  var cls = (filterCls && filterCls!=='ALL' && filterCls!=='') ? filterCls : (DYNAMIC_CLASSES[0]||'');
+  if(!cls){ alert('Classes not loaded yet - wait a second and click Load again'); return; }
   var maxId=0; SM_DATA.forEach(r=>{ var m=String(r.subjectId||'').match(/(\d+)/); if(m) maxId=Math.max(maxId, parseInt(m[1])); });
   var maxOrder=0; SM_DATA.filter(r=>r.class===cls).forEach(r=>{ maxOrder=Math.max(maxOrder, Number(r.displayOrder||0)); });
   var newRow={subjectId:'SUB'+String(maxId+1).padStart(3,'0'), class:cls, subjectName:'', subjectType:'SCHOLASTIC', maxPT:50, maxTerm:100, isGradeSystem:'NO', displayOrder:maxOrder+1};
@@ -325,7 +357,6 @@ async function saveEditUser(){ var oldU=edit_old.value; var obj={username:edit_u
 async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; let res=await apiPost('toggleuserstatus', {username:u}); alert('Login Status: '+res.status); loadUsers(); }
 async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; let res=await apiPost('toggleexamaccess', {username:u}); alert('Exam Access: '+res.examAccess); loadUsers(); }
 async function delUser(u){ if(confirm('Delete '+u+'?')){ await apiPost('deleteuser', {username:u}); alert('Deleted'); loadUsers(); } }
-// ===== STUDENTS - ELECTIVE FULLY DYNAMIC, NO HARDCODED CLASS LIST =====
 async function getElectivesForClass(grade){
   if(!grade) return [];
   let res=await apiGet('getelectiveoptions',{grade:String(grade).toUpperCase()});
@@ -363,7 +394,6 @@ async function searchStudent(){
 }
 async function saveEdit(){
   var dobRaw=e_dob.value.trim();
-  // DYNAMIC: if this class has electives in backend, keep elective value, else blank - no hardcoded list
   var electiveOpts=await getElectivesForClass(e_class.value);
   var electiveVal = electiveOpts.length>0 ? (e_elective.value||window._curElective||'') : '';
   var arr=[e_ad.value, e_name.value, e_roll.value, e_class.value.toUpperCase(), dobRaw, e_father.value, e_mother.value, e_house.value, electiveVal];
@@ -377,7 +407,6 @@ async function addStu(){
   if(dobRaw && !/^\d{2}-\d{2}-\d{4}$/.test(dobRaw)){ alert('Enter DOB as DD-MM-YYYY e.g. 03-10-2019'); return; }
   var grade=sclass.value.toUpperCase().trim();
   var elect=document.getElementById('s_elective').value||'';
-  // DYNAMIC: backend decides if elective required - NO hardcoded XI-A / XII-A list
   let electiveOpts=await getElectivesForClass(grade);
   if(electiveOpts.length>0 && !elect){ alert('Select Elective for '+grade+' - Options: '+electiveOpts.join(', ')); document.getElementById('s_elective').focus(); return; }
   var arr=[adno.value.trim(), sname.value.trim(), roll.value.trim(), grade, dobRaw, father.value.trim(), '', '', elect];
