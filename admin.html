@@ -1,91 +1,100 @@
-<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
-:root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:14px}
-body{font-family:Inter,Arial,Helvetica,sans-serif;padding:0;background:var(--bg);margin:0;color:var(--text)}
-.wrap{max-width:1180px;margin:0 auto;padding:16px}
-.box{background:var(--card);padding:18px;border-radius:var(--radius);margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3}
-.box h3{margin:0 0 14px;font-size:18px;letter-spacing:-.2px}
+:root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;padding:0;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 12px 20px}
+.box{background:var(--card);padding:16px;border-radius:var(--radius);margin-bottom:12px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3}
+.box h3{margin:0 0 10px;font-size:17px;letter-spacing:-.2px}
 .box h4{margin:0 0 10px}
-.sub{color:var(--muted);font-size:13px;margin:-8px 0 14px}
+.sub{color:var(--muted);font-size:12.5px;margin:-6px 0 12px;line-height:1.4}
 label{font-size:12.5px;font-weight:700;color:#334155;margin:8px 4px 2px;display:inline-block}
-/* Header */
+/* Header - compact mobile */
 .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
-.topbar-in{max-width:1180px;margin:0 auto;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{display:flex;gap:12px;align-items:center}
-.brandIcon{width:44px;height:44px;border-radius:12px;background:#e3f2fd;display:flex;align-items:center;justify-content:center;font-size:24px}
-.brand h2{margin:0;font-size:20px;line-height:1.1}
-.brand p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
-.pillSession{display:inline-block;background:#e8f5e9;color:#1b5e20;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-top:4px}
-.btnLogout{background:var(--red)!important}
-/* Top actions */
-.topActions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
-@media(max-width:640px){.topActions{grid-template-columns:1fr}}
-.actionCard{border:0;border-radius:14px;padding:16px;text-align:left;cursor:pointer;color:#fff;display:flex;gap:12px;align-items:center}
-.actionCard b{font-size:16px;display:block}
-.actionCard span{font-size:12.5px;opacity:.9}
-.actionCard small{font-size:28px}
-/* Tabs */
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;background:#fff;padding:8px;border-radius:999px;border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:auto}
-.tabBtn{padding:10px 16px;border:none;border-radius:999px;cursor:pointer;background:transparent;font-weight:700;font-size:13.5px;color:#334155;white-space:nowrap}
-.tabBtn.active{background:var(--blue);color:white;box-shadow:0 4px 12px rgba(25,118,210,.35)}
-/* Forms */
-input,select{padding:11px 12px;margin:4px;border:1.5px solid #dbe2ea;border-radius:10px;min-width:120px;font-size:14px;background:#fff;width:100%}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{display:flex;gap:10px;align-items:center;min-width:0}
+.brandIcon{width:40px;height:40px;border-radius:12px;background:#e3f2fd;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.brand h2{margin:0;font-size:16px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:11.5px;display:none}
+@media(min-width:640px){.brand h2{font-size:20px}.brand p{display:block}}
+.pillSession{display:inline-block;background:#e8f5e9;color:#1b5e20;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800;margin-top:4px}
+.btnLogout{background:var(--red)!important;padding:9px 12px!important;font-size:12px!important;border-radius:999px!important;flex-shrink:0}
+/* Top actions - 2 cols mobile stacked nicely */
+.topActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+@media(max-width:640px){.topActions{grid-template-columns:1fr 1fr}}
+.actionCard{border:0;border-radius:14px;padding:12px;text-align:left;cursor:pointer;color:#fff;display:flex;gap:10px;align-items:center;min-height:64px}
+.actionCard b{font-size:14px;display:block;line-height:1.2}
+.actionCard span{font-size:11px;opacity:.92;line-height:1.3;display:block}
+.actionCard small{font-size:24px;flex-shrink:0}
+/* BOTTOM TABS - mobile app style */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:11px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
+.tabBtn .tabIco{font-size:20px;line-height:1}
+.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+.tabBtn.active .tabIco{transform:scale(1.05)}
+/* Forms - mobile 1 col */
+input,select{padding:12px 12px;margin:4px 0;border:1.5px solid #dbe2ea;border-radius:12px;min-width:0;font-size:15px;background:#fff;width:100%}
 input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(25,118,210,.12)}
-.formGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.formGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 @media(max-width:760px){.formGrid{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.formGrid{grid-template-columns:1fr}}
-.field label{display:block}
-button{padding:10px 16px;background:var(--blue);color:white;border:none;border-radius:10px;cursor:pointer;margin:2px;font-weight:700;font-size:13.5px}
+.field label{display:block;margin:6px 2px 2px}
+button{padding:11px 16px;background:var(--blue);color:white;border:none;border-radius:12px;cursor:pointer;margin:2px;font-weight:700;font-size:14px;min-height:44px}
 button:active{transform:scale(.98)}
 .btn-del{background:var(--red)}.btn-green{background:var(--green)}.btn-orange{background:var(--orange)}.btn-gray{background:#666}
-.btnFull{width:100%;padding:12px}
-/* Toggle switch - fixes double checkbox */
-.switchRow{display:flex;align-items:center;gap:10px;background:#fff3e0;padding:10px 12px;border-radius:12px;border:1px solid #ffcc80;margin:8px 4px}
-.switch{position:relative;width:46px;height:26px;flex-shrink:0}
+/* Toggle */
+.switchRow{display:flex;align-items:center;gap:10px;background:#fff3e0;padding:11px 12px;border-radius:12px;border:1px solid #ffcc80;margin:10px 0}
+.switch{position:relative;width:48px;height:28px;flex-shrink:0}
 .switch input{opacity:0;width:0;height:0;margin:0;min-width:0}
 .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:.2s}
-.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:.2s}
+.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:.2s}
 .switch input:checked + .slider{background:var(--green)}
 .switch input:checked + .slider:before{transform:translateX(20px)}
-.switchLabel{font-weight:800;font-size:13.5px;color:#7c2d12}
+.switchLabel{font-weight:800;font-size:13px;color:#7c2d12;line-height:1.3}
 /* Tables */
-.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:12px}
-table{border-collapse:collapse;width:100%;margin-top:0}
-th,td{padding:11px 10px;border-bottom:1px solid #eef0f3;text-align:left;font-size:13.5px;min-height:0.8cm}
-th{background:#f8fafc;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#475569;white-space:nowrap}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:12px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;margin-top:0;min-width:620px}
+th,td{padding:11px 10px;border-bottom:1px solid #eef0f3;text-align:left;font-size:13.5px}
+th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#475569;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 tbody tr:nth-child(even){background:#fbfcfd}
+/* Teacher Cards */
+.teacherGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:760px){.teacherGrid{grid-template-columns:1fr}}
+.teacherCard{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:13px;display:flex;gap:11px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.teacherAvatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.teacherMain{flex:1;min-width:0}
+.teacherName{font-weight:800;font-size:15px;margin:0;line-height:1.2;word-break:break-word}
+.teacherUser{color:var(--muted);font-size:12px;margin:2px 0 8px}
+.teacherMeta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.metaPill{background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 9px;border-radius:999px;font-size:11.5px;font-weight:600;color:#334155}
+.rolePill-SubjectTeacher{background:#e3f2fd;color:#0d47a1;border-color:#bbdefb}
+.rolePill-ClassTeacher{background:#fff3e0;color:#7c2d12;border-color:#ffcc80}
+.rolePill-Admin{background:#f3e5f5;color:#6a1b9a;border-color:#e1bee7}
+.teacherActions{display:flex;gap:6px;flex-direction:column;flex-shrink:0}
+.teacherActions button{padding:8px 14px!important;border-radius:999px!important;font-size:12.5px!important;min-height:34px!important;white-space:nowrap}
 #loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#e3f2fd,#eef2f7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
-.loginCard{background:white;padding:28px;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.14);width:360px;max-width:100%;text-align:center}
-.loginCard h2{margin:0 0 4px}
+.loginCard{background:white;padding:24px;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.14);width:360px;max-width:100%;text-align:center}
+.loginCard h2{margin:0 0 4px;font-size:20px}
 .loginSub{color:var(--muted);font-size:13px;margin:0 0 16px}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:12px}
-.modalBox{background:#fff;padding:22px;border-radius:16px;width:90%;max-width:520px;max-height:92vh;overflow:auto}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:640px){.modal{align-items:center;padding:12px}}
+.modalBox{background:#fff;padding:20px 16px calc(20px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:92vh;overflow:auto}
+@media(min-width:640px){.modalBox{border-radius:16px;padding:22px}}
 .mapTag{display:inline-block;background:var(--blue);color:#fff;padding:6px 11px;border-radius:999px;margin:3px;font-size:12px;font-weight:600}
 .settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.settingsGrid{grid-template-columns:1fr}}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#fff}
 .badge-green{background:var(--green)}.badge-red{background:var(--red)}.badge-orange{background:var(--orange)}
-.kpiRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.kpi{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px}
-.kpi b{font-size:14px}
 </style></head><body>
-<div id="loginScreen"><div class="loginCard"><div style="font-size:42px">🏫</div><h2>🔐 <span id="loginSchoolName">Carey's Vision</span><br>Admin Login</h2><p class="loginSub" id="loginSessionLabel">School Management System</p><input id="l_user" placeholder="Username" style="width:100%"><br><input id="l_pass" type="password" placeholder="Password" style="width:100%"><br><br><button onclick="doLogin()" style="width:100%;padding:12px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
+<div id="loginScreen"><div class="loginCard"><div style="font-size:42px">🏫</div><h2>🔐 <span id="loginSchoolName">Carey's Vision</span><br>Admin Login</h2><p class="loginSub" id="loginSessionLabel">School Management System</p><input id="l_user" placeholder="Username" style="width:100%"><br><input id="l_pass" type="password" placeholder="Password" style="width:100%"><br><br><button onclick="doLogin()" style="width:100%;padding:13px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
 <div id="adminContent" style="display:none;">
-<div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div><h2>Admin Panel — <span id="schoolName">Carey's Vision</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
+<div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div style="min-width:0"><h2>Admin Panel — <span id="schoolName">Carey's Vision</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
 <div class="wrap">
 <div class="topActions">
-<button onclick="openRegister()" class="actionCard" style="background:linear-gradient(135deg,#2e7d32,#43a047)"><small>📒</small><span><b>Class Wise Exam Register</b><span>Enter marks class-wise • Opens Exam Register</span></span></button>
-<button onclick="openTimetableBuilder()" class="actionCard" style="background:linear-gradient(135deg,#6d4c41,#8d6e63)"><small>🗓️</small><span><b>TIMETABLE BUILDER</b><span>Build & print weekly timetable</span></span></button>
-</div>
-<div class="tabs">
-<button class="tabBtn active" id="b1" onclick="openTab('tabUsers')">👥 Teachers</button>
-<button class="tabBtn" id="b2" onclick="openTab('tabStudents')">🎓 Students</button>
-<!-- FEES HIDDEN FOR NOW - logic kept, just hidden. To bring back, remove style="display:none" -->
-<button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();" style="display:none">💰 Fees</button>
-<button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();">📦 Backup</button>
-<button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();">⚙️ Settings</button>
-<button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();">📚 Subject Master</button>
+<button onclick="openRegister()" class="actionCard" style="background:linear-gradient(135deg,#2e7d32,#43a047)"><small>📒</small><span><b>Exam Register</b><span>Enter marks class-wise</span></span></button>
+<button onclick="openTimetableBuilder()" class="actionCard" style="background:linear-gradient(135deg,#6d4c41,#8d6e63)"><small>🗓️</small><span><b>TIMETABLE</b><span>Build & print timetable</span></span></button>
 </div>
 <div id="tabUsers" class="tab"><div class="box"><h3>Create Teacher / Admin</h3><p class="sub">Add login, role and exam access. For Subject Teacher, use the blue builder below to map Class → Subjects.</p>
 <div class="formGrid">
@@ -97,15 +106,15 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="field"><label>Full Name</label><input id="fname" placeholder="Full Name"></div>
 </div>
 <div class="switchRow"><label class="switch"><input type="checkbox" id="examCheck"><span class="slider"></span></label><span class="switchLabel">Enable Exam Entry — teacher can enter marks</span></div>
-<button onclick="create()" class="btn-green" style="width:100%;padding:12px">+ Create User</button>
+<button onclick="create()" class="btn-green" style="width:100%;padding:13px">+ Create User</button>
 <div id="builder" style="display:none;margin-top:12px;background:#e3f2fd;padding:14px;border-radius:12px;border:2px solid #1976d2">
 <b>🎯 Class-Wise Subject Permission</b><br><small>Select Class + Subject → Add.</small><br><br>
 <select id="bClass"><option value="">Loading classes...</option></select>
 <select id="bSub"><option value="">Loading subjects...</option></select>
-<button onclick="addMap()" class="btn-green">+ Add</button><button onclick="clearMap()" class="btn-gray">Clear</button>
+<div style="display:flex;gap:8px"><button onclick="addMap()" class="btn-green" style="flex:1">+ Add</button><button onclick="clearMap()" class="btn-gray" style="flex:1">Clear</button></div>
 <div id="mapPreview" style="margin-top:10px"></div>
 </div>
-</div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()">🔄 Refresh</button><div id="ulist">Click Refresh...</div></div></div>
+</div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()" style="width:100%">🔄 Refresh</button><div id="ulist">Click Refresh...</div></div></div>
 <div id="tabStudents" class="tab" style="display:none;">
 <div class="box"><h3>Add New Student</h3>
 <div class="formGrid">
@@ -117,9 +126,9 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="field"><label>Father Name</label><input id="father" placeholder="Father Name"></div>
 </div>
 <select id="s_elective" style="display:none;background:#e3f2fd;font-weight:bold"><option value="">Select Elective</option></select>
-<br><button onclick="addStu()" class="btn-green">Add Student</button>
+<br><button onclick="addStu()" class="btn-green" style="width:100%;padding:13px">Add Student</button>
 </div>
-<div class="box"><h3>🎓 Search & Edit</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="searchAd" placeholder="Enter Admission No" style="flex:1;min-width:220px" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button></div>
+<div class="box"><h3>🎓 Search & Edit</h3><div style="display:flex;gap:8px"><input id="searchAd" placeholder="Enter Admission No" style="flex:1;min-width:0" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button></div>
 <div id="slist" style="margin-top:15px; display:none; background:#fffbe6; padding:15px; border-radius:12px; border:1px solid #ffe082;">
 <div class="formGrid">
 <div class="field"><label>Adm No</label><input id="e_ad" readonly title="Adm No"></div>
@@ -132,9 +141,9 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="field"><label>House</label><input id="e_house" placeholder="House"></div>
 </div>
 <select id="e_elective" style="display:none;background:#e3f2fd;font-weight:bold;margin-top:8px;min-width:200px"><option value="">-- Elective --</option></select>
-<br><br><button onclick="saveEdit()" class="btn-green">Save</button><button onclick="delStu2()" class="btn-del">Delete</button><p id="editMsg"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
-<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:220px"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div>
-<div id="backupTab" class="tab" style="display:none;"><div class="box"><h3>📦 Sheet Backup</h3><b>Active Sheet ID:</b><br><span id="activeSheetId" style="word-break:break-all;color:#0b2a5c;font-weight:bold;">Loading...</span><br><br><button onclick="createBackup()" id="btnBackup" class="btn-green">Backup Now</button><div id="backupMsg"></div></div><div class="box"><h3>🔄 Switch Sheet</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="newSheetId" placeholder="Paste New Sheet ID" style="flex:1;min-width:220px"><button onclick="switchSheet()" class="btn-orange">Switch</button></div><div id="switchMsg"></div></div><div class="box"><h3>📂 Recent Backups</h3><button onclick="loadBackupList()">Show</button><div id="backupList"></div></div></div>
+<br><br><div style="display:flex;gap:8px"><button onclick="saveEdit()" class="btn-green" style="flex:1">Save</button><button onclick="delStu2()" class="btn-del" style="flex:1">Delete</button></div><p id="editMsg"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
+<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:0"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div>
+<div id="backupTab" class="tab" style="display:none;"><div class="box"><h3>📦 Sheet Backup</h3><b>Active Sheet ID:</b><br><span id="activeSheetId" style="word-break:break-all;color:#0b2a5c;font-weight:bold;">Loading...</span><br><br><button onclick="createBackup()" id="btnBackup" class="btn-green" style="width:100%">Backup Now</button><div id="backupMsg"></div></div><div class="box"><h3>🔄 Switch Sheet</h3><div style="display:flex;gap:8px"><input id="newSheetId" placeholder="Paste New Sheet ID" style="flex:1;min-width:0"><button onclick="switchSheet()" class="btn-orange">Switch</button></div><div id="switchMsg"></div></div><div class="box"><h3>📂 Recent Backups</h3><button onclick="loadBackupList()" style="width:100%">Show</button><div id="backupList"></div></div></div>
 <div id="resultControlTab" class="tab" style="display:none;">
 <div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>⚙️ Full School Settings</h3><p class="sub">These values come from Settings sheet — change here and header / prints update automatically.</p>
 <div class="settingsGrid">
@@ -155,13 +164,13 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label>Logo Path (URL)</label><br><input id="s_Logo" style="width:100%">
 </div>
 </div>
-<div class="box" style="background:#fffbe6;border:2px solid #ff9800;margin-top:15px">
-<h4>🕒 Timetable Periods - Label Dropdown + Time (Affects Builder)</h4>
-<small>Select <b>Type</b> from dropdown: Teaching / Leisure / Break / Lunch / etc. These will show in builder & prints.</small><br><br>
+<div class="box" style="background:#fffbe6;border:2px solid #ff9800;margin-top:12px">
+<h4>🕒 Timetable Periods</h4>
+<small>Select <b>Type</b> from dropdown: Teaching / Leisure / Break / Lunch / etc.</small><br><br>
 <label>Total Periods</label> <input id="s_TotalPeriods" type="number" min="1" max="10" style="width:80px" onchange="renderPeriodInputs()"><br><br>
 <div id="periodInputs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
 </div>
-<button onclick="saveAllSettings()" class="btn-green" style="padding:12px 22px;font-size:14px;font-weight:bold;margin-top:12px">💾 SAVE ALL SETTINGS</button>
+<button onclick="saveAllSettings()" class="btn-green" style="padding:13px 22px;font-size:14px;font-weight:bold;margin-top:12px;width:100%">💾 SAVE ALL SETTINGS</button>
 <div id="settingsMsg" style="margin-top:10px;font-weight:bold"></div>
 <br>
 <div id="publishControlDiv" style="margin-top:10px"></div>
@@ -172,13 +181,22 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="box" style="background:#fff3e0;border:2px solid #ff9800">
 <h3>📚 Subject Master</h3><p class="sub">Classes & subjects come from Classes + SubjectMaster sheets — no hardcoding.</p>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
-<select id="smClassFilter" onchange="renderSMTable()"><option value="ALL">All</option><option value="">Loading classes...</option></select>
+<select id="smClassFilter" onchange="renderSMTable()" style="flex:1;min-width:120px"><option value="ALL">All</option><option value="">Loading classes...</option></select>
 <button onclick="loadSM()" class="btn">Load</button><button onclick="saveSM()" class="btn-green">Save All</button><button onclick="addSMRow()" style="background:#ff9800">+ Add</button>
 </div>
 <div class="tableWrap" style="max-height:550px"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center">Click Load</td></tr></tbody></table></div>
 <div id="smMsg"></div>
 </div>
 </div>
+</div>
+<!-- BOTTOM TABS -->
+<div class="tabs">
+<button class="tabBtn active" id="b1" onclick="openTab('tabUsers')"><span class="tabIco">👥</span>Teachers</button>
+<button class="tabBtn" id="b2" onclick="openTab('tabStudents')"><span class="tabIco">🎓</span>Students</button>
+<button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();" style="display:none"><span class="tabIco">💰</span>Fees</button>
+<button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();"><span class="tabIco">📦</span>Backup</button>
+<button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();"><span class="tabIco">⚙️</span>Settings</button>
+<button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();"><span class="tabIco">📚</span>Subjects</button>
 </div>
 </div>
 <div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
@@ -187,11 +205,11 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="admin">Admin</option></select>
 <label>Classes</label><input id="edit_classes" style="width:100%" placeholder="Classes">
 <label>Subjects</label><input id="edit_subjects" style="width:100%" placeholder="Subjects">
-<div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><button onclick="addEditMap()" class="btn-green">+ Add</button><button onclick="clearEditMap()" class="btn-gray">Clear</button><div id="editMapPreview"></div></div>
+<div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><div style="display:flex;gap:8px"><button onclick="addEditMap()" class="btn-green" style="flex:1">+ Add</button><button onclick="clearEditMap()" class="btn-gray" style="flex:1">Clear</button></div><div id="editMapPreview"></div></div>
 <label>Full Name</label><input id="edit_fname" style="width:100%" placeholder="Full Name">
 <label>Login Status</label><select id="edit_status" style="width:100%"><option>Active</option><option>Inactive</option></select>
 <label>Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
-<br><br><button onclick="saveEditUser()" class="btn-green">Save</button><button onclick="closeEdit()" class="btn-gray">Cancel</button><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
+<br><br><div style="display:flex;gap:8px"><button onclick="saveEditUser()" class="btn-green" style="flex:1">Save</button><button onclick="closeEdit()" class="btn-gray" style="flex:1">Cancel</button></div><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
 <script>
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e_KHn7Cj1UbuvRpYt-X1tnddQVNFy3GtZgKIdS4v50jtG/exec";
 let mapStore={}; let editMapStore={}; let SM_DATA=[];
@@ -324,7 +342,6 @@ async function loadAllSettings(){
     renderPeriodInputs(map);
     document.getElementById('currentSettings').innerHTML=Object.keys(map).map(k=>'<b>'+k+':</b> '+map[k]).join('<br>');
     document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Loaded '+Object.keys(map).length+' keys | Periods: '+s_TotalPeriods.value+'</span>';
-    // DYNAMIC HEADER - from Settings sheet only, no hardcode
     try{ var _sn=String(s_SchoolName.value||'').trim(); var _ss=String(s_Session.value||'').trim(); if(_sn){ var _a=document.getElementById('schoolName'); if(_a) _a.textContent=_sn; var _b=document.getElementById('loginSchoolName'); if(_b) _b.textContent=_sn; } if(_ss){ var _c=document.getElementById('sessionLabel'); if(_c) _c.textContent='Session • '+_ss; var _d=document.getElementById('loginSessionLabel'); if(_d) _d.textContent='Session '+_ss+' • School Management System'; } }catch(_e){}
   }catch(e){ document.getElementById('settingsMsg').innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
 }
@@ -404,7 +421,7 @@ async function saveSM(){
 function logout(){ localStorage.clear(); window.location.href='index.html'; }
 async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { loginMsg.innerText='❌ Not Admin'; } }
 window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
-function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); }
+function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
 async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; let res=await apiPost('addteacher', {username:uname.value, password:pass.value, role:role.value, classes:classes.value, subjects:subjects.value, name:fname.value, examAccess:examVal, status:'Active'}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; clearMap(); loadUsers(); } }
 async function loadUsers(){
   ulist.innerHTML='Loading...';
@@ -412,9 +429,11 @@ async function loadUsers(){
     let d=await apiGet('getteachers'); let teachers=d.teachers||d.users||d||[];
     if(!Array.isArray(teachers)) teachers=[];
     if(teachers.length==0){ ulist.innerHTML='<div style="padding:20px;text-align:center;color:#64748b">No users found — check Users sheet</div>'; return; }
-    var h='<table><tr><th>Username</th><th>Role</th><th>Classes</th><th>Subjects</th><th>Name</th><th>Login</th><th>Exam</th><th>Actions</th></tr>';
-    teachers.forEach(function(r){ var st=r.status||'Active'; var ex=r.examAccess||'NO'; var loginBadge=st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'; var examBadge=ex.toUpperCase()=='YES' ? '<span class="badge badge-green">YES</span>' : '<span class="badge badge-red">NO</span>'; h+='<tr><td><b>'+(r.username||'')+'</b></td><td>'+(r.role||'')+'</td><td>'+(r.classes||'')+'</td><td>'+(r.subjects||'ALL')+'</td><td>'+(r.name||'')+'</td><td>'+loginBadge+'</td><td>'+examBadge+'</td><td><button onclick="openEdit(\''+r.username+'\')" style="border-radius:999px">Edit</button> <button class="btn-del" style="border-radius:999px" onclick="delUser(\''+r.username+'\')">Del</button></td></tr>'; });
-    h+='</table>'; ulist.innerHTML=h;
+    function prettyRole(r){ if(r=='subjectTeacher') return 'Subject Teacher'; if(r=='classTeacher') return 'Class Teacher'; if(r=='admin') return 'Admin'; return r||''; }
+    function roleClass(r){ if(r=='subjectTeacher') return 'rolePill-SubjectTeacher'; if(r=='classTeacher') return 'rolePill-ClassTeacher'; if(r=='admin') return 'rolePill-Admin'; return ''; }
+    var h='<div class="teacherGrid">';
+    teachers.forEach(function(r){ var st=r.status||'Active'; var ex=r.examAccess||'NO'; var loginBadge=st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'; var examBadge=ex.toUpperCase()=='YES' ? '<span class="badge badge-green">Exam YES</span>' : '<span class="badge badge-red">Exam NO</span>'; var initial=String(r.name||r.username||'?').trim().charAt(0).toUpperCase(); var safeUser=String(r.username||'').replace(/'/g,"\\'"); h+='<div class="teacherCard">'+'<div class="teacherAvatar">'+initial+'</div>'+'<div class="teacherMain">'+'<p class="teacherName">'+(r.name||r.username||'')+'</p>'+'<p class="teacherUser">@'+(r.username||'')+'</p>'+'<div class="teacherMeta">'+'<span class="metaPill '+roleClass(r.role)+'">'+prettyRole(r.role)+'</span>'+'<span class="metaPill">Class: '+(r.classes||'—')+'</span>'+'<span class="metaPill">Subjects: '+(r.subjects||'ALL')+'</span>'+'</div>'+'<div style="display:flex;gap:6px;flex-wrap:wrap">'+loginBadge+examBadge+'</div>'+'</div>'+'<div class="teacherActions"><button onclick="openEdit(\''+safeUser+'\')">Edit</button><button class="btn-del" onclick="delUser(\''+safeUser+'\')">Del</button></div>'+'</div>'; });
+    h+='</div><p style="font-size:12px;color:#64748b;margin-top:10px">Total: '+teachers.length+' users</p>'; ulist.innerHTML=h;
   }catch(e){ ulist.innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
 }
 async function openEdit(u){ let d=await apiGet('getteachers'); let teachers=d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=r.classes||''; edit_subjects.value=r.subjects||''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); editMapStore=parseToMap(r.subjects||''); updateEditMapPreview(); editBuilder.style.display=(r.role=='subjectTeacher')?'block':'none'; editModal.style.display='flex'; return; } } }
