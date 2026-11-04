@@ -1,33 +1,84 @@
 <!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>
-body{font-family:Arial;padding:15px;background:#f5f5f5;margin:0}
-.box{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-.tabBtn{padding:10px 18px;border:none;border-radius:8px;margin-right:6px;cursor:pointer;background:#e0e0e0;font-weight:bold;margin-bottom:6px}
-.tabBtn.active{background:#1976d2;color:white}
-input,select{padding:9px;margin:4px;border:1px solid #ccc;border-radius:6px;min-width:120px}
-button{padding:9px 14px;background:#1976d2;color:white;border:none;border-radius:6px;cursor:pointer;margin:2px}
-.btn-del{background:#c62828}.btn-green{background:#2e7d32}.btn-orange{background:#ef6c00}.btn-gray{background:#666}
-table{border-collapse:collapse;width:100%;margin-top:10px} 
-th,td{padding:8px;border:1px solid #ddd;text-align:left;font-size:13px;min-height:0.8cm;height:0.8cm} 
-th{background:#f0f0f0}
-#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#eef2f7;display:flex;align-items:center;justify-content:center;z-index:9999}
-.loginCard{background:white;padding:28px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.15);width:340px;text-align:center}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center}
-.modalBox{background:#fff;padding:20px;border-radius:12px;width:90%;max-width:480px;max-height:90vh;overflow:auto}
-.mapTag{display:inline-block;background:#1976d2;color:#fff;padding:5px 10px;border-radius:15px;margin:3px;font-size:12px}
-.topActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+*{box-sizing:border-box}
+:root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:14px}
+body{font-family:Inter,Arial,Helvetica,sans-serif;padding:0;background:var(--bg);margin:0;color:var(--text)}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+.box{background:var(--card);padding:18px;border-radius:var(--radius);margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3}
+.box h3{margin:0 0 14px;font-size:18px;letter-spacing:-.2px}
+.box h4{margin:0 0 10px}
+.sub{color:var(--muted);font-size:13px;margin:-8px 0 14px}
+label{font-size:12.5px;font-weight:700;color:#334155;margin:8px 4px 2px;display:inline-block}
+/* Header */
+.topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.topbar-in{max-width:1180px;margin:0 auto;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center}
+.brandIcon{width:44px;height:44px;border-radius:12px;background:#e3f2fd;display:flex;align-items:center;justify-content:center;font-size:24px}
+.brand h2{margin:0;font-size:20px;line-height:1.1}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.pillSession{display:inline-block;background:#e8f5e9;color:#1b5e20;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-top:4px}
+.btnLogout{background:var(--red)!important}
+/* Top actions */
+.topActions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:640px){.topActions{grid-template-columns:1fr}}
+.actionCard{border:0;border-radius:14px;padding:16px;text-align:left;cursor:pointer;color:#fff;display:flex;gap:12px;align-items:center}
+.actionCard b{font-size:16px;display:block}
+.actionCard span{font-size:12.5px;opacity:.9}
+.actionCard small{font-size:28px}
+/* Tabs */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;background:#fff;padding:8px;border-radius:999px;border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:auto}
+.tabBtn{padding:10px 16px;border:none;border-radius:999px;cursor:pointer;background:transparent;font-weight:700;font-size:13.5px;color:#334155;white-space:nowrap}
+.tabBtn.active{background:var(--blue);color:white;box-shadow:0 4px 12px rgba(25,118,210,.35)}
+/* Forms */
+input,select{padding:11px 12px;margin:4px;border:1.5px solid #dbe2ea;border-radius:10px;min-width:120px;font-size:14px;background:#fff;width:100%}
+input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(25,118,210,.12)}
+.formGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(max-width:760px){.formGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.formGrid{grid-template-columns:1fr}}
+.field label{display:block}
+button{padding:10px 16px;background:var(--blue);color:white;border:none;border-radius:10px;cursor:pointer;margin:2px;font-weight:700;font-size:13.5px}
+button:active{transform:scale(.98)}
+.btn-del{background:var(--red)}.btn-green{background:var(--green)}.btn-orange{background:var(--orange)}.btn-gray{background:#666}
+.btnFull{width:100%;padding:12px}
+/* Toggle switch - fixes double checkbox */
+.switchRow{display:flex;align-items:center;gap:10px;background:#fff3e0;padding:10px 12px;border-radius:12px;border:1px solid #ffcc80;margin:8px 4px}
+.switch{position:relative;width:46px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0;margin:0;min-width:0}
+.slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:.2s}
+.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:.2s}
+.switch input:checked + .slider{background:var(--green)}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+.switchLabel{font-weight:800;font-size:13.5px;color:#7c2d12}
+/* Tables */
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:12px}
+table{border-collapse:collapse;width:100%;margin-top:0}
+th,td{padding:11px 10px;border-bottom:1px solid #eef0f3;text-align:left;font-size:13.5px;min-height:0.8cm}
+th{background:#f8fafc;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#475569;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:#fbfcfd}
+#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#e3f2fd,#eef2f7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.loginCard{background:white;padding:28px;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.14);width:360px;max-width:100%;text-align:center}
+.loginCard h2{margin:0 0 4px}
+.loginSub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:12px}
+.modalBox{background:#fff;padding:22px;border-radius:16px;width:90%;max-width:520px;max-height:92vh;overflow:auto}
+.mapTag{display:inline-block;background:var(--blue);color:#fff;padding:6px 11px;border-radius:999px;margin:3px;font-size:12px;font-weight:600}
 .settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.settingsGrid{grid-template-columns:1fr}}
-.badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:800;color:#fff}
-.badge-green{background:#2e7d32}.badge-red{background:#c62828}.badge-orange{background:#ef6c00}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#fff}
+.badge-green{background:var(--green)}.badge-red{background:var(--red)}.badge-orange{background:var(--orange)}
+.kpiRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.kpi{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px}
+.kpi b{font-size:14px}
 </style></head><body>
-<div id="loginScreen"><div class="loginCard"><h2>🔐 Carey's Vision<br>Admin Login</h2><input id="l_user" placeholder="Username" style="width:92%"><br><input id="l_pass" type="password" placeholder="Password" style="width:92%"><br><br><button onclick="doLogin()" style="width:95%;padding:11px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
+<div id="loginScreen"><div class="loginCard"><div style="font-size:42px">🏫</div><h2>🔐 <span id="loginSchoolName">Carey's Vision</span><br>Admin Login</h2><p class="loginSub" id="loginSessionLabel">School Management System</p><input id="l_user" placeholder="Username" style="width:100%"><br><input id="l_pass" type="password" placeholder="Password" style="width:100%"><br><br><button onclick="doLogin()" style="width:100%;padding:12px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
 <div id="adminContent" style="display:none;">
-<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;"><h2>Admin Panel - Carey's Vision</h2><button onclick="logout()" style="background:#c62828;">Logout</button></div>
+<div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div><h2>Admin Panel — <span id="schoolName">Carey's Vision</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
+<div class="wrap">
 <div class="topActions">
-<button onclick="openRegister()" style="background:#2e7d32;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer">📒 Class Wise Exam Register</button>
-<button onclick="openTimetableBuilder()" style="background:#8b4513;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;border:2px solid #5d2e0c">🗓️ TIMETABLE BUILDER - Open</button>
+<button onclick="openRegister()" class="actionCard" style="background:linear-gradient(135deg,#2e7d32,#43a047)"><small>📒</small><span><b>Class Wise Exam Register</b><span>Enter marks class-wise • Opens Exam Register</span></span></button>
+<button onclick="openTimetableBuilder()" class="actionCard" style="background:linear-gradient(135deg,#6d4c41,#8d6e63)"><small>🗓️</small><span><b>TIMETABLE BUILDER</b><span>Build & print weekly timetable</span></span></button>
 </div>
-<div style="margin-bottom:15px;">
+<div class="tabs">
 <button class="tabBtn active" id="b1" onclick="openTab('tabUsers')">👥 Teachers</button>
 <button class="tabBtn" id="b2" onclick="openTab('tabStudents')">🎓 Students</button>
 <button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();">💰 Fees</button>
@@ -35,58 +86,72 @@ th{background:#f0f0f0}
 <button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();">⚙️ Settings</button>
 <button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();">📚 Subject Master</button>
 </div>
-<div id="tabUsers" class="tab"><div class="box"><h3>Create Teacher / Admin</h3>
-<input id="uname" placeholder="username"><input id="pass" placeholder="password">
-<select id="role" onchange="onRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select>
-<input id="classes" placeholder="Classes e.g. III,IV,V"><input id="subjects" placeholder="Subjects e.g. English,Mathematics"><input id="fname" placeholder="Full Name"><br>
-<label style="background:#fff3e0;padding:8px 12px;border-radius:8px;border:1px solid #ff9800;display:inline-block;margin:4px"><input type="checkbox" id="examCheck"> ✅ Enable Exam Entry</label>
-<button onclick="create()" class="btn-green">Create User</button>
-<div id="builder" style="display:none;margin-top:12px;background:#e3f2fd;padding:12px;border-radius:10px;border:2px solid #1976d2">
+<div id="tabUsers" class="tab"><div class="box"><h3>Create Teacher / Admin</h3><p class="sub">Add login, role and exam access. For Subject Teacher, use the blue builder below to map Class → Subjects.</p>
+<div class="formGrid">
+<div class="field"><label>Username</label><input id="uname" placeholder="e.g. niraj"></div>
+<div class="field"><label>Password</label><input id="pass" placeholder="Password"></div>
+<div class="field"><label>Role</label><select id="role" onchange="onRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select></div>
+<div class="field"><label>Classes</label><input id="classes" placeholder="Classes e.g. III,IV,V"></div>
+<div class="field"><label>Subjects</label><input id="subjects" placeholder="Subjects e.g. English,Mathematics"></div>
+<div class="field"><label>Full Name</label><input id="fname" placeholder="Full Name"></div>
+</div>
+<div class="switchRow"><label class="switch"><input type="checkbox" id="examCheck"><span class="slider"></span></label><span class="switchLabel">Enable Exam Entry — teacher can enter marks</span></div>
+<button onclick="create()" class="btn-green" style="width:100%;padding:12px">+ Create User</button>
+<div id="builder" style="display:none;margin-top:12px;background:#e3f2fd;padding:14px;border-radius:12px;border:2px solid #1976d2">
 <b>🎯 Class-Wise Subject Permission</b><br><small>Select Class + Subject → Add.</small><br><br>
 <select id="bClass"><option value="">Loading classes...</option></select>
 <select id="bSub"><option value="">Loading subjects...</option></select>
 <button onclick="addMap()" class="btn-green">+ Add</button><button onclick="clearMap()" class="btn-gray">Clear</button>
 <div id="mapPreview" style="margin-top:10px"></div>
 </div>
-</div><div class="box"><h3>All Users - Login & Exam Control</h3><button onclick="loadUsers()">🔄 Refresh</button><div id="ulist">Click Refresh...</div></div></div>
+</div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()">🔄 Refresh</button><div id="ulist">Click Refresh...</div></div></div>
 <div id="tabStudents" class="tab" style="display:none;">
 <div class="box"><h3>Add New Student</h3>
-<input id="adno" placeholder="Adm No">
-<input id="sname" placeholder="Student Name">
-<input id="roll" placeholder="Roll" style="width:90px">
-<select id="sclass"><option value="">Loading classes...</option></select>
-<input id="dob" placeholder="DOB DD-MM-YYYY" style="min-width:160px" title="DD-MM-YYYY e.g. 03-10-2019">
-<input id="father" placeholder="Father Name">
+<div class="formGrid">
+<div class="field"><label>Admission No</label><input id="adno" placeholder="Adm No"></div>
+<div class="field"><label>Student Name</label><input id="sname" placeholder="Student Name"></div>
+<div class="field"><label>Roll</label><input id="roll" placeholder="Roll"></div>
+<div class="field"><label>Class</label><select id="sclass"><option value="">Loading classes...</option></select></div>
+<div class="field"><label>DOB</label><input id="dob" placeholder="DOB DD-MM-YYYY" title="DD-MM-YYYY e.g. 03-10-2019"></div>
+<div class="field"><label>Father Name</label><input id="father" placeholder="Father Name"></div>
+</div>
 <select id="s_elective" style="display:none;background:#e3f2fd;font-weight:bold"><option value="">Select Elective</option></select>
 <br><button onclick="addStu()" class="btn-green">Add Student</button>
 </div>
-<div class="box"><h3>🎓 Search & Edit</h3><input id="searchAd" placeholder="Enter Admission No" style="width:280px;" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button>
-<div id="slist" style="margin-top:15px; display:none; background:#fffbe6; padding:15px; border-radius:10px; border:1px solid #ffe082;">
-<input id="e_ad" readonly title="Adm No"><input id="e_name" placeholder="Name"><input id="e_roll" placeholder="Roll" style="width:80px">
-<select id="e_class" onchange="loadEditElective()"><option value="">Loading classes...</option></select><br>
-<input id="e_dob" placeholder="DD-MM-YYYY" style="min-width:160px" title="DD-MM-YYYY"><input id="e_father" placeholder="Father"><input id="e_mother" placeholder="Mother"><input id="e_house" placeholder="House"><br>
+<div class="box"><h3>🎓 Search & Edit</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="searchAd" placeholder="Enter Admission No" style="flex:1;min-width:220px" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button></div>
+<div id="slist" style="margin-top:15px; display:none; background:#fffbe6; padding:15px; border-radius:12px; border:1px solid #ffe082;">
+<div class="formGrid">
+<div class="field"><label>Adm No</label><input id="e_ad" readonly title="Adm No"></div>
+<div class="field"><label>Name</label><input id="e_name" placeholder="Name"></div>
+<div class="field"><label>Roll</label><input id="e_roll" placeholder="Roll"></div>
+<div class="field"><label>Class</label><select id="e_class" onchange="loadEditElective()"><option value="">Loading classes...</option></select></div>
+<div class="field"><label>DOB</label><input id="e_dob" placeholder="DD-MM-YYYY" title="DD-MM-YYYY"></div>
+<div class="field"><label>Father</label><input id="e_father" placeholder="Father"></div>
+<div class="field"><label>Mother</label><input id="e_mother" placeholder="Mother"></div>
+<div class="field"><label>House</label><input id="e_house" placeholder="House"></div>
+</div>
 <select id="e_elective" style="display:none;background:#e3f2fd;font-weight:bold;margin-top:8px;min-width:200px"><option value="">-- Elective --</option></select>
 <br><br><button onclick="saveEdit()" class="btn-green">Save</button><button onclick="delStu2()" class="btn-del">Delete</button><p id="editMsg"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
-<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><input id="feeSearch" placeholder="Search..." onkeyup="filterFees()" style="width:320px"><button onclick="loadFees()">Load</button><div id="feeListDiv"></div></div></div>
-<div id="backupTab" class="tab" style="display:none;"><div class="box"><h3>📦 Sheet Backup</h3><b>Active Sheet ID:</b><br><span id="activeSheetId" style="word-break:break-all;color:#0b2a5c;font-weight:bold;">Loading...</span><br><br><button onclick="createBackup()" id="btnBackup" class="btn-green">Backup Now</button><div id="backupMsg"></div></div><div class="box"><h3>🔄 Switch Sheet</h3><input id="newSheetId" placeholder="Paste New Sheet ID" style="width:75%;"><button onclick="switchSheet()" class="btn-orange">Switch</button><div id="switchMsg"></div></div><div class="box"><h3>📂 Recent Backups</h3><button onclick="loadBackupList()">Show</button><div id="backupList"></div></div></div>
+<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:220px"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div>
+<div id="backupTab" class="tab" style="display:none;"><div class="box"><h3>📦 Sheet Backup</h3><b>Active Sheet ID:</b><br><span id="activeSheetId" style="word-break:break-all;color:#0b2a5c;font-weight:bold;">Loading...</span><br><br><button onclick="createBackup()" id="btnBackup" class="btn-green">Backup Now</button><div id="backupMsg"></div></div><div class="box"><h3>🔄 Switch Sheet</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="newSheetId" placeholder="Paste New Sheet ID" style="flex:1;min-width:220px"><button onclick="switchSheet()" class="btn-orange">Switch</button></div><div id="switchMsg"></div></div><div class="box"><h3>📂 Recent Backups</h3><button onclick="loadBackupList()">Show</button><div id="backupList"></div></div></div>
 <div id="resultControlTab" class="tab" style="display:none;">
-<div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>⚙️ Full School Settings</h3>
+<div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>⚙️ Full School Settings</h3><p class="sub">These values come from Settings sheet — change here and header / prints update automatically.</p>
 <div class="settingsGrid">
 <div class="box" style="background:#fff"><h4>📚 Academic</h4>
-<label>Academic Session</label><br><input id="s_Session" placeholder="2026-2027" style="width:90%"><br>
-<label>Active Term (I / II)</label><br><select id="s_ActiveTerm" style="width:95%"><option value="I">I</option><option value="II">II</option></select><br>
-<label>Publish Result (YES/NO)</label><br><select id="s_PublishResult" style="width:95%"><option>YES</option><option>NO</option></select><br>
-<label>Publish Term I</label><br><select id="s_PubT1" style="width:95%"><option>YES</option><option>NO</option></select><br>
-<label>Publish Term II</label><br><select id="s_PubT2" style="width:95%"><option>YES</option><option>NO</option></select><br>
-<label>Enable Daily Update</label><br><select id="s_EnableDaily" style="width:95%"><option>YES</option><option>NO</option></select>
+<label>Academic Session</label><br><input id="s_Session" placeholder="2026-2027" style="width:100%"><br>
+<label>Active Term (I / II)</label><br><select id="s_ActiveTerm" style="width:100%"><option value="I">I</option><option value="II">II</option></select><br>
+<label>Publish Result (YES/NO)</label><br><select id="s_PublishResult" style="width:100%"><option>YES</option><option>NO</option></select><br>
+<label>Publish Term I</label><br><select id="s_PubT1" style="width:100%"><option>YES</option><option>NO</option></select><br>
+<label>Publish Term II</label><br><select id="s_PubT2" style="width:100%"><option>YES</option><option>NO</option></select><br>
+<label>Enable Daily Update</label><br><select id="s_EnableDaily" style="width:100%"><option>YES</option><option>NO</option></select>
 </div>
 <div class="box" style="background:#fff"><h4>🏫 School Info - Used in Timetable Prints</h4>
-<label>School Name</label><br><input id="s_SchoolName" style="width:90%"><br>
-<label>School Address</label><br><input id="s_Address" style="width:90%"><br>
-<label>Affiliation No</label><br><input id="s_Affiliation" style="width:90%"><br>
-<label>School Phone</label><br><input id="s_Phone" style="width:90%"><br>
-<label>Header Path (URL)</label><br><input id="s_Header" style="width:90%"><br>
-<label>Logo Path (URL)</label><br><input id="s_Logo" style="width:90%">
+<label>School Name</label><br><input id="s_SchoolName" style="width:100%"><br>
+<label>School Address</label><br><input id="s_Address" style="width:100%"><br>
+<label>Affiliation No</label><br><input id="s_Affiliation" style="width:100%"><br>
+<label>School Phone</label><br><input id="s_Phone" style="width:100%"><br>
+<label>Header Path (URL)</label><br><input id="s_Header" style="width:100%"><br>
+<label>Logo Path (URL)</label><br><input id="s_Logo" style="width:100%">
 </div>
 </div>
 <div class="box" style="background:#fffbe6;border:2px solid #ff9800;margin-top:15px">
@@ -104,24 +169,25 @@ th{background:#f0f0f0}
 </div>
 <div id="subjectMasterTab" class="tab" style="display:none;">
 <div class="box" style="background:#fff3e0;border:2px solid #ff9800">
-<h3>📚 Subject Master</h3>
+<h3>📚 Subject Master</h3><p class="sub">Classes & subjects come from Classes + SubjectMaster sheets — no hardcoding.</p>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
 <select id="smClassFilter" onchange="renderSMTable()"><option value="ALL">All</option><option value="">Loading classes...</option></select>
 <button onclick="loadSM()" class="btn">Load</button><button onclick="saveSM()" class="btn-green">Save All</button><button onclick="addSMRow()" style="background:#ff9800">+ Add</button>
 </div>
-<div style="overflow:auto;max-height:550px;border:1px solid #ccc"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center">Click Load</td></tr></tbody></table></div>
+<div class="tableWrap" style="max-height:550px"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center">Click Load</td></tr></tbody></table></div>
 <div id="smMsg"></div>
 </div>
 </div>
 </div>
+</div>
 <div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
-<input id="edit_uname" style="width:100%" placeholder="username">
-<input id="edit_pass" placeholder="Password leave blank to keep" style="width:100%">
-<select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select>
-<input id="edit_classes" style="width:100%" placeholder="Classes">
-<input id="edit_subjects" style="width:100%" placeholder="Subjects">
+<label>Username</label><input id="edit_uname" style="width:100%" placeholder="username">
+<label>Password</label><input id="edit_pass" placeholder="Password leave blank to keep" style="width:100%">
+<label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher Only</option><option value="classTeacher">Class Teacher (Always Both)</option><option value="admin">Admin</option></select>
+<label>Classes</label><input id="edit_classes" style="width:100%" placeholder="Classes">
+<label>Subjects</label><input id="edit_subjects" style="width:100%" placeholder="Subjects">
 <div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><button onclick="addEditMap()" class="btn-green">+ Add</button><button onclick="clearEditMap()" class="btn-gray">Clear</button><div id="editMapPreview"></div></div>
-<input id="edit_fname" style="width:100%" placeholder="Full Name">
+<label>Full Name</label><input id="edit_fname" style="width:100%" placeholder="Full Name">
 <label>Login Status</label><select id="edit_status" style="width:100%"><option>Active</option><option>Inactive</option></select>
 <label>Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
 <br><br><button onclick="saveEditUser()" class="btn-green">Save</button><button onclick="closeEdit()" class="btn-gray">Cancel</button><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
@@ -130,7 +196,6 @@ const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e
 let mapStore={}; let editMapStore={}; let SM_DATA=[];
 let ALL_SETTINGS={};
 const PERIOD_TYPES = ['Teaching','Leisure','Break','Lunch','Assembly','Library','Games','Zero Period','Prayer','Activity'];
-// ===== DYNAMIC - NO FALLBACK, NO HARDCODE =====
 let DYNAMIC_CLASSES = [];
 let DYNAMIC_SUBJECTS = [];
 let _classesLoaded=false, _subjectsLoaded=false;
@@ -145,7 +210,6 @@ async function apiPost(action, payload={}){
   let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, ...payload})});
   return await r.json();
 }
-// FIXED: proper function, fromServer only inside here, backend order kept
 async function loadDynamicClasses(){
   try{
     let res = await apiGet('getallclasses');
@@ -158,7 +222,6 @@ async function loadDynamicClasses(){
       return DYNAMIC_CLASSES;
     }
   }catch(e){ console.warn('getallclasses failed', e); }
-  // Fallback to SubjectMaster distinct classes so dropdown never stays empty
   try{
     let res2 = await apiGet('getsubjectmaster');
     let list2 = res2.subjects || res2.subjectMaster || res2.data || [];
@@ -260,6 +323,8 @@ async function loadAllSettings(){
     renderPeriodInputs(map);
     document.getElementById('currentSettings').innerHTML=Object.keys(map).map(k=>'<b>'+k+':</b> '+map[k]).join('<br>');
     document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Loaded '+Object.keys(map).length+' keys | Periods: '+s_TotalPeriods.value+'</span>';
+    // DYNAMIC HEADER - from Settings sheet only, no hardcode
+    try{ var _sn=String(s_SchoolName.value||'').trim(); var _ss=String(s_Session.value||'').trim(); if(_sn){ var _a=document.getElementById('schoolName'); if(_a) _a.textContent=_sn; var _b=document.getElementById('loginSchoolName'); if(_b) _b.textContent=_sn; } if(_ss){ var _c=document.getElementById('sessionLabel'); if(_c) _c.textContent='Session • '+_ss; var _d=document.getElementById('loginSessionLabel'); if(_d) _d.textContent='Session '+_ss+' • School Management System'; } }catch(_e){}
   }catch(e){ document.getElementById('settingsMsg').innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
 }
 function renderPeriodInputs(map){
@@ -415,13 +480,13 @@ async function addStu(){
   adno.value=''; sname.value=''; roll.value=''; dob.value=''; father.value=''; document.getElementById('s_elective').style.display='none';
 }
 var allFeeData=[]; async function loadFees(){ feeListDiv.innerHTML='Loading...'; let list=await apiGet('getfeelist'); allFeeData=list.feeList||list||[]; renderFees(allFeeData); }
-function renderFees(list){ if(!list||list.length==0){ feeListDiv.innerHTML='No students'; return; } var html='<table><tr><th>Adm</th><th>Name</th><th>Class</th><th>Status</th><th>Change</th><th>Action</th></tr>'; for(var i=0;i<list.length;i++){ var r=list[i]; var c=(r.status&&r.status.toLowerCase()=='paid'?'green':'red'); html+='<tr><td>'+r.ad+'</td><td>'+r.name+'</td><td>'+r.cls+'</td><td><b style="color:'+c+'">'+r.status+'</b></td><td><select id="st_'+r.ad+'"><option '+(r.status=='Paid'?'selected':'')+'>Paid</option><option '+(r.status=='Withheld'?'selected':'')+'>Withheld</option><option '+(r.status=='Due'?'selected':'')+'>Due</option></select><br><input id="rm_'+r.ad+'" value="'+(r.remark||'')+'"></td><td><button onclick="updateFee(\''+r.ad+'\')" class="btn-green">Save</button></td></tr>'; } html+='</table>'; feeListDiv.innerHTML=html; }
+function renderFees(list){ if(!list||list.length==0){ feeListDiv.innerHTML='No students'; return; } var html='<div class="tableWrap"><table><tr><th>Adm</th><th>Name</th><th>Class</th><th>Status</th><th>Change</th><th>Action</th></tr>'; for(var i=0;i<list.length;i++){ var r=list[i]; var c=(r.status&&r.status.toLowerCase()=='paid'?'green':'red'); html+='<tr><td>'+r.ad+'</td><td>'+r.name+'</td><td>'+r.cls+'</td><td><b style="color:'+c+'">'+r.status+'</b></td><td><select id="st_'+r.ad+'"><option '+(r.status=='Paid'?'selected':'')+'>Paid</option><option '+(r.status=='Withheld'?'selected':'')+'>Withheld</option><option '+(r.status=='Due'?'selected':'')+'>Due</option></select><br><input id="rm_'+r.ad+'" value="'+(r.remark||'')+'"></td><td><button onclick="updateFee(\''+r.ad+'\')" class="btn-green">Save</button></td></tr>'; } html+='</table></div>'; feeListDiv.innerHTML=html; }
 async function updateFee(ad){ var st=document.getElementById('st_'+ad).value; var rm=document.getElementById('rm_'+ad).value; await apiPost('setfeestatus', {admissionNo:ad, status:st, remark:rm}); alert('Updated '+ad); loadFees(); }
 function filterFees(){ var q=feeSearch.value.toLowerCase(); if(!q){ renderFees(allFeeData); return; } var f=allFeeData.filter(r=> (r.ad+' '+r.name+' '+r.cls).toLowerCase().indexOf(q)>-1); renderFees(f); }
 async function loadBackupInfo(){ activeSheetId.innerText='Loading...'; let info=await apiGet('getactivesheetinfo'); activeSheetId.innerText=info.id||'Admin'; }
 async function createBackup(){ btnBackup.disabled=true; btnBackup.innerText='Creating...'; let res=await apiPost('createsheetbackup', {}); btnBackup.disabled=false; btnBackup.innerText='Backup Now'; backupMsg.innerHTML=res.success?'<span style="color:green">✅ '+res.name+'</span>':'<span style="color:red">❌ '+(res.msg||res.error)+'</span>'; }
 async function switchSheet(){ var nid=newSheetId.value.trim(); if(!nid){ alert('Paste ID'); return; } if(!confirm('Switch to '+nid+'?')) return; let res=await apiPost('switchtonewsheet', {sheetId:nid}); switchMsg.innerHTML=res.success?'<span style="color:green">✅ Switched: '+res.name+'</span>':'<span style="color:red">❌ '+(res.msg||res.error)+'</span>'; }
-async function loadBackupList(){ backupList.innerHTML='Loading...'; let list=await apiGet('getbackuplist'); if(!list||!list.length){ backupList.innerHTML='No backups'; return; } var h='<table><tr><th>Name</th><th>Date</th><th>ID</th></tr>'; list.forEach(f=>{ h+='<tr><td>'+f.name+'</td><td>'+f.date+'</td><td style="font-size:10px;word-break:break-all">'+f.id+'</td></tr>'; }); h+='</table>'; backupList.innerHTML=h; }
+async function loadBackupList(){ backupList.innerHTML='Loading...'; let list=await apiGet('getbackuplist'); if(!list||!list.length){ backupList.innerHTML='No backups'; return; } var h='<div class="tableWrap"><table><tr><th>Name</th><th>Date</th><th>ID</th></tr>'; list.forEach(f=>{ h+='<tr><td>'+f.name+'</td><td>'+f.date+'</td><td style="font-size:10px;word-break:break-all">'+f.id+'</td></tr>'; }); h+='</table></div>'; backupList.innerHTML=h; }
 function openRegister(){ window.top.location.href="teacher-work.html?tab=exam&role=admin"; }
 document.addEventListener('DOMContentLoaded', function(){
   var sc=document.getElementById('sclass'); if(sc) sc.addEventListener('change', loadAddElective);
