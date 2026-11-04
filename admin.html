@@ -81,7 +81,8 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="tabs">
 <button class="tabBtn active" id="b1" onclick="openTab('tabUsers')">👥 Teachers</button>
 <button class="tabBtn" id="b2" onclick="openTab('tabStudents')">🎓 Students</button>
-<button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();">💰 Fees</button>
+<!-- FEES HIDDEN FOR NOW - logic kept, just hidden. To bring back, remove style="display:none" -->
+<button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();" style="display:none">💰 Fees</button>
 <button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();">📦 Backup</button>
 <button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();">⚙️ Settings</button>
 <button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();">📚 Subject Master</button>
