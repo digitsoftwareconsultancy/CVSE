@@ -130,10 +130,10 @@ const WEB_URL = "https://script.google.com/macros/s/AKfycbyzFPIR9-9oGTAI59J-109e
 let mapStore={}; let editMapStore={}; let SM_DATA=[]; 
 let ALL_SETTINGS={};
 const PERIOD_TYPES = ['Teaching','Leisure','Break','Lunch','Assembly','Library','Games','Zero Period','Prayer','Activity'];
-// ===== DYNAMIC - SINGLE SOURCE OF TRUTH =====
-// Fallback only if backend is down. Never used for logic, only for initial paint.
-let DYNAMIC_CLASSES = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI-A','XI-B','XII-A'];
-let DYNAMIC_SUBJECTS = ['English','Mathematics','Science/EVS','Social Science','Computer','Hindi','Assamese','Karbi','Art','GK'];
+// ===== DYNAMIC - NO FALLBACK, NO HARDCODE =====
+// Empty on purpose. If dropdown is empty, it means backend didn't return data - fix backend, don't edit code.
+let DYNAMIC_CLASSES = [];
+let DYNAMIC_SUBJECTS = [];
 let _classesLoaded=false, _subjectsLoaded=false;
 let ELECTIVE_REQUIRED=false;
 async function apiGet(action, params={}){
