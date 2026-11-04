@@ -146,21 +146,8 @@ async function apiPost(action, payload={}){
   let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, ...payload})});
   return await r.json();
 }
-async function loadDynamicClasses(){
-  try{
-    let res = await apiGet('getallclasses');
-    let list = res.classes || res.list || res.data || [];
-    if(Array.isArray(list) && list.length>0){
-      let fromServer = list.map(c=>String(c.class||c.Class||c.name||c).trim().toUpperCase()).filter(c=>c);
-      let merged=[...DYNAMIC_CLASSES];
-      fromServer.forEach(c=>{ if(merged.indexOf(c)===-1) merged.push(c); });
-      let order=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI-A','XI-B','XII-A','XII-B'];
-      merged.sort((a,b)=>{ let ia=order.indexOf(a), ib=order.indexOf(b); if(ia===-1&&ib===-1) return a.localeCompare(b); if(ia===-1) return 1; if(ib===-1) return -1; return ia-ib; });
-      DYNAMIC_CLASSES=merged;
-    }
-  }catch(e){}
-  _classesLoaded=true; fillAllClassDropdowns(); return DYNAMIC_CLASSES;
-}
+// Keep EXACT order backend / Classes sheet gives. No frontend sorting, no hardcoded order.
+DYNAMIC_CLASSES = fromServer;
 async function loadDynamicSubjects(){
   try{
     let res = await apiGet('getsubjectmaster');
