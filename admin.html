@@ -9,7 +9,6 @@ body{font-family:Inter,Arial,Helvetica,sans-serif;padding:0;background:var(--bg)
 .box h4{margin:0 0 10px}
 .sub{color:var(--muted);font-size:12.5px;margin:-6px 0 12px;line-height:1.4}
 label{font-size:12.5px;font-weight:700;color:#334155;margin:8px 4px 2px;display:inline-block}
-/* Header - compact mobile */
 .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
 .topbar-in{max-width:1180px;margin:0 auto;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .brand{display:flex;gap:10px;align-items:center;min-width:0}
@@ -19,21 +18,18 @@ label{font-size:12.5px;font-weight:700;color:#334155;margin:8px 4px 2px;display:
 @media(min-width:640px){.brand h2{font-size:20px}.brand p{display:block}}
 .pillSession{display:inline-block;background:#e8f5e9;color:#1b5e20;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800;margin-top:4px}
 .btnLogout{background:var(--red)!important;padding:9px 12px!important;font-size:12px!important;border-radius:999px!important;flex-shrink:0}
-/* Top actions - 2 cols mobile stacked nicely */
 .topActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 @media(max-width:640px){.topActions{grid-template-columns:1fr 1fr}}
 .actionCard{border:0;border-radius:14px;padding:12px;text-align:left;cursor:pointer;color:#fff;display:flex;gap:10px;align-items:center;min-height:64px}
 .actionCard b{font-size:14px;display:block;line-height:1.2}
 .actionCard span{font-size:11px;opacity:.92;line-height:1.3;display:block}
 .actionCard small{font-size:24px;flex-shrink:0}
-/* BOTTOM TABS - mobile app style */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
 @media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
 .tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:11px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
 .tabBtn .tabIco{font-size:20px;line-height:1}
 .tabBtn.active{background:#e3f2fd;color:var(--blue)}
 .tabBtn.active .tabIco{transform:scale(1.05)}
-/* Forms - mobile 1 col */
 input,select{padding:12px 12px;margin:4px 0;border:1.5px solid #dbe2ea;border-radius:12px;min-width:0;font-size:15px;background:#fff;width:100%}
 input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(25,118,210,.12)}
 .formGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -43,7 +39,6 @@ input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 
 button{padding:11px 16px;background:var(--blue);color:white;border:none;border-radius:12px;cursor:pointer;margin:2px;font-weight:700;font-size:14px;min-height:44px}
 button:active{transform:scale(.98)}
 .btn-del{background:var(--red)}.btn-green{background:var(--green)}.btn-orange{background:var(--orange)}.btn-gray{background:#666}
-/* Toggle */
 .switchRow{display:flex;align-items:center;gap:10px;background:#fff3e0;padding:11px 12px;border-radius:12px;border:1px solid #ffcc80;margin:10px 0}
 .switch{position:relative;width:48px;height:28px;flex-shrink:0}
 .switch input{opacity:0;width:0;height:0;margin:0;min-width:0}
@@ -52,14 +47,12 @@ button:active{transform:scale(.98)}
 .switch input:checked + .slider{background:var(--green)}
 .switch input:checked + .slider:before{transform:translateX(20px)}
 .switchLabel{font-weight:800;font-size:13px;color:#7c2d12;line-height:1.3}
-/* Tables */
 .tableWrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:12px;-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;width:100%;margin-top:0;min-width:620px}
 th,td{padding:11px 10px;border-bottom:1px solid #eef0f3;text-align:left;font-size:13.5px}
 th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#475569;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 tbody tr:nth-child(even){background:#fbfcfd}
-/* Teacher Cards */
 .teacherGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 @media(max-width:760px){.teacherGrid{grid-template-columns:1fr}}
 .teacherCard{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:13px;display:flex;gap:11px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -101,7 +94,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="field"><label>Username</label><input id="uname" placeholder="e.g. niraj"></div>
 <div class="field"><label>Password</label><input id="pass" placeholder="Password"></div>
 <div class="field"><label>Role</label><select id="role" onchange="onRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="admin">Admin</option></select></div>
-<div class="field"><label>Classes</label><input id="classes" placeholder="Classes e.g. III,IV,V"></div>
+<div class="field"><label>Classes</label><select id="classes"><option value="">Select Class</option></select></div>
 <div class="field"><label>Subjects</label><input id="subjects" placeholder="Subjects e.g. English,Mathematics"></div>
 <div class="field"><label>Full Name</label><input id="fname" placeholder="Full Name"></div>
 </div>
@@ -189,7 +182,6 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 </div>
 </div>
-<!-- BOTTOM TABS -->
 <div class="tabs">
 <button class="tabBtn active" id="b1" onclick="openTab('tabUsers')"><span class="tabIco">👥</span>Teachers</button>
 <button class="tabBtn" id="b2" onclick="openTab('tabStudents')"><span class="tabIco">🎓</span>Students</button>
@@ -203,7 +195,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label>Username</label><input id="edit_uname" style="width:100%" placeholder="username">
 <label>Password</label><input id="edit_pass" placeholder="Password leave blank to keep" style="width:100%">
 <label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="admin">Admin</option></select>
-<label>Classes</label><input id="edit_classes" style="width:100%" placeholder="Classes">
+<label>Classes</label><select id="edit_classes" style="width:100%"><option value="">Select Class</option></select>
 <label>Subjects</label><input id="edit_subjects" style="width:100%" placeholder="Subjects">
 <div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><div style="display:flex;gap:8px"><button onclick="addEditMap()" class="btn-green" style="flex:1">+ Add</button><button onclick="clearEditMap()" class="btn-gray" style="flex:1">Clear</button></div><div id="editMapPreview"></div></div>
 <label>Full Name</label><input id="edit_fname" style="width:100%" placeholder="Full Name">
@@ -287,6 +279,8 @@ function fillSubjectSelect(el){
   if(cur && DYNAMIC_SUBJECTS.indexOf(cur)!==-1) el.value=cur;
 }
 function fillAllClassDropdowns(){
+  fillClassSelect(document.getElementById('classes'), {first:'<option value="">Select Class</option>'});
+  fillClassSelect(document.getElementById('edit_classes'), {first:'<option value="">Select Class</option>'});
   fillClassSelect(document.getElementById('smClassFilter'), {first:'<option value="ALL">All</option>'});
   fillClassSelect(document.getElementById('bClass'), {});
   fillClassSelect(document.getElementById('ebClass'), {});
@@ -302,13 +296,13 @@ function openTimetableBuilder(){ window.open('timetable-builder.html','_blank');
 function onRoleChange(){ document.getElementById('builder').style.display=(document.getElementById('role').value=='subjectTeacher')?'block':'none'; }
 function addMap(){ var c=bClass.value.toUpperCase(); var s=bSub.value; if(!mapStore[c]) mapStore[c]=[]; if(mapStore[c].indexOf(s)==-1) mapStore[c].push(s); updateMapPreview(); }
 function clearMap(){ mapStore={}; updateMapPreview(); }
-function updateMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in mapStore){ classes.push(cls); var subs=mapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="removeCls(\''+cls+'\')" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } mapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); subjects.value=finalStr; classes.value=classes.join(','); }
+function updateMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in mapStore){ classes.push(cls); var subs=mapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="removeCls(\''+cls+'\')" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } mapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); subjects.value=finalStr; if(classes.length>0 && document.getElementById('classes')){ if(DYNAMIC_CLASSES.indexOf(classes[0])!==-1) document.getElementById('classes').value=classes[0]; } }
 function removeCls(cls){ delete mapStore[cls]; updateMapPreview(); }
 function parseToMap(str){ var m={}; if(!str||str.indexOf(':')==-1) return m; str.split(/[|;]/).forEach(p=>{ p=p.trim(); if(!p) return; var idx=p.indexOf(':'); if(idx==-1) return; var cls=p.substring(0,idx).trim().toUpperCase(); var subs=p.substring(idx+1).trim().split(',').map(s=>s.trim()).filter(s=>s); m[cls]=subs; }); return m; }
 function onEditRoleChange(){ editBuilder.style.display=(edit_role.value=='subjectTeacher')?'block':'none'; }
 function addEditMap(){ var c=ebClass.value.toUpperCase(); var s=ebSub.value; if(!editMapStore[c]) editMapStore[c]=[]; if(editMapStore[c].indexOf(s)==-1) editMapStore[c].push(s); updateEditMapPreview(); }
 function clearEditMap(){ editMapStore={}; updateEditMapPreview(); }
-function updateEditMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in editMapStore){ classes.push(cls); var subs=editMapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="delete editMapStore[\''+cls+'\'];updateEditMapPreview();" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } editMapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); edit_subjects.value=finalStr; edit_classes.value=classes.join(','); }
+function updateEditMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in editMapStore){ classes.push(cls); var subs=editMapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="delete editMapStore[\''+cls+'\'];updateEditMapPreview();" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } editMapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); edit_subjects.value=finalStr; if(classes.length>0 && document.getElementById('edit_classes')){ if(DYNAMIC_CLASSES.indexOf(classes[0])!==-1) document.getElementById('edit_classes').value=classes[0]; } }
 function toDDMMYYYY(v){
   if(!v) return '';
   var s=String(v).trim();
@@ -422,7 +416,7 @@ function logout(){ localStorage.clear(); window.location.href='index.html'; }
 async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { loginMsg.innerText='❌ Not Admin'; } }
 window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
 function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
-async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; let res=await apiPost('addteacher', {username:uname.value, password:pass.value, role:role.value, classes:classes.value, subjects:subjects.value, name:fname.value, examAccess:examVal, status:'Active'}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; clearMap(); loadUsers(); } }
+async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; var finalClasses = classes.value; if(role.value=='subjectTeacher' && Object.keys(mapStore).length>0){ finalClasses = Object.keys(mapStore).join(','); } let res=await apiPost('addteacher', {username:uname.value, password:pass.value, role:role.value, classes:finalClasses, subjects:subjects.value, name:fname.value, examAccess:examVal, status:'Active'}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; clearMap(); loadUsers(); } }
 async function loadUsers(){
   ulist.innerHTML='Loading...';
   try{
@@ -436,9 +430,9 @@ async function loadUsers(){
     h+='</div><p style="font-size:12px;color:#64748b;margin-top:10px">Total: '+teachers.length+' users</p>'; ulist.innerHTML=h;
   }catch(e){ ulist.innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
 }
-async function openEdit(u){ let d=await apiGet('getteachers'); let teachers=d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=r.classes||''; edit_subjects.value=r.subjects||''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); editMapStore=parseToMap(r.subjects||''); updateEditMapPreview(); editBuilder.style.display=(r.role=='subjectTeacher')?'block':'none'; editModal.style.display='flex'; return; } } }
+async function openEdit(u){ let d=await apiGet('getteachers'); let teachers=d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=String(r.classes||'').split(',')[0].trim().toUpperCase(); edit_subjects.value=r.subjects||''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); editMapStore=parseToMap(r.subjects||''); updateEditMapPreview(); editBuilder.style.display=(r.role=='subjectTeacher')?'block':'none'; editModal.style.display='flex'; return; } } }
 function closeEdit(){ editModal.style.display='none'; }
-async function saveEditUser(){ var oldU=edit_old.value; var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:edit_classes.value, subjects:edit_subjects.value, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value}; if(obj.password.trim()==''){ let d=await apiGet('getteachers'); for(var i=0;i<d.teachers.length;i++) if(String(d.teachers[i].username).toLowerCase()==oldU.toLowerCase()) obj.password=d.teachers[i].password||''; } let res=await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
+async function saveEditUser(){ var oldU=edit_old.value; var finalEditClasses = edit_classes.value; if(edit_role.value=='subjectTeacher' && Object.keys(editMapStore).length>0){ finalEditClasses = Object.keys(editMapStore).join(','); } var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:finalEditClasses, subjects:edit_subjects.value, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value}; if(obj.password.trim()==''){ let d=await apiGet('getteachers'); for(var i=0;i<d.teachers.length;i++) if(String(d.teachers[i].username).toLowerCase()==oldU.toLowerCase()) obj.password=d.teachers[i].password||''; } let res=await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
 async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; let res=await apiPost('toggleuserstatus', {username:u}); alert('Login Status: '+res.status); loadUsers(); }
 async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; let res=await apiPost('toggleexamaccess', {username:u}); alert('Exam Access: '+res.examAccess); loadUsers(); }
 async function delUser(u){ if(confirm('Delete '+u+'?')){ await apiPost('deleteuser', {username:u}); alert('Deleted'); loadUsers(); } }
