@@ -193,7 +193,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 <div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
 <label>Username</label><input id="edit_uname" style="width:100%" placeholder="username">
-<label>Password</label><input id="edit_pass" placeholder="Password leave blank to keep" style="width:100%">
+<label>Password</label><input id="edit_pass" placeholder="Set new password (leave blank to keep old)" style="width:100%">
 <label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="admin">Admin</option></select>
 <label>Classes</label><select id="edit_classes" style="width:100%"><option value="">Select Class</option></select>
 <label>Subjects</label><input id="edit_subjects" style="width:100%" placeholder="Subjects">
@@ -211,15 +211,20 @@ let DYNAMIC_CLASSES = [];
 let DYNAMIC_SUBJECTS = [];
 let _classesLoaded=false, _subjectsLoaded=false;
 let ELECTIVE_REQUIRED=false;
+function authCheck(res){
+  if(res && res.code==='AUTH'){ localStorage.clear(); alert('Session expired. Please login again.'); location.reload(); }
+  return res;
+}
 async function apiGet(action, params={}){
   let url = WEB_URL + "?action=" + action;
+  let tk = localStorage.getItem('cvse_token'); if(tk) url += "&token=" + encodeURIComponent(tk);
   for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]);
   let r = await fetch(url);
-  return await r.json();
+  return authCheck(await r.json());
 }
 async function apiPost(action, payload={}){
-  let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, ...payload})});
-  return await r.json();
+  let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, token: localStorage.getItem('cvse_token')||'', ...payload})});
+  return authCheck(await r.json());
 }
 async function loadDynamicClasses(){
   try{
@@ -291,7 +296,7 @@ function fillAllSubjectDropdowns(){
   fillSubjectSelect(document.getElementById('bSub'));
   fillSubjectSelect(document.getElementById('ebSub'));
 }
-function isAdminLoggedIn(){ return localStorage.getItem('cvse_role')=='admin' && localStorage.getItem('cvse_username'); }
+function isAdminLoggedIn(){ return localStorage.getItem('cvse_role')=='admin' && localStorage.getItem('cvse_username') && localStorage.getItem('cvse_token'); }
 function openTimetableBuilder(){ window.open('timetable-builder.html','_blank'); }
 function onRoleChange(){ document.getElementById('builder').style.display=(document.getElementById('role').value=='subjectTeacher')?'block':'none'; }
 function addMap(){ var c=bClass.value.toUpperCase(); var s=bSub.value; if(!mapStore[c]) mapStore[c]=[]; if(mapStore[c].indexOf(s)==-1) mapStore[c].push(s); updateMapPreview(); }
@@ -413,14 +418,14 @@ async function saveSM(){
   smMsg.innerHTML='<span style="color:green">Saved '+clean.length+'</span>'; loadSM();
 }
 function logout(){ localStorage.clear(); window.location.href='index.html'; }
-async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { loginMsg.innerText='❌ Not Admin'; } }
+async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_token', res.token); localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { loginMsg.innerText = res.success ? '❌ Not Admin' : '❌ '+(res.error||'Login failed'); } }
 window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
 function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
-async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; var finalClasses = classes.value; if(role.value=='subjectTeacher' && Object.keys(mapStore).length>0){ finalClasses = Object.keys(mapStore).join(','); } let res=await apiPost('addteacher', {username:uname.value, password:pass.value, role:role.value, classes:finalClasses, subjects:subjects.value, name:fname.value, examAccess:examVal, status:'Active'}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; clearMap(); loadUsers(); } }
+async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; var finalClasses = classes.value; if(role.value=='subjectTeacher' && Object.keys(mapStore).length>0){ finalClasses = Object.keys(mapStore).join(','); } let res=await apiPost('addteacher', {mode:'create', username:uname.value, password:pass.value, role:role.value, classes:finalClasses, subjects:subjects.value, name:fname.value, examAccess:examVal, status:'Active'}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; clearMap(); loadUsers(); } }
 async function loadUsers(){
   ulist.innerHTML='Loading...';
   try{
-    let d=await apiGet('getteachers'); let teachers=d.teachers||d.users||d||[];
+    let d=await apiGet('getteachers'); if(d && d.success===false){ ulist.innerHTML='<span style="color:red">'+(d.error||'Error')+'</span>'; return; } let teachers=d.teachers||d.users||d||[];
     if(!Array.isArray(teachers)) teachers=[];
     if(teachers.length==0){ ulist.innerHTML='<div style="padding:20px;text-align:center;color:#64748b">No users found — check Users sheet</div>'; return; }
     function prettyRole(r){ if(r=='subjectTeacher') return 'Subject Teacher'; if(r=='classTeacher') return 'Class Teacher'; if(r=='admin') return 'Admin'; return r||''; }
@@ -430,9 +435,9 @@ async function loadUsers(){
     h+='</div><p style="font-size:12px;color:#64748b;margin-top:10px">Total: '+teachers.length+' users</p>'; ulist.innerHTML=h;
   }catch(e){ ulist.innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
 }
-async function openEdit(u){ let d=await apiGet('getteachers'); let teachers=d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=String(r.classes||'').split(',')[0].trim().toUpperCase(); edit_subjects.value=r.subjects||''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); editMapStore=parseToMap(r.subjects||''); updateEditMapPreview(); editBuilder.style.display=(r.role=='subjectTeacher')?'block':'none'; editModal.style.display='flex'; return; } } }
+async function openEdit(u){ let d=await apiGet('getteachers'); if(d && d.success===false){ alert(d.error||'Error'); return; } let teachers=d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=String(r.classes||'').split(',')[0].trim().toUpperCase(); edit_subjects.value=r.subjects||''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); editMapStore=parseToMap(r.subjects||''); updateEditMapPreview(); editBuilder.style.display=(r.role=='subjectTeacher')?'block':'none'; editModal.style.display='flex'; return; } } }
 function closeEdit(){ editModal.style.display='none'; }
-async function saveEditUser(){ var oldU=edit_old.value; var finalEditClasses = edit_classes.value; if(edit_role.value=='subjectTeacher' && Object.keys(editMapStore).length>0){ finalEditClasses = Object.keys(editMapStore).join(','); } var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:finalEditClasses, subjects:edit_subjects.value, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value}; if(obj.password.trim()==''){ let d=await apiGet('getteachers'); for(var i=0;i<d.teachers.length;i++) if(String(d.teachers[i].username).toLowerCase()==oldU.toLowerCase()) obj.password=d.teachers[i].password||''; } let res=await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
+async function saveEditUser(){ var oldU=edit_old.value; var finalEditClasses = edit_classes.value; if(edit_role.value=='subjectTeacher' && Object.keys(editMapStore).length>0){ finalEditClasses = Object.keys(editMapStore).join(','); } var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:finalEditClasses, subjects:edit_subjects.value, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value}; obj.mode='update'; obj.oldUsername=oldU; let res=await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
 async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; let res=await apiPost('toggleuserstatus', {username:u}); alert('Login Status: '+res.status); loadUsers(); }
 async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; let res=await apiPost('toggleexamaccess', {username:u}); alert('Exam Access: '+res.examAccess); loadUsers(); }
 async function delUser(u){ if(confirm('Delete '+u+'?')){ await apiPost('deleteuser', {username:u}); alert('Deleted'); loadUsers(); } }
