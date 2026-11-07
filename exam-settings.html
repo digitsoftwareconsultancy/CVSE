@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Exam Settings</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.wrap{max-width:1000px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:46px;background:#fff}
+input[readonly]{background:#f1f5f9;color:#475569}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-orange{background:linear-gradient(135deg,#ef6c00,#ff9800)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--purple);margin-bottom:12px}
+.card.exam{border-left-color:var(--blue)}.card.rep{border-left-color:var(--orange)}.card.area{border-left-color:var(--green)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px}
+.ch b{color:var(--navy);font-size:15px}
+.pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-dirty{background:#fff3e0;color:#9a3412}.p-ok{background:#dcfce7;color:#166534}.p-lock{background:#fee2e2;color:#991b1b}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:999px;padding:0 12px;min-height:38px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip input{width:18px;height:18px;min-height:0;padding:0;margin:0}
+.chip.on{background:#e3f2fd;border-color:#90caf9}
+.sw{display:flex;align-items:center;gap:8px;min-height:46px;font-weight:700;font-size:14px;cursor:pointer}
+.sw input{width:22px;height:22px;min-height:0;padding:0}
+.preview{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:10px;font-size:13px;font-weight:700;color:var(--navy);margin-top:10px;line-height:1.5}
+.wrow{display:flex;gap:8px;align-items:center;margin-top:6px}.wrow span{flex:1;font-weight:700;font-size:13px}.wrow input{width:100px;text-align:center}
+.grow{display:grid;grid-template-columns:70px 70px 70px 1fr 46px;gap:6px;align-items:center;margin-bottom:6px}
+.grow input{padding:8px;text-align:center}.grow input.rem{text-align:left}
+.xbtn{border:1px solid #fecaca;background:#fff;color:var(--red);border-radius:10px;min-height:46px;font-weight:900;cursor:pointer}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.prow .full{grid-column:1/-1}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;position:relative}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+.tabBtn .dot{position:absolute;top:4px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--orange);display:none}
+.tabBtn.dirty .dot{display:block}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <div class="badge-exam" id="examBadge" style="background:#16a34a">Exam: ENABLED</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box">
+    <div class="title">⚙️ Exam Settings</div>
+    <div class="meta">Everything about exams and report cards is set here. Each section has its own Save button. Nothing is saved until you press it, and if anything is wrong nothing is changed.</div>
+    <div class="msg" id="gMsg"></div>
+    <div id="problems"></div>
+  </div>
+
+  <div id="secPreset" class="box" style="display:none">
+    <div class="title">Starter set</div>
+    <div class="meta">Fills Exams, Reports, Grade scale and Extra areas in one go. Values marked "to confirm" are my guesses. You can change everything afterwards.</div>
+    <div class="btnrow">
+      <button class="btn b-navy" id="btnCarey" onclick="loadPreset('carey')">Carey's Vision style</button>
+      <button class="btn b-purple" id="btnCalvary" onclick="loadPreset('calvary')">Calvary style</button>
+    </div>
+    <div class="meta" id="presetNote" style="margin-top:8px"></div>
+  </div>
+
+  <div id="secExams" style="display:none"></div>
+  <div id="secReports" style="display:none"></div>
+  <div id="secGrades" style="display:none"></div>
+  <div id="secAreas" style="display:none"></div>
+  <div id="secAssign" style="display:none"></div>
+</div>
+
+<div class="tabs">
+  <button class="tabBtn" id="tab_exams" onclick="showSec('exams')"><span class="dot"></span><span class="tabIco">📝</span>Exams</button>
+  <button class="tabBtn" id="tab_reports" onclick="showSec('reports')"><span class="dot"></span><span class="tabIco">📄</span>Reports</button>
+  <button class="tabBtn" id="tab_grades" onclick="showSec('grades')"><span class="dot"></span><span class="tabIco">🎯</span>Grades</button>
+  <button class="tabBtn" id="tab_areas" onclick="showSec('areas')"><span class="dot"></span><span class="tabIco">🎨</span>Extras</button>
+  <button class="tabBtn" id="tab_assign" onclick="showSec('assign')"><span class="dot"></span><span class="tabIco">👩‍🏫</span>Access</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin'){ window.location.href = 'index.html'; }
+
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function goBack(){ window.location.href = 'admin.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+
+/* ===== state ===== */
+var ROWS = {exams:[], reports:[], grades:[], areas:[], assign:[]};
+var SAVED = {};          // JSON of each section as last loaded/saved, to know what is unsaved
+var REF = {classes:[], subjects:[], teachers:[], hasMarks:false, problems:[]};
+var CUR = 'exams';
+var SECS = ['exams', 'reports', 'grades', 'areas', 'assign'];
+
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function csv(v){ return String(v || '').split(',').map(x => x.trim()).filter(Boolean); }
+function dirty(sec){ return JSON.stringify(ROWS[sec]) !== SAVED[sec]; }
+function markDirty(){
+  SECS.forEach(s => {
+    $('tab_' + s).classList.toggle('dirty', dirty(s));
+    let p = $('pill_' + s); if(p){ p.className = 'pill ' + (dirty(s) ? 'p-dirty' : 'p-ok'); p.innerText = dirty(s) ? 'Unsaved changes' : 'Saved'; }
+  });
+}
+function loadSection(sec, rows){ ROWS[sec] = clone(rows || []); SAVED[sec] = JSON.stringify(ROWS[sec]); }
+
+/* ===== start ===== */
+async function init(){
+  $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
+  $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
+  $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
+  show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getexamsettings');
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.') + (String(r.error || '').indexOf('Tab') > -1 ? ' Run EXAM_setupTabs in Apps Script first.' : ''), 'err'); return; }
+    applyData(r, true);
+  }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
+  hide($('gMsg'));
+  showSec('exams');
+}
+function applyData(r, all, onlySec){
+  REF.classes = r.classes || []; REF.subjects = r.subjects || []; REF.teachers = r.teachers || [];
+  REF.hasMarks = !!r.hasMarks; REF.problems = r.problems || [];
+  SECS.forEach(s => { if(all || s === onlySec) loadSection(s, r[s]); });
+  drawProblems();
+}
+function drawProblems(){
+  $('problems').innerHTML = REF.problems.length
+    ? '<div class="msg show warn">⚠️ Please fix:<br>' + REF.problems.map(p => '• ' + esc(p)).join('<br>') + '</div>'
+    : '';
+}
+function showSec(sec){
+  CUR = sec;
+  SECS.forEach(s => { $('tab_' + s).classList.toggle('active', s === sec); });
+  $('secExams').style.display = sec === 'exams' ? '' : 'none';
+  $('secReports').style.display = sec === 'reports' ? '' : 'none';
+  $('secGrades').style.display = sec === 'grades' ? '' : 'none';
+  $('secAreas').style.display = sec === 'areas' ? '' : 'none';
+  $('secAssign').style.display = sec === 'assign' ? '' : 'none';
+  $('secPreset').style.display = sec === 'exams' ? '' : 'none';
+  $('btnCarey').disabled = $('btnCalvary').disabled = REF.hasMarks;
+  $('presetNote').innerText = REF.hasMarks ? 'Marks are already entered, so the setup can no longer be replaced.' : '';
+  ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, assign:drawAssign})[sec]();
+  window.scrollTo(0, 0);
+}
+
+/* ===== shared pieces ===== */
+function secHead(title, note, sec){
+  return '<div class="box"><div class="ch"><div class="title">' + title + '</div><span class="pill p-ok" id="pill_' + sec + '">Saved</span></div><div class="meta">' + note + '</div></div>';
+}
+function saveBar(sec, addLabel, addFn){
+  return '<div class="box"><div class="msg" id="msg_' + sec + '"></div><div class="btnrow">' +
+    (addFn ? '<button class="btn b-blue" onclick="' + addFn + '">' + addLabel + '</button>' : '') +
+    '<button class="btn b-green" id="save_' + sec + '" onclick="saveSec(\'' + sec + '\')">💾 Save ' + ({exams:'Exams', reports:'Reports', grades:'Grade scale', areas:'Extra areas', assign:'Access'})[sec] + '</button></div></div>';
+}
+function chipsHtml(sec, i, field, options, selectedCsv, allLabel){
+  let sel = csv(selectedCsv).map(x => x.toUpperCase());
+  let h = '<div class="chips">';
+  options.forEach(o => {
+    let v = typeof o === 'string' ? o : o.value, l = typeof o === 'string' ? o : o.label;
+    let on = sel.indexOf(String(v).toUpperCase()) > -1;
+    h += '<label class="chip ' + (on ? 'on' : '') + '"><input type="checkbox" ' + (on ? 'checked' : '') + ' onchange="toggleChip(\'' + sec + '\',' + i + ',\'' + field + '\',\'' + esc(v) + '\',this.checked)">' + esc(l) + '</label>';
+  });
+  h += '</div>';
+  if(allLabel) h += '<div class="meta" style="margin-top:4px">' + allLabel + '</div>';
+  return h;
+}
+function toggleChip(sec, i, field, val, on){
+  let list = csv(ROWS[sec][i][field]);
+  let idx = list.map(x => x.toUpperCase()).indexOf(String(val).toUpperCase());
+  if(on && idx < 0) list.push(val);
+  if(!on && idx > -1) list.splice(idx, 1);
+  // keep list in the same order as the options
+  let order = field === 'Exams' ? ROWS.exams.map(e => e.ExamID) : REF.classes;
+  list.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  ROWS[sec][i][field] = list.join(',');
+  redraw(sec);
+}
+function setF(sec, i, f, v){ ROWS[sec][i][f] = v; markDirty(); if(sec === 'reports' || sec === 'exams') refreshPreview(sec, i); }
+function setYN(sec, i, f, on){ ROWS[sec][i][f] = on ? 'YES' : 'NO'; markDirty(); }
+function redraw(sec){ let y = window.scrollY; ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, assign:drawAssign})[sec](); window.scrollTo(0, y); }
+function delRow(sec, i){
+  if(!confirm('Remove this row? It is only removed for good when you press Save.')) return;
+  ROWS[sec].splice(i, 1); redraw(sec);
+}
+function yn(v){ return String(v || '').toUpperCase() === 'YES'; }
+
+async function saveSec(sec){
+  let b = $('save_' + sec), m = $('msg_' + sec);
+  b.disabled = true; show(m, 'Saving...', 'load');
+  try{
+    let r = await apiPost('saveexamsettings', {section:sec, rows:ROWS[sec]});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not save.'), 'err'); return; }
+    let f = await apiGet('getexamsettings');
+    if(f.success) applyData(f, false, sec); else loadSection(sec, ROWS[sec]);
+    redraw(sec);
+    show($('msg_' + sec), '✅ Saved (' + r.saved + ' row' + (r.saved === 1 ? '' : 's') + ').', 'ok');
+  }catch(e){ show(m, '❌ Network problem. Nothing may have been saved. Please check and try again.', 'err'); }
+  finally{ let bb = $('save_' + sec); if(bb) bb.disabled = false; }
+}
+
+async function loadPreset(which){
+  let name = which === 'carey' ? "Carey's Vision" : 'Calvary';
+  if(!confirm('Load the ' + name + ' starter set? This REPLACES the current Exams, Reports, Grade scale, Extra areas and Access lists.' + (SECS.some(dirty) ? '\n\nYour unsaved changes will be lost.' : ''))) return;
+  show($('gMsg'), 'Loading starter set...', 'load');
+  $('btnCarey').disabled = $('btnCalvary').disabled = true;
+  try{
+    let r = await apiPost('applyexampreset', {preset:which});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    let f = await apiGet('getexamsettings');
+    if(f.success){ applyData(f, true); }
+    show($('gMsg'), '✅ ' + (r.message || 'Loaded.'), 'ok');
+    showSec('exams');
+  }catch(e){ show($('gMsg'), '❌ Network problem. Please check and try again.', 'err'); }
+  finally{ $('btnCarey').disabled = $('btnCalvary').disabled = REF.hasMarks; }
+}
+
+/* ===== EXAMS ===== */
+function drawExams(){
+  let h = secHead('📝 Exams', 'The tests and exams of the session, in the order they happen. <b>PT</b> = periodic test, <b>TERM</b> = half yearly / annual type. Leave Classes empty if the exam is for every class. The ID cannot be changed after saving.', 'exams');
+  if(!ROWS.exams.length) h += '<div class="box"><div class="empty-note">No exam yet. Press "Add Exam", or load a Starter set.</div></div>';
+  ROWS.exams.forEach((e, i) => {
+    h += '<div class="card exam"><div class="ch"><b>' + esc(e.ShortName || e.ExamName || 'New exam') + '</b>' + (yn(e.Locked) ? '<span class="pill p-lock">Locked</span>' : '') + '</div>' +
+      '<div class="row"><div><label>Exam ID</label><input ' + (e._new ? '' : 'readonly') + ' maxlength="10" value="' + esc(e.ExamID) + '" placeholder="e.g. PT1" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,\'\');setF(\'exams\',' + i + ',\'ExamID\',this.value)"></div>' +
+      '<div style="flex:2"><label>Exam name</label><input value="' + esc(e.ExamName) + '" placeholder="e.g. Periodic Test 1" oninput="setF(\'exams\',' + i + ',\'ExamName\',this.value)"></div></div>' +
+      '<div class="row"><div><label>Short name (on report)</label><input maxlength="12" value="' + esc(e.ShortName) + '" placeholder="e.g. PT-1" oninput="setF(\'exams\',' + i + ',\'ShortName\',this.value)"></div>' +
+      '<div><label>Type</label><select onchange="setF(\'exams\',' + i + ',\'ExamType\',this.value)"><option value="PT"' + (String(e.ExamType).toUpperCase() === 'PT' ? ' selected' : '') + '>PT (periodic test)</option><option value="TERM"' + (String(e.ExamType).toUpperCase() === 'TERM' ? ' selected' : '') + '>TERM (half yearly / annual)</option></select></div></div>' +
+      '<label>Classes</label>' + chipsHtml('exams', i, 'Classes', REF.classes, e.Classes, 'None ticked = all classes') +
+      '<div class="row"><label class="sw"><input type="checkbox" ' + (yn(e.EntryOpen) ? 'checked' : '') + ' onchange="setYN(\'exams\',' + i + ',\'EntryOpen\',this.checked)">Marks entry open for teachers</label>' +
+      '<label class="sw"><input type="checkbox" ' + (yn(e.Locked) ? 'checked' : '') + ' onchange="setYN(\'exams\',' + i + ',\'Locked\',this.checked);redraw(\'exams\')">Locked (no more changes)</label></div>' +
+      '<div class="btnrow"><button class="btn b-grey" onclick="moveRow(\'exams\',' + i + ',-1)">⬆ Up</button><button class="btn b-grey" onclick="moveRow(\'exams\',' + i + ',1)">⬇ Down</button><button class="btn b-red" onclick="delRow(\'exams\',' + i + ')">🗑 Remove</button></div></div>';
+  });
+  h += saveBar('exams', '➕ Add Exam', 'addExam()');
+  $('secExams').innerHTML = h; markDirty();
+}
+function addExam(){ ROWS.exams.push({ExamID:'', ExamName:'', ShortName:'', ExamType:'PT', EntryOpen:'NO', Locked:'NO', Classes:'', Note:'', _new:true}); redraw('exams'); }
+function moveRow(sec, i, d){ let j = i + d; if(j < 0 || j >= ROWS[sec].length) return; let t = ROWS[sec][i]; ROWS[sec][i] = ROWS[sec][j]; ROWS[sec][j] = t; redraw(sec); }
+
+/* ===== REPORTS ===== */
+var LAYOUTS = {A:'A - one exam', B:'B - theory + I/A', C:'C - combined exams'};
+var RULES = ['Single', 'Add marks', 'Weighted percentage'];
+function examShort(id){ let e = ROWS.exams.find(x => String(x.ExamID).toUpperCase() === String(id).toUpperCase()); return e ? (e.ShortName || e.ExamName || e.ExamID) : id; }
+function weightMap(r){ let m = {}; csv(r.Weights).forEach(p => { let a = p.split(':'); if(a.length === 2) m[a[0].trim().toUpperCase()] = a[1].trim(); }); return m; }
+function previewText(r){
+  let ex = csv(r.Exams); if(!ex.length) return 'Choose at least one exam.';
+  let rule = String(r.CombineRule || '');
+  let cls = csv(r.Classes).length ? 'Classes ' + csv(r.Classes).join(', ') : 'All classes';
+  if(rule === 'Single') return (ex.length === 1 ? examShort(ex[0]) + ' marks shown as they are' : '⚠️ "Single" needs exactly one exam') + ' · ' + cls;
+  if(ex.length < 2) return '⚠️ This rule needs two or more exams · ' + cls;
+  if(rule === 'Add marks') return ex.map(examShort).join(' + ') + ' = marks added together · ' + cls;
+  let w = weightMap(r), tot = 0;
+  let parts = ex.map(x => { let n = Number(w[x.toUpperCase()]) || 0; tot += n; return examShort(x) + ' (' + n + '%)'; });
+  return parts.join(' + ') + ' = weighted percentage' + (Math.round(tot * 100) === 10000 ? '' : ' · ⚠️ total is ' + (Math.round(tot * 100) / 100) + ', must be 100') + ' · ' + cls;
+}
+function refreshPreview(sec, i){ if(sec !== 'reports') return; let el = $('pv_' + i); if(el) el.innerText = previewText(ROWS.reports[i]); }
+function drawReports(){
+  let h = secHead('📄 Reports', 'A report is what a student receives. Pick the exams it uses and how they are combined. <b>Save Exams first</b> if you just added a new exam. Published = students and parents can see it. Locked = nobody can change the marks behind it.', 'reports');
+  if(!ROWS.reports.length) h += '<div class="box"><div class="empty-note">No report yet. Press "Add Report", or load a Starter set.</div></div>';
+  let examOpts = ROWS.exams.filter(e => e.ExamID).map(e => ({value:e.ExamID, label:e.ShortName || e.ExamID}));
+  ROWS.reports.forEach((r, i) => {
+    let rule = String(r.CombineRule || 'Single');
+    h += '<div class="card rep"><div class="ch"><b>' + esc(r.ReportName || 'New report') + '</b>' + (yn(r.Published) ? '<span class="pill p-ok">Published</span>' : '') + (yn(r.Locked) ? '<span class="pill p-lock">Locked</span>' : '') + '</div>' +
+      '<div class="row"><div><label>Report ID</label><input ' + (r._new ? '' : 'readonly') + ' maxlength="10" value="' + esc(r.ReportID) + '" placeholder="e.g. R1" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,\'\');setF(\'reports\',' + i + ',\'ReportID\',this.value)"></div>' +
+      '<div style="flex:2"><label>Report name</label><input value="' + esc(r.ReportName) + '" placeholder="e.g. Half Yearly Report" oninput="setF(\'reports\',' + i + ',\'ReportName\',this.value)"></div></div>' +
+      '<div class="row"><div><label>Layout</label><select onchange="setF(\'reports\',' + i + ',\'Layout\',this.value)">' + Object.keys(LAYOUTS).map(k => '<option value="' + k + '"' + (String(r.Layout).toUpperCase() === k ? ' selected' : '') + '>' + LAYOUTS[k] + '</option>').join('') + '</select></div>' +
+      '<div><label>How exams are combined</label><select onchange="setF(\'reports\',' + i + ',\'CombineRule\',this.value);redraw(\'reports\')">' + RULES.map(k => '<option' + (rule === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div></div>' +
+      '<label>Exams used</label>' + (examOpts.length ? chipsHtml('reports', i, 'Exams', examOpts, r.Exams) : '<div class="meta">No exams yet. Add them in the Exams section.</div>');
+    if(rule === 'Weighted percentage'){
+      let w = weightMap(r);
+      h += '<label>Weight of each exam (must total 100)</label>' + csv(r.Exams).map(x => '<div class="wrow"><span>' + esc(examShort(x)) + '</span><input type="number" inputmode="decimal" min="0" max="100" value="' + esc(w[x.toUpperCase()] === undefined ? '' : w[x.toUpperCase()]) + '" oninput="setWeight(' + i + ',\'' + esc(x) + '\',this.value)"><b>%</b></div>').join('');
+    }
+    h += '<label>Classes</label>' + chipsHtml('reports', i, 'Classes', REF.classes, r.Classes, 'None ticked = all classes') +
+      '<label>Pass rule (note for your own reference)</label><input value="' + esc(r.PassRule) + '" oninput="setF(\'reports\',' + i + ',\'PassRule\',this.value)" placeholder="e.g. each subject pass marks from SubjectMaster">' +
+      '<div class="preview" id="pv_' + i + '">' + esc(previewText(r)) + '</div>' +
+      '<div class="row"><label class="sw"><input type="checkbox" ' + (yn(r.Published) ? 'checked' : '') + ' onchange="setYN(\'reports\',' + i + ',\'Published\',this.checked);redraw(\'reports\')">Published to students</label>' +
+      '<label class="sw"><input type="checkbox" ' + (yn(r.Locked) ? 'checked' : '') + ' onchange="setYN(\'reports\',' + i + ',\'Locked\',this.checked);redraw(\'reports\')">Locked</label></div>' +
+      '<div class="btnrow"><button class="btn b-grey" onclick="moveRow(\'reports\',' + i + ',-1)">⬆ Up</button><button class="btn b-grey" onclick="moveRow(\'reports\',' + i + ',1)">⬇ Down</button><button class="btn b-red" onclick="delRow(\'reports\',' + i + ')">🗑 Remove</button></div></div>';
+  });
+  h += saveBar('reports', '➕ Add Report', 'addReport()');
+  $('secReports').innerHTML = h; markDirty();
+}
+function setWeight(i, exam, v){
+  let w = weightMap(ROWS.reports[i]); w[exam.toUpperCase()] = v;
+  ROWS.reports[i].Weights = csv(ROWS.reports[i].Exams).map(x => x.toUpperCase() + ':' + (w[x.toUpperCase()] === undefined || w[x.toUpperCase()] === '' ? 0 : w[x.toUpperCase()])).join(',');
+  markDirty(); refreshPreview('reports', i);
+}
+function addReport(){ ROWS.reports.push({ReportID:'', ReportName:'', Layout:'A', Classes:'', Exams:'', CombineRule:'Single', Weights:'', PassRule:'', Published:'NO', Locked:'NO', Note:'', _new:true}); redraw('reports'); }
+
+/* ===== GRADES ===== */
+function gradeCheck(){
+  let t = ROWS.grades.map(g => ({f:Number(g.FromPercent), t:Number(g.ToPercent), g:g.Grade}));
+  if(!t.length) return 'No grades yet.';
+  if(t.some(x => isNaN(x.f) || isNaN(x.t) || !x.g)) return '⚠️ Fill From, To and Grade in every row.';
+  t.sort((a, b) => b.f - a.f);
+  let exp = 100;
+  for(let x of t){ if(x.t > exp) return '⚠️ ' + x.g + ' overlaps the grade above it.'; if(x.t < exp) return '⚠️ Gap: nothing covers ' + (x.t + 1) + ' to ' + exp + '.'; exp = x.f - 1; }
+  return exp === -1 ? '✅ The scale covers 0 to 100 with no gaps or overlaps.' : '⚠️ Gap: nothing covers 0 to ' + exp + '.';
+}
+function drawGrades(){
+  let h = secHead('🎯 Grade scale', 'Percentage ranges and the grade each gets. It must cover 0 to 100 without gaps or overlaps. Whole numbers only.', 'grades');
+  h += '<div class="box"><div class="grow" style="font-size:11px;font-weight:800;color:var(--muted)"><span>From %</span><span>To %</span><span>Grade</span><span>Remark</span><span></span></div>';
+  ROWS.grades.forEach((g, i) => {
+    h += '<div class="grow"><input type="number" inputmode="numeric" value="' + esc(g.FromPercent) + '" oninput="setF(\'grades\',' + i + ',\'FromPercent\',this.value);gradeNote()">' +
+      '<input type="number" inputmode="numeric" value="' + esc(g.ToPercent) + '" oninput="setF(\'grades\',' + i + ',\'ToPercent\',this.value);gradeNote()">' +
+      '<input maxlength="6" value="' + esc(g.Grade) + '" oninput="setF(\'grades\',' + i + ',\'Grade\',this.value);gradeNote()">' +
+      '<input class="rem" value="' + esc(g.Remark) + '" oninput="setF(\'grades\',' + i + ',\'Remark\',this.value)">' +
+      '<button class="xbtn" onclick="delRow(\'grades\',' + i + ')">✕</button></div>';
+  });
+  h += '<div class="preview" id="gradeNote">' + esc(gradeCheck()) + '</div></div>';
+  h += saveBar('grades', '➕ Add Grade', 'addGrade()');
+  $('secGrades').innerHTML = h; markDirty();
+}
+function gradeNote(){ let el = $('gradeNote'); if(el) el.innerText = gradeCheck(); }
+function addGrade(){ ROWS.grades.push({FromPercent:'', ToPercent:'', Grade:'', Remark:''}); redraw('grades'); }
+
+/* ===== EXTRA AREAS ===== */
+function drawAreas(){
+  let h = secHead('🎨 Extra areas', 'Co-scholastic subjects and personal / social qualities that are graded with letters (no marks). Leave Classes empty for every class.', 'areas');
+  if(!ROWS.areas.length) h += '<div class="box"><div class="empty-note">No extra area. Press "Add Area" if the report should show some.</div></div>';
+  ROWS.areas.forEach((a, i) => {
+    h += '<div class="card area"><div class="ch"><b>' + esc(a.AreaName || 'New area') + '</b></div>' +
+      '<div class="row"><div style="flex:2"><label>Name</label><input value="' + esc(a.AreaName) + '" placeholder="e.g. Art Education" oninput="setF(\'areas\',' + i + ',\'AreaName\',this.value)"></div>' +
+      '<div><label>Type</label><select onchange="setF(\'areas\',' + i + ',\'AreaType\',this.value)"><option value="CO-SCHOLASTIC"' + (String(a.AreaType).toUpperCase() === 'CO-SCHOLASTIC' ? ' selected' : '') + '>Co-scholastic</option><option value="PSD"' + (String(a.AreaType).toUpperCase() === 'PSD' ? ' selected' : '') + '>Personal / Social (PSD)</option></select></div></div>' +
+      '<label>Grade choices (comma separated)</label><input value="' + esc(a.GradeOptions) + '" placeholder="A,B,C,D,E" oninput="setF(\'areas\',' + i + ',\'GradeOptions\',this.value)">' +
+      '<label>Classes</label>' + chipsHtml('areas', i, 'Classes', REF.classes, a.Classes, 'None ticked = all classes') +
+      '<div class="btnrow"><button class="btn b-grey" onclick="moveRow(\'areas\',' + i + ',-1)">⬆ Up</button><button class="btn b-grey" onclick="moveRow(\'areas\',' + i + ',1)">⬇ Down</button><button class="btn b-red" onclick="delRow(\'areas\',' + i + ')">🗑 Remove</button></div></div>';
+  });
+  h += saveBar('areas', '➕ Add Area', 'addArea()');
+  $('secAreas').innerHTML = h; markDirty();
+}
+function addArea(){ ROWS.areas.push({AreaID:'', AreaName:'', AreaType:'CO-SCHOLASTIC', Classes:'', GradeOptions:'A,B,C,D,E'}); redraw('areas'); }
+
+/* ===== ACCESS (who may enter marks) ===== */
+function subjectsOf(cls){ let seen = {}, out = []; REF.subjects.forEach(s => { if(s.class === cls && !seen[s.subjectName.toUpperCase()]){ seen[s.subjectName.toUpperCase()] = 1; out.push(s.subjectName.toUpperCase()); } }); return out; }
+function drawAssign(){
+  let h = secHead('👩‍🏫 Who can enter marks', 'A teacher can enter marks only for the class + subject listed here. Choose a particular exam, or "All exams". Admin can always enter marks. Class teachers also need a row for their own subject.', 'assign');
+  if(!REF.teachers.length) h += '<div class="box"><div class="empty-note">No teacher found. Add teachers in the Teacher tab of Admin first.</div></div>';
+  if(!ROWS.assign.length && REF.teachers.length) h += '<div class="box"><div class="empty-note">No permission yet. Press "Add Permission".</div></div>';
+  let tOpts = '<option value="">- Teacher -</option>' + REF.teachers.map(t => '<option value="' + esc(t.username) + '">' + esc(t.name) + ' (' + esc(t.username) + ')</option>').join('');
+  ROWS.assign.forEach((a, i) => {
+    let subs = subjectsOf(String(a.Class || '').toUpperCase());
+    h += '<div class="box"><div class="prow">' +
+      '<div class="full"><label>Teacher</label><select onchange="setF(\'assign\',' + i + ',\'Username\',this.value)">' + tOpts.replace('value="' + esc(a.Username) + '"', 'value="' + esc(a.Username) + '" selected') + '</select></div>' +
+      '<div><label>Class</label><select onchange="setClass(' + i + ',this.value)"><option value="">- Class -</option>' + REF.classes.map(c => '<option' + (String(a.Class).toUpperCase() === c ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></div>' +
+      '<div><label>Subject</label><select onchange="setF(\'assign\',' + i + ',\'SubjectName\',this.value)"><option value="">- Subject -</option>' + subs.map(s => '<option' + (String(a.SubjectName).toUpperCase() === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select></div>' +
+      '<div class="full"><label>Exam</label><select onchange="setF(\'assign\',' + i + ',\'ExamID\',this.value)"><option value="">All exams</option>' + ROWS.exams.filter(e => e.ExamID).map(e => '<option value="' + esc(e.ExamID) + '"' + (String(a.ExamID).toUpperCase() === String(e.ExamID).toUpperCase() ? ' selected' : '') + '>' + esc(e.ShortName || e.ExamID) + '</option>').join('') + '</select></div>' +
+      '<div class="full"><button class="btn b-red" style="width:100%" onclick="delRow(\'assign\',' + i + ')">🗑 Remove</button></div></div></div>';
+  });
+  h += saveBar('assign', '➕ Add Permission', REF.teachers.length ? 'addAssign()' : '');
+  $('secAssign').innerHTML = h; markDirty();
+}
+function setClass(i, v){ ROWS.assign[i].Class = v; ROWS.assign[i].SubjectName = ''; redraw('assign'); }
+function addAssign(){ ROWS.assign.push({AssignID:'', Username:'', Class:'', SubjectName:'', ExamID:'', Note:''}); redraw('assign'); }
+
+window.addEventListener('beforeunload', function(e){ if(SECS.some(dirty)){ e.preventDefault(); e.returnValue = ''; } });
+init();
+</script>
+</body></html>
