@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Daily Updates</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.wrap{max-width:1000px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;border-left:4px solid var(--navy);padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 10px}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:46px;background:#fff}
+textarea{min-height:76px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:140px}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff}
+.btn:disabled{opacity:.6;cursor:wait}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-orange{background:linear-gradient(135deg,#ef6c00,#ff9800)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#666}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btnrow .btn{flex:1;min-width:130px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;display:flex;flex-direction:column;gap:6px}
+.card.done{border-left:5px solid var(--green)}.card.draft{border-left:5px solid var(--orange)}.card.empty{border-left:5px solid #cbd5e1}.card.pub{border-left:5px solid var(--purple)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.per{font-weight:900;color:var(--navy);font-size:15px}
+.pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-empty{background:#f1f5f9;color:#475569}.p-draft{background:#fff3e0;color:#9a3412}.p-done{background:#dcfce7;color:#166534}.p-pub{background:#ede9fe;color:#5b21b6}
+.subj{font-weight:800;font-size:16px}
+.meta{font-size:12px;color:var(--muted);line-height:1.5}
+.txt{font-size:13px;line-height:1.45;word-break:break-word}
+.lock{font-size:11.5px;color:var(--red);font-weight:700}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{flex:1;min-width:70px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:20px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{font-size:11.5px;font-weight:700;padding:6px 10px;border-radius:999px;background:#fee2e2;color:#991b1b}.chip.ok{background:#dcfce7;color:#166534}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}
+.empty-note{text-align:center;color:var(--muted);padding:26px 10px;font-weight:700}
+.att{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.attx{flex-basis:100%;display:none;gap:8px;flex-wrap:wrap}.attx>*{flex:1;min-width:150px;font-size:14px}
+.rmBtn{border:1px solid #cbd5e1;background:#fff;border-radius:10px;min-height:36px;padding:0 10px;font-weight:700;color:var(--navy);cursor:pointer;font-size:12px}
+.att .nm{flex:1;min-width:0;font-weight:700;font-size:14px}.att .nm small{display:block;color:var(--muted);font-weight:600}
+.tg{display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:800;color:var(--muted);gap:3px}
+.tg input{width:26px;height:26px;min-height:0;padding:0}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.modal{align-items:center}.sheet{border-radius:20px}}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
+.tabBtn .tabIco{font-size:20px;line-height:1}
+.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">T</div>
+    <div style="min-width:0">
+      <div class="welcome" id="wName">Welcome</div>
+      <div class="sub" id="wSub">Username: -</div>
+    </div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">TEACHER</div>
+    <div class="badge-exam" id="examBadge" style="background:#c1272d">Exam: -</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box">
+    <div class="title" id="pageTitle">Daily Updates</div>
+    <div class="row">
+      <div><label>Date</label><input type="date" id="fDate"></div>
+      <div id="classWrap"><label>Class</label><select id="fClass"></select></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn b-blue" id="btnLoad" onclick="reload()">🔍 Load</button>
+      <button class="btn b-navy" id="btnPrint" onclick="printClass()" style="display:none">🖨️ Print Class Page</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <!-- DAILY VIEW -->
+  <div id="dailyView">
+    <div class="box" id="statsBox" style="display:none"><div class="stats" id="stats"></div><div class="chips" id="chips"></div></div>
+    <div class="box" id="attBox" style="display:none"></div>
+    <div class="box" id="testBox" style="display:none"></div>
+    <div class="box" id="pubBox" style="display:none">
+      <div style="font-size:13px;font-weight:700;color:var(--navy)">Publish (locks teachers) — only entries marked Done</div>
+      <div class="btnrow">
+        <button class="btn b-green" onclick="publish('YES','sel')">📢 Publish Selected</button>
+        <button class="btn b-orange" onclick="publish('NO','sel')">🔓 Unpublish Selected</button>
+        <button class="btn b-purple" onclick="publish('YES','all')">📢 Publish All Done (shown)</button>
+      </div>
+    </div>
+    <div class="grid" id="cards"></div>
+  </div>
+
+  <!-- ATTENDANCE VIEW -->
+  <div id="attView" style="display:none">
+    <div class="box">
+      <div class="stats" id="attCount"></div>
+      <div class="btnrow">
+        <button class="btn b-green" onclick="markAll('P')">✅ All Present</button>
+        <button class="btn b-red" onclick="markAll('A')">❌ All Absent</button>
+      </div>
+      <div id="attList" style="margin-top:8px"></div>
+      <div class="lock" id="attLock"></div>
+      <div class="btnrow"><button class="btn b-blue" id="btnAttSave" onclick="saveAttendance()">💾 Save Attendance</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ENTRY FORM -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeForm()">
+  <div class="sheet">
+    <div class="title" id="fmTitle">Period</div>
+    <div class="meta" id="fmMeta"></div>
+    <div class="lock" id="fmLock"></div>
+    <label>Lesson / Chapter</label><input id="fmChapter" maxlength="300">
+    <label>Activities / Topic</label><textarea id="fmTopic"></textarea>
+    <label>Home Assignment</label><textarea id="fmHw"></textarea>
+    <div class="row">
+      <div><label>Submission Date</label><input type="date" id="fmSub"></div>
+      <div><label>Status</label><select id="fmStatus"><option value="Draft">Draft (still working)</option><option value="Done">Done</option></select></div>
+    </div>
+    <label>Information / Reminder</label><textarea id="fmRem"></textarea>
+    <label>Teacher's Comment</label><textarea id="fmCom"></textarea>
+    <div class="msg" id="fmMsg"></div>
+    <div class="btnrow">
+      <button class="btn b-green" id="fmSave" onclick="saveEntry()">💾 Save</button>
+      <button class="btn b-grey" onclick="closeForm()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+
+/* ---------- user (same localStorage keys everywhere) ---------- */
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), classes:ls('cvse_classes'),
+  examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+var IS_ADMIN = USER.role === 'admin';
+var IS_CT = USER.role === 'classTeacher' || USER.isClassTeacher;
+
+/* ---------- api ---------- */
+function authCheck(j){
+  if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; }
+}
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function today(){ let d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+
+/* ---------- state ---------- */
+var MODE = '';          // 'mine' | 'class' | 'all' | 'att'
+var DATA = null;        // last daily response
+var ITEMS = {};         // id -> item
+var CUR = null;         // item open in the form
+var ATT = null;         // attendance response
+var OPEN = {};          // students whose remark box was opened by hand
+var SETTINGS = {};
+
+function myClasses(){
+  if(IS_ADMIN || String(USER.classes).toUpperCase().trim() === 'ALL') return null;   // null = every class
+  return String(USER.classes).split(/[,;|]+/).map(c => c.trim().toUpperCase()).filter(Boolean);
+}
+
+/* ---------- start ---------- */
+async function init(){
+  document.getElementById('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
+  document.getElementById('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
+  document.getElementById('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
+  document.getElementById('roleBadge').innerText = IS_ADMIN ? 'ADMIN' : (IS_CT ? 'CLASS TEACHER' : 'SUBJECT TEACHER');
+  let ex = IS_ADMIN || String(USER.examAccess).toUpperCase() === 'YES';
+  let eb = document.getElementById('examBadge'); eb.innerText = ex ? 'Exam: ENABLED' : 'Exam: DISABLED'; eb.style.background = ex ? '#16a34a' : '#c1272d';
+  document.getElementById('fDate').value = today();
+
+  // tabs
+  let t = [];
+  if(IS_ADMIN){ t.push(['all', '🗂️', 'All Classes']); t.push(['att', '✅', 'Attendance']); }
+  else{
+    t.push(['mine', '📚', 'My Periods']);
+    if(IS_CT){ t.push(['class', '🏫', 'My Class']); t.push(['att', '✅', 'Attendance']); }
+  }
+  let html = t.map(x => `<button class="tabBtn" id="tab_${x[0]}" onclick="setMode('${x[0]}')"><span class="tabIco">${x[1]}</span>${x[2]}</button>`).join('');
+  html += `<button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>`;
+  document.getElementById('tabs').innerHTML = html;
+
+  // classes dropdown
+  let list = myClasses();
+  if(list === null){
+    try{ let r = await apiGet('getallclasses'); list = r.classes || []; }catch(e){ list = []; }
+  }
+  window.CLASS_LIST = list;
+  try{ let s = await apiGet('getfullsettings'); SETTINGS = s.settings || s.map || {}; }catch(e){}
+  let first = (new URLSearchParams(location.search)).get('tab');
+  let view = ls('cvse_view');
+  setMode(first && document.getElementById('tab_' + first) ? first : (IS_ADMIN ? 'all' : (IS_CT && view === 'class' ? 'class' : 'mine')));
+}
+
+function goBack(){
+  let v = ls('cvse_view');
+  window.location.href = IS_ADMIN ? 'admin.html' : (IS_CT && v === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html');
+}
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+
+function setMode(m){
+  MODE = m;
+  document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
+  let tb = document.getElementById('tab_' + m); if(tb) tb.classList.add('active');
+  let sel = document.getElementById('fClass');
+  let needClass = (m === 'class' || m === 'att' || m === 'all');
+  document.getElementById('classWrap').style.display = needClass ? 'block' : 'none';
+  let opts = (m === 'all' ? '<option value="ALL">All Classes</option>' : '') + (window.CLASS_LIST || []).map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  let keep = sel.value; sel.innerHTML = opts; if(keep && Array.from(sel.options).some(o => o.value === keep)) sel.value = keep;
+  document.getElementById('pageTitle').innerText = ({mine:'My Periods', 'class':'My Class - Full Day', all:'All Classes - Admin', att:'Daily Attendance'})[m];
+  document.getElementById('btnPrint').style.display = (m === 'class' || m === 'all') ? 'block' : 'none';
+  document.getElementById('dailyView').style.display = m === 'att' ? 'none' : 'block';
+  document.getElementById('attView').style.display = m === 'att' ? 'block' : 'none';
+  reload();
+}
+
+async function reload(){
+  hide(document.getElementById('msg'));
+  if(MODE === 'att') return loadAttendance();
+  return loadDaily();
+}
+
+/* =============== DAILY =============== */
+async function loadDaily(){
+  let msg = document.getElementById('msg'), box = document.getElementById('cards');
+  let date = document.getElementById('fDate').value, cls = document.getElementById('fClass').value;
+  if(!date){ show(msg, 'Choose a date', 'err'); return; }
+  if((MODE === 'class') && !cls){ show(msg, 'No class is assigned to you.', 'err'); box.innerHTML = ''; return; }
+  show(msg, 'Loading...', 'load'); box.innerHTML = '';
+  let btn = document.getElementById('btnLoad'); btn.disabled = true;
+  try{
+    let p = {date:date, view:MODE}; if(MODE !== 'mine') p.className = cls;
+    let r = await apiGet('getdailyupdates', p);
+    if(!r.success){ show(msg, r.error || 'Could not load', 'err'); return; }
+    DATA = r; ITEMS = {}; r.items.forEach(i => { ITEMS[i.id] = i; });
+    hide(msg); render();
+  }catch(e){ show(msg, 'Network problem. Check internet and tap Load.', 'err'); }
+  finally{ btn.disabled = false; }
+}
+
+function pillOf(it){
+  if(it.published === 'YES') return ['p-pub', 'Published'];
+  if(it.status === 'Done') return ['p-done', 'Done'];
+  if(it.status === 'Draft') return ['p-draft', 'Draft'];
+  return ['p-empty', 'Not filled'];
+}
+
+function render(){
+  let r = DATA, s = r.summary;
+  let sb = document.getElementById('statsBox');
+  sb.style.display = r.items.length ? 'block' : 'none';
+  document.getElementById('stats').innerHTML =
+    `<div class="stat"><b>${s.total}</b><span>Periods</span></div><div class="stat"><b style="color:#16a34a">${s.done}</b><span>Done</span></div>` +
+    `<div class="stat"><b style="color:#ef6c00">${s.draft}</b><span>Draft</span></div><div class="stat"><b style="color:#c62828">${s.empty}</b><span>Not filled</span></div>` +
+    `<div class="stat"><b style="color:#7c3aed">${s.published}</b><span>Published</span></div>`;
+  let chips = '';
+  if(r.byClass) chips = r.byClass.map(b => b.total - b.done > 0
+      ? `<span class="chip">${esc(b.className)}: ${b.total - b.done} not done (${esc(b.missingPeriods.join(', '))})</span>`
+      : `<span class="chip ok">${esc(b.className)}: all done</span>`).join('');
+  document.getElementById('chips').innerHTML = chips;
+
+  // attendance block (class view)
+  let ab = document.getElementById('attBox');
+  if(MODE === 'class' && r.attendance){
+    let a = r.attendance;
+    ab.style.display = 'block';
+    ab.innerHTML = a.taken
+      ? `<div class="title" style="font-size:15px">✅ Attendance</div><div class="stats"><div class="stat"><b>${a.present}</b><span>Present</span></div><div class="stat"><b>${a.absent}</b><span>Absent</span></div><div class="stat"><b>${a.late}</b><span>Late</span></div><div class="stat"><b>${a.uniform}</b><span>Incomplete Uniform</span></div></div>` +
+        (a.absentees ? `<div class="meta" style="margin-top:8px"><b>Absentees:</b> ${esc(a.absentees)}</div>` : '')
+      : `<div class="title" style="font-size:15px">Attendance not taken yet for this date</div><button class="btn b-green" onclick="setMode('att')" style="width:100%">✅ Take Attendance</button>`;
+  }else ab.style.display = 'none';
+
+  let tb = document.getElementById('testBox');
+  if(r.classTests && r.classTests.length){
+    tb.style.display = 'block';
+    tb.innerHTML = '<div class="title" style="font-size:15px">📌 Class Tests on this date</div>' + r.classTests.map(t => `<div class="txt" style="color:#c00000;font-weight:700;margin:4px 0">${esc(t.text)}${MODE !== 'mine' ? '' : ''}</div>`).join('');
+  }else tb.style.display = 'none';
+
+  document.getElementById('pubBox').style.display = (IS_ADMIN && r.items.length) ? 'block' : 'none';
+
+  let box = document.getElementById('cards');
+  if(!r.items.length){
+    box.innerHTML = `<div class="empty-note" style="grid-column:1/-1">No data found. ${r.day === 'SUNDAY' ? 'Sunday has no periods.' : 'No periods in the timetable for this day.'}</div>`;
+    return;
+  }
+  box.innerHTML = r.items.map(it => {
+    let pl = pillOf(it);
+    let cls = it.published === 'YES' ? 'pub' : (it.status === 'Done' ? 'done' : it.status === 'Draft' ? 'draft' : 'empty');
+    let who = (MODE === 'mine') ? '' : `<div class="meta">👤 ${esc(it.teacherName || 'No teacher')}</div>`;
+    let grp = it.group ? ` · <b>${esc(it.group)}</b>${it.room ? ' · Room ' + esc(it.room) : ''}` : '';
+    let body = (it.chapter || it.topic || it.homework)
+      ? `<div class="txt"><b>${esc(it.chapter)}</b>${it.topic ? '<br>' + esc(it.topic) : ''}${it.homework ? '<br>📝 ' + esc(it.homework) : ''}</div>` : '<div class="meta">Nothing written yet</div>';
+    let by = it.updatedBy ? `<div class="meta">Last saved by ${esc(it.updatedBy)} · ${esc(it.updatedAt)}</div>` : '';
+    let chk = IS_ADMIN ? `<label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" class="chk" value="${esc(it.id)}" style="width:22px;height:22px;min-height:0"> Select</label>` : '';
+    let slotMiss = it.slotMissing ? '<div class="lock">Period no longer in timetable</div>' : '';
+    return `<div class="card ${cls}">
+      <div class="ch"><span class="per">${esc(it.periodLabel)} <span class="meta">${esc(it.time)}</span></span><span class="pill ${pl[0]}">${pl[1]}</span></div>
+      <div class="subj">${esc(it.subject)}${grp}</div>
+      <div class="meta">Class ${esc(it.className)}</div>${who}${body}${by}${slotMiss}
+      ${(it.tests || []).map(t => `<div class="txt" style="color:#c00000;font-weight:700">${esc(t)}</div>`).join('')}
+      ${it.canEdit ? '' : `<div class="lock">🔒 ${esc(it.lockReason)}</div>`}
+      ${chk}
+      <button class="btn ${it.canEdit ? 'b-orange' : 'b-grey'}" onclick="openForm('${esc(it.id)}')">${it.canEdit ? '✏️ Fill / Edit' : '👁️ View'}</button>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- form ---------- */
+function openForm(id){
+  let it = ITEMS[id]; if(!it) return; CUR = it;
+  document.getElementById('fmTitle').innerText = it.periodLabel + ' · ' + it.subject;
+  document.getElementById('fmMeta').innerText = 'Class ' + it.className + (it.group ? ' · ' + it.group : '') + ' · ' + it.date + ' · ' + it.time;
+  document.getElementById('fmLock').innerText = it.canEdit ? '' : '🔒 ' + it.lockReason;
+  document.getElementById('fmChapter').value = it.chapter;
+  document.getElementById('fmTopic').value = it.topic;
+  document.getElementById('fmHw').value = it.homework;
+  document.getElementById('fmSub').value = it.submissionDate;
+  document.getElementById('fmRem').value = it.reminder;
+  document.getElementById('fmCom').value = it.comment;
+  document.getElementById('fmStatus').value = it.status === 'Done' ? 'Done' : 'Draft';
+  ['fmChapter', 'fmTopic', 'fmHw', 'fmSub', 'fmRem', 'fmCom', 'fmStatus'].forEach(k => { document.getElementById(k).disabled = !it.canEdit; });
+  document.getElementById('fmSave').style.display = it.canEdit ? 'block' : 'none';
+  hide(document.getElementById('fmMsg'));
+  document.getElementById('modal').classList.add('show');
+}
+function closeForm(){ document.getElementById('modal').classList.remove('show'); CUR = null; }
+
+async function saveEntry(){
+  if(!CUR) return;
+  let m = document.getElementById('fmMsg'), b = document.getElementById('fmSave');
+  b.disabled = true; show(m, 'Saving...', 'load');
+  try{
+    let r = await apiPost('savedailyupdate', {
+      date:CUR.date, className:CUR.className, period:CUR.periodNo, group:CUR.group, subject:CUR.subject,
+      chapter:document.getElementById('fmChapter').value, topic:document.getElementById('fmTopic').value,
+      homework:document.getElementById('fmHw').value, submissionDate:document.getElementById('fmSub').value,
+      reminder:document.getElementById('fmRem').value, comment:document.getElementById('fmCom').value,
+      status:document.getElementById('fmStatus').value
+    });
+    if(r.success){ show(m, '✅ ' + (r.message || 'Saved'), 'ok'); setTimeout(() => { closeForm(); loadDaily(); }, 700); }
+    else show(m, '❌ ' + (r.error || 'Could not save'), 'err');
+  }catch(e){ show(m, '❌ Network problem. Your text is still here. Try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+
+/* ---------- publish (admin) ---------- */
+async function publish(flag, which){
+  let msg = document.getElementById('msg');
+  let payload = {published:flag};
+  if(which === 'sel'){
+    let ids = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
+    if(!ids.length){ show(msg, 'Select at least one period', 'err'); return; }
+    payload.ids = ids;
+  }else{
+    payload.date = document.getElementById('fDate').value;
+    let c = document.getElementById('fClass').value; if(c && c !== 'ALL') payload.className = c;
+    if(!confirm('Publish every Done entry shown for this date' + (payload.className ? ' and class ' + payload.className : '') + '?')) return;
+  }
+  if(flag === 'NO' && !confirm('Unpublish the selected periods? Teachers will be able to edit them again.')) return;
+  show(msg, 'Working...', 'load');
+  try{
+    let r = await apiPost('setpublishstatus', payload);
+    if(r.success){ show(msg, '✅ ' + r.message, 'ok'); loadDaily(); }
+    else show(msg, '❌ ' + (r.error || 'Failed'), 'err');
+  }catch(e){ show(msg, '❌ Network problem', 'err'); }
+}
+
+/* =============== ATTENDANCE =============== */
+async function loadAttendance(){
+  let msg = document.getElementById('msg');
+  let date = document.getElementById('fDate').value, cls = document.getElementById('fClass').value;
+  let list = document.getElementById('attList');
+  if(!cls || cls === 'ALL'){ show(msg, 'Choose a class', 'err'); list.innerHTML = ''; return; }
+  show(msg, 'Loading students...', 'load'); list.innerHTML = '';
+  try{
+    let r = await apiGet('getattendance', {className:cls, date:date});
+    if(!r.success){ show(msg, r.error || 'Could not load', 'err'); ATT = null; return; }
+    ATT = r;
+    if(!r.students.length){ show(msg, 'No data found. No students in class ' + cls + '.', 'err'); return; }
+    hide(msg);
+    OPEN = {};
+    let dis = r.canEdit ? '' : 'disabled';
+    list.innerHTML = r.students.map((s, i) => `<div class="att">
+      <div class="nm">${esc(s.name)}<small>Roll ${esc(s.rollNo || '-')} · Adm ${esc(s.admissionNo)}</small></div>
+      <label class="tg">Present<input type="checkbox" id="p_${i}" ${s.status === 'P' ? 'checked' : ''} onchange="attCount()" ${dis}></label>
+      <label class="tg">Late<input type="checkbox" id="l_${i}" ${s.late === 'YES' ? 'checked' : ''} onchange="attCount()" ${dis}></label>
+      <label class="tg">Uniform<input type="checkbox" id="u_${i}" ${s.uniform === 'YES' ? 'checked' : ''} onchange="attCount()" ${dis}></label>
+      <button class="rmBtn" onclick="OPEN[${i}]=true;attRefresh(${i})">✎ Remark</button>
+      <div class="attx" id="x_${i}">
+        <input id="rm_${i}" maxlength="200" placeholder="Remark (optional)" value="${esc(s.remark)}" ${dis}>
+      </div>
+    </div>`).join('');
+    document.getElementById('attLock').innerText = r.canEdit ? (r.taken ? 'Attendance already taken for this date. Saving will replace it.' : '') : '🔒 ' + r.lockReason;
+    document.getElementById('btnAttSave').style.display = r.canEdit ? 'block' : 'none';
+    attCount();
+  }catch(e){ show(msg, 'Network problem. Check internet and tap Load.', 'err'); }
+}
+function attRefresh(i){
+  let rem = OPEN[i] || document.getElementById('rm_' + i).value.trim() !== '';
+  document.getElementById('x_' + i).style.display = rem ? 'flex' : 'none';
+}
+function attCount(){
+  if(!ATT) return;
+  ATT.students.forEach((s, i) => attRefresh(i));
+  let p = 0, a = 0, l = 0, u = 0;
+  ATT.students.forEach((s, i) => {
+    if(document.getElementById('p_' + i).checked) p++; else a++;
+    if(document.getElementById('l_' + i).checked) l++;
+    if(document.getElementById('u_' + i).checked) u++;
+  });
+  document.getElementById('attCount').innerHTML =
+    `<div class="stat"><b>${p}</b><span>Present</span></div><div class="stat"><b>${a}</b><span>Absent</span></div><div class="stat"><b>${l}</b><span>Late</span></div><div class="stat"><b>${u}</b><span>Incomplete Uniform</span></div>`;
+}
+function markAll(t){ if(!ATT || !ATT.canEdit) return; ATT.students.forEach((s, i) => { document.getElementById('p_' + i).checked = (t === 'P'); }); attCount(); }
+
+async function saveAttendance(){
+  if(!ATT) return;
+  let msg = document.getElementById('msg'), b = document.getElementById('btnAttSave');
+  let recs = ATT.students.map((s, i) => ({admissionNo:s.admissionNo,
+    status:document.getElementById('p_' + i).checked ? 'P' : 'A',
+    late:document.getElementById('l_' + i).checked ? 'YES' : 'NO',
+    uniform:document.getElementById('u_' + i).checked ? 'YES' : 'NO',
+    remark:document.getElementById('rm_' + i).value}));
+  b.disabled = true; show(msg, 'Saving attendance...', 'load');
+  try{
+    let r = await apiPost('saveattendance', {className:ATT.className, date:ATT.date, records:recs});
+    if(r.success){ show(msg, '✅ ' + r.message, 'ok'); setTimeout(loadAttendance, 800); }
+    else show(msg, '❌ ' + (r.error || 'Could not save'), 'err');
+  }catch(e){ show(msg, '❌ Network problem. Nothing was lost on screen. Try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+
+/* =============== PRINT (landscape A4, school details from Settings) =============== */
+function printClass(){
+  if(!DATA || !DATA.items.length){ show(document.getElementById('msg'), 'Load some data first', 'err'); return; }
+  let cls = document.getElementById('fClass').value;
+  let byCls = {};
+  DATA.items.forEach(i => { (byCls[i.className] = byCls[i.className] || []).push(i); });
+  let school = SETTINGS.School_Name || '', addr = SETTINGS.School_Address || '', phone = SETTINGS.School_Phone || SETTINGS.Phone || '', logo = SETTINGS['Logo Path'] || '';
+  let sess = SETTINGS.Academic_Session || '';
+  let pages = Object.keys(byCls).map(c => {
+    let items = byCls[c];
+    let nos = []; items.forEach(i => { if(nos.indexOf(Number(i.periodNo)) < 0) nos.push(Number(i.periodNo)); }); nos.sort((a, b) => a - b);
+    function cell(no, fn){
+      return '<td>' + items.filter(i => Number(i.periodNo) === no).map(i => fn(i)).join('<hr style="border:0;border-top:1px dashed #000;margin:3px 0">') + '</td>';
+    }
+    let rows = [
+      ['Subject', i => '<b>' + esc(i.subject) + '</b>' + (i.group ? '<br>(' + esc(i.group) + ')' : '')],
+      ['Teacher', i => esc(i.teacherName)],
+      ['Lesson / Chapter', i => esc(i.chapter)],
+      ['Activities / Topic', i => esc(i.topic)],
+      ['Home Assignment', i => esc(i.homework)],
+      ['Submission Date', i => esc(i.submissionDate)],
+      ['Information / Reminder', i => esc(i.reminder) + (i.tests && i.tests.length ? (i.reminder ? '<br>' : '') + i.tests.map(esc).join('<br>') : '')],
+      ["Teacher's Comment", i => esc(i.comment)]
+    ];
+    let head = '<tr><th style="width:2.8cm">Period</th>' + nos.map(n => { let it = items.find(i => Number(i.periodNo) === n); return '<th>' + esc(it.periodLabel) + '<br><span style="font-weight:400">' + esc(it.time) + '</span></th>'; }).join('') + '</tr>';
+    let body = rows.map(r => '<tr><td class="lbl">' + r[0] + '</td>' + nos.map(n => cell(n, r[1])).join('') + '</tr>').join('');
+    let att = '';
+    if(MODE === 'class' && DATA.attendance && DATA.attendance.taken){
+      let a = DATA.attendance;
+      att = `<div class="att">Present: <b>${a.present}</b> &nbsp; Absent: <b>${a.absent}</b> &nbsp; Late Entry: <b>${a.late}</b> &nbsp; Incomplete Uniform: <b>${a.uniform}</b>${a.absentees ? '<br>Absentees: ' + esc(a.absentees) : ''}</div>`;
+    }
+    return `<section><div class="hd">${logo ? '<img src="' + esc(logo) + '">' : ''}<div><h1>${esc(school)}</h1><div class="ad">${esc(addr)}${phone ? ' | Phone: ' + esc(phone) : ''}</div></div></div>
+      <div class="tt">DAILY CLASS UPDATE - CLASS ${esc(c)}</div>
+      <div class="mt"><span>Date: <b>${esc(DATA.date)} (${esc(DATA.day)})</b></span><span>${sess ? 'Session: ' + esc(sess) : ''}</span></div>${att}
+      <table><thead>${head}</thead><tbody>${body}</tbody></table></section>`;
+  }).join('');
+  let css = '@page{size:A4 landscape;margin:8mm 8mm 14mm 8mm}body{font-family:Arial;margin:0}section{page-break-after:always}section:last-of-type{page-break-after:auto}' +
+    '.hd{display:flex;align-items:center;justify-content:center;gap:12px;position:relative;min-height:1.4cm}.hd img{height:1.3cm;position:absolute;left:0}.hd h1{margin:0;font-size:20px;color:#0b2a5c;text-align:center}.ad{font-size:10px;text-align:center;font-weight:700}' +
+    '.tt{background:#a9d8e8;text-align:center;padding:5px;font-weight:800;border:1px solid #000;margin:6px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.mt{display:flex;justify-content:space-between;font-size:11px;margin:4px 0}.att{font-size:11px;border:1px solid #000;padding:5px;margin:4px 0}' +
+    'table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #000;font-size:10px;padding:3px;text-align:center;vertical-align:middle;word-wrap:break-word;height:0.9cm}th{background:#0a1931;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}td.lbl{background:#dbe6ff;font-weight:800;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+    '.foot{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:9px}.foot:after{content:"Page " counter(page)}';
+  let w = window.open('', '_blank');
+  if(!w){ show(document.getElementById('msg'), 'Allow pop-ups to print', 'err'); return; }
+  w.document.write('<html><head><title>Daily Update</title><style>' + css + '</style></head><body>' + pages + '<div class="foot"></div><script>setTimeout(function(){window.print()},400)<\/script></body></html>');
+  w.document.close();
+}
+
+init();
+</script>
+</body></html>
