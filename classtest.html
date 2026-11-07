@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Class Test</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.wrap{max-width:1000px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;border-left:4px solid var(--navy);padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 10px}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:46px;background:#fff}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:140px}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff}
+.btn:disabled{opacity:.6;cursor:wait}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-orange{background:linear-gradient(135deg,#ef6c00,#ff9800)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#666}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:110px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--purple);display:flex;flex-direction:column;gap:6px}
+.card.up{border-left-color:var(--orange)}.card.done{border-left-color:var(--green)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.per{font-weight:900;color:var(--navy);font-size:15px}
+.pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-up{background:#fff3e0;color:#9a3412}.p-done{background:#dcfce7;color:#166534}.p-none{background:#f1f5f9;color:#475569}
+.subj{font-weight:800;font-size:16px}.tname{font-size:14px;font-weight:700;color:var(--purple)}
+.meta{font-size:12px;color:var(--muted);line-height:1.5}
+.lock{font-size:11.5px;color:var(--red);font-weight:700;margin:6px 0}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}
+.empty-note{text-align:center;color:var(--muted);padding:26px 10px;font-weight:700}
+.stu{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.stu .nm{flex:1;min-width:140px;font-weight:700;font-size:14px}.stu .nm small{display:block;color:var(--muted);font-weight:600}
+.stu .mk{width:92px;text-align:center;font-weight:800;font-size:17px}
+.stu .ab{display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:800;color:var(--muted);gap:3px}.stu .ab input{width:26px;height:26px;min-height:0;padding:0}
+.stu .rm{flex-basis:100%;display:none;font-size:14px}
+.rmBtn{border:1px solid #cbd5e1;background:#fff;border-radius:10px;min-height:36px;padding:0 10px;font-weight:700;color:var(--navy);cursor:pointer;font-size:12px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.stat{flex:1;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:680px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.modal{align-items:center}.sheet{border-radius:20px}}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">T</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">TEACHER</div>
+    <div class="badge-exam" id="examBadge" style="background:#c1272d">Exam: -</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box">
+    <div class="title">1. Create New Test</div>
+    <div class="row">
+      <div><label>Test Date</label><input type="date" id="cDate"></div>
+      <div><label>Class</label><select id="cClass" onchange="fillSubjects()"></select></div>
+      <div><label>Subject</label><select id="cSubject"></select></div>
+    </div>
+    <div class="row">
+      <div style="flex:3"><label>Test Name</label><input id="cName" maxlength="100" placeholder="e.g. UT-1, Chapter 3 Test"></div>
+      <div><label>Max Marks</label><input id="cMax" type="number" inputmode="decimal" min="1" max="1000" value="20"></div>
+    </div>
+    <div class="msg" id="cMsg"></div>
+    <div class="btnrow"><button class="btn b-green" id="btnCreate" onclick="createTest()">➕ Create Test</button></div>
+    <div class="meta" style="margin-top:8px">A test booked for a date shows as a 📌 reminder in that day's Daily Update.</div>
+  </div>
+
+  <div class="box">
+    <div class="title">2. My Tests</div>
+    <div class="row">
+      <div><label>Class</label><select id="fClass"></select></div>
+      <div><label>Month</label><input type="month" id="fMonth"></div>
+    </div>
+    <div class="btnrow"><button class="btn b-blue" id="btnLoad" onclick="loadTests()">🔍 Load</button></div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="grid" id="cards"></div>
+</div>
+
+<!-- MARKS -->
+<div class="modal" id="mModal" onclick="if(event.target===this)closeMarks()">
+  <div class="sheet">
+    <div class="title" id="mTitle">Marks</div>
+    <div class="meta" id="mMeta"></div>
+    <div class="lock" id="mLock"></div>
+    <div class="stats" id="mStats" style="margin-top:8px"></div>
+    <div id="mList"></div>
+    <div class="msg" id="mMsg"></div>
+    <div class="btnrow">
+      <button class="btn b-green" id="mSave" onclick="saveMarks()">💾 Save Marks</button>
+      <button class="btn b-grey" onclick="closeMarks()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT -->
+<div class="modal" id="eModal" onclick="if(event.target===this)closeEdit()">
+  <div class="sheet">
+    <div class="title">Edit Test</div>
+    <div class="meta" id="eMeta"></div>
+    <label>Test Date</label><input type="date" id="eDate">
+    <label>Test Name</label><input id="eName" maxlength="100">
+    <label>Max Marks</label><input id="eMax" type="number" inputmode="decimal" min="1" max="1000">
+    <div class="msg" id="eMsg"></div>
+    <div class="btnrow">
+      <button class="btn b-green" id="eSave" onclick="saveEdit()">💾 Save</button>
+      <button class="btn b-grey" onclick="closeEdit()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tabBtn active"><span class="tabIco">📝</span>Class Test</button>
+  <button class="tabBtn" onclick="goDaily()"><span class="tabIco">📚</span>Daily</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+var IS_ADMIN = USER.role === 'admin';
+var IS_CT = USER.role === 'classTeacher' || USER.isClassTeacher;
+
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function today(){ let d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function $(id){ return document.getElementById(id); }
+
+var OPTS = [];      // [{className, subjects:[{subject, group, label}]}]
+var TESTS = {};     // testID -> test
+var MK = null;      // marks response
+var EDIT = null;
+
+async function init(){
+  $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
+  $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
+  $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
+  $('roleBadge').innerText = IS_ADMIN ? 'ADMIN' : ((IS_CT && ls('cvse_view') === 'class') ? 'CLASS TEACHER' : 'SUBJECT TEACHER');
+  let ex = IS_ADMIN || String(USER.examAccess).toUpperCase() === 'YES';
+  $('examBadge').innerText = ex ? 'Exam: ENABLED' : 'Exam: DISABLED'; $('examBadge').style.background = ex ? '#16a34a' : '#c1272d';
+  $('cDate').value = today();
+  let d = new Date(); $('fMonth').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  show($('msg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getclasstestoptions');
+    if(!r.success){ show($('msg'), r.error || 'Could not load classes', 'err'); return; }
+    OPTS = r.classes || [];
+  }catch(e){ show($('msg'), 'Network problem. Check internet and reload.', 'err'); return; }
+  hide($('msg'));
+  if(!OPTS.length){
+    $('cClass').innerHTML = '<option value="">No class in your timetable</option>';
+    $('fClass').innerHTML = '<option value="">-</option>';
+    show($('cMsg'), 'No data found. You have no class or subject in the timetable yet.', 'err');
+    return;
+  }
+  $('cClass').innerHTML = OPTS.map(c => `<option value="${esc(c.className)}">${esc(c.className)}</option>`).join('');
+  $('fClass').innerHTML = '<option value="ALL">All my classes</option>' + OPTS.map(c => `<option value="${esc(c.className)}">${esc(c.className)}</option>`).join('');
+  fillSubjects();
+  loadTests();
+}
+
+function fillSubjects(){
+  let c = OPTS.find(x => x.className === $('cClass').value);
+  $('cSubject').innerHTML = c ? c.subjects.map((s, i) => `<option value="${i}">${esc(s.label)}</option>`).join('') : '';
+}
+
+function goBack(){
+  let v = ls('cvse_view');
+  window.location.href = IS_ADMIN ? 'admin.html' : (IS_CT && v === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html');
+}
+function goDaily(){ window.location.href = 'daily.html?tab=' + (IS_ADMIN ? 'all' : (IS_CT && ls('cvse_view') === 'class' ? 'class' : 'mine')); }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+
+/* ---------- create ---------- */
+async function createTest(){
+  let m = $('cMsg'), b = $('btnCreate');
+  let c = OPTS.find(x => x.className === $('cClass').value);
+  let s = c ? c.subjects[Number($('cSubject').value)] : null;
+  if(!c || !s){ show(m, 'Choose a class and subject', 'err'); return; }
+  b.disabled = true; show(m, 'Creating test...', 'load');
+  try{
+    let r = await apiPost('saveclasstest', {date:$('cDate').value, className:c.className, subject:s.subject, group:s.group,
+      testName:$('cName').value, maxMarks:$('cMax').value});
+    if(r.success){ show(m, '✅ ' + (r.message || 'Test created'), 'ok'); $('cName').value = ''; loadTests(); }
+    else show(m, '❌ ' + (r.error || 'Could not create'), 'err');
+  }catch(e){ show(m, '❌ Network problem. Try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+
+/* ---------- list ---------- */
+async function loadTests(){
+  let msg = $('msg'), box = $('cards'), btn = $('btnLoad');
+  show(msg, 'Loading tests...', 'load'); box.innerHTML = ''; btn.disabled = true;
+  try{
+    let p = {month:$('fMonth').value}; let c = $('fClass').value; if(c && c !== 'ALL') p.className = c;
+    let r = await apiGet('getclasstests', p);
+    if(!r.success){ show(msg, r.error || 'Could not load', 'err'); return; }
+    TESTS = {}; r.tests.forEach(t => { TESTS[t.testID] = t; });
+    hide(msg);
+    if(!r.tests.length){ box.innerHTML = '<div class="empty-note" style="grid-column:1/-1">No data found. No tests in this month.</div>'; return; }
+    box.innerHTML = r.tests.map(t => {
+      let pill = t.isFuture ? ['p-up', 'Upcoming'] : (t.marksCount ? ['p-done', t.marksCount + ' marks entered'] : ['p-none', 'No marks yet']);
+      let cls = t.isFuture ? 'up' : (t.marksCount ? 'done' : '');
+      let del = t.canDelete ? `<button class="btn b-red" onclick="delTest('${esc(t.testID)}')">🗑️ Delete</button>` : '';
+      let edit = t.canEdit ? `<button class="btn b-navy" onclick="openEdit('${esc(t.testID)}')">✏️ Edit</button>` : '';
+      return `<div class="card ${cls}">
+        <div class="ch"><span class="per">${esc(t.date)}</span><span class="pill ${pill[0]}">${esc(pill[1])}</span></div>
+        <div class="subj">${esc(t.subject)}${t.group ? ' · ' + esc(t.group) : ''}</div>
+        <div class="tname">${esc(t.testName)}</div>
+        <div class="meta">Class ${esc(t.className)} · Max ${esc(t.maxMarks)} · by ${esc(t.createdBy)}</div>
+        <div class="btnrow" style="margin-top:6px">
+          <button class="btn ${t.canEnter ? 'b-purple' : 'b-grey'}" onclick="openMarks('${esc(t.testID)}')">${t.canEnter ? '📝 Marks' : '👁️ View'}</button>${edit}${del}
+        </div></div>`;
+    }).join('');
+  }catch(e){ show(msg, 'Network problem. Check internet and tap Load.', 'err'); }
+  finally{ btn.disabled = false; }
+}
+
+/* ---------- marks ---------- */
+async function openMarks(id){
+  $('mTitle').innerText = 'Loading...'; $('mList').innerHTML = ''; hide($('mMsg')); $('mLock').innerText = ''; $('mStats').innerHTML = '';
+  $('mModal').classList.add('show');
+  try{
+    let r = await apiGet('getclasstestmarks', {testID:id});
+    if(!r.success){ closeMarks(); show($('msg'), r.error || 'Could not open', 'err'); return; }
+    MK = r; let t = r.test;
+    $('mTitle').innerText = t.subject + (t.group ? ' · ' + t.group : '') + ' — ' + t.testName;
+    $('mMeta').innerText = 'Class ' + t.className + ' · ' + t.date + ' · Max ' + t.maxMarks;
+    $('mLock').innerText = r.canEnter ? '' : '🔒 ' + r.lockReason;
+    let dis = r.canEnter ? '' : 'disabled';
+    if(!r.students.length){ $('mList').innerHTML = '<div class="empty-note">No data found. No students in this list.</div>'; }
+    else $('mList').innerHTML = r.students.map((s, i) => `<div class="stu">
+      <div class="nm">${esc(s.name)}<small>Roll ${esc(s.rollNo || '-')} · Adm ${esc(s.admissionNo)}</small></div>
+      <input class="mk" id="m_${i}" type="number" inputmode="decimal" min="0" max="${esc(t.maxMarks)}" step="0.5" placeholder="/${esc(t.maxMarks)}" value="${s.marks === 'AB' ? '' : esc(s.marks)}" ${s.marks === 'AB' ? 'disabled' : dis} oninput="mkStats()">
+      <label class="ab">AB<input type="checkbox" id="a_${i}" ${s.marks === 'AB' ? 'checked' : ''} ${dis} onchange="toggleAb(${i})"></label>
+      <button class="rmBtn" onclick="document.getElementById('r_${i}').style.display='block'">✎</button>
+      <input class="rm" id="r_${i}" maxlength="200" placeholder="Remark (optional)" value="${esc(s.remark)}" style="${s.remark ? 'display:block' : ''}" ${dis}>
+    </div>`).join('');
+    $('mSave').style.display = r.canEnter ? 'block' : 'none';
+    mkStats();
+  }catch(e){ closeMarks(); show($('msg'), 'Network problem. Try again.', 'err'); }
+}
+function closeMarks(){ $('mModal').classList.remove('show'); MK = null; }
+function toggleAb(i){
+  let ab = $('a_' + i).checked, inp = $('m_' + i);
+  if(ab){ inp.value = ''; inp.disabled = true; } else inp.disabled = !MK.canEnter;
+  mkStats();
+}
+function mkStats(){
+  if(!MK) return;
+  let max = Number(MK.test.maxMarks), n = 0, ab = 0, sum = 0;
+  MK.students.forEach((s, i) => {
+    if($('a_' + i).checked){ ab++; return; }
+    let v = $('m_' + i).value.trim(); if(v === '') return;
+    let x = Number(v); if(isNaN(x)) return; n++; sum += x;
+  });
+  $('mStats').innerHTML = `<div class="stat"><b>${n}</b><span>Entered</span></div><div class="stat"><b>${ab}</b><span>Absent</span></div><div class="stat"><b>${MK.students.length - n - ab}</b><span>Left blank</span></div><div class="stat"><b>${n ? (Math.round(sum / n * 10) / 10) : '-'}</b><span>Average / ${max}</span></div>`;
+}
+async function saveMarks(){
+  if(!MK) return;
+  let m = $('mMsg'), b = $('mSave');
+  let recs = MK.students.map((s, i) => ({admissionNo:s.admissionNo,
+    marks:$('a_' + i).checked ? 'AB' : $('m_' + i).value.trim(), remark:$('r_' + i).value}));
+  b.disabled = true; show(m, 'Saving marks...', 'load');
+  try{
+    let r = await apiPost('saveclasstestmarks', {testID:MK.test.testID, records:recs});
+    if(r.success){ show(m, '✅ ' + (r.message || 'Saved'), 'ok'); setTimeout(() => { closeMarks(); loadTests(); }, 800); }
+    else show(m, '❌ ' + (r.error || 'Could not save'), 'err');
+  }catch(e){ show(m, '❌ Network problem. Your marks are still on screen. Try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+
+/* ---------- edit / delete ---------- */
+function openEdit(id){
+  let t = TESTS[id]; if(!t) return; EDIT = t;
+  $('eMeta').innerText = 'Class ' + t.className + ' · ' + t.subject + (t.group ? ' · ' + t.group : '') + (t.marksCount ? ' · ' + t.marksCount + ' marks entered' : '');
+  $('eDate').value = t.date; $('eName').value = t.testName; $('eMax').value = t.maxMarks;
+  hide($('eMsg')); $('eModal').classList.add('show');
+}
+function closeEdit(){ $('eModal').classList.remove('show'); EDIT = null; }
+async function saveEdit(){
+  if(!EDIT) return;
+  let m = $('eMsg'), b = $('eSave'); b.disabled = true; show(m, 'Saving...', 'load');
+  try{
+    let r = await apiPost('saveclasstest', {testID:EDIT.testID, date:$('eDate').value, testName:$('eName').value, maxMarks:$('eMax').value});
+    if(r.success){ show(m, '✅ ' + (r.message || 'Saved'), 'ok'); setTimeout(() => { closeEdit(); loadTests(); }, 700); }
+    else show(m, '❌ ' + (r.error || 'Could not save'), 'err');
+  }catch(e){ show(m, '❌ Network problem. Try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+async function delTest(id){
+  let t = TESTS[id]; if(!t) return;
+  if(!confirm('Delete test "' + t.testName + '" (' + t.subject + ', class ' + t.className + ')? This cannot be undone.')) return;
+  show($('msg'), 'Deleting...', 'load');
+  try{
+    let r = await apiPost('deleteclasstest', {testID:id});
+    if(r.success){ show($('msg'), '✅ ' + (r.message || 'Deleted'), 'ok'); loadTests(); }
+    else show($('msg'), '❌ ' + (r.error || 'Could not delete'), 'err');
+  }catch(e){ show($('msg'), '❌ Network problem. Try again.', 'err'); }
+}
+
+init();
+</script>
+</body></html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>DiGit ERP Login</title>
+<style>body{font-family:Arial;background:#eef2f7;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0} .card{background:#fff;padding:28px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:360px;text-align:center} .input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;margin:8px 0;background:#eef6ff;box-sizing:border-box} .btn{width:100%;padding:12px;border:none;border-radius:25px;font-weight:800;cursor:pointer;margin:6px 0} .btn-login{background:#0b2a5c;color:#fff} .btn-class{background:#0b2a5c;color:#fff} .btn-sub{background:#16a34a;color:#fff} .btn-back{background:#e5e7eb;color:#333}</style></head><body>
+<div class="card">
+<div id="loginForm"><h2 style="color:#0b2a5c">DiGit School Management<br>System . ERP</h2>
+<input id="username" class="input" placeholder="Username"><input id="password" type="password" class="input" placeholder="Password">
+<button class="btn btn-login" onclick="doLogin()">Login</button><p id="msg" style="color:red;min-height:18px;font-size:13px"></p></div>
+<div id="roleForm" style="display:none"><h2 style="color:#0b2a5c">DiGit School Management<br>System . ERP</h2><p style="font-weight:700">Select Login Mode</p><p id="welcomeName" style="font-weight:800;color:#0b2a5c"></p><div id="roleList"></div></div>
+</div>
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+let CAP = null;
+
+async function apiPost(action, payload={}){
+  let r = await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action,...payload})});
+  return await r.json();
+}
+
+async function doLogin(){
+  var u=document.getElementById('username').value.trim();
+  var p=document.getElementById('password').value.trim();
+  if(!u||!p){ document.getElementById('msg').innerText='Enter username & password'; return; }
+  document.getElementById('msg').innerText='Checking...';
+  try{
+    // FIXED: action is 'login' not 'checklogin' - matches 08_WebRouter.gs
+    let res = await apiPost('login', {username:u, password:p});
+    
+    if(!res || !res.success){ 
+      document.getElementById('msg').innerText='❌ Invalid Login - '+(res.error||res.message||'Wrong password'); 
+      return; 
+    }
+    
+    // Handle both formats: {user:{}} or direct {username, role...}
+    let userObj = res.user || res.data || res;
+    let token = res.token || userObj.token || 'ok-'+Date.now();
+    
+    CAP = {
+      username: userObj.username || u,
+      name: userObj.name || userObj.fullName || userObj.username || u,
+      role: userObj.role || 'teacher',
+      classes: userObj.classes || userObj.className || '',
+      subjects: userObj.subjects || userObj.subject || '',
+      examAccess: userObj.examAccess || userObj.ExamAccess || 'NO',
+      isClassTeacher: userObj.isClassTeacher || false,
+      availableRoles: userObj.availableRoles || res.availableRoles || [{role: userObj.role || 'subjectTeacher', label: (userObj.role||'TEACHER').toUpperCase()}],
+      token: token
+    };
+
+    // Save both old and new keys for compatibility
+    localStorage.setItem('cvs_user', JSON.stringify(CAP));
+    localStorage.setItem('cvse_user', JSON.stringify(CAP));
+    localStorage.setItem('cvs_token', CAP.token);
+    localStorage.setItem('cvse_token', CAP.token);
+    localStorage.setItem('token', CAP.token);
+    localStorage.setItem('cvse_username', CAP.username);
+    localStorage.setItem('cvse_role', CAP.role);
+    localStorage.setItem('cvse_name', CAP.name);
+    localStorage.setItem('cvse_classes', CAP.classes||'');
+    localStorage.setItem('cvse_subjects', CAP.subjects||'');
+    localStorage.setItem('cvse_examAccess', CAP.examAccess||'NO');
+    localStorage.setItem('cvse_isClassTeacher', CAP.isClassTeacher ? 'true':'false');
+    localStorage.setItem('cvs_username', CAP.username);
+    localStorage.setItem('cvs_role', CAP.role);
+    
+    showRoleSwitcher(CAP);
+  }catch(e){ document.getElementById('msg').innerText='Error: '+e.message; }
+}
+
+function showRoleSwitcher(cap){
+  if(!cap.availableRoles || cap.availableRoles.length==0){
+    cap.availableRoles=[{role: cap.role || 'admin', label: (cap.role||'admin').toUpperCase()}];
+  }
+  
+  // No choice box: a class teacher enters the Class view, a subject teacher the Subject view, admin the Admin panel.
+  // A class teacher moves between the two views with the Switch button on the dashboard.
+  if(cap.role=='admin'){ enterRole('admin'); return; }
+  if(cap.availableRoles.length>=1){
+    var hasClass=false;
+    for(var j=0;j<cap.availableRoles.length;j++){ if(cap.availableRoles[j].role=='classTeacher') hasClass=true; }
+    enterRole(hasClass ? 'classTeacher' : cap.availableRoles[0].role);
+    return;
+  }
+  
+  var first = cap.availableRoles[0].role;
+  var allSame = true;
+  for(var i=0;i<cap.availableRoles.length;i++){ if(cap.availableRoles[i].role!=first){ allSame=false; break; } }
+  if(allSame){
+    enterRole(first);
+    return;
+  }
+  
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('roleForm').style.display='block';
+  document.getElementById('welcomeName').innerText='Welcome, '+cap.name+' ('+cap.username.toUpperCase()+')';
+  var html='';
+  cap.availableRoles.forEach(function(r){
+    var cls = r.role=='classTeacher' ? 'btn-class' : 'btn-sub';
+    var icon = r.role=='classTeacher' ? '🏫' : '📚';
+    if(r.role=='admin'){ cls='btn-class'; icon='🛡️'; }
+    html+='<button class="btn '+cls+'" onclick="enterRole(\''+r.role+'\')">'+icon+' '+r.label+'</button>';
+  });
+  html+='<button class="btn btn-back" onclick="backToLogin()">← Back to Login</button>';
+  document.getElementById('roleList').innerHTML=html;
+}
+
+function enterRole(role){
+  if(!CAP) {
+    try{ CAP=JSON.parse(localStorage.getItem('cvse_user')||localStorage.getItem('cvs_user')||'{}'); }catch(e){ CAP={}; }
+  }
+  localStorage.setItem('cvs_selected_role', role);
+  localStorage.setItem('cvse_view', role=='classTeacher' ? 'class' : role=='subjectTeacher' ? 'subject' : 'admin');
+  localStorage.setItem('role', role);
+  localStorage.setItem('cvse_role', role);
+  localStorage.setItem('cvs_role', role);
+  
+  if(role=='admin') window.location.href = 'admin.html';
+  else if(role=='subjectTeacher' || role=='subject') window.location.href = 'subject-dashboard.html';
+  else if(role=='classTeacher' || role=='teacher') window.location.href = 'class-dashboard.html';
+  else window.location.href = 'class-dashboard.html';
+}
+
+function backToLogin(){
+  document.getElementById('roleForm').style.display='none';
+  document.getElementById('loginForm').style.display='block';
+  document.getElementById('msg').innerText='';
+}
+
+(function(){
+  try{
+    var u = JSON.parse(localStorage.getItem('cvse_user')||'null');
+    if(u && u.token){
+      CAP = u;
+      var view = localStorage.getItem('cvse_view');
+      if(view=='class') window.location.href='class-dashboard.html';
+      else if(view=='subject') window.location.href='subject-dashboard.html';
+      else if(view=='admin') window.location.href='admin.html';
+    }
+  }catch(e){}
+})();
+</script></body></html>
