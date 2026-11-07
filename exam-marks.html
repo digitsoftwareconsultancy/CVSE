@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Exam Marks</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.wrap{max-width:1000px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:46px;background:#fff}
+input[readonly]{background:#f1f5f9;color:#475569}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-orange{background:linear-gradient(135deg,#ef6c00,#ff9800)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--purple);margin-bottom:12px}
+.card.exam{border-left-color:var(--blue)}.card.rep{border-left-color:var(--orange)}.card.area{border-left-color:var(--green)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px}
+.ch b{color:var(--navy);font-size:15px}
+.pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-dirty{background:#fff3e0;color:#9a3412}.p-ok{background:#dcfce7;color:#166534}.p-lock{background:#fee2e2;color:#991b1b}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:999px;padding:0 12px;min-height:38px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip input{width:18px;height:18px;min-height:0;padding:0;margin:0}
+.chip.on{background:#e3f2fd;border-color:#90caf9}
+.sw{display:flex;align-items:center;gap:8px;min-height:46px;font-weight:700;font-size:14px;cursor:pointer}
+.sw input{width:22px;height:22px;min-height:0;padding:0}
+.preview{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:10px;font-size:13px;font-weight:700;color:var(--navy);margin-top:10px;line-height:1.5}
+.wrow{display:flex;gap:8px;align-items:center;margin-top:6px}.wrow span{flex:1;font-weight:700;font-size:13px}.wrow input{width:100px;text-align:center}
+.grow{display:grid;grid-template-columns:70px 70px 70px 1fr 46px;gap:6px;align-items:center;margin-bottom:6px}
+.grow input{padding:8px;text-align:center}.grow input.rem{text-align:left}
+.xbtn{border:1px solid #fecaca;background:#fff;color:var(--red);border-radius:10px;min-height:46px;font-weight:900;cursor:pointer}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.prow .full{grid-column:1/-1}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;position:relative}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+.stu{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.stu .nm{flex:1 1 100%;font-weight:700;font-size:14px}
+.stu .fld{display:flex;flex-direction:column;align-items:center}
+.stu .sp{flex:1}.stu .nm small{display:block;color:var(--muted);font-weight:600}
+.stu .mk{width:84px;text-align:center;font-weight:800;font-size:17px;padding:8px}
+.stu .mk.bad{border-color:var(--red);background:#fee2e2}
+.stu .tot{width:62px;text-align:center;font-weight:800;color:var(--navy);font-size:15px}
+.stu .ab{display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:800;color:var(--muted);gap:3px}.stu .ab input{width:26px;height:26px;min-height:0;padding:0}
+.stu.absent .mk{background:#f1f5f9;opacity:.6}
+.lab{font-size:10px;font-weight:800;color:var(--muted);text-align:center;display:block}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.stat{flex:1;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <div class="badge-exam" id="examBadge" style="background:#16a34a">Exam: ENABLED</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box">
+    <div class="title">📝 Exam Marks</div>
+    <div class="row">
+      <div><label>Exam</label><select id="selExam" onchange="onExam()"></select></div>
+      <div><label>Class</label><select id="selClass" onchange="onClass()"></select></div>
+      <div><label>Subject</label><select id="selSubject" onchange="onSubject()"></select></div>
+    </div>
+    <div class="msg" id="gMsg"></div>
+    <div class="btnrow"><button class="btn b-blue" id="btnLoad" onclick="loadMarks()">🔍 Load Students</button></div>
+  </div>
+
+  <div class="box" id="entryBox" style="display:none">
+    <div class="title" id="eTitle">Marks</div>
+    <div class="meta" id="eMeta"></div>
+    <div class="msg warn" id="eLock"></div>
+    <div class="stats" id="eStats"></div>
+    <div id="eList"></div>
+    <div class="msg" id="eMsg"></div>
+    <div class="btnrow">
+      <button class="btn b-green" id="btnSave" onclick="saveMarks()">💾 Save Marks</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tabBtn active"><span class="tabIco">📝</span>Exam Marks</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+var IS_ADMIN = USER.role === 'admin';
+var IS_CT = USER.role === 'classTeacher' || USER.isClassTeacher;
+
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function goBack(){ window.location.href = IS_ADMIN ? 'admin.html' : (IS_CT && ls('cvse_view') === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html'); }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+
+var OPTS = [];           // exams -> classes -> subjects
+var DATA = null;         // loaded marks
+var DIRTY = false;
+
+function curExam(){ return OPTS.find(e => e.examId === $('selExam').value); }
+function curClass(){ let e = curExam(); return e ? e.classes.find(c => c.className === $('selClass').value) : null; }
+function curSub(){ let c = curClass(); return c ? c.subjects.find(s => s.subjectName === $('selSubject').value) : null; }
+
+async function init(){
+  $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
+  $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
+  $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
+  $('roleBadge').innerText = IS_ADMIN ? 'ADMIN' : ((IS_CT && ls('cvse_view') === 'class') ? 'CLASS TEACHER' : 'SUBJECT TEACHER');
+  let ex = IS_ADMIN || String(USER.examAccess).toUpperCase() === 'YES';
+  $('examBadge').innerText = ex ? 'Exam: ENABLED' : 'Exam: DISABLED'; $('examBadge').style.background = ex ? '#16a34a' : '#c1272d';
+  show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getexamentryoptions');
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    OPTS = r.exams || [];
+  }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
+  if(!OPTS.length){
+    $('selExam').innerHTML = $('selClass').innerHTML = $('selSubject').innerHTML = '<option value="">-</option>';
+    $('btnLoad').disabled = true;
+    show($('gMsg'), IS_ADMIN ? 'No exam found. Create exams in Exam Settings first.' : 'No exam is set for you yet. The admin gives permission in Exam Settings > Access.', 'warn');
+    return;
+  }
+  hide($('gMsg'));
+  $('selExam').innerHTML = OPTS.map(e => `<option value="${esc(e.examId)}">${esc(e.name || e.short)}${e.locked ? ' (locked)' : (!e.entryOpen && !IS_ADMIN ? ' (not open)' : '')}</option>`).join('');
+  onExam();
+}
+function onExam(){
+  let e = curExam();
+  $('selClass').innerHTML = e ? e.classes.map(c => `<option value="${esc(c.className)}">${esc(c.className)}</option>`).join('') : '';
+  onClass();
+}
+function onClass(){
+  let c = curClass();
+  $('selSubject').innerHTML = c ? c.subjects.map(s => `<option value="${esc(s.subjectName)}">${esc(s.subjectName)}${s.canEdit ? '' : ' (view only)'}</option>`).join('') : '';
+  onSubject();
+}
+function onSubject(){ if(DIRTY && !confirm('You have unsaved marks. Leave them?')){ restoreSel(); return; } DIRTY = false; $('entryBox').style.display = 'none'; DATA = null; remember(); }
+var SEL = {};
+function remember(){ SEL = {exam:$('selExam').value, cls:$('selClass').value, sub:$('selSubject').value}; }
+function restoreSel(){ $('selExam').value = SEL.exam; onExamQuiet(); }
+function onExamQuiet(){ let e = curExam(); $('selClass').innerHTML = e.classes.map(c => `<option value="${esc(c.className)}">${esc(c.className)}</option>`).join(''); $('selClass').value = SEL.cls; let c = curClass(); $('selSubject').innerHTML = c.subjects.map(s => `<option value="${esc(s.subjectName)}">${esc(s.subjectName)}${s.canEdit ? '' : ' (view only)'}</option>`).join(''); $('selSubject').value = SEL.sub; }
+
+async function loadMarks(){
+  if(DIRTY && !confirm('You have unsaved marks. Reload and lose them?')) return;
+  let b = $('btnLoad'); b.disabled = true; show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getexammarks', {examId:$('selExam').value, className:$('selClass').value, subject:$('selSubject').value});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    DATA = r; DIRTY = false; hide($('gMsg')); draw();
+  }catch(e){ show($('gMsg'), '❌ Network problem. Please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+
+function num(v){ v = String(v).trim(); if(v === '') return null; let n = Number(v); return isNaN(n) ? NaN : n; }
+function draw(){
+  let d = DATA; $('entryBox').style.display = '';
+  $('eTitle').innerText = d.subject + ' · Class ' + d.className + ' · ' + (d.exam.short || d.exam.name);
+  if(d.grade){ $('eMeta').innerText = 'Choose a letter grade for each student (' + (d.letters || []).join(', ') + '). Tick AB if the student was absent.'; }
+  else $('eMeta').innerText = 'Full marks ' + d.total + (d.ia ? ' = Theory ' + d.theory + ' + I/A ' + d.ia : '') + (d.pass !== null && d.pass !== undefined ? ' · Pass marks ' + d.pass : '') + '. Tick AB if the student was absent.';
+  if(d.canEdit) hide($('eLock')); else show($('eLock'), '🔒 ' + (d.reason || 'View only.'), 'warn');
+  $('btnSave').style.display = d.canEdit ? '' : 'none';
+  if(!d.students.length){ $('eList').innerHTML = '<div class="empty-note">No students found for this subject in class ' + esc(d.className) + '.</div>'; $('eStats').innerHTML = ''; return; }
+  if(d.grade){ drawGrade(d); return; }
+  $('eList').innerHTML = d.students.map((s, i) => {
+      let dis = d.canEdit ? '' : 'disabled';
+      return '<div class="stu' + (s.absent ? ' absent' : '') + '" id="row' + i + '"><div class="nm">' + esc(s.name) + '<small>Roll ' + esc(s.rollNo || '-') + ' · Adm ' + esc(s.admissionNo) + '</small></div>' +
+        '<div class="fld"><span class="lab">' + (d.ia ? 'Theory /' + d.theory : 'Marks /' + d.total) + '</span><input class="mk" id="m' + i + '" inputmode="decimal" value="' + esc(s.marks) + '" ' + dis + ' ' + (s.absent ? 'disabled' : '') + ' oninput="onType(' + i + ')" onkeydown="nextOnEnter(event,' + i + ',\'m\')"></div>' +
+        (d.ia ? '<div class="fld"><span class="lab">I/A /' + d.ia + '</span><input class="mk" id="i' + i + '" inputmode="decimal" value="' + esc(s.ia) + '" ' + dis + ' ' + (s.absent ? 'disabled' : '') + ' oninput="onType(' + i + ')" onkeydown="nextOnEnter(event,' + i + ',\'i\')"></div>' : '') +
+        '<div class="fld"><span class="lab">Total</span><div class="tot" id="t' + i + '" style="min-height:46px;display:flex;align-items:center;justify-content:center"></div></div><div class="sp"></div>' +
+        '<label class="ab">AB<input type="checkbox" id="a' + i + '" ' + (s.absent ? 'checked' : '') + ' ' + dis + ' onchange="onAbsent(' + i + ')"></label></div>';
+    }).join('');
+  d.students.forEach((s, i) => rowCalc(i));
+  stats();
+}
+function drawGrade(d){
+  $('eList').innerHTML = d.students.map((s, i) => {
+    let dis = d.canEdit ? '' : 'disabled';
+    return '<div class="stu' + (s.absent ? ' absent' : '') + '" id="row' + i + '"><div class="nm">' + esc(s.name) + '<small>Roll ' + esc(s.rollNo || '-') + ' · Adm ' + esc(s.admissionNo) + '</small></div>' +
+      '<div class="fld"><span class="lab">Grade</span><select class="mk" style="width:110px;min-height:46px" id="m' + i + '" ' + dis + ' ' + (s.absent ? 'disabled' : '') + ' onchange="onType(' + i + ')"><option value="">-</option>' + d.letters.map(L => '<option' + (String(s.marks).toUpperCase() === String(L).toUpperCase() ? ' selected' : '') + '>' + esc(L) + '</option>').join('') + '</select></div><div class="sp"></div>' +
+      '<label class="ab">AB<input type="checkbox" id="a' + i + '" ' + (s.absent ? 'checked' : '') + ' ' + dis + ' onchange="onAbsent(' + i + ')"></label></div>';
+  }).join('');
+  stats();
+}
+function nextOnEnter(ev, i, kind){
+  if(ev.key !== 'Enter') return; ev.preventDefault();
+  let nxt = $(kind + (i + 1)); if(nxt && !nxt.disabled){ nxt.focus(); nxt.select(); }
+}
+function onType(i){ DIRTY = true; rowCalc(i); stats(); }
+function onAbsent(i){
+  DIRTY = true; let ab = $('a' + i).checked;
+  ['m', 'i'].forEach(k => { let el = $(k + i); if(el){ el.disabled = ab; if(ab) el.value = ''; } });
+  $('row' + i).classList.toggle('absent', ab); rowCalc(i); stats();
+}
+function rowCalc(i){
+  if(DATA.grade) return;
+  let d = DATA, m = $('m' + i), ia = $('i' + i), t = $('t' + i);
+  let mv = num(m.value), iv = ia ? num(ia.value) : null, bad = false;
+  if(mv !== null && (isNaN(mv) || mv < 0 || mv > d.theory)) bad = true;
+  m.classList.toggle('bad', mv !== null && (isNaN(mv) || mv < 0 || mv > d.theory));
+  if(ia){ let b2 = iv !== null && (isNaN(iv) || iv < 0 || iv > d.ia); ia.classList.toggle('bad', b2); if(b2) bad = true; }
+  if($('a' + i).checked){ t.innerText = 'AB'; return; }
+  if(bad || (mv === null && iv === null)){ t.innerText = ''; return; }
+  t.innerText = String(Math.round(((mv || 0) + (iv || 0)) * 100) / 100);
+}
+function stats(){
+  let d = DATA, entered = 0, ab = 0, bad = 0, sum = 0, n = 0;
+  d.students.forEach((s, i) => {
+    if($('a' + i).checked){ ab++; entered++; return; }
+    let mv = num($('m' + i).value), iv = $('i' + i) ? num($('i' + i).value) : null;
+    if(d.grade){ if($('m' + i).value !== ''){ entered++; } return; }
+    if($('m' + i).classList.contains('bad') || ($('i' + i) && $('i' + i).classList.contains('bad'))) bad++;
+    if(mv !== null || iv !== null){ entered++; sum += (mv || 0) + (iv || 0); n++; }
+  });
+  if(d.grade){ $('eStats').innerHTML = '<div class="stat"><b>' + entered + '/' + d.students.length + '</b><span>Entered</span></div><div class="stat"><b>' + ab + '</b><span>Absent</span></div>'; return; }
+  $('eStats').innerHTML = '<div class="stat"><b>' + entered + '/' + d.students.length + '</b><span>Entered</span></div><div class="stat"><b>' + ab + '</b><span>Absent</span></div><div class="stat"><b>' + (n ? (Math.round(sum / n * 10) / 10) : '-') + '</b><span>Average</span></div>' + (bad ? '<div class="stat" style="border-color:#fecaca"><b style="color:#c62828">' + bad + '</b><span>Check marks</span></div>' : '');
+}
+
+async function saveMarks(){
+  let d = DATA; if(!d || !d.canEdit) return;
+  let recs = [];
+  for(let i = 0; i < d.students.length; i++){
+    let s = d.students[i], ab = $('a' + i).checked;
+    let mv = $('m' + i).value.trim(), iv = $('i' + i) ? $('i' + i).value.trim() : '';
+    if(!d.grade && ($('m' + i).classList.contains('bad') || ($('i' + i) && $('i' + i).classList.contains('bad')))){
+      show($('eMsg'), '❌ Please correct the marks shown in red (' + s.name + ').', 'err'); $('row' + i).scrollIntoView({block:'center'}); return;
+    }
+    recs.push({admissionNo:s.admissionNo, marks:mv, ia:iv, absent:ab});
+  }
+  let b = $('btnSave'); b.disabled = true; show($('eMsg'), 'Saving...', 'load');
+  try{
+    let r = await apiPost('saveexammarks', {examId:d.exam.examId, className:d.className, subject:d.subject, records:recs});
+    if(r.success){
+      DIRTY = false; show($('eMsg'), '✅ ' + (r.message || 'Saved.'), 'ok');
+      let f = await apiGet('getexammarks', {examId:d.exam.examId, className:d.className, subject:d.subject});
+      if(f.success){ DATA = f; draw(); show($('eMsg'), '✅ ' + (r.message || 'Saved.'), 'ok'); }
+    }else show($('eMsg'), '❌ ' + (r.error || 'Could not save.'), 'err');
+  }catch(e){ show($('eMsg'), '❌ Network problem. Marks may not be saved. Please check and try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+window.addEventListener('beforeunload', function(e){ if(DIRTY){ e.preventDefault(); e.returnValue = ''; } });
+init();
+</script>
+</body></html>
