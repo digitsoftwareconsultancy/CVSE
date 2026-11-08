@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Class Report</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.wrap{max-width:1000px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:46px;background:#fff}
+input[readonly]{background:#f1f5f9;color:#475569}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-orange{background:linear-gradient(135deg,#ef6c00,#ff9800)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--purple);margin-bottom:12px}
+.card.exam{border-left-color:var(--blue)}.card.rep{border-left-color:var(--orange)}.card.area{border-left-color:var(--green)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px}
+.ch b{color:var(--navy);font-size:15px}
+.pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-dirty{background:#fff3e0;color:#9a3412}.p-ok{background:#dcfce7;color:#166534}.p-lock{background:#fee2e2;color:#991b1b}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:999px;padding:0 12px;min-height:38px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip input{width:18px;height:18px;min-height:0;padding:0;margin:0}
+.chip.on{background:#e3f2fd;border-color:#90caf9}
+.sw{display:flex;align-items:center;gap:8px;min-height:46px;font-weight:700;font-size:14px;cursor:pointer}
+.sw input{width:22px;height:22px;min-height:0;padding:0}
+.preview{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:10px;font-size:13px;font-weight:700;color:var(--navy);margin-top:10px;line-height:1.5}
+.wrow{display:flex;gap:8px;align-items:center;margin-top:6px}.wrow span{flex:1;font-weight:700;font-size:13px}.wrow input{width:100px;text-align:center}
+.grow{display:grid;grid-template-columns:70px 70px 70px 1fr 46px;gap:6px;align-items:center;margin-bottom:6px}
+.grow input{padding:8px;text-align:center}.grow input.rem{text-align:left}
+.xbtn{border:1px solid #fecaca;background:#fff;color:var(--red);border-radius:10px;min-height:46px;font-weight:900;cursor:pointer}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.prow .full{grid-column:1/-1}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;position:relative}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+.stu{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.stu .nm{flex:1 1 100%;font-weight:700;font-size:14px}
+.stu .fld{display:flex;flex-direction:column;align-items:center}
+.stu .sp{flex:1}.stu .nm small{display:block;color:var(--muted);font-weight:600}
+.stu .mk{width:84px;text-align:center;font-weight:800;font-size:17px;padding:8px}
+.stu .mk.bad{border-color:var(--red);background:#fee2e2}
+.stu .tot{width:62px;text-align:center;font-weight:800;color:var(--navy);font-size:15px}
+.stu .ab{display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:800;color:var(--muted);gap:3px}.stu .ab input{width:26px;height:26px;min-height:0;padding:0}
+.stu.absent .mk{background:#f1f5f9;opacity:.6}
+.lab{font-size:10px;font-weight:800;color:var(--muted);text-align:center;display:block}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.stat{flex:1;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+
+.sc{background:#fff;border-radius:16px;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:10px}
+.sc.dirty{border-left-color:var(--orange)}.sc.fin{border-left-color:var(--green)}
+.sc .nm{font-weight:800;font-size:15px;color:var(--navy)}.sc .nm small{display:block;color:var(--muted);font-weight:600;font-size:11.5px}
+.sum{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tag{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;background:#eef2ff;color:#3730a3}
+.tag.pass{background:#dcfce7;color:#166534}.tag.fail{background:#fee2e2;color:#991b1b}.tag.inc{background:#fff3e0;color:#9a3412}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sc textarea{min-height:70px;resize:vertical}
+details.ps{margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:0 10px;background:#f8fafc}
+details.ps summary{min-height:46px;display:flex;align-items:center;font-weight:800;font-size:13px;color:var(--navy);cursor:pointer}
+.arow{padding:8px 0;border-top:1px solid var(--line)}.arow b{font-size:13px;color:var(--navy)}
+.arow .ex{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.arow .ex div{flex:1;min-width:90px}
+.arow .ex span{font-size:10px;font-weight:800;color:var(--muted);display:block}
+#sStats .stat{min-width:70px;padding:8px 4px}.miss{font-size:12.5px;line-height:1.6}.miss div{padding:2px 0}
+.bar{height:10px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:var(--green)}
+.cnt{font-size:11px;color:var(--muted);text-align:right}
+
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <div class="badge-exam" id="examBadge" style="background:#16a34a">Exam: ENABLED</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box">
+    <div class="title">📋 Class Report</div>
+    <div class="meta">Enter attendance, personal / social grades, remark and final result. Then finalise the class.</div>
+    <div class="row">
+      <div><label>Report</label><select id="selReport" onchange="onReport()"></select></div>
+      <div><label>Class</label><select id="selClass" onchange="onSel()"></select></div>
+    </div>
+    <div class="msg" id="gMsg"></div>
+    <div class="btnrow"><button class="btn b-blue" id="btnLoad" onclick="loadClass()">🔍 Load Class</button></div>
+  </div>
+
+  <div id="main" style="display:none">
+    <div class="box" id="sumBox">
+      <div class="title" id="sTitle">Summary</div>
+      <div class="stats" id="sStats"></div>
+      <div class="bar"><i id="sBar" style="width:0"></i></div><div class="cnt" id="sCnt"></div>
+      <details id="missD" style="display:none"><summary style="min-height:46px;display:flex;align-items:center;font-weight:800;color:var(--orange);cursor:pointer">⚠️ Marks still missing</summary><div class="miss" id="missL"></div></details>
+      <div class="msg warn" id="sLock"></div>
+    </div>
+
+    <div class="box" id="bulkBox">
+      <div class="title" style="font-size:15px">Working days (whole class)</div>
+      <div class="row"><div><input id="bulkWd" inputmode="decimal" placeholder="e.g. 220"></div><div><button class="btn b-purple" style="width:100%" onclick="applyWd()">Apply to all</button></div></div>
+    </div>
+
+    <div id="list"></div>
+
+    <div class="box">
+      <div class="msg" id="fMsg"></div>
+      <div id="fWarn"></div>
+      <div class="btnrow">
+        <button class="btn b-green" id="btnSave" onclick="saveAll()">💾 Save All</button>
+        <button class="btn b-navy" id="btnFin" onclick="finalise()">✅ Finalise Class</button>
+        <button class="btn b-orange" id="btnReopen" onclick="reopen()" style="display:none">🔓 Reopen</button>
+        <button class="btn b-purple" id="btnCards" onclick="openCards()">🎓 Report Cards</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tabBtn active"><span class="tabIco">📋</span>Class Report</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+var IS_ADMIN = USER.role === 'admin';
+var IS_CT = USER.role === 'classTeacher' || USER.isClassTeacher;
+
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function goBack(){ if(DIRTY.size && !confirm('You have unsaved changes. Leave them?')) return; window.location.href = IS_ADMIN ? 'admin.html' : 'class-dashboard.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+
+var OPTS = [], DATA = null, DIRTY = new Set();
+function curRep(){ return OPTS.find(r => r.reportId === $('selReport').value); }
+
+async function init(){
+  $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
+  $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
+  $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
+  $('roleBadge').innerText = IS_ADMIN ? 'ADMIN' : 'CLASS TEACHER';
+  let ex = IS_ADMIN || String(USER.examAccess).toUpperCase() === 'YES';
+  $('examBadge').innerText = ex ? 'Exam: ENABLED' : 'Exam: DISABLED'; $('examBadge').style.background = ex ? '#16a34a' : '#c1272d';
+  show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getfinaloptions');
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    OPTS = r.reports || [];
+  }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
+  if(!OPTS.length){
+    $('selReport').innerHTML = $('selClass').innerHTML = '<option value="">-</option>';
+    $('btnLoad').disabled = true;
+    show($('gMsg'), IS_ADMIN ? 'No report found. Create reports in Exam Settings first.' : 'No report is set for your class yet. Please ask the admin.', 'warn');
+    return;
+  }
+  hide($('gMsg'));
+  $('selReport').innerHTML = OPTS.map(r => `<option value="${esc(r.reportId)}">${esc(r.name)}${r.locked ? ' (locked)' : ''}</option>`).join('');
+  onReport();
+}
+function onReport(){
+  if(!confirmLeave()) return;
+  let r = curRep();
+  $('selClass').innerHTML = r ? r.classes.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('') : '';
+  clearView();
+}
+function onSel(){ if(!confirmLeave()) return; clearView(); }
+function confirmLeave(){ return !DIRTY.size || confirm('You have unsaved changes. Leave them?') && (DIRTY.clear(), true); }
+function clearView(){ DATA = null; DIRTY.clear(); $('main').style.display = 'none'; }
+
+async function loadClass(){
+  if(DIRTY.size && !confirm('You have unsaved changes. Reload and lose them?')) return;
+  let b = $('btnLoad'); b.disabled = true; show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getclassfinal', {reportId:$('selReport').value, className:$('selClass').value});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    DATA = r; DIRTY.clear(); hide($('gMsg')); hide($('fMsg')); $('fWarn').innerHTML = ''; draw();
+  }catch(e){ show($('gMsg'), '❌ Network problem. Please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+
+function draw(){
+  let d = DATA; $('main').style.display = '';
+  $('sTitle').innerText = d.report.name + ' · Class ' + d.className;
+  let exp = 0, ent = 0;
+  d.progress.forEach(p => { exp += p.expected; ent += p.entered; });
+  let pctDone = exp ? Math.round(ent * 100 / exp) : 0;
+  $('sBar').style.width = pctDone + '%'; $('sCnt').innerText = 'Marks entered: ' + ent + ' of ' + exp + ' (' + pctDone + '%)';
+  let passN = d.students.filter(s => s.suggested === 'PASS').length, failN = d.students.filter(s => s.suggested === 'FAIL').length, incN = d.students.filter(s => s.suggested === 'INCOMPLETE').length;
+  $('sStats').innerHTML = `<div class="stat"><b>${d.students.length}</b><span>Students</span></div><div class="stat"><b>${passN}</b><span>Pass</span></div><div class="stat"><b>${failN}</b><span>Fail</span></div><div class="stat"><b>${incN}</b><span>Incomplete</span></div>`;
+  let miss = d.progress.filter(p => p.entered < p.expected);
+  if(miss.length){
+    $('missD').style.display = '';
+    $('missL').innerHTML = miss.map(p => { let s = d.subjects.filter(x => x.subjectId === p.subjectId)[0]; return '<div>' + esc(s ? s.name : p.subjectId) + ' (' + esc(p.examId) + '): ' + p.entered + ' of ' + p.expected + ' entered</div>'; }).join('');
+  } else $('missD').style.display = 'none';
+  if(d.finalised) show($('sLock'), '✅ This class is finalised.' + (d.canEdit ? '' : ' ' + (d.reason || '')), 'ok');
+  else if(!d.canEdit) show($('sLock'), '🔒 ' + (d.reason || 'View only.'), 'warn');
+  else hide($('sLock'));
+  $('bulkBox').style.display = d.canEdit ? '' : 'none';
+  $('btnSave').style.display = d.canEdit ? '' : 'none';
+  $('btnFin').style.display = (d.canEdit && !d.finalised) ? '' : 'none';
+  $('btnReopen').style.display = (d.isAdmin && d.finalised && !d.report.locked) ? '' : 'none';
+  if(!d.students.length){ $('list').innerHTML = '<div class="empty-note">No students found in class ' + esc(d.className) + '.</div>'; return; }
+  let dis = d.canEdit ? '' : 'disabled';
+  $('list').innerHTML = d.students.map((s, i) => {
+    let tag = s.suggested === 'PASS' ? '<span class="tag pass">Pass</span>' : s.suggested === 'FAIL' ? '<span class="tag fail">Fail: ' + esc(s.failedSubjects.join(', ')) + '</span>' : '<span class="tag inc">Marks incomplete</span>';
+    let score = s.pct === null ? '' : '<span class="tag">' + s.pct + '%' + (s.grade ? ' · ' + esc(s.grade) : '') + (s.rank ? ' · Rank ' + s.rank : '') + '</span>';
+    let resOpts = '<option value="">- Select result -</option>' + d.resultOptions.map(o => `<option${o.text === s.final.result ? ' selected' : ''}>${esc(o.text)}</option>`).join('');
+    let areas = s.psd.length ? '<details class="ps"><summary>Personal &amp; social grades</summary>' + s.psd.map((a, ai) => {
+      let opts = d.areaOptions[a.areaId] || [];
+      return '<div class="arow"><b>' + esc(a.name) + '</b><div class="ex">' + a.perExam.map(e => {
+        let ex = d.report.exams.filter(x => x.examId === e.examId)[0];
+        return '<div><span>' + esc(ex ? (ex.short || ex.name) : e.examId) + '</span><select ' + dis + ' data-i="' + i + '" data-a="' + esc(a.areaId) + '" data-e="' + esc(e.examId) + '" onchange="mark(' + i + ')"><option value="">-</option>' + opts.map(g => `<option${g === e.value ? ' selected' : ''}>${esc(g)}</option>`).join('') + '</select></div>';
+      }).join('') + '</div></div>';
+    }).join('') + '</details>' : '';
+    return '<div class="sc' + (s.final.finalised ? ' fin' : '') + '" id="sc' + i + '"><div class="nm">' + esc(s.name) + '<small>Roll ' + esc(s.rollNo || '-') + ' · Adm ' + esc(s.admissionNo) + '</small></div>' +
+      '<div class="sum">' + score + tag + '</div>' +
+      '<label>Final result</label><select id="res' + i + '" ' + dis + ' onchange="mark(' + i + ')">' + resOpts + '</select>' +
+      '<div class="two"><div><label>Working days</label><input id="wd' + i + '" inputmode="decimal" value="' + esc(s.final.workingDays) + '" ' + dis + ' oninput="mark(' + i + ')"></div><div><label>Present days</label><input id="pd' + i + '" inputmode="decimal" value="' + esc(s.final.presentDays) + '" ' + dis + ' oninput="mark(' + i + ')"></div></div>' +
+      '<label>Remark</label><textarea id="rm' + i + '" maxlength="300" ' + dis + ' oninput="mark(' + i + ')">' + esc(s.final.remark) + '</textarea>' + areas + '</div>';
+  }).join('');
+}
+function mark(i){ DIRTY.add(i); $('sc' + i).classList.add('dirty'); }
+function openCards(){
+  if(DIRTY.size && !confirm('You have unsaved changes. Leave them?')) return;
+  window.location.href = 'report-card.html?report=' + encodeURIComponent(DATA.report.id) + '&class=' + encodeURIComponent(DATA.className);
+}
+function applyWd(){
+  let v = $('bulkWd').value.trim(), n = Number(v);
+  if(v === '' || isNaN(n) || n < 0 || n > 400){ show($('fMsg'), '❌ Enter a valid number of working days first.', 'err'); return; }
+  DATA.students.forEach((s, i) => { $('wd' + i).value = v; mark(i); });
+  show($('fMsg'), 'Working days set to ' + v + ' for everyone. Tap Save All.', 'ok');
+}
+function collect(){
+  let out = [];
+  DIRTY.forEach(i => {
+    let s = DATA.students[i];
+    let rec = {studentId:s.admissionNo, workingDays:$('wd' + i).value.trim(), presentDays:$('pd' + i).value.trim(), remark:$('rm' + i).value.trim(), result:$('res' + i).value, psd:[]};
+    document.querySelectorAll('select[data-i="' + i + '"]').forEach(el => rec.psd.push({areaId:el.dataset.a, examId:el.dataset.e, value:el.value}));
+    out.push(rec);
+  });
+  return out;
+}
+function localCheck(){
+  for(let i of DIRTY){
+    let s = DATA.students[i], w = $('wd' + i).value.trim(), p = $('pd' + i).value.trim();
+    if((w !== '' && isNaN(Number(w))) || (p !== '' && isNaN(Number(p)))) return s.name + ': days must be numbers.';
+    if(w !== '' && p !== '' && Number(p) > Number(w)) return s.name + ': present days are more than working days.';
+  }
+  return '';
+}
+async function saveAll(quiet){
+  if(!DIRTY.size){ if(!quiet) show($('fMsg'), 'Nothing changed.', 'warn'); return true; }
+  let bad = localCheck(); if(bad){ show($('fMsg'), '❌ ' + bad, 'err'); return false; }
+  let b = $('btnSave'); b.disabled = true; show($('fMsg'), 'Saving...', 'load');
+  try{
+    let r = await apiPost('savefinaldata', {reportId:DATA.report.id, className:DATA.className, records:collect()});
+    if(!r.success){ show($('fMsg'), '❌ ' + (r.error || 'Could not save.'), 'err'); return false; }
+    let sent = Array.from(DIRTY); DIRTY.clear();
+    sent.forEach(i => $('sc' + i).classList.remove('dirty'));
+    if(!quiet) show($('fMsg'), '✅ ' + (r.message || 'Saved.'), 'ok');
+    return true;
+  }catch(e){ show($('fMsg'), '❌ Network problem. Nothing is lost on this screen, please try again.', 'err'); return false; }
+  finally{ b.disabled = false; }
+}
+async function finalise(){
+  if(!await saveAll(true)) return;
+  let b = $('btnFin'); b.disabled = true; show($('fMsg'), 'Checking the class...', 'load'); $('fWarn').innerHTML = '';
+  try{
+    let r = await apiPost('finalisereport', {reportId:DATA.report.id, className:DATA.className, dryRun:true});
+    if(!r.success){
+      show($('fMsg'), '❌ ' + (r.error || 'Cannot finalise.'), 'err');
+      $('fWarn').innerHTML = '<div class="msg show err">' + (r.problems || []).map(p => '• ' + esc(p)).join('<br>') + '</div>';
+      return;
+    }
+    hide($('fMsg'));
+    let w = (r.warnings || []).length ? '\n\nPlease note:\n- ' + r.warnings.join('\n- ') : '';
+    if(!confirm('Finalise class ' + DATA.className + '? After this you cannot change anything. Only the admin can reopen it.' + w)) return;
+    show($('fMsg'), 'Finalising...', 'load');
+    let r2 = await apiPost('finalisereport', {reportId:DATA.report.id, className:DATA.className});
+    if(!r2.success){ show($('fMsg'), '❌ ' + (r2.error || 'Could not finalise.'), 'err'); return; }
+    show($('fMsg'), '✅ ' + (r2.message || 'Finalised.'), 'ok');
+    await loadClass(); show($('fMsg'), '✅ ' + (r2.message || 'Finalised.'), 'ok');
+  }catch(e){ show($('fMsg'), '❌ Network problem. Please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+async function reopen(){
+  if(!confirm('Reopen class ' + DATA.className + '? The class teacher will be able to change it again.')) return;
+  let b = $('btnReopen'); b.disabled = true; show($('fMsg'), 'Reopening...', 'load');
+  try{
+    let r = await apiPost('reopenreport', {reportId:DATA.report.id, className:DATA.className});
+    if(!r.success){ show($('fMsg'), '❌ ' + (r.error || 'Could not reopen.'), 'err'); return; }
+    await loadClass(); show($('fMsg'), '✅ ' + (r.message || 'Reopened.'), 'ok');
+  }catch(e){ show($('fMsg'), '❌ Network problem. Please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+window.addEventListener('beforeunload', e => { if(DIRTY.size){ e.preventDefault(); e.returnValue = ''; } });
+init();
+</script>
+</body></html>

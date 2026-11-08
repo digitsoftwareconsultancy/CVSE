@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Report Card Settings</title>
+<style>
+
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.wrap{max-width:1000px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:46px;background:#fff}
+input[readonly]{background:#f1f5f9;color:#475569}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-orange{background:linear-gradient(135deg,#ef6c00,#ff9800)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--purple);margin-bottom:12px}
+.card.exam{border-left-color:var(--blue)}.card.rep{border-left-color:var(--orange)}.card.area{border-left-color:var(--green)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px}
+.ch b{color:var(--navy);font-size:15px}
+.pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-dirty{background:#fff3e0;color:#9a3412}.p-ok{background:#dcfce7;color:#166534}.p-lock{background:#fee2e2;color:#991b1b}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:999px;padding:0 12px;min-height:38px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip input{width:18px;height:18px;min-height:0;padding:0;margin:0}
+.chip.on{background:#e3f2fd;border-color:#90caf9}
+.sw{display:flex;align-items:center;gap:8px;min-height:46px;font-weight:700;font-size:14px;cursor:pointer}
+.sw input{width:22px;height:22px;min-height:0;padding:0}
+.preview{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:10px;font-size:13px;font-weight:700;color:var(--navy);margin-top:10px;line-height:1.5}
+.wrow{display:flex;gap:8px;align-items:center;margin-top:6px}.wrow span{flex:1;font-weight:700;font-size:13px}.wrow input{width:100px;text-align:center}
+.grow{display:grid;grid-template-columns:70px 70px 70px 1fr 46px;gap:6px;align-items:center;margin-bottom:6px}
+.grow input{padding:8px;text-align:center}.grow input.rem{text-align:left}
+.xbtn{border:1px solid #fecaca;background:#fff;color:var(--red);border-radius:10px;min-height:46px;font-weight:900;cursor:pointer}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.prow .full{grid-column:1/-1}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;position:relative}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+.stu{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.stu .nm{flex:1 1 100%;font-weight:700;font-size:14px}
+.stu .fld{display:flex;flex-direction:column;align-items:center}
+.stu .sp{flex:1}.stu .nm small{display:block;color:var(--muted);font-weight:600}
+.stu .mk{width:84px;text-align:center;font-weight:800;font-size:17px;padding:8px}
+.stu .mk.bad{border-color:var(--red);background:#fee2e2}
+.stu .tot{width:62px;text-align:center;font-weight:800;color:var(--navy);font-size:15px}
+.stu .ab{display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:800;color:var(--muted);gap:3px}.stu .ab input{width:26px;height:26px;min-height:0;padding:0}
+.stu.absent .mk{background:#f1f5f9;opacity:.6}
+.lab{font-size:10px;font-weight:800;color:var(--muted);text-align:center;display:block}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.stat{flex:1;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+
+.frow{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.frow input{flex:1;min-width:0}
+.frow .mv{width:46px;min-height:46px;border:1px solid #cbd5e1;background:#fff;border-radius:10px;font-weight:900;color:var(--navy);cursor:pointer;flex-shrink:0}
+.frow .key{font-size:11px;color:var(--muted);font-weight:700;flex:1 1 100%;margin-bottom:-2px}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:4px}
+.warnbox{background:#fff7ed;border:1px solid #ffcc80;color:#9a3412;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <div class="badge-exam" id="examBadge" style="background:#16a34a">Exam: ENABLED</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="msg" id="gMsg"></div>
+
+  <div class="box" id="schoolBox" style="display:none">
+    <div class="title">🏫 School items for the report card</div>
+    <div class="meta">Used on every report card of this school. Header image, logo and school name come from the Settings tab of the admin page (<span id="hdrState"></span>). Images are links (https://...). Leave a box empty to skip it.</div>
+    <label>Principal name</label><input id="g_RC_Principal_Name" placeholder="e.g. Dr. A. Roy">
+    <label>Principal signature image link</label><input id="g_RC_Principal_Sign" placeholder="https://...">
+    <label>Footer line (bottom bar of the card)</label><input id="g_RC_Footer" placeholder="e.g. Good Learners · Good Humans">
+    <label>Student photo link pattern</label><input id="g_RC_Photo_Pattern" placeholder="https://.../photos/{AdmissionNo}.jpg">
+    <div class="hint">Write {AdmissionNo} where the admission number goes. If your Students tab has a Photo column, that link is used first.</div>
+    <div class="card area" style="margin-top:12px"><div class="ch"><b>Decoration image 1</b></div>
+      <label>Image link</label><input id="g_RC_Deco1_Image" placeholder="https://...">
+      <div class="row"><div><label>Caption (optional)</label><input id="g_RC_Deco1_Caption"></div><div><label>Side</label><select id="g_RC_Deco1_Side"><option>Left</option><option>Right</option></select></div></div></div>
+    <div class="card area"><div class="ch"><b>Decoration image 2</b></div>
+      <label>Image link</label><input id="g_RC_Deco2_Image" placeholder="https://...">
+      <div class="row"><div><label>Caption (optional)</label><input id="g_RC_Deco2_Caption"></div><div><label>Side</label><select id="g_RC_Deco2_Side"><option>Left</option><option>Right</option></select></div></div></div>
+    <div class="hint">Each report decides below whether to show decoration 1 and 2. Use them for anything: a motto picture, an award, an emblem.</div>
+    <div class="msg" id="sMsg"></div>
+    <div class="btnrow"><button class="btn b-purple" id="btnSchool" onclick="saveSchool()">💾 Save School Items</button></div>
+  </div>
+
+  <div class="box" id="repBox" style="display:none">
+    <div class="title">🎓 Report card options</div>
+    <div class="meta">Choose a report, then what its card shows. Each report has its own choices.</div>
+    <label>Report</label><select id="selReport" onchange="onReport()"></select>
+    <div id="repBody"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tabBtn active"><span class="tabIco">🎓</span>Card Settings</button>
+  <button class="tabBtn" onclick="location.href='report-card.html'"><span class="tabIco">🖨️</span>Print</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+if(USER.role !== 'admin'){ window.location.href = 'admin.html'; }
+
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function goBack(){ if(DIRTY && !confirm('You have unsaved changes. Leave them?')) return; window.location.href = 'admin.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+
+var S = null, CUR = null, DIRTY = false;
+var GK = ['RC_Principal_Name','RC_Principal_Sign','RC_Footer','RC_Photo_Pattern','RC_Deco1_Image','RC_Deco1_Caption','RC_Deco1_Side','RC_Deco2_Image','RC_Deco2_Caption','RC_Deco2_Side'];
+var LAYOUT_NAME = {A:'A - one exam, marks only', B:'B - one exam, written + I/A', C:'C - several exams combined'};
+
+async function init(){
+  $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
+  $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
+  $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
+  show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getreportcardsettings');
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    S = r;
+  }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
+  hide($('gMsg'));
+  $('schoolBox').style.display = ''; $('repBox').style.display = '';
+  $('hdrState').innerText = (S.school.header ? 'header image: set' : 'header image: NOT set') + ', ' + (S.school.logo ? 'logo: set' : 'logo: NOT set');
+  GK.forEach(k => { let el = $('g_' + k); el.value = S.globals[k] || (/_Side$/.test(k) ? (k.indexOf('Deco1') > -1 ? 'Left' : 'Right') : ''); el.oninput = el.onchange = () => { SDIRTY = true; }; });
+  if(!S.reports.length){ $('selReport').innerHTML = ''; $('repBody').innerHTML = '<div class="empty-note">No report found. Create reports in Exam Settings first.</div>'; return; }
+  $('selReport').innerHTML = S.reports.map(r => `<option value="${esc(r.reportId)}">${esc(r.name)}</option>`).join('');
+  onReport(true);
+}
+var SDIRTY = false;
+function onReport(first){
+  if(!first && DIRTY && !confirm('You have unsaved changes for this report. Leave them?')){ $('selReport').value = CUR.reportId; return; }
+  let r = S.reports.find(x => x.reportId === $('selReport').value);
+  CUR = JSON.parse(JSON.stringify(r)); DIRTY = false; drawReport();
+}
+function mark(){ DIRTY = true; }
+function drawReport(){
+  let r = CUR, used = {}; r.fields.forEach(f => used[f.key] = 1);
+  let free = S.catalog.filter(c => !used[c.key]);
+  let h = '<div class="meta" style="margin-top:8px">Layout: <b>' + esc(LAYOUT_NAME[r.layout] || r.layout) + '</b> (change it in Exam Settings) · ' + (r.published ? 'Published to students' : 'Not published') + '</div>';
+  h += '<div class="card"><div class="ch"><b>Parts of the card</b></div><div class="chips">' + S.parts.map(p => `<label class="chip ${r.parts[p.key] ? 'on' : ''}"><input type="checkbox" ${r.parts[p.key] ? 'checked' : ''} onchange="setPart('${p.key}',this.checked)">${esc(p.label)}</label>`).join('') + '</div></div>';
+  h += '<div class="card rep"><div class="ch"><b>Rank</b></div><label class="sw"><input type="checkbox" ' + (r.showRank ? 'checked' : '') + ' onchange="CUR.showRank=this.checked;mark()">Print position (rank) on the card</label><div class="hint">Off by default. Rank is only worked out for students whose marks are complete.</div></div>';
+  h += '<div class="card area"><div class="ch"><b>Student details</b></div><div class="hint" style="margin:0 0 8px">Name is always printed. Choose the others and their order. The list comes from the columns of your Students tab, so a school without House or Mother\'s name never sees them. A student with no value for a field simply does not print that line.</div>';
+  h += r.fields.map((f, i) => `<div class="frow"><span class="key">Column: ${esc(f.key)}</span><input value="${esc(f.label)}" maxlength="40" oninput="CUR.fields[${i}].label=this.value;mark()"><button class="mv" onclick="mvF(${i},-1)" ${i === 0 ? 'disabled' : ''}>↑</button><button class="mv" onclick="mvF(${i},1)" ${i === r.fields.length - 1 ? 'disabled' : ''}>↓</button><button class="xbtn" style="width:46px" onclick="rmF(${i})">✕</button></div>`).join('') || '<div class="hint">No extra fields chosen.</div>';
+  h += '<div class="frow" style="margin-top:8px"><select id="addSel"><option value="">+ Add a field...</option>' + free.map(c => `<option value="${esc(c.key)}">${esc(c.label)}</option>`).join('') + '</select><button class="btn b-blue" style="min-width:90px" onclick="addF()">Add</button></div></div>';
+  let d1 = !!(S.globals.RC_Deco1_Image), d2 = !!(S.globals.RC_Deco2_Image);
+  h += '<div class="card"><div class="ch"><b>Decoration images</b></div><label class="sw"><input type="checkbox" ' + (r.deco1 ? 'checked' : '') + ' onchange="CUR.deco1=this.checked;mark();drawReport()">Show decoration image 1</label>' + (r.deco1 && !d1 ? '<div class="warnbox">Image 1 has no link yet (School items above), so nothing will print.</div>' : '') +
+    '<label class="sw"><input type="checkbox" ' + (r.deco2 ? 'checked' : '') + ' onchange="CUR.deco2=this.checked;mark();drawReport()">Show decoration image 2</label>' + (r.deco2 && !d2 ? '<div class="warnbox">Image 2 has no link yet (School items above), so nothing will print.</div>' : '') + '</div>';
+  h += '<div class="card"><div class="ch"><b>Card heading</b></div><input value="' + esc(r.title) + '" maxlength="80" placeholder="Leave empty to use the report name (' + esc(r.name) + ')" oninput="CUR.title=this.value;mark()"></div>';
+  h += '<div class="msg" id="rMsg"></div><div class="btnrow"><button class="btn b-green" id="btnRep" onclick="saveReport()">💾 Save Report Card Options</button><button class="btn b-blue" onclick="preview()">👁️ Preview / Print</button></div>';
+  $('repBody').innerHTML = h;
+}
+function setPart(k, v){ CUR.parts[k] = v; mark(); drawReport(); }
+function mvF(i, d){ let a = CUR.fields, j = i + d; if(j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; mark(); drawReport(); }
+function rmF(i){ CUR.fields.splice(i, 1); mark(); drawReport(); }
+function addF(){ let k = $('addSel').value; if(!k) return; let c = S.catalog.find(x => x.key === k); CUR.fields.push({key:k, label:c.label}); mark(); drawReport(); }
+function preview(){ if(DIRTY && !confirm('Unsaved changes will not show in the preview. Continue?')) return; DIRTY = false; location.href = 'report-card.html?report=' + encodeURIComponent(CUR.reportId); }
+
+async function saveReport(){
+  let b = $('btnRep'); b.disabled = true; show($('rMsg'), 'Saving...', 'load');
+  try{
+    let r = await apiPost('savereportcardsettings', {report:{reportId:CUR.reportId, parts:CUR.parts, showRank:CUR.showRank, fields:CUR.fields, deco1:CUR.deco1, deco2:CUR.deco2, title:CUR.title}});
+    if(!r.success){ show($('rMsg'), '❌ ' + (r.error || 'Could not save.'), 'err'); return; }
+    let i = S.reports.findIndex(x => x.reportId === CUR.reportId); S.reports[i] = JSON.parse(JSON.stringify(CUR)); DIRTY = false;
+    show($('rMsg'), '✅ ' + (r.message || 'Saved.'), 'ok');
+  }catch(e){ show($('rMsg'), '❌ Network problem. Nothing is lost on this screen, please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+async function saveSchool(){
+  let g = {}; GK.forEach(k => g[k] = $('g_' + k).value.trim());
+  let b = $('btnSchool'); b.disabled = true; show($('sMsg'), 'Saving...', 'load');
+  try{
+    let r = await apiPost('savereportcardsettings', {globals:g});
+    if(!r.success){ show($('sMsg'), '❌ ' + (r.error || 'Could not save.'), 'err'); return; }
+    S.globals = g; SDIRTY = false; show($('sMsg'), '✅ ' + (r.message || 'Saved.'), 'ok'); if(CUR) drawReport();
+  }catch(e){ show($('sMsg'), '❌ Network problem. Please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+window.addEventListener('beforeunload', e => { if(DIRTY || SDIRTY){ e.preventDefault(); e.returnValue = ''; } });
+init();
+</script>
+</body></html>
