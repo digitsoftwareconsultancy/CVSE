@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Student Fees</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b;--frame:#1a4bb5;--cream:#fdf6d0}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.lock{background:#fff7ed;border:1px solid #ffcc80;border-radius:16px;padding:18px;text-align:center;color:#9a3412;font-weight:700;line-height:1.5}
+.lock b{display:block;font-size:30px;margin-bottom:6px}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.school{display:flex;gap:12px;align-items:center}
+.school img{width:56px;height:56px;border-radius:12px;object-fit:contain;background:#fff;border:1px solid var(--line)}
+.school b{font-size:16px;color:var(--navy)}
+.drow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.drow:last-child{border-bottom:none}.drow span{color:var(--muted);font-weight:700}.drow b{text-align:right}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.go{background:#fff;border-radius:16px;border:1px solid #eef0f3;box-shadow:0 4px 18px rgba(0,0,0,.06);padding:14px 10px;text-align:center;font-weight:800;color:var(--navy);cursor:pointer;min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-left:4px solid var(--blue)}
+.go .ic{font-size:28px}.go small{font-size:11px;color:var(--muted);font-weight:700}
+.go.closed{opacity:.6;border-left-color:#f59e0b}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px}
+.chip{flex-shrink:0;border:1px solid #cbd5e1;border-radius:999px;padding:0 14px;min-height:40px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.item{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:10px}
+.item h4{margin:0 0 6px;color:var(--navy);font-size:15px;display:flex;justify-content:space-between;gap:8px}
+.item h4 small{color:var(--muted);font-weight:700;font-size:11.5px;white-space:nowrap}
+.line{font-size:13.5px;line-height:1.5;margin:3px 0}.line span{color:var(--muted);font-weight:700}
+.hw{background:#fff7ed;border-left:3px solid var(--orange);padding:6px 8px;border-radius:6px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.dchip{font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:#fee2e2;color:#991b1b}.dchip.l{background:#fff3e0;color:#9a3412}.dchip.u{background:#ede9fe;color:#5b21b6}
+.tag{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;background:#e0f2fe;color:#075985}.tag.up{background:#fff3e0;color:#9a3412}
+.score{font-size:22px;font-weight:900;color:var(--navy)}.score small{font-size:13px;color:var(--muted)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+#login .card{background:#fff;border-radius:20px;padding:22px;max-width:380px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.1);border-top:5px solid var(--navy)}
+#login h1{margin:8px 0 2px;font-size:20px;color:var(--navy);text-align:center}
+#login .sch{text-align:center;color:var(--muted);font-weight:700;font-size:13px;margin-bottom:8px}
+#login img{display:block;margin:0 auto;max-width:90px;max-height:90px;border-radius:12px}
+
+@media print{
+  body{background:#fff;padding:0}
+  body>.top,body>.tabs,.noprint,#screens>.scr:not(#s_result),#resList,#resMsg,#cardBar{display:none!important}
+  .wrap{margin:0;padding:0;max-width:none}
+}
+</style><style>
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cl{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.cl label{margin:0;display:flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:999px;padding:0 12px;min-height:38px;font-size:13px;background:#fff;font-weight:600}
+.cl input{width:auto;min-height:0}
+textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:70px}
+.ty{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;color:#fff;white-space:nowrap}
+.t-HOLIDAY{background:#c62828}.t-EXAM{background:#7c3aed}.t-PROGRAM,.t-PTM{background:#1976d2}.t-OTHER{background:#64748b}
+.item.cancelled{border-left-color:#94a3b8!important}.item.cancelled>*:not(.btnrow){opacity:.55}.item.cancelled h4 span.tt{text-decoration:line-through}
+.mh{font-weight:900;color:var(--navy);font-size:14px;margin:14px 2px 6px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:12px;font-weight:700;color:#475569}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+pre.res{white-space:pre-wrap;font-family:inherit;margin:0}
+.fl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.sec{display:none}.sec.on{display:block}
+.card2{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;position:relative}
+.card2 h5{margin:0 0 4px;color:var(--navy);font-size:14px}
+.x{position:absolute;right:8px;top:8px;background:#fee2e2;color:#991b1b;border:none;border-radius:8px;min-height:36px;min-width:36px;font-weight:900;cursor:pointer}
+.help{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+.probs{background:#fff7ed;border:1px solid #ffcc80;border-radius:12px;padding:10px;margin-bottom:10px;font-size:13px;color:#9a3412;font-weight:700;line-height:1.5}
+.amt{width:100%;border-collapse:collapse;font-size:13px}.amt th,.amt td{border:1px solid var(--line);padding:4px;text-align:center}
+.amt th{background:#eef2f7;color:var(--navy);position:sticky;top:0}.amt td:first-child,.amt th:first-child{text-align:left;font-weight:700;min-width:110px}
+.amt input{min-height:40px;padding:6px;font-size:15px;text-align:right}
+.scroll{overflow-x:auto}
+.mo{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}.mo label{margin:0;border:1px solid #cbd5e1;border-radius:999px;padding:0 10px;min-height:36px;display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;background:#fff}.mo input{width:auto;min-height:0}
+h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid var(--line);padding-bottom:3px}
+
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#e0f2fe;color:#075985;white-space:nowrap}
+.pill.n{background:#dcfce7;color:#166534}.pill.o{background:#e5e7eb;color:#374151}.pill.d{background:#fee2e2;color:#991b1b}.pill.g{background:#dcfce7;color:#166534}
+.srow{background:#fff;border-radius:14px;padding:12px;border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:8px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.srow b{color:var(--navy)}.srow .l2{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.ft{width:100%;border-collapse:collapse;font-size:12.5px}.ft th,.ft td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:right}.ft th{background:#eef2f7;color:var(--navy);font-size:11.5px}.ft td:first-child,.ft th:first-child,.ft td:nth-child(2),.ft th:nth-child(2){text-align:left}
+.ft tr.tot td{font-weight:900;border-top:2px solid var(--navy)}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.big div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}.big b{display:block;font-size:18px;color:var(--navy)}.big span{font-size:11px;color:var(--muted);font-weight:700}
+.chk{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px;font-weight:700;color:var(--navy)}.chk input{width:22px;height:22px;min-height:0}
+</style></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+<div class="wrap">
+ <div id="vList">
+  <div class="box"><div class="title">Student Fee Setup</div><div class="meta">Choose a class, tap a student to set new/old, admission date, brother/sister link, bus route, optional fees, concessions and previous dues. The calculated fees are shown below the form.</div>
+   <label>Session</label><select id="sess" onchange="loadList()"></select>
+   <label>Search (name or admission no)</label><input id="q" oninput="drawList()" placeholder="Type to filter">
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="msg" id="gMsg"></div>
+  <div id="probs"></div>
+  <div id="list"></div>
+ </div>
+ <div id="vEdit" style="display:none"></div>
+</div>
+<div class="tabs" id="tabsBar">
+  <button class="tabBtn active"><span class="tabIco">👨‍👩‍👧</span>Students</button>
+  <button class="tabBtn" onclick="window.location.href='fees-opening.html'"><span class="tabIco">✅</span>Already Paid</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin'){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function goBack(){ window.location.href = 'admin.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+function maskD(el){
+  let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
+  if(d.length > 4) o = d.substring(0, 2) + '-' + d.substring(2, 4) + '-' + d.substring(4);
+  else if(d.length > 2) o = d.substring(0, 2) + '-' + d.substring(2);
+  el.value = o;
+}
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+
+
+var CLS = '', LIST = null, ST = null, ED = null;
+function rs(n){ n = Number(n) || 0; return '₹' + (Math.round(n * 100) / 100).toLocaleString('en-IN'); }
+async function loadList(first){
+  show($('gMsg'),'Loading...','load');
+  try{
+    let r = await apiGet('feestudents', {session:$('sess').value || '', 'class':CLS});
+    if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); return; }
+    LIST = r; hide($('gMsg'));
+    if(first || !$('sess').options.length){
+      let g = await apiGet('getfeesetup',{}); 
+      if(g.success) $('sess').innerHTML = g.sessions.map(s=>'<option'+(s===r.session?' selected':'')+'>'+esc(s)+'</option>').join('');
+    }
+    if(!CLS && r.classes.length){ CLS = r.classes[0]; return loadList(); }
+    $('chips').innerHTML = r.classes.map(c=>'<button class="chip'+(c===CLS?' on':'')+'" onclick="CLS=\''+esc(c)+'\';loadList()">'+esc(c)+'</button>').join('');
+    $('probs').innerHTML = r.problems.length ? '<div class="probs">⚠ Fees Settings need attention:<br>'+r.problems.map(esc).join('<br>')+'</div>' : '';
+    drawList();
+  }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
+}
+function drawList(){
+  if(!LIST) return; let q = $('q').value.trim().toLowerCase();
+  let a = LIST.students.filter(s=>!q || (s.name+' '+s.adm).toLowerCase().indexOf(q) > -1);
+  let t = LIST.totals;
+  let h = '<div class="big"><div><b>'+LIST.students.length+'</b><span>Students</span></div><div><b>'+rs(t.balance)+'</b><span>Total unpaid</span></div></div>';
+  if(!a.length) h += '<div class="empty-note">No students found.</div>';
+  h += a.map(s=>'<div class="srow" onclick="openStu(\''+esc(s.adm)+'\')"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(s.name)+(s.active?'':' (left)')+'</b><span class="pill '+(s.balance>0?'d':'g')+'">'+(s.balance>0?'Unpaid '+rs(s.balance):'Clear')+'</span></div>'+
+    '<div class="meta">Adm '+esc(s.adm)+(s.roll?' · Roll '+esc(s.roll):'')+'</div><div class="l2"><span class="pill '+(s.type==='NEW'?'n':'o')+'">'+(s.type==='NEW'?'New':'Old')+'</span>'+
+    (s.familyId?'<span class="pill">Child '+s.childNo+'</span>':'')+(s.route?'<span class="pill">🚌 '+esc(s.route)+'</span>':'')+(s.optional?'<span class="pill">+'+s.optional+' optional</span>':'')+(s.concessions?'<span class="pill">Concession</span>':'')+(s.opening?'<span class="pill">Prev dues '+rs(s.opening)+'</span>':'')+(s.warnings?'<span class="pill d">⚠ check</span>':'')+'</div></div>').join('');
+  $('list').innerHTML = h;
+}
+async function openStu(adm){
+  show($('gMsg'),'Loading...','load');
+  try{
+    let r = await apiGet('feestudentget',{adm:adm,session:$('sess').value});
+    if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); return; }
+    hide($('gMsg')); ST = r; ED = {concessions:r.concessions.map(c=>Object.assign({},c))}; $('vList').style.display = 'none'; $('vEdit').style.display = 'block'; drawEdit(); window.scrollTo(0,0);
+  }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
+}
+function closeStu(){ $('vEdit').style.display = 'none'; $('vList').style.display = 'block'; loadList(); }
+function concRow(c, i){
+  let ids = c.headIds === 'ALL' ? [] : String(c.headIds).split(',');
+  return '<div class="card2" data-i="'+i+'"><button class="x" onclick="rmConc('+i+')">✕</button><div class="row2" style="width:calc(100% - 46px)"><div><label>Type</label><select class="c_m"><option value="PERCENT"'+(c.mode!=='FIXED'?' selected':'')+'>Percent off</option><option value="FIXED"'+(c.mode==='FIXED'?' selected':'')+'>Fixed amount off</option></select></div><div><label>Value</label><input class="c_v" inputmode="decimal" value="'+esc(c.value||'')+'"></div></div>'+
+   '<label>Reason (required)</label><input class="c_r" value="'+esc(c.reason||'')+'" placeholder="Staff child, RTE, merit..."><label>On which heads (none ticked = all)</label><div class="cl c_h">'+ST.heads.map(h=>'<label><input type="checkbox" value="'+esc(h.id)+'"'+(ids.indexOf(h.id)>-1?' checked':'')+'>'+esc(h.name)+'</label>').join('')+'</div></div>';
+}
+function readConc(){ return [...document.querySelectorAll('#concs .card2')].map(c=>({mode:c.querySelector('.c_m').value,value:c.querySelector('.c_v').value,reason:c.querySelector('.c_r').value,headIds:[...c.querySelectorAll('.c_h input:checked')].map(i=>i.value).join(',')||'ALL'})); }
+function addConc(){ ED.concessions = readConc(); ED.concessions.push({mode:'PERCENT',headIds:'ALL'}); $('concs').innerHTML = ED.concessions.map(concRow).join(''); }
+function rmConc(i){ ED.concessions = readConc(); ED.concessions.splice(i,1); $('concs').innerHTML = ED.concessions.map(concRow).join(''); }
+function drawEdit(){
+  let r = ST, s = r.student, u = r.setup, opt = String(u.optionalHeads||'').split(',');
+  let optHeads = r.heads.filter(h=>h.scope==='OPTIONAL' && h.id!==r.transportHeadId);
+  let h = '<div class="box"><div class="title">'+esc(s.name)+'</div><div class="meta">Adm '+esc(s.adm)+' · Class '+esc(s.cls)+(s.roll?' · Roll '+esc(s.roll):'')+' · Session '+esc(r.session)+'</div>'+
+   '<h3 class="g">New or old student</h3><select id="e_type"><option value="">Automatic (by admission date)</option><option value="NEW"'+(s.type==='NEW'?' selected':'')+'>New student</option><option value="OLD"'+(s.type==='OLD'?' selected':'')+'>Old student</option></select><div class="help">Now treated as: <b>'+(s.effectiveType==='NEW'?'New':'Old')+'</b></div>'+
+   '<label>Admission date</label><input id="e_date" inputmode="numeric" maxlength="10" oninput="maskD(this)" value="'+esc(s.admissionDate)+'" placeholder="DD-MM-YYYY"><div class="help">New students pay monthly fees from the admission month, and late-joiner slabs use this date.</div>'+
+   '<h3 class="g">Brother / sister</h3>'+(r.siblings.length?'<div class="meta">This student is child no. <b>'+s.childNo+'</b> in the family. Others: '+r.siblings.map(x=>esc(x.name)+' ('+esc(x.cls)+', child '+x.childNo+')').join(', ')+'</div><label class="chk"><input type="checkbox" id="e_unlink"> Remove from this family</label>':'<div class="meta">Not linked to any brother or sister.</div>')+
+   '<label>Link with a brother/sister (their admission no)</label><input id="e_link" placeholder="Admission no of the other child">'+
+   '<label class="chk"><input type="checkbox" id="e_sibOff"'+(u.siblingOff?' checked':'')+'> No sibling discount for this student</label>'+
+   '<h3 class="g">Bus</h3><select id="e_route"><option value="">No bus</option>'+r.routes.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===u.routeId?' selected':'')+'>'+esc(x.name)+' — '+rs(x.monthly)+'/month'+(x.oneWay!==null&&x.oneWay!==''?' (one-way '+rs(x.oneWay)+')':'')+'</option>').join('')+'</select>'+
+   '<label>Trip</label><select id="e_mode"><option value="BOTH"'+(u.routeMode!=='ONE_WAY'?' selected':'')+'>Both ways</option><option value="ONE_WAY"'+(u.routeMode==='ONE_WAY'?' selected':'')+'>One way (if the route has a one-way amount)</option></select>'+
+   (r.transportHeadId?'':'<div class="help">⚠ No bus fee head is chosen in Fees Settings → Receipt &amp; Rules, so the bus is not charged.</div>')+
+   '<h3 class="g">Optional fees</h3>'+(optHeads.length?'<div class="cl" id="e_opt">'+optHeads.map(x=>'<label><input type="checkbox" value="'+esc(x.id)+'"'+(opt.indexOf(x.id)>-1?' checked':'')+'>'+esc(x.name)+'</label>').join('')+'</div>':'<div class="meta">No optional fee heads are set.</div>')+
+   '<h3 class="g">Concessions</h3><div id="concs">'+ED.concessions.map(concRow).join('')+'</div><div class="btnrow"><button class="btn b-blue" onclick="addConc()">+ Add concession</button></div>'+
+   '<h3 class="g">Previous dues (before this session or before the app)</h3><input id="e_ob" inputmode="decimal" value="'+esc(u.openingBalance||'')+'" placeholder="0">'+
+   (r.locked?'<label>Reason for changing (the opening position is locked)</label><input id="e_reason" placeholder="Why is it being changed?">':'')+
+   '<label>Note</label><input id="e_note" maxlength="120" value="'+esc(u.note)+'">'+
+   '<div class="btnrow"><button class="btn b-green" id="saveBtn" onclick="saveStu()">Save student</button><button class="btn b-navy" onclick="closeStu()">Back to list</button></div><div class="msg" id="sMsg"></div></div>'+
+   '<div class="box"><div class="title">Calculated fees</div>'+(r.warnings.length?'<div class="probs">⚠ '+r.warnings.map(esc).join('<br>⚠ ')+'</div>':'')+drawLines()+'</div>';
+  $('vEdit').innerHTML = h;
+}
+function drawLines(){
+  let r = ST, t = r.totals;
+  if(!r.lines.length) return '<div class="empty-note">No fees apply to this student yet.</div>';
+  let h = '<div class="big"><div><b>'+rs(t.totalDue)+'</b><span>Total unpaid</span></div><div><b>'+rs(t.payableNow)+'</b><span>Overdue today</span></div></div><div class="scroll"><table class="ft"><tr><th>Fee</th><th>Due</th><th>Fee</th><th>Less</th><th>Paid</th><th>Balance</th></tr>';
+  r.lines.forEach(l=>{ h += '<tr><td>'+esc(l.head)+' '+esc(l.label)+'</td><td>'+esc(l.due.split('-').reverse().join('-'))+'</td><td>'+l.charge+'</td><td>'+(l.discount?'-'+l.discount:'')+'</td><td>'+(l.paid||'')+'</td><td>'+(l.balance?'<b>'+l.balance+'</b>':'✓')+'</td></tr>'; });
+  if(t.previous) h += '<tr><td>Previous dues</td><td></td><td>'+t.openingBalance+'</td><td></td><td>'+(t.openingBalance-t.previous||'')+'</td><td><b>'+t.previous+'</b></td></tr>';
+  if(t.fine) h += '<tr><td>Late fine</td><td></td><td colspan="3"></td><td><b>'+t.fine+'</b></td></tr>';
+  h += '<tr class="tot"><td>Total</td><td></td><td>'+rs(t.charge+t.openingBalance)+'</td><td>'+(t.discount?'-'+t.discount:'')+'</td><td>'+t.paid+'</td><td>'+t.totalDue+'</td></tr></table></div>';
+  return h;
+}
+async function saveStu(){
+  let b = $('saveBtn'), m = $('sMsg'); b.disabled = true; show(m,'Saving...','load');
+  let d = {type:$('e_type').value,admissionDate:$('e_date').value.trim(),linkTo:$('e_link').value.trim(),unlink:!!($('e_unlink')&&$('e_unlink').checked),siblingOff:$('e_sibOff').checked,
+    routeId:$('e_route').value,routeMode:$('e_mode').value,optionalHeads:$('e_opt')?[...$('e_opt').querySelectorAll('input:checked')].map(i=>i.value):[],
+    openingBalance:$('e_ob').value,note:$('e_note').value,concessions:readConc(),reason:$('e_reason')?$('e_reason').value:''};
+  try{
+    let r = await apiPost('feestudentsave',{adm:ST.student.adm,session:ST.session,data:JSON.stringify(d)});
+    if(r.success){ let g = await apiGet('feestudentget',{adm:ST.student.adm,session:ST.session}); if(g.success){ ST = g; ED = {concessions:g.concessions.map(c=>Object.assign({},c))}; drawEdit(); } show($('sMsg'),'✅ Saved.','ok'); return; }
+    show(m,'❌ '+(r.error||'Could not save.'),'err'); m.scrollIntoView({block:'center'});
+  }catch(e){ show(m,'❌ Could not connect. Nothing was saved. Try again.','err'); }
+  b.disabled = false;
+}
+loadList(true);
+</script>
+</body></html>
