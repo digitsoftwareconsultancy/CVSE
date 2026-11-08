@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Report Cards</title>
+<link rel="stylesheet" href="rc-card.css">
+<style>
+
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.wrap{max-width:1000px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:46px;background:#fff}
+input[readonly]{background:#f1f5f9;color:#475569}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-orange{background:linear-gradient(135deg,#ef6c00,#ff9800)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--purple);margin-bottom:12px}
+.card.exam{border-left-color:var(--blue)}.card.rep{border-left-color:var(--orange)}.card.area{border-left-color:var(--green)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px}
+.ch b{color:var(--navy);font-size:15px}
+.pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-dirty{background:#fff3e0;color:#9a3412}.p-ok{background:#dcfce7;color:#166534}.p-lock{background:#fee2e2;color:#991b1b}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:999px;padding:0 12px;min-height:38px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip input{width:18px;height:18px;min-height:0;padding:0;margin:0}
+.chip.on{background:#e3f2fd;border-color:#90caf9}
+.sw{display:flex;align-items:center;gap:8px;min-height:46px;font-weight:700;font-size:14px;cursor:pointer}
+.sw input{width:22px;height:22px;min-height:0;padding:0}
+.preview{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:10px;font-size:13px;font-weight:700;color:var(--navy);margin-top:10px;line-height:1.5}
+.wrow{display:flex;gap:8px;align-items:center;margin-top:6px}.wrow span{flex:1;font-weight:700;font-size:13px}.wrow input{width:100px;text-align:center}
+.grow{display:grid;grid-template-columns:70px 70px 70px 1fr 46px;gap:6px;align-items:center;margin-bottom:6px}
+.grow input{padding:8px;text-align:center}.grow input.rem{text-align:left}
+.xbtn{border:1px solid #fecaca;background:#fff;color:var(--red);border-radius:10px;min-height:46px;font-weight:900;cursor:pointer}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.prow .full{grid-column:1/-1}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;position:relative}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+.stu{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.stu .nm{flex:1 1 100%;font-weight:700;font-size:14px}
+.stu .fld{display:flex;flex-direction:column;align-items:center}
+.stu .sp{flex:1}.stu .nm small{display:block;color:var(--muted);font-weight:600}
+.stu .mk{width:84px;text-align:center;font-weight:800;font-size:17px;padding:8px}
+.stu .mk.bad{border-color:var(--red);background:#fee2e2}
+.stu .tot{width:62px;text-align:center;font-weight:800;color:var(--navy);font-size:15px}
+.stu .ab{display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:800;color:var(--muted);gap:3px}.stu .ab input{width:26px;height:26px;min-height:0;padding:0}
+.stu.absent .mk{background:#f1f5f9;opacity:.6}
+.lab{font-size:10px;font-weight:800;color:var(--muted);text-align:center;display:block}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.stat{flex:1;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+
+:root{--frame:#1a4bb5;--cream:#fdf6d0}
+#fit{max-width:1000px;margin:0 auto;padding:0 12px}
+@media print{
+  body{background:#fff;padding:0}body>.top,body>.wrap,.tabs,.msg{display:none!important}
+  #fit{padding:0;max-width:none}.cw{height:auto!important;margin:0!important;page-break-after:always;break-after:page}
+  .cw:last-child{page-break-after:auto;break-after:auto}
+  .cw .scaler{transform:none!important;width:auto!important}
+  @page{size:A4;margin:.8cm}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <div class="badge-exam" id="examBadge" style="background:#16a34a">Exam: ENABLED</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box">
+    <div class="title">🎓 Report Cards</div>
+    <div class="meta">Look at the report cards of a class, then print one student or the whole class. Cards of a class that is not finalised yet show a DRAFT mark.</div>
+    <div class="row">
+      <div><label>Report</label><select id="selReport" onchange="onReport()"></select></div>
+      <div><label>Class</label><select id="selClass" onchange="clearView()"></select></div>
+    </div>
+    <div class="msg" id="gMsg"></div>
+    <div class="btnrow"><button class="btn b-blue" id="btnLoad" onclick="loadCards()">🔍 Load Report Cards</button></div>
+  </div>
+  <div class="box" id="viewBox" style="display:none">
+    <div class="row">
+      <div><label>Show</label><select id="selStu" onchange="drawCards()"></select></div>
+    </div>
+    <div class="msg" id="vMsg"></div>
+    <div class="btnrow"><button class="btn b-green" id="btnPrint" onclick="doPrint()">🖨️ Print</button><button class="btn b-grey" id="btnSettings" onclick="location.href='report-card-settings.html'" style="display:none">⚙️ Card Settings</button></div>
+  </div>
+</div>
+
+<div id="fit"></div>
+
+<div class="tabs">
+  <button class="tabBtn active"><span class="tabIco">🎓</span>Report Cards</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+
+<script src="rc-render.js"></script>
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+var IS_ADMIN = USER.role === 'admin';
+
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function goBack(){ window.location.href = IS_ADMIN ? 'admin.html' : 'class-dashboard.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+
+var OPTS = [], DATA = null;
+function curRep(){ return OPTS.find(r => r.reportId === $('selReport').value); }
+function qs(k){ try{ return new URLSearchParams(location.search).get(k) || ''; }catch(e){ return ''; } }
+
+async function init(){
+  $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
+  $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
+  $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
+  $('roleBadge').innerText = IS_ADMIN ? 'ADMIN' : 'CLASS TEACHER';
+  let ex = IS_ADMIN || String(USER.examAccess).toUpperCase() === 'YES';
+  $('examBadge').innerText = ex ? 'Exam: ENABLED' : 'Exam: DISABLED'; $('examBadge').style.background = ex ? '#16a34a' : '#c1272d';
+  $('btnSettings').style.display = IS_ADMIN ? '' : 'none';
+  show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getfinaloptions');
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    OPTS = r.reports || [];
+  }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
+  if(!OPTS.length){
+    $('selReport').innerHTML = $('selClass').innerHTML = '<option value="">-</option>'; $('btnLoad').disabled = true;
+    show($('gMsg'), IS_ADMIN ? 'No report found. Create reports in Exam Settings first.' : 'No report is set for your class yet. Please ask the admin.', 'warn'); return;
+  }
+  hide($('gMsg'));
+  $('selReport').innerHTML = OPTS.map(r => `<option value="${esc(r.reportId)}">${esc(r.name)}</option>`).join('');
+  if(qs('report') && OPTS.some(r => r.reportId === qs('report'))) $('selReport').value = qs('report');
+  onReport();
+  if(qs('class') && Array.from($('selClass').options).some(o => o.value === qs('class'))){ $('selClass').value = qs('class'); loadCards(); }
+}
+function onReport(){ let r = curRep(); $('selClass').innerHTML = r ? r.classes.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('') : ''; clearView(); }
+function clearView(){ DATA = null; $('viewBox').style.display = 'none'; $('fit').innerHTML = ''; }
+
+async function loadCards(){
+  let b = $('btnLoad'); b.disabled = true; show($('gMsg'), 'Loading...', 'load');
+  try{
+    let r = await apiGet('getreportcards', {reportId:$('selReport').value, className:$('selClass').value});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    DATA = r; hide($('gMsg')); $('viewBox').style.display = '';
+    $('selStu').innerHTML = '<option value="">All students (' + r.students.length + ')</option>' + r.students.map(s => `<option value="${esc(s.admissionNo)}">${esc((s.rollNo || '-') + ' - ' + s.name)}</option>`).join('');
+    if(!r.students.length) show($('vMsg'), 'No students found in this class.', 'warn');
+    else if(r.draft) show($('vMsg'), '⚠️ This class is not finalised yet. The cards show a DRAFT mark and should not be given out.', 'warn');
+    else hide($('vMsg'));
+    $('btnPrint').disabled = !r.students.length;
+    drawCards();
+  }catch(e){ show($('gMsg'), '❌ Network problem. Please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+
+function drawCards(){
+  if(!DATA){ return; }
+  let only = $('selStu').value, list = DATA.students.filter(s => !only || s.admissionNo === only);
+  $('fit').innerHTML = rcCardsHtml(DATA, list);
+  fit();
+}
+function fit(){ rcFit($('fit')); }
+window.addEventListener('resize', fit);
+function doPrint(){
+  if(!DATA || !DATA.students.length) return;
+  if(DATA.draft && !confirm('This class is not finalised. The printed cards will carry a DRAFT mark. Print anyway?')) return;
+  window.print();
+}
+window.addEventListener('beforeprint', () => { document.querySelectorAll('.cw').forEach(c => { c.style.width = ''; c.style.height = ''; }); });
+window.addEventListener('afterprint', fit);
+init();
+</script>
+</body></html>
