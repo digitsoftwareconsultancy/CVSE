@@ -161,6 +161,7 @@ function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return '';
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), classes:ls('cvse_classes'),
   examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+var REAL_ROLE = USER.role; if(USER.role === 'accountant') USER.role = 'admin';       // an accountant the admin allowed works like admin on this page
 var IS_ADMIN = USER.role === 'admin';
 var IS_CT = USER.role === 'classTeacher' || USER.isClassTeacher;
 
@@ -201,7 +202,7 @@ async function init(){
   document.getElementById('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
   document.getElementById('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
   document.getElementById('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
-  document.getElementById('roleBadge').innerText = IS_ADMIN ? 'ADMIN' : 'SUBJECT TEACHER';
+  document.getElementById('roleBadge').innerText = REAL_ROLE === 'accountant' ? 'ACCOUNTANT' : (IS_ADMIN ? 'ADMIN' : 'SUBJECT TEACHER');
   let ex = IS_ADMIN || String(USER.examAccess).toUpperCase() === 'YES';
   let eb = document.getElementById('examBadge'); eb.innerText = ex ? 'Exam: ENABLED' : 'Exam: DISABLED'; eb.style.background = ex ? '#16a34a' : '#c1272d';
   document.getElementById('fDate').value = today();
@@ -231,7 +232,7 @@ async function init(){
 
 function goBack(){
   let v = ls('cvse_view');
-  window.location.href = IS_ADMIN ? 'admin.html' : (IS_CT && v === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html');
+  window.location.href = REAL_ROLE === 'accountant' ? 'accountant.html' : IS_ADMIN ? 'admin.html' : (IS_CT && v === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html');
 }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
