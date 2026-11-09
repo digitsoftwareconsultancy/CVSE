@@ -37,6 +37,7 @@ body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;
 .btn-disabled{background:#e5e7eb!important;color:#666!important;cursor:not-allowed}
 .info-box{background:#fff;border-left:4px solid var(--navy);padding:12px 14px;border-radius:12px;margin:12px 0;font-size:13px;line-height:1.7;box-shadow:0 2px 10px rgba(0,0,0,.06)}
 .info-box b{color:var(--navy)}
+.pwr2{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#64748b}.pwr2 img{height:36px;width:auto}
 .powered{text-align:center;margin-top:14px;padding:12px;font-size:11px;color:#666;background:#fff;border-radius:12px;border:1px solid var(--line)}
 /* BOTTOM TABS - same as Admin */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:2px;padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
@@ -135,7 +136,7 @@ body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;
   </div>
 </div>
 
-<div class="powered">Powered by <b>DiGit Software Consultancy</b> | <span id="dateInfo"></span></div>
+<div class="powered"><span class="pwr2">Powered by <img src="icons/digit-logo.png" alt="DiGit Software Consultancy"></span> | <span id="dateInfo"></span></div>
 
 <!-- BOTTOM TABS - same as Admin -->
 <div class="tabs">
