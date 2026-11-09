@@ -135,6 +135,7 @@ pre.res{white-space:pre-wrap;font-family:inherit;margin:0}
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+var REAL_ROLE = USER.role; if(USER.role === 'accountant') USER.role = 'admin';       // an accountant the admin allowed works like admin on this page
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
 else if(USER.role !== 'admin' && USER.role !== 'classTeacher'){ window.location.href = 'index.html'; }
 function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
@@ -151,7 +152,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html' : 'class-dashboard.html'; }
+function goBack(){ window.location.href = REAL_ROLE === 'accountant' ? 'accountant.html' : (USER.role === 'admin' ? 'admin.html' : 'class-dashboard.html'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -161,7 +162,7 @@ function maskD(el){
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
-$('roleBadge').innerText = USER.role === 'admin' ? 'ADMIN' : 'CLASS TEACHER';
+$('roleBadge').innerText = REAL_ROLE === 'accountant' ? 'ACCOUNTANT' : (USER.role === 'admin' ? 'ADMIN' : 'CLASS TEACHER');
 
 var DATA = null, EDIT = '';
 var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];

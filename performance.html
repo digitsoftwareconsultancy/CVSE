@@ -109,6 +109,7 @@ const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKE
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), classes:ls('cvse_classes'), examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+var REAL_ROLE = USER.role; if(USER.role === 'accountant') USER.role = 'admin';       // an accountant the admin allowed works like admin on this page
 var IS_ADMIN = USER.role === 'admin';
 var IS_CT = USER.role === 'classTeacher' || USER.isClassTeacher;
 if(!IS_ADMIN && !IS_CT){ alert('The performance report is only for class teachers.'); window.location.href = 'subject-dashboard.html'; }
@@ -130,7 +131,7 @@ async function init(){
   $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
   $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
   $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
-  $('roleBadge').innerText = IS_ADMIN ? 'ADMIN' : 'CLASS TEACHER';
+  $('roleBadge').innerText = REAL_ROLE === 'accountant' ? 'ACCOUNTANT' : (IS_ADMIN ? 'ADMIN' : 'CLASS TEACHER');
   let ex = IS_ADMIN || String(USER.examAccess).toUpperCase() === 'YES';
   $('examBadge').innerText = ex ? 'Exam: ENABLED' : 'Exam: DISABLED'; $('examBadge').style.background = ex ? '#16a34a' : '#c1272d';
   let d = new Date(); $('fMonth').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -144,7 +145,7 @@ async function init(){
   else show('No class is assigned to you. Ask admin to set your Class in the Teachers tab.', 'err');
 }
 
-function goBack(){ window.location.href = IS_ADMIN ? 'admin.html' : 'class-dashboard.html'; }
+function goBack(){ window.location.href = REAL_ROLE === 'accountant' ? 'accountant.html' : (IS_ADMIN ? 'admin.html' : 'class-dashboard.html'); }
 function goAtt(){ window.location.href = 'daily.html?tab=att'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 

@@ -95,6 +95,7 @@ pre.res{white-space:pre-wrap;font-family:inherit;margin:0}
 .scroll{overflow-x:auto}
 .mo{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}.mo label{margin:0;border:1px solid #cbd5e1;border-radius:999px;padding:0 10px;min-height:36px;display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;background:#fff}.mo input{width:auto;min-height:0}
 h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
 </style></head>
 <body>
 <div class="top">
@@ -128,7 +129,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
-if(!ls('cvse_token') || !USER.username || USER.role !== 'admin'){ window.location.href = 'index.html'; }
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
 function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
 async function apiGet(action, params){
   let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
@@ -143,7 +144,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = 'admin.html'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html' : 'accountant.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -152,6 +153,7 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 var D = null, TAB = 'settings';
@@ -193,9 +195,7 @@ var SETF = [
  ['Fine_Grace','Grace days before fine','num'],
  ['Fine_Max','Maximum fine (0 = no limit)','num'],
  ['Who can collect',null],
- ['Role_AccountantCollects','Accountant collects fees','yn'],
- ['Role_ClassTeacherCollects','Class teacher collects fees','yn'],
- ['Role_AccountantCancels','Accountant may cancel receipts','yn','','If No, only Admin can cancel'],
+ ['Role_ClassTeacherCollects','Class teachers may collect fees for their own class','yn','','Accountants are given their permissions in Admin → Users.'],
  ['Unpaid fees',null],
  ['Dues_Rule','When fees are not paid','sel',[['OFF','Do nothing'],['RESULT','Close the Result tab in the student app'],['RESULT_HOME','Close Result and Home tabs']]],
  ['Dues_Grace_Days','Days to wait after due date','num'],
@@ -254,8 +254,10 @@ function dSettings(){
     else h += inp(id,v);
     if(f[4]) h += '<div class="help">'+esc(f[4])+'</div>';
   });
+  h += '<div class="btnrow"><button class="btn b-purple" onclick="preview()">👁 Preview a sample receipt</button></div><div class="help">Save first, then preview, to see your latest receipt settings.</div>';
   return h;
 }
+function preview(){ window.open('fees-receipt.html?sample=1','_blank'); }
 function rSettings(){ return SETF.filter(f=>f[1]!==null).map(f=>({key:f[0],value:$('s_'+f[0]).value})); }
 /* ---- groups ---- */
 function dGroups(){

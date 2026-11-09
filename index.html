@@ -107,12 +107,13 @@ function enterRole(role){
     try{ CAP=JSON.parse(localStorage.getItem('cvse_user')||localStorage.getItem('cvs_user')||'{}'); }catch(e){ CAP={}; }
   }
   localStorage.setItem('cvs_selected_role', role);
-  localStorage.setItem('cvse_view', role=='classTeacher' ? 'class' : role=='subjectTeacher' ? 'subject' : 'admin');
+  localStorage.setItem('cvse_view', role=='classTeacher' ? 'class' : role=='subjectTeacher' ? 'subject' : role=='accountant' ? 'accountant' : 'admin');
   localStorage.setItem('role', role);
   localStorage.setItem('cvse_role', role);
   localStorage.setItem('cvs_role', role);
   
   if(role=='admin') window.location.href = 'admin.html';
+  else if(role=='accountant') window.location.href = 'accountant.html';
   else if(role=='subjectTeacher' || role=='subject') window.location.href = 'subject-dashboard.html';
   else if(role=='classTeacher' || role=='teacher') window.location.href = 'class-dashboard.html';
   else window.location.href = 'class-dashboard.html';
@@ -133,6 +134,7 @@ function backToLogin(){
       if(view=='class') window.location.href='class-dashboard.html';
       else if(view=='subject') window.location.href='subject-dashboard.html';
       else if(view=='admin') window.location.href='admin.html';
+      else if(view=='accountant') window.location.href='accountant.html';
     }
   }catch(e){}
 })();

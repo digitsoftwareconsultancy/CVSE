@@ -101,7 +101,15 @@ textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;fon
     <div class="btnrow"><button class="btn b-green" id="btnSave" onclick="saveRules()">💾 Save</button></div>
     <div class="msg" id="rMsg"></div>
   </div>
-  <div class="box" style="border-left-color:#7c3aed">
+  <div class="box" style="border-left-color:#16a34a">
+    <div class="title">🔑 Student password</div>
+    <div class="meta">A student's first password is the date of birth; the app then makes them create their own. If a parent forgets it, find the student here and reset it. The student will login with the date of birth again and create a new password.</div>
+    <label>Admission Number</label><input id="pwAdm" placeholder="e.g. 1001" onkeydown="if(event.key==='Enter')findPw()">
+    <div class="btnrow"><button class="btn b-green" id="btnPwFind" onclick="findPw()">🔍 Find student</button></div>
+    <div class="msg" id="pwMsg"></div>
+    <div id="pwBody"></div>
+  </div>
+  <div class="box" id="oneBox" style="border-left-color:#7c3aed">
     <div class="title">👤 One student</div>
     <div class="meta">Block or allow a single tab for one student. This beats the rules above and the automatic rules.</div>
     <label>Admission Number</label><input id="stAdm" placeholder="e.g. 1001" onkeydown="if(event.key==='Enter')findStudent()">
@@ -119,7 +127,8 @@ const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKE
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
-else if(USER.role !== 'admin'){ window.location.href = 'admin.html'; }
+else if(USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'admin.html'; }
+var IS_ACC = USER.role === 'accountant';
 function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
 async function apiGet(action, params){
   let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
@@ -134,8 +143,9 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = 'admin.html'; }
+function goBack(){ window.location.href = IS_ACC ? 'accountant.html' : 'admin.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+if(IS_ACC) $('roleBadge').innerText = 'ACCOUNTANT';
 $('wName').innerText = 'Welcome, ' + (USER.name || 'Admin'); $('wSub').innerText = 'Username: ' + USER.username;
 $('avatarLetter').innerText = String(USER.name || 'A').trim().charAt(0).toUpperCase();
 
@@ -206,6 +216,35 @@ async function setOv(key, act, btn){
     else{ show($('sMsg'), '❌ ' + (r.error || 'Could not save.'), 'err'); all.forEach(x => x.disabled = false); }
   }catch(e){ show($('sMsg'), '❌ Network problem. Please check and try again.', 'err'); all.forEach(x => x.disabled = false); }
 }
-load();
+var PWADM = '';
+async function findPw(){
+  let adm = $('pwAdm').value.trim(); if(!adm){ show($('pwMsg'), 'Enter an admission number.', 'err'); return; }
+  let b = $('btnPwFind'); b.disabled = true; show($('pwMsg'), 'Searching...', 'load'); $('pwBody').innerHTML = '';
+  try{
+    let r = await apiGet('studentpwinfo', {admissionNo:adm});
+    if(!r.success){ show($('pwMsg'), '❌ ' + (r.error || 'Could not search.'), 'err'); return; }
+    if(!r.found){ show($('pwMsg'), 'No student with admission number ' + adm + '.', 'err'); return; }
+    hide($('pwMsg')); PWADM = r.student.admissionNo; drawPw(r);
+  }catch(e){ show($('pwMsg'), '❌ Network problem. Please try again.', 'err'); }
+  finally{ b.disabled = false; }
+}
+function drawPw(r){
+  let st = r.state === 'OWN' ? 'Has created own password' + (r.changedAt ? ' (' + esc(r.changedAt) + ')' : '') : 'Not created yet (uses date of birth)';
+  $('pwBody').innerHTML = '<div class="drow"><span>Student</span><b>' + esc(r.student.name) + ' · Class ' + esc(r.student.className) + '</b></div>' +
+    '<div class="drow"><span>Password</span><b>' + st + '</b></div>' +
+    '<div class="drow"><span>Today</span><b>' + (r.locked ? '<span style="color:#c62828">Locked (too many wrong attempts)</span>' : (r.failsToday ? r.failsToday + ' wrong attempt(s)' : 'No wrong attempts')) + '</b></div>' +
+    (r.resetBy ? '<div class="drow"><span>Last reset by</span><b>' + esc(r.resetBy) + '</b></div>' : '') +
+    '<div class="btnrow"><button class="btn b-purple" id="btnPwReset" onclick="resetPw()">🔄 Reset password</button></div>';
+}
+async function resetPw(){
+  if(!confirm('Reset the password of this student? They will login with the date of birth and create a new password.')) return;
+  let b = $('btnPwReset'); b.disabled = true; show($('pwMsg'), 'Resetting... please wait', 'load');
+  try{
+    let r = await apiPost('studentpwreset', {admissionNo:PWADM});
+    if(r.success){ show($('pwMsg'), '✅ ' + r.message, 'ok'); let q = await apiGet('studentpwinfo', {admissionNo:PWADM}); if(q.success && q.found) drawPw(q); }
+    else{ show($('pwMsg'), '❌ ' + (r.error || 'Could not reset.'), 'err'); b.disabled = false; }
+  }catch(e){ show($('pwMsg'), '❌ Network problem. Nothing may have changed - check and try again.', 'err'); b.disabled = false; }
+}
+if(IS_ACC){ $('rulesBox').style.display = 'none'; $('oneBox').style.display = 'none'; } else load();
 </script>
 </body></html>

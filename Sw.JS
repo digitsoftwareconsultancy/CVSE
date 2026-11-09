@@ -2,7 +2,7 @@
    It keeps only the app's own files (page, styles, icons) so the app opens fast and shows its screen even with a weak
    connection. It NEVER keeps anything that comes from the server (marks, attendance, results): those always come live.
    To release a new version of the pages, change VERSION below. */
-var VERSION = 'v6';
+var VERSION = 'v7';
 var CACHE = 'digit-student-' + VERSION;
 var FILES = ['student.html', 'rc-render.js', 'rc-card.css', 'manifest-student.webmanifest', 'icons/student-192.png', 'icons/student-512.png', 'icons/student-512-maskable.png', 'icons/apple-touch-icon.png'];
 

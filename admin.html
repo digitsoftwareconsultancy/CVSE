@@ -1,0 +1,618 @@
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+*{box-sizing:border-box}
+:root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;padding:0;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 12px 20px}
+.box{background:var(--card);padding:16px;border-radius:var(--radius);margin-bottom:12px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3}
+.box h3{margin:0 0 10px;font-size:17px;letter-spacing:-.2px}
+.box h4{margin:0 0 10px}
+.sub{color:var(--muted);font-size:12.5px;margin:-6px 0 12px;line-height:1.4}
+label{font-size:12.5px;font-weight:700;color:#334155;margin:8px 4px 2px;display:inline-block}
+.topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{display:flex;gap:10px;align-items:center;min-width:0}
+.brandIcon{width:40px;height:40px;border-radius:12px;background:#e3f2fd;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.brand h2{margin:0;font-size:16px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:11.5px;display:none}
+@media(min-width:640px){.brand h2{font-size:20px}.brand p{display:block}}
+.pillSession{display:inline-block;background:#e8f5e9;color:#1b5e20;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800;margin-top:4px}
+.btnLogout{background:var(--red)!important;padding:9px 12px!important;font-size:12px!important;border-radius:999px!important;flex-shrink:0}
+.topActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+@media(max-width:640px){.topActions{grid-template-columns:1fr 1fr}}
+.actionCard{border:0;border-radius:14px;padding:12px;text-align:left;cursor:pointer;color:#fff;display:flex;gap:10px;align-items:center;min-height:64px}
+.actionCard b{font-size:14px;display:block;line-height:1.2}
+.actionCard span{font-size:11px;opacity:.92;line-height:1.3;display:block}
+.actionCard small{font-size:24px;flex-shrink:0}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:11px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
+.tabBtn .tabIco{font-size:20px;line-height:1}
+.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+.tabBtn.active .tabIco{transform:scale(1.05)}
+input,select{padding:12px 12px;margin:4px 0;border:1.5px solid #dbe2ea;border-radius:12px;min-width:0;font-size:15px;background:#fff;width:100%}
+input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(25,118,210,.12)}
+.formGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:760px){.formGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.formGrid{grid-template-columns:1fr}}
+.field label{display:block;margin:6px 2px 2px}
+button{padding:11px 16px;background:var(--blue);color:white;border:none;border-radius:12px;cursor:pointer;margin:2px;font-weight:700;font-size:14px;min-height:44px}
+button:active{transform:scale(.98)}
+.btn-del{background:var(--red)}.btn-green{background:var(--green)}.btn-orange{background:var(--orange)}.btn-gray{background:#666}
+.switchRow{display:flex;align-items:center;gap:10px;background:#fff3e0;padding:11px 12px;border-radius:12px;border:1px solid #ffcc80;margin:10px 0}
+.switch{position:relative;width:48px;height:28px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0;margin:0;min-width:0}
+.slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:.2s}
+.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:.2s}
+.switch input:checked + .slider{background:var(--green)}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+.switchLabel{font-weight:800;font-size:13px;color:#7c2d12;line-height:1.3}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:12px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;margin-top:0;min-width:620px}
+th,td{padding:11px 10px;border-bottom:1px solid #eef0f3;text-align:left;font-size:13.5px}
+th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#475569;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:#fbfcfd}
+.teacherGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:760px){.teacherGrid{grid-template-columns:1fr}}
+.teacherCard{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:13px;display:flex;gap:11px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.teacherAvatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.teacherMain{flex:1;min-width:0}
+.teacherName{font-weight:800;font-size:15px;margin:0;line-height:1.2;word-break:break-word}
+.teacherUser{color:var(--muted);font-size:12px;margin:2px 0 8px}
+.teacherMeta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.metaPill{background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 9px;border-radius:999px;font-size:11.5px;font-weight:600;color:#334155}
+.rolePill-SubjectTeacher{background:#e3f2fd;color:#0d47a1;border-color:#bbdefb}
+.rolePill-ClassTeacher{background:#fff3e0;color:#7c2d12;border-color:#ffcc80}
+.fp{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13.5px;font-weight:600}.fp input{width:22px;height:22px;margin:0}
+.rolePill-Accountant{background:#dcfce7;color:#166534;border-color:#86efac}
+.rolePill-Admin{background:#f3e5f5;color:#6a1b9a;border-color:#e1bee7}
+.teacherActions{display:flex;gap:6px;flex-direction:column;flex-shrink:0}
+.teacherActions button{padding:8px 14px!important;border-radius:999px!important;font-size:12.5px!important;min-height:34px!important;white-space:nowrap}
+#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#e3f2fd,#eef2f7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.loginCard{background:white;padding:24px;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.14);width:360px;max-width:100%;text-align:center}
+.loginCard h2{margin:0 0 4px;font-size:20px}
+.loginSub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:640px){.modal{align-items:center;padding:12px}}
+.modalBox{background:#fff;padding:20px 16px calc(20px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:92vh;overflow:auto}
+@media(min-width:640px){.modalBox{border-radius:16px;padding:22px}}
+.mapTag{display:inline-block;background:var(--blue);color:#fff;padding:6px 11px;border-radius:999px;margin:3px;font-size:12px;font-weight:600}
+.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.settingsGrid{grid-template-columns:1fr}}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#fff}
+.badge-green{background:var(--green)}.badge-red{background:var(--red)}.badge-orange{background:var(--orange)}
+</style></head><body>
+<div id="loginScreen"><div class="loginCard"><div style="font-size:42px">🏫</div><h2>🔐 <span id="loginSchoolName">School</span><br>Admin Login</h2><p class="loginSub" id="loginSessionLabel">School Management System</p><input id="l_user" placeholder="Username" style="width:100%"><br><input id="l_pass" type="password" placeholder="Password" style="width:100%"><br><br><button onclick="doLogin()" style="width:100%;padding:13px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
+<div id="adminContent" style="display:none;">
+<div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div style="min-width:0"><h2>Admin Panel — <span id="schoolName">School</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
+<div class="wrap">
+<div class="topActions">
+<button onclick="openRegister()" class="actionCard" style="background:linear-gradient(135deg,#2e7d32,#43a047)"><small>📒</small><span><b>Exam Register</b><span>Enter marks class-wise</span></span></button>
+<button onclick="openTimetableBuilder()" class="actionCard" style="background:linear-gradient(135deg,#6d4c41,#8d6e63)"><small>🗓️</small><span><b>TIMETABLE</b><span>Build & print timetable</span></span></button>
+</div>
+<div id="tabUsers" class="tab"><div class="box"><h3>Create Teacher / Admin</h3><p class="sub">Add login, role and exam access. Which class and subject a teacher can enter marks for is set later in Exam Settings.</p>
+<div class="formGrid">
+<div class="field"><label>Username</label><input id="uname" placeholder="e.g. niraj"></div>
+<div class="field"><label>Password</label><input id="pass" placeholder="Password"></div>
+<div class="field"><label>Role</label><select id="role" onchange="onRoleChange()"><option value="classTeacher">Class Teacher</option><option value="subjectTeacher">Subject Teacher</option><option value="accountant">Accountant (fees office)</option><option value="admin">Admin</option></select></div>
+<div class="field"><label>Classes</label><select id="classes"><option value="">Select Class</option></select></div>
+<div class="field" style="display:none"><label>Subjects</label><input id="subjects" placeholder="Subjects e.g. English,Mathematics"></div>
+<div class="field"><label>Full Name</label><input id="fname" placeholder="Full Name"></div>
+</div><div id="c_fees" style="display:none;margin:8px 0;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px"><b style="color:#166534">Pages this accountant may use</b><div style="font-size:12px;color:#475569;margin:4px 0 6px">Tick only what is needed. Admin always has everything.</div>
+<label class="fp"><input type="checkbox" class="c_fp" value="COLLECT" checked> Collect fees, print and see receipts</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="CANCEL"> Cancel a receipt</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="STUDENTS"> Student Fee Setup (concessions, bus, previous dues)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="OPENING"> Already Paid grid (start mid-session)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="SETTINGS"> Fees Settings (heads, amounts, due dates, receipt look)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="REPORTS"> Fee reports</label>
+<div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
+<label class="fp"><input type="checkbox" class="c_fp" value="STUDENTDB"> Students (add and edit student details)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="TIMETABLE"> Timetable builder</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="CALENDAR"> School calendar and events</label></div>
+<div class="switchRow"><label class="switch"><input type="checkbox" id="examCheck"><span class="slider"></span></label><span class="switchLabel">Enable Exam Entry — teacher can enter marks</span></div>
+<button onclick="create()" class="btn-green" style="width:100%;padding:13px">+ Create User</button>
+<div id="builder" style="display:none;margin-top:12px;background:#e3f2fd;padding:14px;border-radius:12px;border:2px solid #1976d2">
+<b>🎯 Class-Wise Subject Permission</b><br><small>Select Class + Subject → Add.</small><br><br>
+<select id="bClass"><option value="">Loading classes...</option></select>
+<select id="bSub"><option value="">Loading subjects...</option></select>
+<div style="display:flex;gap:8px"><button onclick="addMap()" class="btn-green" style="flex:1">+ Add</button><button onclick="clearMap()" class="btn-gray" style="flex:1">Clear</button></div>
+<div id="mapPreview" style="margin-top:10px"></div>
+</div>
+</div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()" style="width:100%">🔄 Refresh</button><div id="ulist">Click Refresh...</div></div></div>
+<div id="tabStudents" class="tab" style="display:none;">
+<div class="box"><h3>Add New Student</h3>
+<div class="formGrid">
+<div class="field"><label>Admission No</label><input id="adno" placeholder="Adm No"></div>
+<div class="field"><label>Student Name</label><input id="sname" placeholder="Student Name"></div>
+<div class="field"><label>Roll</label><input id="roll" placeholder="Roll"></div>
+<div class="field"><label>Class</label><select id="sclass"><option value="">Loading classes...</option></select></div>
+<div class="field"><label>DOB</label><input id="dob" placeholder="DOB DD-MM-YYYY" title="DD-MM-YYYY e.g. 03-10-2019"></div>
+<div class="field"><label>Father Name</label><input id="father" placeholder="Father Name"></div>
+<div class="field"><label>Mother Name (optional)</label><input id="mother" placeholder="Mother Name"></div>
+<div class="field"><label>House (optional)</label><input id="house" placeholder="House"></div>
+</div>
+<div id="s_electives"></div>
+<div id="addMsg" style="margin-top:8px;font-weight:700"></div>
+<br><button onclick="addStu()" id="btnAddStu" class="btn-green" style="width:100%;padding:13px">Add Student</button>
+</div>
+<div class="box"><h3>🎓 Search & Edit</h3><div style="display:flex;gap:8px"><input id="searchAd" placeholder="Enter Admission No" style="flex:1;min-width:0" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button></div>
+<div id="slist" style="margin-top:15px; display:none; background:#fffbe6; padding:15px; border-radius:12px; border:1px solid #ffe082;">
+<div class="formGrid">
+<div class="field"><label>Adm No</label><input id="e_ad" readonly title="Adm No"></div>
+<div class="field"><label>Name</label><input id="e_name" placeholder="Name"></div>
+<div class="field"><label>Roll</label><input id="e_roll" placeholder="Roll"></div>
+<div class="field"><label>Class</label><select id="e_class" onchange="loadEditElective()"><option value="">Loading classes...</option></select></div>
+<div class="field"><label>DOB</label><input id="e_dob" placeholder="DD-MM-YYYY" title="DD-MM-YYYY"></div>
+<div class="field"><label>Father</label><input id="e_father" placeholder="Father"></div>
+<div class="field"><label>Mother</label><input id="e_mother" placeholder="Mother"></div>
+<div class="field"><label>House</label><input id="e_house" placeholder="House"></div>
+</div>
+<div id="e_electives"></div>
+<br><br><div style="display:flex;gap:8px"><button onclick="saveEdit()" id="btnSaveStu" class="btn-green" style="flex:1">Save</button><button onclick="delStu2()" id="btnDelStu" class="btn-del" style="flex:1">Delete</button></div><p id="editMsg" style="font-weight:700"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
+<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:0"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div>
+<div id="backupTab" class="tab" style="display:none;">
+<div class="box"><h3>📦 Backup</h3>
+<div style="font-size:13px;line-height:1.6">Workbook: <b id="bkName">-</b><br>Last backup: <b id="bkLast">-</b><br>Weekly automatic backup: <b id="bkWeekly">-</b></div>
+<div id="bkWarn" style="margin-top:8px;font-weight:700"></div>
+<br><button onclick="createBackup()" id="btnBackup" class="btn-green" style="width:100%;padding:13px">💾 Backup Now</button>
+<div id="backupMsg" style="margin-top:8px;font-weight:700"></div>
+<p style="font-size:12px;color:#64748b;line-height:1.5;margin-top:10px">A backup is a full copy of this Google Sheet, kept in your Google Drive folder "DiGit Backups". The newest 12 are kept. To go back to a backup: open it from the list below, check it, then copy the tabs you need back (or File &gt; Make a copy).</p></div>
+<div class="box"><h3>📂 Recent backups</h3><div id="backupList">Loading...</div></div>
+</div>
+<div id="resultControlTab" class="tab" style="display:none;">
+<div class="box" style="background:#f3e8ff;border:2px solid #7c3aed"><h3>📝 Exam Settings</h3><p class="sub">Exams, report cards, grade scale, extra areas and who can enter marks.</p><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='exam-settings.html'">Open Exam Settings</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='class-report.html'">Open Class Report (finalise / reopen)</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#ff9800);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card-settings.html'">Report Card Settings</button><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card.html'">View / Print Report Cards</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='student-access.html'">Student App Access</button></div>
+<div class="box" style="background:#ecfdf5;border:2px solid #16a34a"><h3>💰 Fees Settings</h3><p class="sub">Fee heads, amounts, due dates, accessories, bus routes, sibling and late-joiner rules, receipt look. All controlled from here.</p><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='fees-settings.html'">Open Fees Settings</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-collect.html'">Collect Fees</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-receipts.html'">Receipts (day book)</button><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-students.html'">Student Fee Setup</button><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-opening.html'">Already Paid (start mid-session)</button></div>
+<div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>📅 School Calendar</h3><p class="sub">Holidays, exams, programs and meetings. Students see them in the Calendar tab of their app.</p><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='events.html'">Open Calendar &amp; Events</button></div>
+<div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>⚙️ Full School Settings</h3><p class="sub">These values come from Settings sheet — change here and header / prints update automatically.</p>
+<div class="settingsGrid">
+<div class="box" style="background:#fff"><h4>📚 Academic</h4>
+<label>Academic Session</label><br><input id="s_Session" placeholder="2026-2027" style="width:100%"><br>
+<label>Active Term (I / II)</label><br><select id="s_ActiveTerm" style="width:100%"><option value="I">I</option><option value="II">II</option></select><br>
+<label>Publish Result (YES/NO)</label><br><select id="s_PublishResult" style="width:100%"><option>YES</option><option>NO</option></select><br>
+<label>Publish Term I</label><br><select id="s_PubT1" style="width:100%"><option>YES</option><option>NO</option></select><br>
+<label>Publish Term II</label><br><select id="s_PubT2" style="width:100%"><option>YES</option><option>NO</option></select><br>
+<label>Enable Daily Update</label><br><select id="s_EnableDaily" style="width:100%"><option>YES</option><option>NO</option></select>
+</div>
+<div class="box" style="background:#fff"><h4>🏫 School Info - Used in Timetable Prints</h4>
+<label>School Name</label><br><input id="s_SchoolName" style="width:100%"><br>
+<label>School Address</label><br><input id="s_Address" style="width:100%"><br>
+<label>Affiliation No</label><br><input id="s_Affiliation" style="width:100%"><br>
+<label>School Phone</label><br><input id="s_Phone" style="width:100%"><br>
+<label>Header Path (URL)</label><br><input id="s_Header" style="width:100%"><br>
+<label>Logo Path (URL)</label><br><input id="s_Logo" style="width:100%">
+</div>
+</div>
+<div class="box" style="background:#fffbe6;border:2px solid #ff9800;margin-top:12px">
+<h4>🕒 Timetable Periods</h4>
+<small>Select <b>Type</b> from dropdown: Teaching / Leisure / Break / Lunch / etc.</small><br><br>
+<label>Total Periods</label> <input id="s_TotalPeriods" type="number" min="1" max="10" style="width:80px" onchange="renderPeriodInputs()"><br><br>
+<div id="periodInputs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+</div>
+<button onclick="saveAllSettings()" class="btn-green" style="padding:13px 22px;font-size:14px;font-weight:bold;margin-top:12px;width:100%">💾 SAVE ALL SETTINGS</button>
+<div id="settingsMsg" style="margin-top:10px;font-weight:bold"></div>
+<br>
+<div id="publishControlDiv" style="margin-top:10px"></div>
+<div id="currentSettings" style="margin-top:10px;background:#fff;padding:10px;border-radius:6px;font-size:12px"></div>
+</div>
+</div>
+<div id="subjectMasterTab" class="tab" style="display:none;">
+<div class="box" style="background:#fff3e0;border:2px solid #ff9800">
+<h3>📚 Subject Master</h3><p class="sub">Classes & subjects come from Classes + SubjectMaster sheets — no hardcoding.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<select id="smClassFilter" onchange="renderSMTable()" style="flex:1;min-width:120px"><option value="ALL">All</option><option value="">Loading classes...</option></select>
+<button onclick="loadSM()" class="btn">Load</button><button onclick="saveSM()" class="btn-green">Save All</button><button onclick="addSMRow()" style="background:#ff9800">+ Add</button>
+</div>
+<div class="tableWrap" style="max-height:550px"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center">Click Load</td></tr></tbody></table></div>
+<div id="smMsg"></div>
+</div>
+</div>
+</div>
+<div class="tabs">
+<button class="tabBtn active" id="b1" onclick="openTab('tabUsers')"><span class="tabIco">👥</span>Teachers</button>
+<button class="tabBtn" id="b2" onclick="openTab('tabStudents')"><span class="tabIco">🎓</span>Students</button>
+<button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();" style="display:none"><span class="tabIco">💰</span>Fees</button>
+<button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();"><span class="tabIco">📦</span>Backup</button>
+<button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();"><span class="tabIco">⚙️</span>Settings</button>
+<button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();"><span class="tabIco">📚</span>Subjects</button>
+<button class="tabBtn" id="b7" onclick="window.location.href='daily.html'"><span class="tabIco">🗂️</span>Daily</button>
+</div>
+</div>
+<div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
+<label>Username</label><input id="edit_uname" style="width:100%" placeholder="username">
+<label>Password</label><input id="edit_pass" placeholder="Set new password (leave blank to keep old)" style="width:100%">
+<label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="accountant">Accountant (fees office)</option><option value="admin">Admin</option></select>
+<label>Classes</label><select id="edit_classes" style="width:100%"><option value="">Select Class</option></select>
+<label style="display:none">Subjects</label><input id="edit_subjects" style="display:none;width:100%" placeholder="Subjects">
+<div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><div style="display:flex;gap:8px"><button onclick="addEditMap()" class="btn-green" style="flex:1">+ Add</button><button onclick="clearEditMap()" class="btn-gray" style="flex:1">Clear</button></div><div id="editMapPreview"></div></div>
+<div id="e_fees" style="display:none;margin:8px 0;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px"><b style="color:#166534">Pages this accountant may use</b><div style="font-size:12px;color:#475569;margin:4px 0 6px">Tick only what is needed. Admin always has everything.</div>
+<label class="fp"><input type="checkbox" class="e_fp" value="COLLECT" checked> Collect fees, print and see receipts</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="CANCEL"> Cancel a receipt</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="STUDENTS"> Student Fee Setup (concessions, bus, previous dues)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="OPENING"> Already Paid grid (start mid-session)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="SETTINGS"> Fees Settings (heads, amounts, due dates, receipt look)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="REPORTS"> Fee reports</label>
+<div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
+<label class="fp"><input type="checkbox" class="e_fp" value="STUDENTDB"> Students (add and edit student details)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="TIMETABLE"> Timetable builder</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="CALENDAR"> School calendar and events</label></div><label>Full Name</label><input id="edit_fname" style="width:100%" placeholder="Full Name">
+<label>Login Status</label><select id="edit_status" style="width:100%"><option>Active</option><option>Inactive</option></select>
+<label>Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
+<br><br><div style="display:flex;gap:8px"><button onclick="saveEditUser()" class="btn-green" style="flex:1">Save</button><button onclick="closeEdit()" class="btn-gray" style="flex:1">Cancel</button></div><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
+<script>
+const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+let mapStore={}; let editMapStore={}; let SM_DATA=[];
+let ALL_SETTINGS={};
+const PERIOD_TYPES = ['Teaching','Leisure','Break','Lunch','Assembly','Library','Games','Zero Period','Prayer','Activity'];
+let DYNAMIC_CLASSES = [];
+let DYNAMIC_SUBJECTS = [];
+let SUBJECT_LIST = [];   // approved subject names + types, from the SubjectList tab
+async function loadSubjectList(){
+  try{ let res = await apiGet('getsubjectlist'); SUBJECT_LIST = (res && res.list) ? res.list : []; }
+  catch(e){ SUBJECT_LIST = []; }
+  return SUBJECT_LIST;
+}
+function smPickSubject(i, name){
+  SM_DATA[i].subjectName = name;
+  var f = SUBJECT_LIST.find(function(x){ return x.subjectName === String(name).toUpperCase(); });
+  if(f) SM_DATA[i].subjectType = f.subjectType;
+  renderSMTable();
+}
+function smNameSelectHTML(i, current){
+  var cur = String(current||'').toUpperCase();
+  var opts = '<option value="">-- Select subject --</option>';
+  var found = false;
+  SUBJECT_LIST.forEach(function(x){ if(x.subjectName===cur) found=true; opts += '<option value="'+x.subjectName+'" '+(x.subjectName===cur?'selected':'')+'>'+x.subjectName+'</option>'; });
+  if(cur && !found) opts += '<option value="'+cur+'" selected>'+cur+' (not in SubjectList)</option>';
+  return '<select onchange="smPickSubject('+i+',this.value)" style="width:150px">'+opts+'</select>';
+}
+let _classesLoaded=false, _subjectsLoaded=false;
+let ELECTIVE_REQUIRED=false;
+function authCheck(res){
+  if(res && res.code==='AUTH'){ localStorage.clear(); alert('Session expired. Please login again.'); location.reload(); }
+  return res;
+}
+async function apiGet(action, params={}){
+  let url = WEB_URL + "?action=" + action;
+  let tk = localStorage.getItem('cvse_token'); if(tk) url += "&token=" + encodeURIComponent(tk);
+  for(let k in params) url += "&" + k + "=" + encodeURIComponent(params[k]);
+  let r = await fetch(url);
+  return authCheck(await r.json());
+}
+async function apiPost(action, payload={}){
+  let r = await fetch(WEB_URL, {method:'POST', body: JSON.stringify({action, token: localStorage.getItem('cvse_token')||'', ...payload})});
+  return authCheck(await r.json());
+}
+async function loadDynamicClasses(){
+  try{
+    let res = await apiGet('getallclasses');
+    let list = res.classes || res.list || res.data || [];
+    let fromServer = list.map(c=>String(c.class||c.Class||c.name||c).trim().toUpperCase()).filter(c=>c);
+    if(fromServer.length>0){
+      DYNAMIC_CLASSES = fromServer;
+      _classesLoaded=true;
+      fillAllClassDropdowns();
+      return DYNAMIC_CLASSES;
+    }
+  }catch(e){ console.warn('getallclasses failed', e); }
+  try{
+    let res2 = await apiGet('getsubjectmaster');
+    let list2 = res2.subjects || res2.subjectMaster || res2.data || [];
+    let seen={}; let out=[];
+    list2.forEach(r=>{ let c=String(r.class||r.Class||'').trim().toUpperCase(); if(c && !seen[c]){ seen[c]=1; out.push(c); } });
+    if(out.length>0) DYNAMIC_CLASSES = out;
+  }catch(e2){}
+  _classesLoaded=true;
+  fillAllClassDropdowns();
+  return DYNAMIC_CLASSES;
+}
+async function loadDynamicSubjects(){
+  try{
+    let res = await apiGet('getsubjectmaster');
+    let list = res.subjects || res.subjectMaster || res.data || [];
+    let names=[];
+    list.forEach(r=>{ let n=String(r.subjectName||r.SubjectName||'').trim().toUpperCase(); if(n && names.indexOf(n)===-1) names.push(n); });
+    if(names.length>0) DYNAMIC_SUBJECTS = names;
+  }catch(e){ console.warn('getsubjectmaster failed', e); }
+  _subjectsLoaded=true;
+  fillAllSubjectDropdowns();
+  return DYNAMIC_SUBJECTS;
+}
+async function loadAllDynamic(){
+  await Promise.allSettled([loadDynamicClasses(), loadDynamicSubjects(), loadSubjectList()]);
+}
+function classOptionsHTML(selected){ return DYNAMIC_CLASSES.map(c=>`<option ${c===String(selected||'').toUpperCase()?'selected':''}>${c}</option>`).join(''); }
+function fillClassSelect(el, opts){
+  if(!el) return;
+  let cur = el.value;
+  let first = (opts && opts.first) || '';
+  if(DYNAMIC_CLASSES.length===0){
+    el.innerHTML = first + '<option value="">Loading classes...</option>';
+    return;
+  }
+  el.innerHTML = first + DYNAMIC_CLASSES.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+  if(cur) el.value = cur;
+}
+function fillSubjectSelect(el){
+  if(!el) return;
+  let cur = el.value;
+  if(DYNAMIC_SUBJECTS.length===0){ el.innerHTML='<option value="">Loading subjects...</option>'; return; }
+  el.innerHTML = DYNAMIC_SUBJECTS.map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('');
+  if(cur && DYNAMIC_SUBJECTS.indexOf(cur)!==-1) el.value=cur;
+}
+function fillAllClassDropdowns(){
+  fillClassSelect(document.getElementById('classes'), {first:'<option value="">Select Class</option>'});
+  fillClassSelect(document.getElementById('edit_classes'), {first:'<option value="">Select Class</option>'});
+  fillClassSelect(document.getElementById('smClassFilter'), {first:'<option value="ALL">All</option>'});
+  fillClassSelect(document.getElementById('bClass'), {});
+  fillClassSelect(document.getElementById('ebClass'), {});
+  fillClassSelect(document.getElementById('sclass'), {first:'<option value="">Select Class</option>'});
+  fillClassSelect(document.getElementById('e_class'), {first:'<option value="">Class</option>'});
+}
+function fillAllSubjectDropdowns(){
+  fillSubjectSelect(document.getElementById('bSub'));
+  fillSubjectSelect(document.getElementById('ebSub'));
+}
+function isAdminLoggedIn(){ return localStorage.getItem('cvse_role')=='admin' && localStorage.getItem('cvse_username') && localStorage.getItem('cvse_token'); }
+function openTimetableBuilder(){ window.open('timetable-builder.html','_blank'); }
+function onRoleChange(){ document.getElementById('builder').style.display='none'; document.getElementById('c_fees').style.display = role.value=='accountant' ? 'block' : 'none'; }   // class-wise subject builder retired: marks permission moves to Exam Settings
+function addMap(){ var c=bClass.value.toUpperCase(); var s=bSub.value; if(!mapStore[c]) mapStore[c]=[]; if(mapStore[c].indexOf(s)==-1) mapStore[c].push(s); updateMapPreview(); }
+function clearMap(){ mapStore={}; updateMapPreview(); }
+function updateMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in mapStore){ classes.push(cls); var subs=mapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="removeCls(\''+cls+'\')" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } mapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); subjects.value=finalStr; if(classes.length>0 && document.getElementById('classes')){ if(DYNAMIC_CLASSES.indexOf(classes[0])!==-1) document.getElementById('classes').value=classes[0]; } }
+function removeCls(cls){ delete mapStore[cls]; updateMapPreview(); }
+function parseToMap(str){ var m={}; if(!str||str.indexOf(':')==-1) return m; str.split(/[|;]/).forEach(p=>{ p=p.trim(); if(!p) return; var idx=p.indexOf(':'); if(idx==-1) return; var cls=p.substring(0,idx).trim().toUpperCase(); var subs=p.substring(idx+1).trim().split(',').map(s=>s.trim()).filter(s=>s); m[cls]=subs; }); return m; }
+function onEditRoleChange(){ editBuilder.style.display='none'; document.getElementById('e_fees').style.display = edit_role.value=='accountant' ? 'block' : 'none'; }   // retired, see onRoleChange
+function addEditMap(){ var c=ebClass.value.toUpperCase(); var s=ebSub.value; if(!editMapStore[c]) editMapStore[c]=[]; if(editMapStore[c].indexOf(s)==-1) editMapStore[c].push(s); updateEditMapPreview(); }
+function clearEditMap(){ editMapStore={}; updateEditMapPreview(); }
+function updateEditMapPreview(){ var tags=''; var finalStr=''; var classes=[]; for(var cls in editMapStore){ classes.push(cls); var subs=editMapStore[cls].join(','); tags+='<span class="mapTag">'+cls+': '+subs+' <span onclick="delete editMapStore[\''+cls+'\'];updateEditMapPreview();" style="cursor:pointer">✕</span></span>'; finalStr+=(finalStr?' | ':'')+cls+':'+subs; } editMapPreview.innerHTML=tags+(finalStr?'<div><b>Final:</b> '+finalStr+'</div>':''); edit_subjects.value=finalStr; if(classes.length>0 && document.getElementById('edit_classes')){ if(DYNAMIC_CLASSES.indexOf(classes[0])!==-1) document.getElementById('edit_classes').value=classes[0]; } }
+function toDDMMYYYY(v){
+  if(!v) return '';
+  var s=String(v).trim();
+  if(/^\d{2}-\d{2}-\d{4}$/.test(s)) return s;
+  if(s.indexOf('T')>-1) s=s.split('T')[0];
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){ var p=s.split('-'); return p[2]+'-'+p[1]+'-'+p[0]; }
+  try{ var d=new Date(v); if(!isNaN(d.getTime())){ var dd=('0'+d.getDate()).slice(-2); var mm=('0'+(d.getMonth()+1)).slice(-2); var yyyy=d.getFullYear(); return dd+'-'+mm+'-'+yyyy; } }catch(e){}
+  return s;
+}
+function fromDDMMYYYYtoISO(ddmmyyyy){ if(!ddmmyyyy) return ''; var s=String(ddmmyyyy).trim(); if(/^\d{2}-\d{2}-\d{4}$/.test(s)){ var p=s.split('-'); return p[2]+'-'+p[1]+'-'+p[0]; } return s; }
+async function loadAllSettings(){
+  function gv(m, ...keys){ for(var k=0;k<keys.length;k++){ var search=keys[k].toLowerCase(); for(var mk in m){ if(mk.toLowerCase()===search && String(m[mk]).trim()!=='') return m[mk]; } } for(var i=0;i<keys.length;i++){ if(m[keys[i]]!==undefined && String(m[keys[i]]).trim()!=='') return m[keys[i]]; } return ''; }
+  document.getElementById('settingsMsg').innerText='⏳ Loading all settings...';
+  try{
+    let map = await apiGet('getfullsettings');
+    if(map && map.settings) map = map.settings; if(map && map.map) map = map.map;
+    ALL_SETTINGS = map || {};
+    s_Session.value=gv(map,'Academic_Session','Academic Session','ACAD_SESSION')||'2026-2027';
+    s_ActiveTerm.value=gv(map,'Active_Term','Active Term')||'I';
+    s_PublishResult.value=gv(map,'Publish_Result','Publish Result')||'YES';
+    s_PubT1.value=gv(map,'Publish_Term_I','Publish Term I')||'YES';
+    s_PubT2.value=gv(map,'Publish_Term_II','Publish Term II')||'YES';
+    s_EnableDaily.value=gv(map,'Enable_DailyUpdate','Enable DailyUpdate')||'YES';
+    s_SchoolName.value=gv(map,'School_Name','School Name','SCHOOL_NAME')||'';
+    s_Address.value=gv(map,'School_Address','School Address','SCHOOL_ADDRESS')||'';
+    s_Affiliation.value=gv(map,'Affiliation_No','Affiliation No','Affiliation')||'';
+    s_Phone.value=gv(map,'School_Phone','School Phone','Phone')||'';
+    s_Header.value=gv(map,'Header Path','Header_Path','HeaderPath')||'';
+    s_Logo.value=gv(map,'Logo Path','Logo_Path','LogoPath')||'';
+    s_TotalPeriods.value=gv(map,'Total_Periods','Total Periods')||6;
+    renderPeriodInputs(map);
+    document.getElementById('currentSettings').innerHTML=Object.keys(map).map(k=>'<b>'+k+':</b> '+map[k]).join('<br>');
+    document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Loaded '+Object.keys(map).length+' keys | Periods: '+s_TotalPeriods.value+'</span>';
+    try{ var _sn=String(s_SchoolName.value||'').trim(); var _ss=String(s_Session.value||'').trim(); if(_sn){ var _a=document.getElementById('schoolName'); if(_a) _a.textContent=_sn; var _b=document.getElementById('loginSchoolName'); if(_b) _b.textContent=_sn; } if(_ss){ var _c=document.getElementById('sessionLabel'); if(_c) _c.textContent='Session • '+_ss; var _d=document.getElementById('loginSessionLabel'); if(_d) _d.textContent='Session '+_ss+' • School Management System'; } }catch(_e){}
+  }catch(e){ document.getElementById('settingsMsg').innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
+}
+function renderPeriodInputs(map){
+  map = map || ALL_SETTINGS || {};
+  var total=parseInt(document.getElementById('s_TotalPeriods').value||6);
+  var div=document.getElementById('periodInputs'); div.innerHTML='';
+  function getVal(key){ for(var k in map){ if(k.toLowerCase()===key.toLowerCase()) return map[k]; } return ''; }
+  for(var i=1;i<=total;i++){
+    var savedTime = getVal('Period_'+i) || ''; var savedType = getVal('Period_'+i+'_Type') || 'Teaching'; var savedLabel = getVal('Period_'+i+'_Label') || (i+'th Period');
+    var normType='Teaching'; for(var t=0;t<PERIOD_TYPES.length;t++){ if(PERIOD_TYPES[t].toLowerCase()===String(savedType).toLowerCase()){ normType=PERIOD_TYPES[t]; break; } }
+    var typeOptions = PERIOD_TYPES.map(pt=>`<option value="${pt}" ${pt===normType?'selected':''}>${pt}</option>`).join('');
+    div.innerHTML+=`<div style="border:1px solid #ffb74d;padding:10px;border-radius:8px;background:#fff"><label><b>Period ${i} - Type</b></label><br><select id="p_type_${i}" style="width:95%;font-weight:bold;background:#fff9e6">${typeOptions}</select><br><label>Time (e.g. 09:00-09:45)</label><br><input id="p_${i}" value="${savedTime.replace(/"/g,'&quot;')}" placeholder="09:00-09:45" style="width:90%"><br><label>Custom Label</label><br><input id="p_label_${i}" value="${savedLabel.replace(/"/g,'&quot;')}" placeholder="LEISURE / BREAK" style="width:90%"></div>`;
+  }
+}
+async function saveAllSettings(){
+  var payload={ Academic_Session: s_Session.value.trim(), Active_Term: s_ActiveTerm.value, Publish_Result: s_PublishResult.value, Publish_Term_I: s_PubT1.value, Publish_Term_II: s_PubT2.value, Enable_DailyUpdate: s_EnableDaily.value, School_Name: s_SchoolName.value.trim(), School_Address: s_Address.value.trim(), Affiliation_No: s_Affiliation.value.trim(), School_Phone: s_Phone.value.trim(), 'Header Path': s_Header.value.trim(), 'Logo Path': s_Logo.value.trim(), Total_Periods: String(s_TotalPeriods.value) };
+  var tot = parseInt(s_TotalPeriods.value||6);
+  for(var i=1;i<=tot;i++){ var typeEl=document.getElementById('p_type_'+i); var timeEl=document.getElementById('p_'+i); var labelEl=document.getElementById('p_label_'+i); payload['Period_'+i]= timeEl ? timeEl.value.trim() : ''; payload['Period_'+i+'_Type']= typeEl ? typeEl.value : 'Teaching'; payload['Period_'+i+'_Label']= labelEl ? labelEl.value.trim() : (i+'th Period'); }
+  for(var j=tot+1;j<=10;j++){ payload['Period_'+j]=''; payload['Period_'+j+'_Type']=''; payload['Period_'+j+'_Label']=''; }
+  document.getElementById('settingsMsg').innerText='⏳ Saving...';
+  let res = await apiPost('savefullsettings', payload);
+  if(res && res.success){ document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Saved!</span>'; setTimeout(loadAllSettings, 1000); } else { document.getElementById('settingsMsg').innerHTML='<span style="color:red">❌ Failed'+(res&&res.error?': '+res.error:'')+'</span>'; }
+}
+function smNormGrade(v){ if(v===true || String(v).toUpperCase()==='YES' || String(v).toUpperCase()==='TRUE') return 'YES'; return 'NO'; }
+function smNormType(v){ var s=String(v||'SCHOLASTIC').toUpperCase().trim(); if(s==='CO' || s==='CO-SCHOLASTIC' || s.indexOf('CO-')===0) return 'CO-SCHOLASTIC'; if(s==='PSD' || s==='PERSONAL') return 'PSD'; return 'SCHOLASTIC'; }
+async function loadSM(){
+  document.getElementById('smMsg').innerText='Loading...';
+  let smPromise = apiGet('getsubjectmaster');
+  await loadAllDynamic();
+  try{
+    let list = await smPromise;
+    SM_DATA = list.subjects || list.subjectMaster || list.data || [];
+    if(!Array.isArray(SM_DATA)) SM_DATA=[];
+    SM_DATA = SM_DATA.map(r=>{
+      if(r.class && String(r.class).toUpperCase().indexOf('SUB')===0){ var tmp=r.class; r.class=r.subjectId||DYNAMIC_CLASSES[0]; r.subjectId=tmp; }
+      return { subjectId: r.subjectId || r.SubjectID || '', class: String(r.class || r.Class || DYNAMIC_CLASSES[0]||'').toUpperCase(), subjectName: r.subjectName || r.SubjectName || r.subject || '', subjectType: smNormType(r.subjectType || r.SubjectType), maxPT: Number(r.maxPT ?? r.Max_PT ?? 0), maxTerm: Number(r.maxTerm ?? r.Max_Term ?? 0), isGradeSystem: smNormGrade(r.isGradeSystem ?? r.IsGradeSystem ?? 'NO'), displayOrder: Number(r.displayOrder ?? r.DisplayOrder ?? 0) };
+    });
+    SM_DATA.forEach(r=>{ if(r.class && DYNAMIC_CLASSES.indexOf(r.class)===-1) DYNAMIC_CLASSES.push(r.class); });
+    let subjNames=[]; SM_DATA.forEach(r=>{ let n=String(r.subjectName||'').toUpperCase(); if(n && subjNames.indexOf(n)===-1) subjNames.push(n); });
+    if(subjNames.length>0) DYNAMIC_SUBJECTS=subjNames;
+    fillAllClassDropdowns(); fillAllSubjectDropdowns();
+    renderSMTable();
+    smMsg.innerHTML='<span style="color:green">Loaded '+SM_DATA.length+' | Classes: '+DYNAMIC_CLASSES.join(', ')+'</span>';
+    if(DYNAMIC_CLASSES.length===0) smMsg.innerHTML='<span style="color:red">No classes found - check Classes sheet + deploy backend. Test ?action=getallclasses</span>';
+  }catch(e){ smMsg.innerHTML='<span style="color:red">'+e.message+'</span>'; }
+}
+function renderSMTable(){
+  let filter=smClassFilter.value; let tbody=smTbody; tbody.innerHTML='';
+  let filtered=SM_DATA.filter(r=>filter=='ALL'||r.class==filter);
+  filtered.forEach((row,idx)=>{
+    let realIdx=SM_DATA.indexOf(row); let tr=document.createElement('tr');
+    tr.innerHTML=`<td><input value="${row.subjectId||''}" onchange="SM_DATA[${realIdx}].subjectId=this.value" style="width:65px"></td><td><select onchange="SM_DATA[${realIdx}].class=this.value">${classOptionsHTML(row.class)}</select></td><td>${smNameSelectHTML(realIdx,row.subjectName)}</td><td><select onchange="SM_DATA[${realIdx}].subjectType=this.value"><option value="SCHOLASTIC" ${row.subjectType=='SCHOLASTIC'?'selected':''}>SCHOLASTIC</option><option value="CO-SCHOLASTIC" ${row.subjectType=='CO-SCHOLASTIC'?'selected':''}>CO-SCHOLASTIC</option><option value="PSD" ${row.subjectType=='PSD'?'selected':''}>PSD</option></select></td><td><input type="number" value="${row.maxPT||0}" onchange="SM_DATA[${realIdx}].maxPT=Number(this.value);renderSMTable()" style="width:50px"></td><td><input type="number" value="${row.maxTerm||0}" onchange="SM_DATA[${realIdx}].maxTerm=Number(this.value);renderSMTable()" style="width:50px"></td><td style="font-weight:bold">${(row.maxPT||0)+(row.maxTerm||0)}</td><td><select onchange="SM_DATA[${realIdx}].isGradeSystem=this.value"><option value="NO" ${row.isGradeSystem=='NO'?'selected':''}>NO</option><option value="YES" ${row.isGradeSystem=='YES'?'selected':''}>YES</option></select></td><td><input type="number" value="${row.displayOrder||0}" onchange="SM_DATA[${realIdx}].displayOrder=Number(this.value)" style="width:40px"></td><td><button onclick="SM_DATA.splice(${realIdx},1);renderSMTable()" style="background:red;color:#fff">X</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function addSMRow(){
+  var filterCls = (document.getElementById('smClassFilter')||{}).value || 'ALL';
+  var cls = (filterCls && filterCls!=='ALL' && filterCls!=='') ? filterCls : (DYNAMIC_CLASSES[0]||'');
+  if(!cls){ alert('Classes not loaded yet - wait a second and click Load again'); return; }
+  var maxId=0; SM_DATA.forEach(r=>{ var m=String(r.subjectId||'').match(/(\d+)/); if(m) maxId=Math.max(maxId, parseInt(m[1])); });
+  var maxOrder=0; SM_DATA.filter(r=>r.class===cls).forEach(r=>{ maxOrder=Math.max(maxOrder, Number(r.displayOrder||0)); });
+  var newRow={subjectId:'SUB'+String(maxId+1).padStart(3,'0'), class:cls, subjectName:'', subjectType:'SCHOLASTIC', maxPT:50, maxTerm:100, isGradeSystem:'NO', displayOrder:maxOrder+1};
+  var insertAt=SM_DATA.findIndex(r=>r.class===cls);
+  if(insertAt===-1) SM_DATA.push(newRow); else SM_DATA.splice(insertAt,0,newRow);
+  document.getElementById('smClassFilter').value='ALL'; renderSMTable();
+  var tb=document.getElementById('smTbody');
+  if(tb && tb.firstElementChild){ tb.firstElementChild.style.background='#fff9c4'; var inp=tb.firstElementChild.querySelectorAll('input')[2]; if(inp){ inp.focus(); inp.placeholder='Type subject name here'; } var box=tb.parentElement; if(box) box.scrollTop=0; }
+  smMsg.innerHTML='<span style="color:green">✅ New row added at TOP - Type name then Save All</span>';
+}
+async function saveSM(){
+  if(!confirm('Save '+SM_DATA.length+'?')) return;
+  var clean=SM_DATA.filter(r=>String(r.subjectName||'').trim()!=='').map(r=>({ subjectId:r.subjectId, class:String(r.class||DYNAMIC_CLASSES[0]).toUpperCase(), subjectName:String(r.subjectName||'').trim().toUpperCase(), subjectType:smNormType(r.subjectType), maxPT:Number(r.maxPT||0), maxTerm:Number(r.maxTerm||0), isGradeSystem:smNormGrade(r.isGradeSystem), displayOrder:Number(r.displayOrder||0) }));
+  let res=await apiPost('savesubjectmaster', {data:clean});
+  if(res && res.success){ smMsg.innerHTML='<span style="color:green">Saved '+clean.length+'</span>'; loadSM(); }
+  else { smMsg.innerHTML='<span style="color:red">❌ '+((res&&res.error)||'Save failed')+'</span>'; }
+}
+function logout(){ localStorage.clear(); window.location.href='index.html'; }
+async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_token', res.token); localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { loginMsg.innerText = res.success ? '❌ Not Admin' : '❌ '+(res.error||'Login failed'); } }
+window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
+function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+function getFp(pfx){ return [...document.querySelectorAll('.'+pfx+'_fp:checked')].map(function(i){return i.value;}).join(','); }
+function setFp(pfx,csv){ var s=','+String(csv||'')+','; document.querySelectorAll('.'+pfx+'_fp').forEach(function(i){ i.checked = s.indexOf(','+i.value+',')>-1; }); }
+async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; var finalClasses = classes.value; let res=await apiPost('addteacher', {mode:'create', username:uname.value, password:pass.value, role:role.value, classes:finalClasses, name:fname.value, examAccess:examVal, status:'Active', feeAccess:getFp('c')}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; setFp('c','COLLECT'); onRoleChange(); clearMap(); loadUsers(); } }
+async function loadUsers(){
+  ulist.innerHTML='Loading...';
+  try{
+    let d=await apiGet('getteachers'); if(d && d.success===false){ ulist.innerHTML='<span style="color:red">'+(d.error||'Error')+'</span>'; return; } let teachers=d.teachers||d.users||d||[];
+    if(!Array.isArray(teachers)) teachers=[];
+    if(teachers.length==0){ ulist.innerHTML='<div style="padding:20px;text-align:center;color:#64748b">No users found — check Users sheet</div>'; return; }
+    function prettyRole(r){ if(r=='accountant') return 'Accountant'; if(r=='subjectTeacher') return 'Subject Teacher'; if(r=='classTeacher') return 'Class Teacher'; if(r=='admin') return 'Admin'; return r||''; }
+    function roleClass(r){ if(r=='accountant') return 'rolePill-Accountant'; if(r=='subjectTeacher') return 'rolePill-SubjectTeacher'; if(r=='classTeacher') return 'rolePill-ClassTeacher'; if(r=='admin') return 'rolePill-Admin'; return ''; }
+    var h='<div class="teacherGrid">';
+    teachers.forEach(function(r){ var st=r.status||'Active'; var ex=r.examAccess||'NO'; var loginBadge=st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'; var examBadge=ex.toUpperCase()=='YES' ? '<span class="badge badge-green">Exam YES</span>' : '<span class="badge badge-red">Exam NO</span>'; var initial=String(r.name||r.username||'?').trim().charAt(0).toUpperCase(); var safeUser=String(r.username||'').replace(/'/g,"\\'"); h+='<div class="teacherCard">'+'<div class="teacherAvatar">'+initial+'</div>'+'<div class="teacherMain">'+'<p class="teacherName">'+(r.name||r.username||'')+'</p>'+'<p class="teacherUser">@'+(r.username||'')+'</p>'+'<div class="teacherMeta">'+'<span class="metaPill '+roleClass(r.role)+'">'+prettyRole(r.role)+'</span>'+'<span class="metaPill">'+(r.role=='accountant' ? 'Pages: '+(r.feeAccess||'none').toLowerCase().replace(/,/g,', ') : 'Class: '+(r.classes||'—'))+'</span>'+'</div>'+'<div style="display:flex;gap:6px;flex-wrap:wrap">'+loginBadge+examBadge+'</div>'+'</div>'+'<div class="teacherActions"><button onclick="openEdit(\''+safeUser+'\')">Edit</button><button class="btn-del" onclick="delUser(\''+safeUser+'\')">Del</button></div>'+'</div>'; });
+    h+='</div><p style="font-size:12px;color:#64748b;margin-top:10px">Total: '+teachers.length+' users</p>'; ulist.innerHTML=h;
+  }catch(e){ ulist.innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
+}
+async function openEdit(u){ let d=await apiGet('getteachers'); if(d && d.success===false){ alert(d.error||'Error'); return; } let teachers=d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=String(r.classes||'').split(',')[0].trim().toUpperCase(); edit_subjects.value=''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); setFp('e', r.feeAccess); onEditRoleChange(); editMapStore={}; editBuilder.style.display='none'; editModal.style.display='flex'; return; } } }
+function closeEdit(){ editModal.style.display='none'; }
+async function saveEditUser(){ var oldU=edit_old.value; var finalEditClasses = edit_classes.value; var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:finalEditClasses, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value, feeAccess:getFp('e')}; obj.mode='update'; obj.oldUsername=oldU; let res=await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
+async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; let res=await apiPost('toggleuserstatus', {username:u}); alert('Login Status: '+res.status); loadUsers(); }
+async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; let res=await apiPost('toggleexamaccess', {username:u}); alert('Exam Access: '+res.examAccess); loadUsers(); }
+async function delUser(u){ if(confirm('Delete '+u+'?')){ await apiPost('deleteuser', {username:u}); alert('Deleted'); loadUsers(); } }
+var EG_CACHE={};
+function msgTo(el, text, kind){ el.innerHTML='<span style="color:'+(kind==='ok'?'#166534':kind==='err'?'#991b1b':'#075985')+'">'+(kind==='ok'?'✅ ':kind==='err'?'❌ ':'⏳ ')+esc(text)+'</span>'; }
+function esc(s){ return String(s===null||s===undefined?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+// elective groups of a class: [{groupName, subjects:[...]}]
+async function getElectiveGroups(grade){
+  grade=String(grade||'').toUpperCase().trim(); if(!grade) return [];
+  if(!EG_CACHE[grade]){
+    let res=await apiGet('getelectivemap',{grade:grade});
+    let map={}; (res.electives||[]).forEach(function(e){ (map[e.groupName]=map[e.groupName]||[]).push(e.subject); });
+    EG_CACHE[grade]=Object.keys(map).map(function(g){ return {groupName:g, subjects:map[g]}; });
+  }
+  return EG_CACHE[grade];
+}
+// draws one drop-down per elective group of the class; chosen = [{group, subject}]
+async function drawElectives(boxId, grade, chosen){
+  let box=document.getElementById(boxId); let groups=await getElectiveGroups(grade);
+  chosen=chosen||[];
+  box.innerHTML=groups.map(function(g,i){
+    let cur=(chosen.filter(function(c){return c.group===g.groupName;})[0]||{}).subject||'';
+    return '<label style="display:block;margin-top:8px;font-weight:700;font-size:13px">Elective: '+esc(g.groupName)+'</label><select data-group="'+esc(g.groupName)+'" style="background:#e3f2fd;font-weight:bold;min-width:200px"><option value="">-- choose --</option>'+g.subjects.map(function(s){return '<option'+(s===cur?' selected':'')+'>'+esc(s)+'</option>';}).join('')+'</select>';
+  }).join('');
+}
+function readElectives(boxId){ return Array.from(document.querySelectorAll('#'+boxId+' select')).map(function(s){ return {group:s.dataset.group, subject:s.value}; }); }
+function loadAddElective(){ drawElectives('s_electives', document.getElementById('sclass').value, []); }
+function loadEditElective(){ drawElectives('e_electives', document.getElementById('e_class').value, []); }
+
+async function searchStudent(){
+  var ad=searchAd.value.trim(); if(!ad){ stuNotFound.innerHTML='Enter an admission number.'; return; }
+  stuNotFound.innerHTML='Searching...'; slist.style.display='none'; editMsg.innerHTML='';
+  try{
+    let res=await apiGet('getstudentbyadmission', {admissionNo:ad});
+    if(!res.success){ stuNotFound.innerHTML='❌ '+esc(res.error||'Could not search.'); return; }
+    if(!res.found){ stuNotFound.innerHTML='Not found: '+esc(ad); return; }
+    stuNotFound.innerHTML=''; var s=res.student;
+    e_ad.value=s.AdmissionNo; e_name.value=s.Name; e_roll.value=s.RollNo; e_class.value=s.Class;
+    e_dob.value=s.DOB; e_father.value=s.FatherName; e_mother.value=s.MotherName; e_house.value=s.House;
+    slist.style.display='block';
+    await drawElectives('e_electives', s.Class, (res.electives||[]).map(function(x){return {group:x.group, subject:x.subject};}));
+  }catch(e){ stuNotFound.innerHTML='❌ Network problem. Please try again.'; }
+}
+function studentFromForm(p){
+  return {AdmissionNo:document.getElementById(p.ad).value.trim(), Name:document.getElementById(p.name).value.trim(), RollNo:document.getElementById(p.roll).value.trim(), Class:document.getElementById(p.cls).value.toUpperCase().trim(), DOB:document.getElementById(p.dob).value.trim(), FatherName:document.getElementById(p.father).value.trim(), MotherName:document.getElementById(p.mother).value.trim(), House:document.getElementById(p.house).value.trim()};
+}
+async function saveEdit(){
+  var b=btnSaveStu; b.disabled=true; msgTo(editMsg,'Saving...','load');
+  try{
+    let r=await apiPost('updatestudent', {student:studentFromForm({ad:'e_ad',name:'e_name',roll:'e_roll',cls:'e_class',dob:'e_dob',father:'e_father',mother:'e_mother',house:'e_house'}), electives:readElectives('e_electives')});
+    msgTo(editMsg, r.success?(r.message||'Saved.'):(r.error||'Could not save.'), r.success?'ok':'err');
+  }catch(e){ msgTo(editMsg,'Network problem. Nothing was lost, please try again.','err'); }
+  finally{ b.disabled=false; }
+}
+async function delStu2(){
+  var ad=e_ad.value; if(!ad) return; if(!confirm('Delete student '+ad+' ('+e_name.value+')? This cannot be undone.')) return;
+  var b=btnDelStu; b.disabled=true; msgTo(editMsg,'Deleting...','load');
+  try{
+    let r=await apiPost('deletestudent', {admissionNo:ad});
+    if(r.success){ slist.style.display='none'; stuNotFound.innerHTML='<span style="color:#166534">✅ '+esc(r.message||'Deleted.')+'</span>'; }
+    else msgTo(editMsg, r.error||'Could not delete.', 'err');
+  }catch(e){ msgTo(editMsg,'Network problem. Please try again.','err'); }
+  finally{ b.disabled=false; }
+}
+async function addStu(){
+  var s=studentFromForm({ad:'adno',name:'sname',roll:'roll',cls:'sclass',dob:'dob',father:'father',mother:'mother',house:'house'});
+  if(!s.AdmissionNo||!s.Name||!s.Class){ msgTo(addMsg,'Enter Admission No, Name and Class.','err'); return; }
+  var b=btnAddStu; b.disabled=true; msgTo(addMsg,'Adding...','load');
+  try{
+    let r=await apiPost('addstudent', {student:s, electives:readElectives('s_electives')});
+    if(r.success){
+      msgTo(addMsg, r.message||'Added.', 'ok');
+      adno.value=''; sname.value=''; roll.value=''; dob.value=''; father.value=''; mother.value=''; house.value=''; loadAddElective();
+    } else msgTo(addMsg, r.error||'Could not add.', 'err');
+  }catch(e){ msgTo(addMsg,'Network problem. Please try again.','err'); }
+  finally{ b.disabled=false; }
+}
+var allFeeData=[]; async function loadFees(){ feeListDiv.innerHTML='Loading...'; let list=await apiGet('getfeelist'); allFeeData=list.feeList||list||[]; renderFees(allFeeData); }
+function renderFees(list){ if(!list||list.length==0){ feeListDiv.innerHTML='No students'; return; } var html='<div class="tableWrap"><table><tr><th>Adm</th><th>Name</th><th>Class</th><th>Status</th><th>Change</th><th>Action</th></tr>'; for(var i=0;i<list.length;i++){ var r=list[i]; var c=(r.status&&r.status.toLowerCase()=='paid'?'green':'red'); html+='<tr><td>'+r.ad+'</td><td>'+r.name+'</td><td>'+r.cls+'</td><td><b style="color:'+c+'">'+r.status+'</b></td><td><select id="st_'+r.ad+'"><option '+(r.status=='Paid'?'selected':'')+'>Paid</option><option '+(r.status=='Withheld'?'selected':'')+'>Withheld</option><option '+(r.status=='Due'?'selected':'')+'>Due</option></select><br><input id="rm_'+r.ad+'" value="'+(r.remark||'')+'"></td><td><button onclick="updateFee(\''+r.ad+'\')" class="btn-green">Save</button></td></tr>'; } html+='</table></div>'; feeListDiv.innerHTML=html; }
+async function updateFee(ad){ var st=document.getElementById('st_'+ad).value; var rm=document.getElementById('rm_'+ad).value; await apiPost('setfeestatus', {admissionNo:ad, status:st, remark:rm}); alert('Updated '+ad); loadFees(); }
+function filterFees(){ var q=feeSearch.value.toLowerCase(); if(!q){ renderFees(allFeeData); return; } var f=allFeeData.filter(r=> (r.ad+' '+r.name+' '+r.cls).toLowerCase().indexOf(q)>-1); renderFees(f); }
+async function loadBackupInfo(){
+  bkWarn.innerHTML=''; backupList.innerHTML='Loading...';
+  try{
+    let r=await apiGet('getbackupinfo');
+    if(!r.success){ backupList.innerHTML='<span style="color:#991b1b">❌ '+esc(r.error||'Could not load.')+'</span>'; return; }
+    bkName.innerText=r.sheetName||'-';
+    bkLast.innerText=r.last?(r.last.time+' ('+r.last.type+')'):'No backup yet';
+    bkWeekly.innerText=r.weekly===true?'ON (every Sunday night)':(r.weekly===false?'OFF - run BACKUP_installWeekly once in the Apps Script editor':'not known yet - run BACKUP_authorize once in the Apps Script editor');
+    if(r.lastFailed) bkWarn.innerHTML='<span style="color:#991b1b">❌ The last backup attempt failed: '+esc(r.lastFailedText)+'</span>';
+    else if(!r.last) bkWarn.innerHTML='<span style="color:#9a3412">⚠️ No backup has been made yet. Tap Backup Now.</span>';
+    if(!r.backups.length){ backupList.innerHTML='No backups yet.'; return; }
+    var h='<div class="tableWrap"><table><tr><th>Date</th><th>Type</th><th>Name</th><th>Open</th></tr>';
+    r.backups.forEach(function(f){ h+='<tr><td>'+esc(f.time)+'</td><td>'+esc(f.type)+'</td><td style="font-size:11px">'+esc(f.name)+'</td><td><a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(f.id)+'" target="_blank" rel="noopener">Open</a></td></tr>'; });
+    backupList.innerHTML=h+'</table></div>';
+  }catch(e){ backupList.innerHTML='<span style="color:#991b1b">❌ Network problem. Please try again.</span>'; }
+}
+async function createBackup(){
+  btnBackup.disabled=true; msgTo(backupMsg,'Creating the backup... this can take a few seconds.','load');
+  try{
+    let r=await apiPost('createbackup', {});
+    msgTo(backupMsg, r.success?(r.message||'Backup created.'):(r.error||'Backup failed.'), r.success?'ok':'err');
+    loadBackupInfo();
+  }catch(e){ msgTo(backupMsg,'Network problem. Please check Backup list in a minute before trying again.','err'); }
+  finally{ btnBackup.disabled=false; }
+}
+function openRegister(){ window.top.location.href="teacher-work.html?tab=exam&role=admin"; }
+document.addEventListener('DOMContentLoaded', function(){
+  var sc=document.getElementById('sclass'); if(sc) sc.addEventListener('change', loadAddElective);
+  fillAllClassDropdowns(); fillAllSubjectDropdowns();
+});
+</script></body></html>

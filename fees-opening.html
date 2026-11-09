@@ -112,6 +112,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .gt input.full{background:#dcfce7;border-color:#86efac}.gt input.part{background:#ffedd5;border-color:#fdba74}.gt input.na{background:#f1f5f9;border-color:#e2e8f0}
 .gt td.nm button{display:block;margin-top:3px;font-size:10.5px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:3px 6px;min-height:28px;color:var(--navy);font-weight:700}
 .legend2{font-size:12px;color:var(--muted);line-height:1.6}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
 </style></head>
 <body>
 <div class="top">
@@ -145,7 +146,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
-if(!ls('cvse_token') || !USER.username || USER.role !== 'admin'){ window.location.href = 'index.html'; }
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
 function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
 async function apiGet(action, params){
   let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
@@ -160,7 +161,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = 'admin.html'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html' : 'accountant.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -169,26 +170,29 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 
 var G = null, DIRTY = false;
 function maxOf(c){ return Math.max(0, c.net - c.other); }
-async function init(){
-  try{ let g = await apiGet('getfeesetup',{}); if(g.success){ $('sess').innerHTML = g.sessions.map(s=>'<option'+(s===g.session?' selected':'')+'>'+esc(s)+'</option>').join(''); $('cls').innerHTML = g.classes.map(c=>'<option>'+esc(c)+'</option>').join(''); } }catch(e){}
-  load();
-}
 async function load(){
   if(DIRTY && !confirm('You have unsaved changes in this class. Leave them?')) return;
-  show($('gMsg'),'Loading...','load'); $('saveBox').style.display = 'none';
+  let first = !$('sess').options.length;
+  show($('gMsg'),'Loading class data... please wait','load'); $('saveBox').style.display = 'none';
+  $('grid').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
   try{
-    let r = await apiGet('feeopeningget',{session:$('sess').value,'class':$('cls').value});
+    let r = await apiGet('feeopeningget',{session:first?'':$('sess').value,'class':first?'':$('cls').value});
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); $('grid').innerHTML=''; return; }
+    if(first){
+      $('sess').innerHTML = r.sessions.map(s=>'<option'+(s===r.session?' selected':'')+'>'+esc(s)+'</option>').join('');
+      $('cls').innerHTML = r.classes.map(c=>'<option'+(c===r.cls?' selected':'')+'>'+esc(c)+'</option>').join('');
+    }
     G = r; DIRTY = false; hide($('gMsg'));
     $('upto').innerHTML = r.months.map(m=>'<option value="'+m.end+'">'+esc(m.name)+'</option>').join('');
     $('lockRow').innerHTML = '<div class="btnrow"><button class="btn '+(r.locked?'b-navy':'b-orange')+'" id="lockBtn" onclick="toggleLock()" style="'+(r.locked?'':'background:var(--orange)')+'">'+(r.locked?'🔒 Locked — tap to unlock':'🔓 Lock this session’s opening position')+'</button></div><div class="help">'+(r.locked?'Locked: every change needs a reason, and is logged.':'Lock it after the school has checked all classes, so nobody changes it by accident once real receipts start.')+'</div>';
     draw();
-  }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
+  }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); $('grid').innerHTML=''; }
 }
 function cls(inp){ let n = +inp.dataset.net, o = +inp.dataset.oth, v = Number(inp.value) || 0; inp.className = v <= 0 ? '' : (v + o >= n - 0.001 ? 'full' : 'part'); }
 function draw(){
@@ -236,6 +240,6 @@ async function save(){
   b.disabled = false;
 }
 window.addEventListener('beforeunload',e=>{ if(DIRTY){ e.preventDefault(); e.returnValue = ''; } });
-init();
+load();
 </script>
 </body></html>
