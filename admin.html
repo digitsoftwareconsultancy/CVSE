@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.09-S1"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -109,6 +109,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="TIMETABLE"> Timetable builder</label>
@@ -165,7 +166,8 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 <div id="resultControlTab" class="tab" style="display:none;">
 <div class="box" style="background:#f3e8ff;border:2px solid #7c3aed"><h3>📝 Exam Settings</h3><p class="sub">Exams, report cards, grade scale, extra areas and who can enter marks.</p><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='exam-settings.html'">Open Exam Settings</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='class-report.html'">Open Class Report (finalise / reopen)</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#ff9800);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card-settings.html'">Report Card Settings</button><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card.html'">View / Print Report Cards</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='student-access.html'">Student App Access</button></div>
-<div class="box" style="background:#ecfdf5;border:2px solid #16a34a"><h3>💰 Fees Settings</h3><p class="sub">Fee heads, amounts, due dates, accessories, bus routes, sibling and late-joiner rules, receipt look. All controlled from here.</p><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='fees-settings.html'">Open Fees Settings</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-collect.html'">Collect Fees</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-receipts.html'">Receipts (day book)</button><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-students.html'">Student Fee Setup</button><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-opening.html'">Already Paid (start mid-session)</button></div>
+<div class="box" style="background:#ecfdf5;border:2px solid #16a34a"><h3>💰 Fees Settings</h3><p class="sub">Fee heads, amounts, due dates, accessories, bus routes, sibling and late-joiner rules, receipt look. All controlled from here.</p><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='fees-settings.html'">Open Fees Settings</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-collect.html'">Collect Fees</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-receipts.html'">Receipts (day book)</button><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-students.html'">Student Fee Setup</button><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-opening.html'">Already Paid (start mid-session)</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-reports.html'">Fee Reports</button></div>
+<div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>🔍 System check</h3><p class="sub">After you upload new files, press this. It shows if every Apps Script file and every page is the latest version.</p><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSysCheck()">Run system check</button><div id="sysOut" style="margin-top:10px;font-size:13px;line-height:1.6"></div></div>
 <div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>📅 School Calendar</h3><p class="sub">Holidays, exams, programs and meetings. Students see them in the Calendar tab of their app.</p><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='events.html'">Open Calendar &amp; Events</button></div>
 <div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>⚙️ Full School Settings</h3><p class="sub">These values come from Settings sheet — change here and header / prints update automatically.</p>
 <div class="settingsGrid">
@@ -238,6 +240,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="TIMETABLE"> Timetable builder</label>
@@ -615,4 +618,26 @@ document.addEventListener('DOMContentLoaded', function(){
   var sc=document.getElementById('sclass'); if(sc) sc.addEventListener('change', loadAddElective);
   fillAllClassDropdowns(); fillAllSubjectDropdowns();
 });
+
+var SYS_PAGES = ["accountant.html", "admin.html", "class-dashboard.html", "class-report.html", "classtest.html", "daily.html", "events.html", "exam-marks.html", "exam-settings.html", "fees-collect.html", "fees-opening.html", "fees-receipt.html", "fees-receipts.html", "fees-reports.html", "fees-settings.html", "fees-students.html", "index.html", "performance.html", "report-card-preview.html", "report-card-settings.html", "report-card.html", "student-access.html", "student.html", "students.html", "subject-dashboard.html", "timetable-builder.html"];
+async function runSysCheck(){
+  var out = document.getElementById('sysOut'); out.innerHTML = 'Checking... please wait';
+  try{
+    var j = await apiGet('appversion', {});
+    if(!j || !j.success){ out.innerHTML = '❌ ' + ((j && j.error) || 'Could not check.'); return; }
+    var V = j.version, bad = [], h = '<b>Latest version: ' + V + '</b><br>';
+    var sv = j.files.filter(function(f){ return !f.ok; });
+    h += (sv.length ? '❌ Apps Script files not latest: ' + sv.map(function(f){ return f.file + ' (' + (f.version || 'MISSING') + ')'; }).join(', ') + '<br>' : '✅ All Apps Script files are the latest (' + j.files.length + ' files)<br>');
+    var res = await Promise.all(SYS_PAGES.map(async function(p){
+      try{
+        var r = await fetch(p + '?cb=' + Date.now(), {cache:'no-store'}); if(!r.ok) return [p, 'MISSING'];
+        var t = await r.text(); var m = t.match(/<meta name="app-version" content="([^"]*)"/);
+        return [p, m ? m[1] : 'OLD'];
+      }catch(e){ return [p, 'UNREACHABLE']; }
+    }));
+    res.forEach(function(x){ if(x[1] !== V) bad.push(x[0] + ' (' + x[1] + ')'); });
+    h += (bad.length ? '❌ Pages not latest: ' + bad.join(', ') + '<br>Upload these again, then reload with ?v=N.' : '✅ All ' + SYS_PAGES.length + ' pages are the latest');
+    out.innerHTML = h;
+  }catch(e){ out.innerHTML = '❌ Could not connect. Check internet and try again.'; }
+}
 </script></body></html>

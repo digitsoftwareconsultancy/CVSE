@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Report Card - Design Preview (DEMO)</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--muted:#64748b;--frame:#1a4bb5;--cream:#fdf6d0}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:#111827;padding-bottom:30px}
+.demo{background:#fff7ed;border-bottom:2px solid var(--orange);color:#9a3412;font-weight:800;font-size:12.5px;padding:8px 12px;text-align:center}
+.ctl{max-width:1000px;margin:10px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;border:1px solid #eef0f3;border-left:4px solid var(--navy);box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:10px}
+.box h3{margin:0 0 8px;color:var(--navy);font-size:16px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:100px;min-height:46px;border:1px solid #cbd5e1;background:#fff;border-radius:12px;font-weight:800;font-size:13px;color:var(--navy);cursor:pointer}
+.seg button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:999px;padding:0 12px;min-height:40px;font-weight:700;font-size:12.5px;color:var(--navy);background:#fff;cursor:pointer}
+.chip input{width:18px;height:18px;margin:0}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;background:linear-gradient(135deg,#1976d2,#42a5f5)}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+#fit{max-width:1000px;margin:0 auto;padding:0 12px}
+#scaler{transform-origin:top left}
+/* ===== the report card (A4) ===== */
+.page{width:19.4cm;height:28.1cm;background:#fff;border:2px solid var(--frame);border-radius:8px;display:flex;flex-direction:column;overflow:hidden;padding:2px;font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hdr{height:4.2cm;flex-shrink:0;position:relative;background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.hdr img{width:100%;height:100%;object-fit:fill;display:block}
+.hdr .ph{font-weight:900;font-size:20px;letter-spacing:.5px}.hdr .ph small{display:block;font-size:11px;font-weight:600;opacity:.85;margin-top:4px}
+.hdr .logo{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:2.6cm;height:2.6cm;border-radius:50%;background:#fff;color:#0b2a5c;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;text-align:center;line-height:1.1}
+.title{flex-shrink:0;text-align:center;font-family:'Times New Roman',serif;color:#0b0ab8;font-weight:900;font-size:12.5px;line-height:1.25;padding:2px 0}
+.inner{padding:2px 3px;display:flex;flex-direction:column;gap:4px;flex:1;overflow:hidden}
+.info{display:flex;gap:4px;height:3.1cm;flex-shrink:0}
+.info .l{flex:1;background:#fdfcf0;border:1px solid #9a9a8a;border-radius:4px;padding:3px 7px;display:flex;gap:6px;overflow:hidden;font-size:11px}
+.info .rows{flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.il b{display:inline-block;width:98px;font-weight:400}.il span{font-weight:700}
+.photo{width:2.5cm;border:1px solid #777;flex-shrink:0;background:#e5e7eb;color:#64748b;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center}
+.sec{font-size:9px;font-weight:900;background:var(--cream);border:1px solid #333;padding:1px 4px;display:inline-block;border-radius:2px;margin:2px}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th,td{border:.6px solid #333;text-align:center;font-size:9px;font-weight:600;padding:2px 1px;line-height:1.2;height:13px}
+th{background:var(--cream);font-size:8px;font-weight:900}
+td.left{text-align:left;padding-left:4px}
+.wrap{border:1px solid #9a9a8a;border-radius:3px;overflow:hidden;background:#fff;flex-shrink:0}
+.sch{border-color:#333}
+tr.tot td{background:var(--cream);font-weight:800}
+.bottom{display:flex;gap:7px;flex:1;overflow:hidden}
+.bl,.br{width:50%;display:flex;flex-direction:column;gap:4px}
+.br{justify-content:flex-start}
+.result{height:3.2cm;flex-shrink:0;border:1.4px solid #8aa8cc;border-radius:8px;background:linear-gradient(135deg,#eaf3ff,#fff8e1);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4px 10px;gap:3px}
+.result small{font-size:9px;font-weight:800;color:#475569;letter-spacing:.6px}
+.result b{font-size:13px;font-weight:900;color:#000;line-height:1.25}
+.pos{display:flex;gap:4px;flex-shrink:0}
+.pos div{flex:1;border:1px solid #9a9a8a;border-radius:4px;text-align:center;padding:3px;font-size:9px;font-weight:700;background:#fdfcf0}.pos div b{display:block;font-size:14px;color:#0b2a5c}
+.remark{min-height:2.4cm;flex:1;border:1px solid #666;border-radius:4px;padding:4px 7px;font-size:10.5px;line-height:1.35}
+.remark b{text-decoration:underline;font-size:11px}
+.signs{display:flex;gap:5px;height:2.1cm;flex-shrink:0;margin-top:auto}
+.sign{flex:1;border:1px solid #666;border-radius:6px;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-size:10.5px;font-weight:700;overflow:hidden;text-align:center;line-height:1.1}
+.sign i{position:absolute;left:50%;transform:translateX(-50%);bottom:24px;font-family:'Brush Script MT',cursive;font-style:italic;font-size:19px;color:#1a237e;font-weight:400;white-space:nowrap}
+.foot{height:.6cm;flex-shrink:0;background:#1a237e;color:#ffeb3b;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:3px}
+@media print{
+  body{background:#fff;padding:0}.demo,.ctl{display:none!important}
+  #fit{padding:0;max-width:none}#scaler{transform:none!important;width:auto!important;height:auto!important}
+  @page{size:A4;margin:.8cm}
+}
+</style>
+</head>
+<body>
+<div class="demo">DEMO - design preview with dummy data. Nothing here is saved or connected yet.</div>
+
+<div class="ctl">
+  <div class="box">
+    <h3>1. Layout (chosen per report in Report Card Settings)</h3>
+    <div class="seg" id="segLayout">
+      <button data-v="A">A - one exam<br><small>marks only</small></button>
+      <button data-v="B" class="on">B - theory + I/A<br><small>one exam</small></button>
+      <button data-v="C">C - combined<br><small>several exams</small></button>
+    </div>
+  </div>
+  <div class="box">
+    <h3>2. Parts of the card (each can be switched on/off per report)</h3>
+    <div class="chips" id="chips"></div>
+    <div class="meta" style="margin-top:8px">The card is one fixed A4 page, so print is always identical. On a phone it shrinks to fit the screen; on a laptop it shows full size.</div>
+    <div style="margin-top:10px"><button class="btn" onclick="window.print()">🖨️ Print this card</button></div>
+  </div>
+</div>
+
+<div id="fit"><div id="scaler"></div></div>
+
+<script>
+/* ---- the settings that will later come from Report Card Settings ---- */
+var CFG = {
+  layout:'B',
+  blocks:{info:true, photo:true, scholastic:true, coscholastic:true, psd:true, attendance:true, gradeScale:true, rank:true, result:true, remark:true, signs:true}
+};
+var BLOCK_LABELS = {info:'Student details', photo:'Student photo', scholastic:'Scholastic table', coscholastic:'Co-scholastic', psd:'Personal & social', attendance:'Attendance', gradeScale:'Grade scale', rank:'Percentage / rank boxes', result:'Final result', remark:'Class teacher remark', signs:'Signatures'};
+
+/* ---- dummy data ---- */
+var SCHOOL = {name:'YOUR SCHOOL NAME', addr:'Address line from Settings', session:'2026-2027', header:'', logo:'', principal:'Principal', tagline:'Good Learners ■ Good Humans ■ Bright Futures'};
+var STU = {name:'ASHA DAS', adm:'1001', roll:'7', cls:'III', dob:'12-03-2017', father:'Ramesh Das', mother:'Sita Das', house:'Blue'};
+var SUBJ = [
+  {n:'English', pt:[18,20,0], hy:[56,60,18], fin:[17,20,0], an:[58,60,17], max:[20,80,20,80]},
+  {n:'Hindi', pt:[17,20,0], hy:[62,80,0], fin:[18,20,0], an:[66,80,0], max:[20,80,20,80]},
+  {n:'Mathematics', pt:[19,20,0], hy:[70,80,0], fin:[20,20,0], an:[74,80,0], max:[20,80,20,80]},
+  {n:'Environmental Studies', pt:[16,20,0], hy:[57,60,17], fin:[17,20,0], an:[60,60,18], max:[20,80,20,80]},
+  {n:'Social Science', pt:[15,20,0], hy:[58,80,0], fin:[16,20,0], an:[61,80,0], max:[20,80,20,80]}
+];
+var CO = [['Art Education','A','A'],['General Knowledge','B','A'],['Karbi','A','B']];
+var PSD = [['Discipline','A','A'],['Regularity & Punctuality','A','B'],['Personal Hygiene','A','A'],['Responsibility','B','A'],['Communication Skills','A','A'],['Leadership','B','B'],['Teamwork','A','A']];
+var GRADES = [['91 - 100','A1'],['81 - 90','A2'],['71 - 80','B1'],['61 - 70','B2'],['51 - 60','C1'],['41 - 50','C2'],['33 - 40','D'],['Below 33','E']];
+function grade(p){ return p>=91?'A1':p>=81?'A2':p>=71?'B1':p>=61?'B2':p>=51?'C1':p>=41?'C2':p>=33?'D':'E'; }
+function pc(a,b){ return b ? Math.round(a/b*1000)/10 : 0; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---- the three layouts: only the table differs ---- */
+function tableA(){
+  var rows='', T=0, M=0;
+  SUBJ.forEach(s=>{ var o=s.hy[0]+s.hy[2], m=s.max[1]; T+=o; M+=m; rows+='<tr><td class="left">'+s.n+'</td><td>'+m+'</td><td>'+o+'</td><td>'+pc(o,m)+'</td><td>'+grade(pc(o,m))+'</td></tr>'; });
+  return {title:'SCHOLASTIC ACHIEVEMENT - HALF YEARLY EXAMINATION', head:'<colgroup><col style="width:34%"><col style="width:16%"><col style="width:18%"><col style="width:16%"><col style="width:16%"></colgroup><tr><th>Subject</th><th>Max Marks</th><th>Marks Obtained</th><th>%</th><th>Grade</th></tr>',
+    rows:rows, foot:'<tr class="tot"><td class="left">TOTAL</td><td>'+M+'</td><td>'+T+'</td><td>'+pc(T,M)+'</td><td>'+grade(pc(T,M))+'</td></tr>', T:T, M:M};
+}
+function tableB(){
+  var rows='', T=0, M=0;
+  SUBJ.forEach(s=>{ var w=s.hy[0], ia=s.hy[2], tot=w+ia, m=s.max[1]; T+=tot; M+=m;
+    rows+='<tr><td class="left">'+s.n+'</td><td>'+(m-(ia?20:0))+'</td><td>'+w+'</td><td>'+(ia?20:'-')+'</td><td>'+(ia||'-')+'</td><td>'+m+'</td><td>'+tot+'</td><td>'+pc(tot,m)+'</td><td>'+grade(pc(tot,m))+'</td></tr>'; });
+  return {title:'SCHOLASTIC ACHIEVEMENT - HALF YEARLY EXAMINATION', head:'<colgroup><col style="width:23%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:12%"><col style="width:11%"><col style="width:11%"></colgroup><tr><th rowspan="2">Subject</th><th colspan="2">Written</th><th colspan="2">I/A</th><th rowspan="2">Max</th><th rowspan="2">Total</th><th rowspan="2">%</th><th rowspan="2">Grade</th></tr><tr><th>Max</th><th>Got</th><th>Max</th><th>Got</th></tr>',
+    rows:rows, foot:'<tr class="tot"><td class="left" colspan="5">TOTAL</td><td>'+M+'</td><td>'+T+'</td><td>'+pc(T,M)+'</td><td>'+grade(pc(T,M))+'</td></tr>', T:T, M:M};
+}
+function tableC(){
+  var W=[10,30,10,50], rows='', totP=0;
+  SUBJ.forEach(s=>{
+    var v=[s.pt[0]+s.pt[2], s.hy[0]+s.hy[2], s.fin[0]+s.fin[2], s.an[0]+s.an[2]], mx=[20,80,20,80];
+    var f=0; v.forEach((x,i)=>{ f+=pc(x,mx[i])*W[i]/100; }); f=Math.round(f*10)/10; totP+=f;
+    rows+='<tr><td class="left">'+s.n+'</td>'+v.map((x,i)=>'<td>'+x+'</td>').join('')+'<td>'+f+'</td><td>'+grade(f)+'</td></tr>'; });
+  var avg=Math.round(totP/SUBJ.length*10)/10;
+  return {title:'SCHOLASTIC ACHIEVEMENT - FINAL REPORT (PT-1, HALF YEARLY, PT-2 AND FINAL COMBINED)', head:'<colgroup><col style="width:28%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"></colgroup><tr><th rowspan="2">Subject</th><th>PT-1</th><th>HALF YEARLY</th><th>PT-2</th><th>FINAL</th><th rowspan="2">Final %</th><th rowspan="2">Grade</th></tr><tr><th>/20 · 10%</th><th>/80 · 30%</th><th>/20 · 10%</th><th>/80 · 50%</th></tr>',
+    rows:rows, foot:'<tr class="tot"><td class="left" colspan="5">OVERALL PERCENTAGE</td><td>'+avg+'</td><td>'+grade(avg)+'</td></tr>', T:avg, M:100, pct:avg};
+}
+
+function render(){
+  var b=CFG.blocks, t = CFG.layout==='A'?tableA():CFG.layout==='B'?tableB():tableC();
+  var pct = t.pct !== undefined ? t.pct : pc(t.T,t.M);
+  var title = CFG.layout==='C' ? 'FINAL REPORT CARD' : 'HALF YEARLY REPORT CARD';
+  var h='<div class="page">';
+  h+='<div class="hdr">'+(SCHOOL.header?'<img src="'+esc(SCHOOL.header)+'">':'<div class="logo">'+(SCHOOL.logo?'':'LOGO')+'</div><div class="ph">'+esc(SCHOOL.name)+'<small>'+esc(SCHOOL.addr)+'<br>Header image comes from Settings &gt; Header Path</small></div>')+'</div>';
+  h+='<div class="title">'+title+'<br>ACADEMIC SESSION : '+SCHOOL.session+'</div><div class="inner">';
+  if(b.info){
+    h+='<div class="info"><div class="l"><div class="rows">'+[['Name',STU.name],['Admission No.',STU.adm],['Roll No.',STU.roll],['Class',STU.cls],['Date of Birth',STU.dob],["Father's Name",STU.father],["Mother's Name",STU.mother],['House',STU.house]].map(r=>'<div class="il"><b>'+r[0]+'</b>: <span>'+esc(r[1])+'</span></div>').join('')+'</div>'+(b.photo?'<div class="photo">STUDENT<br>PHOTO</div>':'')+'</div></div>';
+  }
+  if(b.scholastic){
+    h+='<div class="wrap sch"><span class="sec">'+t.title+'</span><table>'+t.head+t.rows+t.foot+'</table></div>';
+  }
+  var left='', right='';
+  if(b.coscholastic) left+='<div class="wrap"><span class="sec">CO-SCHOLASTIC ACHIEVEMENT</span><table><tr><th>Subject</th><th>Term I</th><th>Term II</th></tr>'+CO.map(r=>'<tr><td class="left">'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</table></div>';
+  if(b.gradeScale) left+='<div class="wrap"><span class="sec">GRADE SCALE - Based on Percentage</span><table><tr><th>Percentage</th><th>Grade</th></tr>'+GRADES.map(r=>'<tr><td class="left">'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('')+'</table></div>';
+  if(b.attendance) left+='<div class="wrap"><span class="sec">ATTENDANCE</span><table>'+[['Total Working Days',210],['Days Present',198],['Days Absent',12],['Attendance %','94.3']].map(r=>'<tr><td class="left">'+r[0]+'</td><td style="width:35%">'+r[1]+'</td></tr>').join('')+'</table></div>';
+  if(b.psd) left+='<div class="wrap"><span class="sec">PERSONAL &amp; SOCIAL DEVELOPMENT</span><table><tr><th>Area</th><th>Term I</th><th>Term II</th></tr>'+PSD.map(r=>'<tr><td class="left">'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</table></div>';
+  if(b.rank) right+='<div class="pos"><div>PERCENTAGE<b>'+pct+'%</b></div><div>GRADE<b>'+grade(pct)+'</b></div><div>POSITION<b>3rd</b></div></div>';
+  if(b.result) right+='<div class="result"><small>RESULT</small><b>Promoted to the next class and wishing success</b></div>';
+  if(b.remark) right+='<div class="remark"><b>Class Teacher\'s Remarks</b><br>Asha is a bright and responsible student. She takes part in class activities with enthusiasm. Keep up the good work.</div>';
+  if(b.signs) right+='<div class="signs"><div class="sign"><i>Class Teacher</i>Class Teacher</div><div class="sign">Parent / Guardian</div><div class="sign"><i>Principal</i>'+esc(SCHOOL.principal)+'</div></div>';
+  h+='<div class="bottom"><div class="bl">'+left+'</div><div class="br">'+right+'</div></div></div>';
+  h+='<div class="foot">'+esc(SCHOOL.tagline)+'</div></div>';
+  $('scaler').innerHTML=h; fit();
+}
+function $(id){ return document.getElementById(id); }
+/* auto-fit: shrink the A4 page to the screen width, never enlarge */
+function fit(){
+  var sc=$('scaler'), page=sc.firstChild; if(!page) return;
+  var w=page.offsetWidth, h=page.offsetHeight, avail=$('fit').clientWidth-24, s=Math.min(1,avail/w);
+  sc.style.transform='scale('+s+')'; sc.style.width=w+'px';
+  $('fit').style.height=(h*s+10)+'px';
+}
+window.addEventListener('resize',fit);
+window.addEventListener('beforeprint',function(){ $('fit').style.height='auto'; });
+window.addEventListener('afterprint',fit);
+
+$('chips').innerHTML=Object.keys(BLOCK_LABELS).map(k=>'<label class="chip"><input type="checkbox" checked data-k="'+k+'">'+BLOCK_LABELS[k]+'</label>').join('');
+$('chips').addEventListener('change',function(e){ CFG.blocks[e.target.dataset.k]=e.target.checked; render(); });
+$('segLayout').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; CFG.layout=b.dataset.v; document.querySelectorAll('#segLayout button').forEach(x=>x.classList.toggle('on',x===b)); render(); });
+render();
+</script>
+</body></html>

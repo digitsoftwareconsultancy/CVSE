@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -196,10 +196,12 @@ var SETF = [
  ['Fine_Max','Maximum fine (0 = no limit)','num'],
  ['Who can collect',null],
  ['Role_ClassTeacherCollects','Class teachers may collect fees for their own class','yn','','Accountants are given their permissions in Admin → Users.'],
- ['Unpaid fees',null],
- ['Dues_Rule','When fees are not paid','sel',[['OFF','Do nothing'],['RESULT','Close the Result tab in the student app'],['RESULT_HOME','Close Result and Home tabs']]],
- ['Dues_Grace_Days','Days to wait after due date','num'],
- ['Dues_Message','Message shown to the student','text'],
+ ['Unpaid fees (Result tab lock)',null],
+ ['Dues_Rule','Close the Result tab and report card when fees are overdue','sel',[['OFF','No, keep Result always open'],['RESULT','Yes, close it while fees are overdue']],'Before you switch this on, please check your board rules and the Right to Education Act. Holding back a child\'s result for unpaid fees is a contested matter, and this software only follows the school\'s decision. The office can unlock one student for some days (Admin → Users → permission "Unlock").'],
+ ['Dues_Grace_Days','Close it when the oldest unpaid fee is overdue by more than this many days','num','','0 = from the day after the due date. Change it whenever results are declared (for example 4 days if results come on the 5th, 10 days if on the 15th). Closes and opens by itself as fees are paid.'],
+ ['Dues_MinAmount','Do not close for overdue amounts below (Rs)','num','','0 = any overdue amount closes it.'],
+ ['Dues_IncludePrevious','Count previous-session dues as overdue','yn'],
+ ['Dues_Message','Message shown to the parent','text','','The overdue amount is added to this message automatically.'],
  ['Rules',null],
  ['Transport_HeadID','Monthly head used for bus fee','headsel','','The bus amount comes from the route chosen for each student. This head decides the months and due day.'],
  ['Discount_Combine','Sibling + other concession','sel',[['ADD','Add both (never more than the fee)'],['BEST','Give only the bigger one']]],

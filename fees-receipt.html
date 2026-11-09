@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Money Receipt</title>
@@ -160,24 +160,27 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 <script>
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
-var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
-if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
-function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+var STU = new URLSearchParams(location.search).get('stu') === '1';
+var USER = STU ? {username:ls('cvse_sadm'), name:ls('cvse_sname'), role:'student'} : {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+var TOKEN = STU ? ls('cvse_stoken') : ls('cvse_token');
+var HOME = STU ? 'student.html' : 'index.html';
+if(!TOKEN || !USER.username || (!STU && USER.role !== 'admin' && USER.role !== 'accountant')){ window.location.href = HOME; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = HOME; } }
 async function apiGet(action, params){
-  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(TOKEN);
   for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
   let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
 }
 async function apiPost(action, payload){
-  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:TOKEN}, payload || {}))});
   let j = await r.json(); authCheck(j); return j;
 }
 function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html' : 'accountant.html'; }
-function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+function goBack(){ window.location.href = STU ? 'student.html' : (USER.role === 'admin' ? 'admin.html' : 'accountant.html'); }
+function doLogout(){ if(STU){ window.location.href = 'student.html'; return; } try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
   if(d.length > 4) o = d.substring(0, 2) + '-' + d.substring(2, 4) + '-' + d.substring(4);
@@ -185,7 +188,7 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = STU ? 'STUDENT' : (USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN');
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 
@@ -243,7 +246,7 @@ async function init(){
       if(!me.success){ show($('gMsg'),'❌ '+(me.error||'Could not load.'),'err'); return; }
       R = sampleData(me); hide($('gMsg')); render(); return;
     }
-    let r = await apiGet('feereceipt',{no:QS.get('no')||'',session:QS.get('s')||''});
+    let r = await apiGet(STU ? 'studentfeereceipt' : 'feereceipt',{no:QS.get('no')||'',session:QS.get('s')||''});
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load the receipt.'),'err'); $('sub').innerText = 'Receipt not available.'; return; }
     R = r; hide($('gMsg')); render();
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }

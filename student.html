@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -110,6 +110,15 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   .ttab td:first-child,.ttab th:first-child{position:static}
 }
 }
+
+.tabBtn{font-size:10px}.tabBtn .tabIco{font-size:19px}
+.fpill{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.fp-PAID{background:#dcfce7;color:#166534}.fp-PART{background:#fff3e0;color:#9a3412}.fp-OVERDUE{background:#fee2e2;color:#991b1b}.fp-DUE{background:#fef3c7;color:#92400e}.fp-UPCOMING{background:#e5e7eb;color:#374151}.fp-FREE{background:#e0f2fe;color:#075985}
+.frow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}.frow:last-child{border-bottom:none}
+.frow .l{min-width:0}.frow .l b{color:var(--navy)}.frow .l small{display:block;color:var(--muted);font-weight:700;font-size:11.5px;margin-top:2px}
+.frow .r{text-align:right;white-space:nowrap}.frow .r b{display:block;color:var(--navy)}
+.fbig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}.fbig div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center}.fbig b{display:block;font-size:16px;color:var(--navy)}.fbig span{font-size:10.5px;color:var(--muted);font-weight:700}
+.fhead{font-weight:900;color:var(--navy);font-size:13px;margin:12px 0 2px;border-bottom:2px solid var(--line);padding-bottom:3px}
 </style>
 </head>
 <body>
@@ -167,6 +176,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   <div class="scr" id="s_timetable" style="display:none"><div id="ttBody"></div></div>
   <div class="scr" id="s_profile" style="display:none"><div id="pBody"></div></div>
   <div class="scr" id="s_performance" style="display:none"><div id="pfBody"></div></div>
+  <div class="scr" id="s_fees" style="display:none"><div id="feeBody"></div></div>
 
   <div class="scr" id="s_result" style="display:none">
     <div id="resList"></div>
@@ -184,7 +194,8 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   <button class="tabBtn" data-t="timetable" onclick="openTab('timetable')"><span class="tabIco">🗓️</span>Timetable</button>
   <button class="tabBtn" data-t="profile" onclick="openTab('profile')"><span class="tabIco">👤</span>Profile</button>
   <button class="tabBtn" data-t="result" onclick="openTab('result')"><span class="tabIco">🎓</span>Result</button>
-  <button class="tabBtn" data-t="performance" onclick="openTab('performance')"><span class="tabIco">📈</span>Performance</button>
+  <button class="tabBtn" data-t="performance" onclick="openTab('performance')"><span class="tabIco">📈</span>Progress</button>
+  <button class="tabBtn" data-t="fees" onclick="openTab('fees')"><span class="tabIco">💰</span>Fees</button>
 </div>
 </div>
 
@@ -275,7 +286,7 @@ async function startApp(){
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
     HOME = r; hide($('gMsg'));
     if(r.school.session){ $('wPill').innerText = 'Session ' + r.school.session; $('wPill').style.display = ''; }
-    document.querySelectorAll('#tabsBar .tabBtn').forEach(b => { let i = tabInfo(b.dataset.t); b.style.opacity = i.open ? '' : '.55'; });
+    document.querySelectorAll('#tabsBar .tabBtn').forEach(b => { let i = tabInfo(b.dataset.t); b.style.opacity = i.open ? '' : '.55'; if(b.dataset.t === 'fees' && !i.open) b.style.display = 'none'; });
     openTab('home');
   }catch(e){ if(e.message !== 'AUTH') show($('gMsg'), '❌ Network problem. Check the internet and reload.', 'err'); }
 }
@@ -287,7 +298,7 @@ function openTab(k){
   document.querySelectorAll('#tabsBar .tabBtn').forEach(b => b.classList.toggle('active', b.dataset.t === k));
   window.scrollTo({top:0});
   hide($('gMsg'));
-  if(k === 'home') loadDaily(''); else if(k === 'events') loadCal(''); else if(k === 'timetable') loadTT(); else if(k === 'profile') loadProfile(); else if(k === 'performance') loadPerf(''); else if(k === 'result') loadResults();
+  if(k === 'home') loadDaily(''); else if(k === 'events') loadCal(''); else if(k === 'timetable') loadTT(); else if(k === 'profile') loadProfile(); else if(k === 'performance') loadPerf(''); else if(k === 'result') loadResults(); else if(k === 'fees') loadFees();
 }
 function lockHtml(m){ return '<div class="lock"><b>🔒</b>' + esc(m || 'This section is not available right now. Please contact the school office.') + '</div>'; }
 function failHtml(retry){ return '<div class="msg show err">❌ Network problem. Please check the internet and <a href="#" onclick="' + retry + ';return false">try again</a>.</div>'; }
@@ -463,6 +474,46 @@ window.addEventListener('resize', () => { if($('fit').innerHTML) rcFit($('fit'))
 window.addEventListener('beforeprint', () => { $('fit').querySelectorAll('.cw').forEach(c => { c.style.width = ''; c.style.height = ''; }); });
 window.addEventListener('afterprint', () => { if($('fit').innerHTML) rcFit($('fit')); });
 
+
+/* ---------- fees (read only) ---------- */
+function frs(n, dec){ return '₹' + (Number(n) || 0).toLocaleString('en-IN', {minimumFractionDigits:dec || 0, maximumFractionDigits:dec || 0}); }
+var FPILL = {PAID:'Paid', PART:'Part paid', OVERDUE:'Overdue', DUE:'Due today', UPCOMING:'Upcoming', FREE:'No fee'};
+async function loadFees(){
+  $('feeBody').innerHTML = '<div class="msg show load">Loading...</div>';
+  try{
+    let r = await api('studentfees');
+    if(!r.success){ $('feeBody').innerHTML = '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>'; return; }
+    if(r.closed){ $('feeBody').innerHTML = lockHtml(r.message); return; }
+    let d = r.decimals, s = r.summary, h = '';
+    if(r.lock && r.lock.locked) h += '<div class="lock" style="margin-bottom:12px;padding:12px"><b style="font-size:22px">🔒</b>' + esc(r.lock.message) + '</div>';
+    h += '<div class="box"><div class="title">💰 My Fees <small style="color:var(--muted);font-size:12px">· Session ' + esc(r.session) + '</small></div>' +
+      '<div class="fbig"><div><b>' + frs(s.net, d) + '</b><span>Total fees</span></div><div><b>' + frs(s.paid, d) + '</b><span>Paid</span></div><div><b style="color:' + (s.totalDue > 0 ? '#c62828' : '#16a34a') + '">' + frs(s.totalDue, d) + '</b><span>Unpaid</span></div></div>';
+    if(s.overdue > 0) h += '<div class="msg show err" style="margin:6px 0">⏰ Overdue now: <b>' + frs(s.overdue, d) + '</b>. Please pay at the school office.</div>';
+    else if(s.totalDue <= 0) h += '<div class="msg show ok" style="margin:6px 0">✅ All fees are paid. Thank you!</div>';
+    if(s.nextDue) h += '<div class="meta">Next: <b>' + esc(s.nextDue.label) + '</b>' + (s.nextDue.due ? ' · due ' + esc(s.nextDue.due) : '') + ' · ' + frs(s.nextDue.amount, d) + '</div>';
+    h += '<div class="meta" style="margin-top:8px">Fees are paid at the school office. This page shows your account.</div></div>';
+    if(s.previous > 0 || s.fine > 0){
+      h += '<div class="box"><div class="title">Other amounts</div>' + (s.previous > 0 ? '<div class="frow"><div class="l"><b>Previous dues</b><small>Brought forward from earlier</small></div><div class="r"><b>' + frs(s.previous, d) + '</b></div></div>' : '') +
+        (s.fine > 0 ? '<div class="frow"><div class="l"><b>Late fine so far</b></div><div class="r"><b>' + frs(s.fine, d) + '</b></div></div>' : '') + '</div>';
+    }
+    if(r.siblingOff > 0 || r.concessionOff > 0){
+      h += '<div class="box"><div class="title">🎁 Discounts you get</div>' +
+        (r.siblingOff > 0 ? '<div class="frow"><div class="l"><b>Sibling discount</b><small>Child no ' + r.childNo + ' of the family</small></div><div class="r"><b>' + frs(r.siblingOff, d) + '</b></div></div>' : '') +
+        (r.concessionOff > 0 ? '<div class="frow"><div class="l"><b>Concession</b>' + r.concessions.map(c => '<small>' + esc(c.heads) + ' · ' + (c.mode === 'PERCENT' ? c.value + '%' : frs(c.value, d)) + (c.reason ? ' · ' + esc(c.reason) : '') + '</small>').join('') + '</div><div class="r"><b>' + frs(r.concessionOff, d) + '</b></div></div>' : '') +
+        '<div class="meta" style="margin-top:6px">Total discount in the session: <b>' + frs(s.discount, d) + '</b></div></div>';
+    }
+    let last = null, body = '';
+    r.lines.forEach(l => {
+      if(l.head !== last){ body += '<div class="fhead">' + esc(l.head) + '</div>'; last = l.head; }
+      body += '<div class="frow"><div class="l"><b>' + esc(l.label) + '</b><small>' + (l.due ? 'Due ' + esc(l.due) : '') + (l.discount > 0 ? ' · discount ' + frs(l.discount, d) : '') + '</small></div>' +
+        '<div class="r"><b>' + frs(l.net, d) + '</b><span class="fpill fp-' + l.status + '">' + FPILL[l.status] + '</span>' + (l.status === 'PART' ? '<small style="display:block;color:#64748b;font-weight:700">Paid ' + frs(l.paid, d) + '</small>' : '') + '</div></div>';
+    });
+    h += '<div class="box"><div class="title">Fee details</div>' + (body || '<div class="meta">No fees are set for you yet. Please ask the school office.</div>') + '</div>';
+    h += '<div class="box"><div class="title">🧾 My receipts</div>' + (r.receipts.length ? r.receipts.map(x => '<div class="frow"><div class="l"><b>' + esc(x.no) + '</b><small>' + esc(x.date) + (x.mode ? ' · ' + esc(x.mode) : '') + '</small></div><div class="r"><b>' + frs(x.total, d) + '</b><button class="btn b-navy" style="min-height:38px;padding:6px 12px;font-size:12px;width:auto" onclick="openReceipt(\'' + esc(x.no) + '\')">🖨 Print</button></div></div>').join('') : '<div class="meta">No receipt yet in this session.</div>') + '</div>';
+    $('feeBody').innerHTML = h;
+  }catch(e){ if(e.message !== 'AUTH') $('feeBody').innerHTML = failHtml('loadFees()'); }
+}
+function openReceipt(no){ window.open('fees-receipt.html?stu=1&no=' + encodeURIComponent(no), '_blank'); }
 
 /* ---------- install help ---------- */
 var DEFER = null;

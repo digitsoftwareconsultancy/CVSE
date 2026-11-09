@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Fees</title>
@@ -105,6 +105,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .big{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.big div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}.big b{display:block;font-size:18px;color:var(--navy)}.big span{font-size:11px;color:var(--muted);font-weight:700}
 .chk{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px;font-weight:700;color:var(--navy)}.chk input{width:22px;height:22px;min-height:0}
 .msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:300;padding:16px}.modal.on{display:flex}
 </style></head>
 <body>
 <div class="top">
@@ -130,6 +131,10 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
  </div>
  <div id="vEdit" style="display:none"></div>
 </div>
+<div class="modal" id="fixM"><div style="background:#fff;border-radius:16px;padding:16px;max-width:400px;width:100%;max-height:90vh;overflow:auto"><div class="title">Correct student details</div><div class="meta">For spelling mistakes. Class, roll no and admission no are not changed here.</div>
+<label>Student name</label><input id="fx_name" maxlength="80"><label>Father name</label><input id="fx_fa" maxlength="80"><label>Mother name</label><input id="fx_mo" maxlength="80">
+<div class="row2"><div><label>Date of birth</label><input id="fx_dob" inputmode="numeric" maxlength="10" oninput="maskD(this)" placeholder="DD-MM-YYYY"></div><div><label>House</label><input id="fx_ho" maxlength="30"></div></div>
+<div class="msg" id="fx_msg"></div><div class="btnrow"><button class="btn b-green" id="fx_btn" onclick="saveFix()">Save correction</button><button class="btn b-navy" onclick="$('fixM').classList.remove('on')">Cancel</button></div></div></div>
 <div class="tabs" id="tabsBar">
   <button class="tabBtn active"><span class="tabIco">👨‍👩‍👧</span>Students</button>
   <button class="tabBtn" onclick="window.location.href='fees-opening.html'"><span class="tabIco">✅</span>Already Paid</button>
@@ -167,6 +172,22 @@ $('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 
+
+var FIXC = null;
+function openFix(d, adm, cb){
+  d = d || {}; FIXC = {adm:adm, cb:cb};
+  $('fx_name').value = d.name || ''; $('fx_fa').value = d.father || ''; $('fx_mo').value = d.mother || ''; $('fx_dob').value = d.dob || ''; $('fx_ho').value = d.house || '';
+  hide($('fx_msg')); $('fixM').classList.add('on');
+}
+async function saveFix(){
+  let b = $('fx_btn'); b.disabled = true; show($('fx_msg'),'Saving... please wait','load');
+  try{
+    let r = await apiPost('feestudentfix',{adm:FIXC.adm,data:JSON.stringify({name:$('fx_name').value,father:$('fx_fa').value,mother:$('fx_mo').value,dob:$('fx_dob').value.trim(),house:$('fx_ho').value})});
+    if(r.success){ $('fixM').classList.remove('on'); if(FIXC.cb) FIXC.cb(r.details); }
+    else show($('fx_msg'),'❌ '+(r.error||'Could not save.'),'err');
+  }catch(e){ show($('fx_msg'),'❌ Could not connect. Nothing was saved. Try again.','err'); }
+  b.disabled = false;
+}
 var CLS = '', LIST = null, ST = null, ED = null;
 function rs(n){ n = Number(n) || 0; return '₹' + (Math.round(n * 100) / 100).toLocaleString('en-IN'); }
 async function loadList(first){
@@ -214,6 +235,7 @@ function drawEdit(){
   let r = ST, s = r.student, u = r.setup, opt = String(u.optionalHeads||'').split(',');
   let optHeads = r.heads.filter(h=>h.scope==='OPTIONAL' && h.id!==r.transportHeadId);
   let h = '<div class="box"><div class="title">'+esc(s.name)+'</div><div class="meta">Adm '+esc(s.adm)+' · Class '+esc(s.cls)+(s.roll?' · Roll '+esc(s.roll):'')+' · Session '+esc(r.session)+'</div>'+
+   '<div class="btnrow"><button class="btn b-purple" onclick="openFix(ST.details,ST.student.adm,function(d){ST.details=d;ST.student.name=d.name;drawEdit();})">✏ Correct name / parents / DOB</button></div>'+
    '<h3 class="g">New or old student</h3><select id="e_type"><option value="">Automatic (by admission date)</option><option value="NEW"'+(s.type==='NEW'?' selected':'')+'>New student</option><option value="OLD"'+(s.type==='OLD'?' selected':'')+'>Old student</option></select><div class="help">Now treated as: <b>'+(s.effectiveType==='NEW'?'New':'Old')+'</b></div>'+
    '<label>Admission date</label><input id="e_date" inputmode="numeric" maxlength="10" oninput="maskD(this)" value="'+esc(s.admissionDate)+'" placeholder="DD-MM-YYYY"><div class="help">New students pay monthly fees from the admission month, and late-joiner slabs use this date.</div>'+
    '<h3 class="g">Brother / sister</h3>'+(r.siblings.length?'<div class="meta">This student is child no. <b>'+s.childNo+'</b> in the family. Others: '+r.siblings.map(x=>esc(x.name)+' ('+esc(x.cls)+', child '+x.childNo+')').join(', ')+'</div><label class="chk"><input type="checkbox" id="e_unlink"> Remove from this family</label>':'<div class="meta">Not linked to any brother or sister.</div>')+
