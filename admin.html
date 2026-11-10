@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.09-S1"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.10-S2"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -80,6 +80,24 @@ tbody tr:nth-child(even){background:#fbfcfd}
 .mapTag{display:inline-block;background:var(--blue);color:#fff;padding:6px 11px;border-radius:999px;margin:3px;font-size:12px;font-weight:600}
 .settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.settingsGrid{grid-template-columns:1fr}}
+.setBar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;margin-bottom:2px;-webkit-overflow-scrolling:touch}
+.setBar button{flex:0 0 auto;margin:0;padding:9px 14px;border-radius:999px;background:#fff;color:#334155;border:1.5px solid #dbe2ea;font-size:13px;min-height:42px;white-space:nowrap}
+.setBar button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.hHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 10px}
+.hHead b{font-size:15px}.hHead small{color:var(--muted);font-weight:600}
+.hGrid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.hGrid{grid-template-columns:1fr 1fr}}
+.hcard{background:#fff;border-radius:var(--radius);padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3}
+.hcard h3{margin:0 0 8px;font-size:15px}
+.hrow{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid #f1f5f9;font-size:13.5px;line-height:1.4}
+.hrow:first-of-type{border-top:none}
+.hrow .ic{flex-shrink:0;width:22px;text-align:center}
+.hbig{font-size:26px;font-weight:900;color:#0b2a5c;line-height:1.1}
+.hmut{color:var(--muted);font-size:12.5px;font-weight:600}
+.hchip{display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;margin:3px 4px 0 0}
+.hwarn{color:#9a3412}.hgood{color:#166534}.herr{color:#b91c1c}
+.hbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.hbtns button{margin:0;font-size:13.5px}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#fff}
 .badge-green{background:var(--green)}.badge-red{background:var(--red)}.badge-orange{background:var(--orange)}
 </style></head><body>
@@ -87,11 +105,10 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div id="adminContent" style="display:none;">
 <div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div style="min-width:0"><h2>Admin Panel — <span id="schoolName">School</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
 <div class="wrap">
-<div class="topActions">
-<button onclick="openRegister()" class="actionCard" style="background:linear-gradient(135deg,#2e7d32,#43a047)"><small>📒</small><span><b>Exam Register</b><span>Enter marks class-wise</span></span></button>
-<button onclick="openTimetableBuilder()" class="actionCard" style="background:linear-gradient(135deg,#6d4c41,#8d6e63)"><small>🗓️</small><span><b>TIMETABLE</b><span>Build & print timetable</span></span></button>
-</div>
-<div id="tabUsers" class="tab"><div class="box"><h3>Create Teacher / Admin</h3><p class="sub">Add login, role and exam access. Which class and subject a teacher can enter marks for is set later in Exam Settings.</p>
+<div id="setBar" class="setBar" style="display:none"><button id="sc1" onclick="openTab('resultControlTab'); loadAllSettings();">⚙️ Settings</button><button id="sc2" onclick="openTab('tabUsers')">👥 Users</button><button id="sc3" onclick="openTab('subjectMasterTab'); loadSM();">📚 Classes · Subjects · Exams</button><button id="sc4" onclick="openTab('backupTab'); loadBackupInfo();">📦 Backup &amp; Check</button><button id="sc5" onclick="openTab('homeTab'); loadHome();">🏠 Home</button></div>
+<div id="homeTab" class="tab"><div id="homeBody"><div class="box">Loading home... please wait</div></div></div>
+<div id="timetableTab" class="tab" style="display:none;"><div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>🗓️ Timetable</h3><p class="sub">The timetable drives daily updates, attendance, teacher work and what students see. Build it here and print it for classes and teachers.</p><button class="btn" style="background:linear-gradient(135deg,#6d4c41,#8d6e63);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;" onclick="openTimetableBuilder()">Open Timetable Builder</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="openTab('resultControlTab'); loadAllSettings(); setTimeout(function(){ var e=document.getElementById('periodInputs'); if(e) e.scrollIntoView({behavior:'smooth',block:'center'}); },600);">Periods and timings (in Settings)</button></div></div>
+<div id="tabUsers" class="tab" style="display:none;"><div class="box"><h3>Create Teacher / Admin</h3><p class="sub">Add login, role and exam access. Which class and subject a teacher can enter marks for is set later in Exam Settings.</p>
 <div class="formGrid">
 <div class="field"><label>Username</label><input id="uname" placeholder="e.g. niraj"></div>
 <div class="field"><label>Password</label><input id="pass" placeholder="Password"></div>
@@ -154,8 +171,10 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 <div id="e_electives"></div>
 <br><br><div style="display:flex;gap:8px"><button onclick="saveEdit()" id="btnSaveStu" class="btn-green" style="flex:1">Save</button><button onclick="delStu2()" id="btnDelStu" class="btn-del" style="flex:1">Delete</button></div><p id="editMsg" style="font-weight:700"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
-<div id="feesTab" class="tab" style="display:none;"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:0"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div>
+<div id="feesTab" class="tab" style="display:none;"><div class="box" style="background:#ecfdf5;border:2px solid #16a34a"><h3>💰 Fees</h3><p class="sub">Collect fees, see receipts, set up students and open the reports.</p><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;" onclick="window.location.href='fees-collect.html'">Collect Fees</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-receipts.html'">Receipts (day book)</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-reports.html'">Fee Reports</button><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-students.html'">Student Fee Setup</button><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-opening.html'">Already Paid (start mid-session)</button><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-settings.html'">Fees Settings</button></div>
+<details class="box"><summary style="font-weight:800;cursor:pointer">Old fee list (earlier version)</summary><div style="margin-top:10px"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:0"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div></details></div>
 <div id="backupTab" class="tab" style="display:none;">
+<div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>🔍 System check</h3><p class="sub">After you upload new files, press this. It shows if every Apps Script file and every page is the latest version.</p><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSysCheck()">Run system check</button><div id="sysOut" style="margin-top:10px;font-size:13px;line-height:1.6"></div></div>
 <div class="box"><h3>📦 Backup</h3>
 <div style="font-size:13px;line-height:1.6">Workbook: <b id="bkName">-</b><br>Last backup: <b id="bkLast">-</b><br>Weekly automatic backup: <b id="bkWeekly">-</b></div>
 <div id="bkWarn" style="margin-top:8px;font-weight:700"></div>
@@ -165,9 +184,9 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="box"><h3>📂 Recent backups</h3><div id="backupList">Loading...</div></div>
 </div>
 <div id="resultControlTab" class="tab" style="display:none;">
-<div class="box" style="background:#f3e8ff;border:2px solid #7c3aed"><h3>📝 Exam Settings</h3><p class="sub">Exams, report cards, grade scale, extra areas and who can enter marks.</p><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='exam-settings.html'">Open Exam Settings</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='class-report.html'">Open Class Report (finalise / reopen)</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#ff9800);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card-settings.html'">Report Card Settings</button><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card.html'">View / Print Report Cards</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='student-access.html'">Student App Access</button></div>
-<div class="box" style="background:#ecfdf5;border:2px solid #16a34a"><h3>💰 Fees Settings</h3><p class="sub">Fee heads, amounts, due dates, accessories, bus routes, sibling and late-joiner rules, receipt look. All controlled from here.</p><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='fees-settings.html'">Open Fees Settings</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-collect.html'">Collect Fees</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-receipts.html'">Receipts (day book)</button><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-students.html'">Student Fee Setup</button><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-opening.html'">Already Paid (start mid-session)</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-reports.html'">Fee Reports</button></div>
-<div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>🔍 System check</h3><p class="sub">After you upload new files, press this. It shows if every Apps Script file and every page is the latest version.</p><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSysCheck()">Run system check</button><div id="sysOut" style="margin-top:10px;font-size:13px;line-height:1.6"></div></div>
+<div class="box" style="background:#f3e8ff;border:2px solid #7c3aed"><h3>📝 Exam Settings</h3><p class="sub">Exams, report cards, grade scale, extra areas and who can enter marks.</p><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='exam-settings.html'">Open Exam Settings</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='class-report.html'">Open Class Report (finalise / reopen)</button><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#ff9800);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card-settings.html'">Report Card Settings</button><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card.html'">View / Print Report Cards</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='student-access.html'">Student App Access</button><button class="btn" style="background:#94a3b8;color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="alert('DEMO - the Exam Register is not built yet. Marks are entered in Exam Settings for now.')">📒 Exam Register (DEMO - not built yet)</button></div>
+<div class="box" style="background:#ecfdf5;border:2px solid #16a34a"><h3>💰 Fees Settings</h3><p class="sub">Fee heads, amounts, due dates, accessories, bus routes, sibling and late-joiner rules, receipt look. All controlled from here.</p><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='fees-settings.html'">Open Fees Settings</button></div>
+
 <div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>📅 School Calendar</h3><p class="sub">Holidays, exams, programs and meetings. Students see them in the Calendar tab of their app.</p><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='events.html'">Open Calendar &amp; Events</button></div>
 <div class="box" style="background:#e3f2fd;border:2px solid #1976d2"><h3>⚙️ Full School Settings</h3><p class="sub">These values come from Settings sheet — change here and header / prints update automatically.</p>
 <div class="settingsGrid">
@@ -202,6 +221,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 </div>
 <div id="subjectMasterTab" class="tab" style="display:none;">
+<div class="box" style="background:#f3e8ff;border:2px solid #7c3aed"><h3>📝 Exams</h3><p class="sub">Exam names, grade scale, report cards and who can enter marks are set in Exam Settings.</p><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;" onclick="window.location.href='exam-settings.html'">Open Exam Settings</button></div>
 <div class="box" style="background:#fff3e0;border:2px solid #ff9800">
 <h3>📚 Subject Master</h3><p class="sub">Classes & subjects come from Classes + SubjectMaster sheets — no hardcoding.</p>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -214,13 +234,15 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 </div>
 <div class="tabs">
-<button class="tabBtn active" id="b1" onclick="openTab('tabUsers')"><span class="tabIco">👥</span>Teachers</button>
+<button class="tabBtn active" id="bHome" onclick="openTab('homeTab'); loadHome();"><span class="tabIco">🏠</span>Home</button>
 <button class="tabBtn" id="b2" onclick="openTab('tabStudents')"><span class="tabIco">🎓</span>Students</button>
-<button class="tabBtn" id="b3" onclick="openTab('feesTab'); loadFees();" style="display:none"><span class="tabIco">💰</span>Fees</button>
-<button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();"><span class="tabIco">📦</span>Backup</button>
+<button class="tabBtn" id="b3" onclick="openTab('feesTab')"><span class="tabIco">💰</span>Fees</button>
+<button class="tabBtn" id="bTT" onclick="openTab('timetableTab')"><span class="tabIco">🗓️</span>Timetable</button>
+<button class="tabBtn" id="b7" onclick="window.location.href='daily.html'"><span class="tabIco">📝</span>Daily</button>
 <button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();"><span class="tabIco">⚙️</span>Settings</button>
-<button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();"><span class="tabIco">📚</span>Subjects</button>
-<button class="tabBtn" id="b7" onclick="window.location.href='daily.html'"><span class="tabIco">🗂️</span>Daily</button>
+<button class="tabBtn" id="b1" onclick="openTab('tabUsers')" style="display:none"><span class="tabIco">👥</span>Teachers</button>
+<button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();" style="display:none"><span class="tabIco">📦</span>Backup</button>
+<button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();" style="display:none"><span class="tabIco">📚</span>Subjects</button>
 </div>
 </div>
 <div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
@@ -485,9 +507,11 @@ async function saveSM(){
   else { smMsg.innerHTML='<span style="color:red">❌ '+((res&&res.error)||'Save failed')+'</span>'; }
 }
 function logout(){ localStorage.clear(); window.location.href='index.html'; }
-async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_token', res.token); localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { loginMsg.innerText = res.success ? '❌ Not Admin' : '❌ '+(res.error||'Login failed'); } }
-window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
-function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); document.getElementById('b'+(['tabUsers','tabStudents','feesTab','backupTab','resultControlTab','subjectMasterTab'].indexOf(id)+1))?.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_token', res.token); localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); openTab('homeTab'); loadHome(1); } else { loginMsg.innerText = res.success ? '❌ Not Admin' : '❌ '+(res.error||'Login failed'); } }
+window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); openTab('homeTab'); loadHome(1); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
+var TAB_BTN={homeTab:'bHome',tabStudents:'b2',feesTab:'b3',timetableTab:'bTT',tabUsers:'b5',backupTab:'b5',resultControlTab:'b5',subjectMasterTab:'b5'};
+var SET_CHIP={resultControlTab:'sc1',tabUsers:'sc2',subjectMasterTab:'sc3',backupTab:'sc4'};
+function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); var bb=document.getElementById(TAB_BTN[id]); if(bb) bb.classList.add('active'); var sb=document.getElementById('setBar'); if(sb){ sb.style.display=SET_CHIP[id]?'flex':'none'; ['sc1','sc2','sc3','sc4'].forEach(function(c){ var e=document.getElementById(c); if(e) e.classList.toggle('on', SET_CHIP[id]===c); }); } window.scrollTo({top:0,behavior:'smooth'}); }
 function getFp(pfx){ return [...document.querySelectorAll('.'+pfx+'_fp:checked')].map(function(i){return i.value;}).join(','); }
 function setFp(pfx,csv){ var s=','+String(csv||'')+','; document.querySelectorAll('.'+pfx+'_fp').forEach(function(i){ i.checked = s.indexOf(','+i.value+',')>-1; }); }
 async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; var finalClasses = classes.value; let res=await apiPost('addteacher', {mode:'create', username:uname.value, password:pass.value, role:role.value, classes:finalClasses, name:fname.value, examAccess:examVal, status:'Active', feeAccess:getFp('c')}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; setFp('c','COLLECT'); onRoleChange(); clearMap(); loadUsers(); } }
@@ -620,6 +644,12 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 var SYS_PAGES = ["accountant.html", "admin.html", "class-dashboard.html", "class-report.html", "classtest.html", "daily.html", "events.html", "exam-marks.html", "exam-settings.html", "fees-collect.html", "fees-opening.html", "fees-receipt.html", "fees-receipts.html", "fees-reports.html", "fees-settings.html", "fees-students.html", "index.html", "performance.html", "report-card-preview.html", "report-card-settings.html", "report-card.html", "student-access.html", "student.html", "students.html", "subject-dashboard.html", "timetable-builder.html"];
+function verOk(v,min){
+  var re=/^(\d{4})\.(\d{2})\.(\d{2})-S(\d+)$/, a=re.exec(v||''), b=re.exec(min||'');
+  if(!a||!b) return false;
+  for(var i=1;i<=4;i++){ var x=+a[i], y=+b[i]; if(x!==y) return x>y; }
+  return true;
+}
 async function runSysCheck(){
   var out = document.getElementById('sysOut'); out.innerHTML = 'Checking... please wait';
   try{
@@ -627,17 +657,64 @@ async function runSysCheck(){
     if(!j || !j.success){ out.innerHTML = '❌ ' + ((j && j.error) || 'Could not check.'); return; }
     var V = j.version, bad = [], h = '<b>Latest version: ' + V + '</b><br>';
     var sv = j.files.filter(function(f){ return !f.ok; });
-    h += (sv.length ? '❌ Apps Script files not latest: ' + sv.map(function(f){ return f.file + ' (' + (f.version || 'MISSING') + ')'; }).join(', ') + '<br>' : '✅ All Apps Script files are the latest (' + j.files.length + ' files)<br>');
-    var res = await Promise.all(SYS_PAGES.map(async function(p){
+    h += (sv.length ? '❌ Apps Script files to update: ' + sv.map(function(f){ return f.file + ' (has ' + (f.version || 'nothing') + ', needs ' + f.min + ')'; }).join(', ') + '<br>' : '✅ All Apps Script files are fine (' + j.files.length + ' files)<br>');
+    var pages = (j.pages && j.pages.length) ? j.pages : SYS_PAGES.map(function(p){ return {page:p, min:V}; });
+    var res = await Promise.all(pages.map(async function(pg){
       try{
-        var r = await fetch(p + '?cb=' + Date.now(), {cache:'no-store'}); if(!r.ok) return [p, 'MISSING'];
+        var r = await fetch(pg.page + '?cb=' + Date.now(), {cache:'no-store'}); if(!r.ok) return [pg, 'MISSING'];
         var t = await r.text(); var m = t.match(/<meta name="app-version" content="([^"]*)"/);
-        return [p, m ? m[1] : 'OLD'];
-      }catch(e){ return [p, 'UNREACHABLE']; }
+        return [pg, m ? m[1] : 'OLD'];
+      }catch(e){ return [pg, 'UNREACHABLE']; }
     }));
-    res.forEach(function(x){ if(x[1] !== V) bad.push(x[0] + ' (' + x[1] + ')'); });
-    h += (bad.length ? '❌ Pages not latest: ' + bad.join(', ') + '<br>Upload these again, then reload with ?v=N.' : '✅ All ' + SYS_PAGES.length + ' pages are the latest');
+    res.forEach(function(x){ if(!verOk(x[1], x[0].min)) bad.push(x[0].page + ' (has ' + x[1] + ', needs ' + x[0].min + ')'); });
+    h += (bad.length ? '❌ Pages to update: ' + bad.join(', ') + '<br>Upload these again, then reload with ?v=N.' : '✅ All ' + pages.length + ' pages are fine');
     out.innerHTML = h;
   }catch(e){ out.innerHTML = '❌ Could not connect. Check internet and try again.'; }
+}
+
+/* ---------- Home dashboard ---------- */
+var HOME_AT = 0;
+function hMoney(n,d){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+async function loadHome(force){
+  if(!force && HOME_AT && Date.now()-HOME_AT < 60000) return;
+  var el=document.getElementById('homeBody');
+  if(!HOME_AT) el.innerHTML='<div class="box">Loading home... please wait</div>';
+  try{
+    var r=await apiGet('homesummary', force?{fresh:1}:{});
+    if(!r || !r.success){ el.innerHTML='<div class="box" style="border-left:4px solid var(--red)">❌ '+esc((r&&r.error)||'Could not load.')+'<br><button onclick="loadHome(1)">Try again</button></div>'; return; }
+    HOME_AT=Date.now(); drawHome(r);
+  }catch(e){ el.innerHTML='<div class="box" style="border-left:4px solid var(--red)">❌ Could not connect. Check internet and try again.<br><button onclick="loadHome(1)">Try again</button></div>'; }
+}
+function hErr(r,k){ return r.errors && r.errors[k] ? '<div class="hrow"><span class="ic">⚠️</span><span class="herr">Could not load this card: '+esc(r.errors[k])+'</span></div>' : ''; }
+function drawHome(r){
+  var h='<div class="hHead"><div><b>'+esc(r.day.charAt(0)+r.day.slice(1).toLowerCase())+', '+esc(r.today)+'</b><br><small>Session '+esc(r.session||'-')+'</small></div><button onclick="HOME_AT=0; loadHome(1);" style="margin:0;padding:8px 14px;min-height:40px;background:#fff;color:var(--blue);border:1.5px solid #bbdefb">🔄 Refresh</button></div>';
+  if(r.noSchool) h+='<div class="box" style="background:#fff7ed;border:1.5px solid #fdba74;font-weight:700">🏖️ No school today: '+esc(r.noSchool)+'</div>';
+  h+='<div class="hGrid">';
+  var a=r.attention, rows='';
+  if(a){
+    if(a.attendance){ rows+= a.attendance.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Attendance: not needed ('+esc(a.attendance.skipped)+')</span></div>' : (a.attendance.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Attendance not marked:</b> '+a.attendance.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Attendance marked for all '+a.attendance.total+' classes</span></div>'); }
+    if(a.daily){ rows+= a.daily.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Daily update: not needed ('+esc(a.daily.skipped)+')</span></div>' : (a.daily.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Daily update not published:</b> '+a.daily.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Daily update published for all '+a.daily.total+' classes</span></div>'); }
+    if(a.locked && a.locked.on) rows+='<div class="hrow"><span class="ic">🔒</span><span><b>'+a.locked.locked+'</b> student'+(a.locked.locked===1?'':'s')+' locked out of the Result tab for unpaid fees'+(a.locked.unlocked?' · '+a.locked.unlocked+' unlocked for some days':'')+' · <a href="fees-reports.html">see Defaulters</a></span></div>';
+    if(a.system) rows+= a.system.allOk ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">All script files are the latest ('+esc(a.system.version)+')</span></div>' : '<div class="hrow"><span class="ic">❌</span><span class="herr">Old script files: '+a.system.old.map(esc).join(', ')+' · <a href="#" onclick="openTab(\'backupTab\'); loadBackupInfo(); return false;">open System check</a></span></div>';
+  }
+  rows+=hErr(r,'attention');
+  if(rows) h+='<div class="hcard"><h3>📌 Needs attention</h3>'+rows+'</div>';
+  if(r.collection){
+    var c=r.collection, d=c.decimals||0, modes=Object.keys(c.byMode||{}).map(function(k){ return '<span class="hchip">'+esc(k)+' '+hMoney(c.byMode[k],d)+'</span>'; }).join('');
+    h+='<div class="hcard"><h3>💵 Today\'s collection</h3><div class="hbig">'+hMoney(c.total,d)+'</div><div class="hmut">'+c.count+' receipt'+(c.count===1?'':'s')+(c.cancelled?' · '+c.cancelled+' cancelled':'')+'</div>'+(modes?'<div>'+modes+'</div>':'')+'<div class="hbtns"><button onclick="window.location.href=\'fees-collect.html\'" style="background:linear-gradient(135deg,#ef6c00,#fb923c)">Collect Fees</button><button onclick="window.location.href=\'fees-receipts.html\'" style="background:#0b2a5c">Receipts</button></div></div>';
+  } else if(r.errors && r.errors.collection) h+='<div class="hcard"><h3>💵 Today\'s collection</h3>'+hErr(r,'collection')+'</div>';
+  if(r.birthdays){
+    var b=r.birthdays, list=b.list||[], bh='';
+    if(b.missingColumn) bh='<div class="hrow"><span class="ic">ℹ️</span><span class="hmut">Add a DOB column in the Students sheet to see birthdays.</span></div>';
+    else if(!list.length) bh='<div class="hrow"><span class="ic">🎂</span><span class="hmut">No birthdays in the next '+(b.withinDays||7)+' days.</span></div>';
+    else bh=list.map(function(x){ return '<div class="hrow"><span class="ic">'+(x.days===0?'🎉':'🎂')+'</span><span><b>'+esc(x.name)+'</b> · Class '+esc(x.cls)+'<br><span class="hmut">'+(x.days===0?'Today':(x.days===1?'Tomorrow':'In '+x.days+' days, '+esc(x.date)))+' · turns '+x.turns+'</span></span></div>'; }).join('')+(b.more?'<div class="hmut">and more...</div>':'');
+    h+='<div class="hcard"><h3>🎂 Birthdays</h3>'+bh+'</div>';
+  } else if(r.errors && r.errors.birthdays) h+='<div class="hcard"><h3>🎂 Birthdays</h3>'+hErr(r,'birthdays')+'</div>';
+  if(r.events){
+    var eh=r.events.length ? r.events.map(function(e){ return '<div class="hrow"><span class="ic">📅</span><span><b>'+esc(e.title)+'</b><br><span class="hmut">'+(e.today?'On now · ':'')+esc(e.date)+(e.endDate&&e.endDate!==e.date?' to '+esc(e.endDate):'')+(e.time?' · '+esc(e.time):'')+(e.classes?' · '+esc(e.classes):'')+'</span></span></div>'; }).join('') : '<div class="hrow"><span class="ic">📅</span><span class="hmut">Nothing in the next 14 days.</span></div>';
+    h+='<div class="hcard"><h3>📅 Coming up</h3>'+eh+'<div class="hbtns"><button onclick="window.location.href=\'events.html\'" style="background:#1976d2">Open Calendar</button></div></div>';
+  } else if(r.errors && r.errors.eventsList) h+='<div class="hcard"><h3>📅 Coming up</h3>'+hErr(r,'eventsList')+'</div>';
+  h+='</div>';
+  document.getElementById('homeBody').innerHTML=h;
 }
 </script></body></html>
