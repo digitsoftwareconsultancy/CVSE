@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.10-S2"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.10-S3"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -673,6 +673,7 @@ async function runSysCheck(){
 }
 
 /* ---------- Home dashboard ---------- */
+function withTimeout(p, ms){ return new Promise(function(res, rej){ var t = setTimeout(function(){ rej(new Error('TIMEOUT')); }, ms); p.then(function(v){ clearTimeout(t); res(v); }, function(e){ clearTimeout(t); rej(e); }); }); }
 var HOME_AT = 0;
 function hMoney(n,d){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
 async function loadHome(force){
@@ -680,10 +681,19 @@ async function loadHome(force){
   var el=document.getElementById('homeBody');
   if(!HOME_AT) el.innerHTML='<div class="box">Loading home... please wait</div>';
   try{
-    var r=await apiGet('homesummary', force?{fresh:1}:{});
+    var r=await withTimeout(apiGet('homesummary', force?{fresh:1}:{}), 60000);
     if(!r || !r.success){ el.innerHTML='<div class="box" style="border-left:4px solid var(--red)">❌ '+esc((r&&r.error)||'Could not load.')+'<br><button onclick="loadHome(1)">Try again</button></div>'; return; }
-    HOME_AT=Date.now(); drawHome(r);
-  }catch(e){ el.innerHTML='<div class="box" style="border-left:4px solid var(--red)">❌ Could not connect. Check internet and try again.<br><button onclick="loadHome(1)">Try again</button></div>'; }
+    HOME_AT=Date.now(); drawHome(r); fillLocked(force);
+  }catch(e){ el.innerHTML='<div class="box" style="border-left:4px solid var(--red)">❌ '+(e && e.message==='TIMEOUT' ? 'Home is taking too long. Please try again in a minute.' : 'Could not connect. Check internet and try again.')+'<br><button onclick="loadHome(1)">Try again</button></div>'; }
+}
+async function fillLocked(force){
+  var el=document.getElementById('homeLockRow'); if(!el) return;
+  try{
+    var r=await withTimeout(apiGet('homelocked', force?{fresh:1}:{}), 90000);
+    if(!r || !r.success){ el.innerHTML='<span class="ic">⚠️</span><span class="hmut">Could not count the locked students.</span>'; return; }
+    if(!r.on){ el.remove(); return; }
+    el.innerHTML='<span class="ic">🔒</span><span><b>'+r.locked+'</b> student'+(r.locked===1?'':'s')+' locked out of the Result tab for unpaid fees'+(r.unlocked?' · '+r.unlocked+' unlocked for some days':'')+' · <a href="fees-reports.html">see Defaulters</a></span>';
+  }catch(e){ el.innerHTML='<span class="ic">⚠️</span><span class="hmut">'+(e && e.message==='TIMEOUT' ? 'Counting is taking too long.' : 'Could not count the locked students.')+'</span>'; }
 }
 function hErr(r,k){ return r.errors && r.errors[k] ? '<div class="hrow"><span class="ic">⚠️</span><span class="herr">Could not load this card: '+esc(r.errors[k])+'</span></div>' : ''; }
 function drawHome(r){
@@ -694,7 +704,7 @@ function drawHome(r){
   if(a){
     if(a.attendance){ rows+= a.attendance.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Attendance: not needed ('+esc(a.attendance.skipped)+')</span></div>' : (a.attendance.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Attendance not marked:</b> '+a.attendance.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Attendance marked for all '+a.attendance.total+' classes</span></div>'); }
     if(a.daily){ rows+= a.daily.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Daily update: not needed ('+esc(a.daily.skipped)+')</span></div>' : (a.daily.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Daily update not published:</b> '+a.daily.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Daily update published for all '+a.daily.total+' classes</span></div>'); }
-    if(a.locked && a.locked.on) rows+='<div class="hrow"><span class="ic">🔒</span><span><b>'+a.locked.locked+'</b> student'+(a.locked.locked===1?'':'s')+' locked out of the Result tab for unpaid fees'+(a.locked.unlocked?' · '+a.locked.unlocked+' unlocked for some days':'')+' · <a href="fees-reports.html">see Defaulters</a></span></div>';
+    if(a.locked && a.locked.on) rows+='<div class="hrow" id="homeLockRow"><span class="ic">🔒</span><span class="hmut">Checking students locked for unpaid fees...</span></div>';
     if(a.system) rows+= a.system.allOk ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">All script files are the latest ('+esc(a.system.version)+')</span></div>' : '<div class="hrow"><span class="ic">❌</span><span class="herr">Old script files: '+a.system.old.map(esc).join(', ')+' · <a href="#" onclick="openTab(\'backupTab\'); loadBackupInfo(); return false;">open System check</a></span></div>';
   }
   rows+=hErr(r,'attention');

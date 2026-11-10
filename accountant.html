@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.10-S2">
+<html lang="en"><head><meta name="app-version" content="2026.11.10-S3">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Office</title>
@@ -194,10 +194,11 @@ var CARDS = [
 function rs(n){ return '₹' + (Math.round((Number(n)||0) * 100) / 100).toLocaleString('en-IN'); }
 
 function hMoney(n,d){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+function withTimeout(p, ms){ return new Promise(function(res, rej){ var t = setTimeout(function(){ rej(new Error('TIMEOUT')); }, ms); p.then(function(v){ clearTimeout(t); res(v); }, function(e){ clearTimeout(t); rej(e); }); }); }
 function hErr(h,k){ return h.errors && h.errors[k] ? '<div class="hrow"><span class="ic">⚠️</span><span class="herr">Could not load this card: '+esc(h.errors[k])+'</span></div>' : ''; }
 async function loadHome(me){
   try{
-    let h = await apiGet('homesummary',{});
+    let h = await withTimeout(apiGet('homesummary',{}), 60000);
     if(!h.success){
       if(me.privileges.indexOf('COLLECT') > -1){ let t = await apiGet('feereceipts',{}); if(t.success){ let s = t.summary; $('today').innerHTML = '<div class="box" style="border-left-color:var(--green)"><div class="title">Today’s collection</div><div class="big"><div><b>'+rs(s.total)+'</b><span>'+s.count+' receipts</span></div><div><b>'+Object.keys(s.byMode).map(k=>esc(k)+' '+rs(s.byMode[k])).join('<br>')+(Object.keys(s.byMode).length?'':'—')+'</b><span>By payment mode</span></div></div></div>'; } }
       return;
@@ -212,7 +213,7 @@ async function loadHome(me){
     if(a){
       if(a.attendance) rows += a.attendance.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Attendance: not needed ('+esc(a.attendance.skipped)+')</span></div>' : (a.attendance.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Attendance not marked:</b> '+a.attendance.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Attendance marked for all '+a.attendance.total+' classes</span></div>');
       if(a.daily) rows += a.daily.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Daily update: not needed ('+esc(a.daily.skipped)+')</span></div>' : (a.daily.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Daily update not published:</b> '+a.daily.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Daily update published for all '+a.daily.total+' classes</span></div>');
-      if(a.locked && a.locked.on) rows += '<div class="hrow"><span class="ic">🔒</span><span><b>'+a.locked.locked+'</b> student'+(a.locked.locked===1?'':'s')+' locked out of the Result tab for unpaid fees'+(a.locked.unlocked?' · '+a.locked.unlocked+' unlocked for some days':'')+'</span></div>';
+      if(a.locked && a.locked.on) rows += '<div class="hrow" id="homeLockRow"><span class="ic">🔒</span><span class="hmut">Checking students locked for unpaid fees...</span></div>';
     }
     rows += hErr(h,'attention');
     if(rows) out += '<div class="hcard"><h3>📌 Needs attention</h3>'+rows+'</div>';
@@ -227,7 +228,17 @@ async function loadHome(me){
       out += '<div class="hcard"><h3>📅 Coming up</h3>'+(h.events.length ? h.events.map(e=>'<div class="hrow"><span class="ic">📅</span><span><b>'+esc(e.title)+'</b><br><span class="hmut">'+(e.today?'On now · ':'')+esc(e.date)+(e.endDate&&e.endDate!==e.date?' to '+esc(e.endDate):'')+(e.time?' · '+esc(e.time):'')+(e.classes?' · '+esc(e.classes):'')+'</span></span></div>').join('') : '<div class="hrow"><span class="ic">📅</span><span class="hmut">Nothing in the next 14 days.</span></div>')+'</div>';
     } else if(h.errors && h.errors.eventsList) out += '<div class="hcard"><h3>📅 Coming up</h3>'+hErr(h,'eventsList')+'</div>';
     $('homeCards').innerHTML = out;
+    fillLocked();
   }catch(e){ /* the cards above still work; the home cards are optional */ }
+}
+async function fillLocked(){
+  let el = document.getElementById('homeLockRow'); if(!el) return;
+  try{
+    let r = await withTimeout(apiGet('homelocked',{}), 90000);
+    if(!r || !r.success){ el.innerHTML = '<span class="ic">⚠️</span><span class="hmut">Could not count the locked students.</span>'; return; }
+    if(!r.on){ el.remove(); return; }
+    el.innerHTML = '<span class="ic">🔒</span><span><b>'+r.locked+'</b> student'+(r.locked===1?'':'s')+' locked out of the Result tab for unpaid fees'+(r.unlocked?' · '+r.unlocked+' unlocked for some days':'')+'</span>';
+  }catch(e){ el.innerHTML = '<span class="ic">⚠️</span><span class="hmut">'+(e && e.message==='TIMEOUT' ? 'Counting is taking too long.' : 'Could not count the locked students.')+'</span>'; }
 }
 async function init(){
   show($('gMsg'),'Loading... please wait','load');
