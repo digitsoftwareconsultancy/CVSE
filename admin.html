@@ -132,7 +132,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="c_fp" value="TIMETABLE"> Timetable builder</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="CALENDAR"> School calendar and events</label></div>
 <div class="switchRow"><label class="switch"><input type="checkbox" id="examCheck"><span class="slider"></span></label><span class="switchLabel">Enable Exam Entry — teacher can enter marks</span></div>
-<button onclick="create()" class="btn-green" style="width:100%;padding:13px">+ Create User</button>
+<button onclick="create()" id="createBtn" class="btn-green" style="width:100%;padding:13px">+ Create User</button><p id="createMsg" style="font-weight:700;margin:8px 0 0"></p>
 <div id="builder" style="display:none;margin-top:12px;background:#e3f2fd;padding:14px;border-radius:12px;border:2px solid #1976d2">
 <b>🎯 Class-Wise Subject Permission</b><br><small>Select Class + Subject → Add.</small><br><br>
 <select id="bClass"><option value="">Loading classes...</option></select>
@@ -140,7 +140,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div style="display:flex;gap:8px"><button onclick="addMap()" class="btn-green" style="flex:1">+ Add</button><button onclick="clearMap()" class="btn-gray" style="flex:1">Clear</button></div>
 <div id="mapPreview" style="margin-top:10px"></div>
 </div>
-</div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()" style="width:100%">🔄 Refresh</button><div id="ulist">Click Refresh...</div></div></div>
+</div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()" style="width:100%">🔄 Refresh</button><p id="userMsg" style="font-weight:700;margin:8px 0"></p><div id="ulist">Click Refresh...</div></div></div>
 <div id="tabStudents" class="tab" style="display:none;">
 <div class="box"><h3>Add New Student</h3>
 <div class="formGrid">
@@ -271,7 +271,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="e_fp" value="CALENDAR"> School calendar and events</label></div><label>Full Name</label><input id="edit_fname" style="width:100%" placeholder="Full Name">
 <label>Login Status</label><select id="edit_status" style="width:100%"><option>Active</option><option>Inactive</option></select>
 <label>Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
-<br><br><div style="display:flex;gap:8px"><button onclick="saveEditUser()" class="btn-green" style="flex:1">Save</button><button onclick="closeEdit()" class="btn-gray" style="flex:1">Cancel</button></div><input type="hidden" id="edit_old"><p id="editUserMsg"></p></div></div>
+<br><br><div style="display:flex;gap:8px"><button onclick="saveEditUser()" id="editSaveBtn" class="btn-green" style="flex:1">Save</button><button onclick="closeEdit()" class="btn-gray" style="flex:1">Cancel</button></div><input type="hidden" id="edit_old"><p id="editUserMsg" style="font-weight:700"></p></div></div>
 <script>
 const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
 let mapStore={}; let editMapStore={}; let SM_DATA=[];
@@ -516,7 +516,18 @@ var SET_CHIP={resultControlTab:'sc1',tabUsers:'sc2',subjectMasterTab:'sc3',backu
 function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); var bb=document.getElementById(TAB_BTN[id]); if(bb) bb.classList.add('active'); var sb=document.getElementById('setBar'); if(sb){ sb.style.display=SET_CHIP[id]?'flex':'none'; ['sc1','sc2','sc3','sc4'].forEach(function(c){ var e=document.getElementById(c); if(e) e.classList.toggle('on', SET_CHIP[id]===c); }); } window.scrollTo({top:0,behavior:'smooth'}); }
 function getFp(pfx){ return [...document.querySelectorAll('.'+pfx+'_fp:checked')].map(function(i){return i.value;}).join(','); }
 function setFp(pfx,csv){ var s=','+String(csv||'')+','; document.querySelectorAll('.'+pfx+'_fp').forEach(function(i){ i.checked = s.indexOf(','+i.value+',')>-1; }); }
-async function create(){ if(!uname.value||!pass.value){ alert('Enter username & password'); return; } var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES'; var finalClasses = classes.value; let res=await apiPost('addteacher', {mode:'create', username:uname.value, password:pass.value, role:role.value, classes:finalClasses, name:fname.value, examAccess:examVal, status:'Active', feeAccess:getFp('c')}); alert(res.success?'Created - Exam:'+examVal:'Error: '+res.error); if(res.success){ uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; setFp('c','COLLECT'); onRoleChange(); clearMap(); loadUsers(); } }
+async function create(){
+  var b=document.getElementById('createBtn'), m=document.getElementById('createMsg');
+  if(!uname.value||!pass.value){ msgTo(m,'Enter username and password.','err'); return; }
+  var examVal=document.getElementById('examCheck').checked ? 'YES' : 'NO'; if(role.value=='admin') examVal='YES';
+  var orig=b.textContent; b.disabled=true; b.textContent='Saving...'; msgTo(m,'Creating user, please wait...','load');
+  try{
+    let res=await apiPost('addteacher', {mode:'create', username:uname.value, password:pass.value, role:role.value, classes:classes.value, name:fname.value, examAccess:examVal, status:'Active', feeAccess:getFp('c')});
+    if(res && res.success){ msgTo(m,'User created.','ok'); uname.value=''; pass.value=''; fname.value=''; subjects.value=''; classes.value=''; document.getElementById('examCheck').checked=false; setFp('c','COLLECT'); onRoleChange(); clearMap(); loadUsers(); setTimeout(function(){ if(m.textContent.indexOf('User created')>-1) m.innerHTML=''; },4000); }
+    else msgTo(m,(res&&res.error)||'Could not create user.','err');
+  }catch(e){ msgTo(m,'Could not reach the server. Check internet and try again.','err'); }
+  b.disabled=false; b.textContent=orig;
+}
 async function loadUsers(){
   ulist.innerHTML='Loading...';
   try{
@@ -532,10 +543,26 @@ async function loadUsers(){
 }
 async function openEdit(u){ let d=await apiGet('getteachers'); if(d && d.success===false){ alert(d.error||'Error'); return; } let teachers=d.teachers||[]; for(var i=0;i<teachers.length;i++){ let r=teachers[i]; if(String(r.username).toLowerCase()==u.toLowerCase()){ edit_old.value=r.username; edit_uname.value=r.username; edit_pass.value=''; edit_role.value=r.role||'subjectTeacher'; edit_classes.value=String(r.classes||'').split(',')[0].trim().toUpperCase(); edit_subjects.value=''; edit_fname.value=r.name||''; edit_status.value=r.status||'Active'; edit_exam.value=(r.examAccess||'NO').toUpperCase(); setFp('e', r.feeAccess); onEditRoleChange(); editMapStore={}; editBuilder.style.display='none'; editModal.style.display='flex'; return; } } }
 function closeEdit(){ editModal.style.display='none'; }
-async function saveEditUser(){ var oldU=edit_old.value; var finalEditClasses = edit_classes.value; var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:finalEditClasses, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value, feeAccess:getFp('e')}; obj.mode='update'; obj.oldUsername=oldU; let res=await apiPost('addteacher', obj); closeEdit(); loadUsers(); alert(res.success?'Updated':'Error: '+res.error); }
-async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; let res=await apiPost('toggleuserstatus', {username:u}); alert('Login Status: '+res.status); loadUsers(); }
-async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; let res=await apiPost('toggleexamaccess', {username:u}); alert('Exam Access: '+res.examAccess); loadUsers(); }
-async function delUser(u){ if(confirm('Delete '+u+'?')){ await apiPost('deleteuser', {username:u}); alert('Deleted'); loadUsers(); } }
+async function saveEditUser(){
+  var b=document.getElementById('editSaveBtn'), m=document.getElementById('editUserMsg');
+  var obj={username:edit_uname.value, password:edit_pass.value, role:edit_role.value, classes:edit_classes.value, name:edit_fname.value, status:edit_status.value, examAccess:edit_exam.value, feeAccess:getFp('e'), mode:'update', oldUsername:edit_old.value};
+  var orig=b.textContent; b.disabled=true; b.textContent='Saving...'; msgTo(m,'Saving, please wait...','load');
+  try{
+    let res=await apiPost('addteacher', obj);
+    if(res && res.success){ msgTo(m,'User saved.','ok'); loadUsers(); setTimeout(function(){ closeEdit(); m.innerHTML=''; b.disabled=false; b.textContent=orig; },1000); return; }
+    msgTo(m,(res&&res.error)||'Could not save.','err');
+  }catch(e){ msgTo(m,'Could not reach the server. Check internet and try again.','err'); }
+  b.disabled=false; b.textContent=orig;
+}
+async function userAct(action, data, busy, done){
+  var m=document.getElementById('userMsg'); msgTo(m,busy,'load');
+  try{ let res=await apiPost(action, data); if(res && res.success!==false){ msgTo(m, typeof done==='function'?done(res):done, 'ok'); loadUsers(); setTimeout(function(){ m.innerHTML=''; },4000); }
+       else msgTo(m,(res&&res.error)||'Did not work.','err'); }
+  catch(e){ msgTo(m,'Could not reach the server. Check internet and try again.','err'); }
+}
+async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; userAct('toggleuserstatus',{username:u},'Changing login...',function(r){ return 'Login status: '+r.status; }); }
+async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; userAct('toggleexamaccess',{username:u},'Changing exam access...',function(r){ return 'Exam access: '+r.examAccess; }); }
+async function delUser(u){ if(!confirm('Delete '+u+'?')) return; userAct('deleteuser',{username:u},'Deleting '+u+'...','User deleted.'); }
 var EG_CACHE={};
 function msgTo(el, text, kind){ el.innerHTML='<span style="color:'+(kind==='ok'?'#166534':kind==='err'?'#991b1b':'#075985')+'">'+(kind==='ok'?'✅ ':kind==='err'?'❌ ':'⏳ ')+esc(text)+'</span>'; }
 function esc(s){ return String(s===null||s===undefined?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
