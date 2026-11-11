@@ -113,7 +113,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .gt td.nm button{display:block;margin-top:3px;font-size:10.5px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:3px 6px;min-height:28px;color:var(--navy);font-weight:700}
 .legend2{font-size:12px;color:var(--muted);line-height:1.6}
 .msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
-</style></head>
+</style><script src="config.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -143,7 +143,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
   <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
 </div>
 <script>
-const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
 if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }

@@ -60,7 +60,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-ra
 .tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
 .tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
 </style>
-</head>
+<script src="config.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -143,8 +143,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-ra
 </div>
 
 <script>
-const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
-
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }

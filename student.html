@@ -120,7 +120,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 .fbig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}.fbig div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center}.fbig b{display:block;font-size:16px;color:var(--navy)}.fbig span{font-size:10.5px;color:var(--muted);font-weight:700}
 .fhead{font-weight:900;color:var(--navy);font-size:13px;margin:12px 0 2px;border-bottom:2px solid var(--line);padding-bottom:3px}
 </style>
-</head>
+<script src="config.js"></script></head>
 <body>
 
 <div id="setpw">
@@ -201,7 +201,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 
 <script src="rc-render.js"></script>
 <script>
-const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 function lset(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 var SKEYS = ['cvse_stoken', 'cvse_sadm', 'cvse_sname', 'cvse_sclass'];    // only the student keys are ever removed here: a teacher logged in on the same phone is not touched

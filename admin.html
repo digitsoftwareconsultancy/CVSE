@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.10-S4"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.10-S5"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -100,7 +100,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 .hbtns button{margin:0;font-size:13.5px}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#fff}
 .badge-green{background:var(--green)}.badge-red{background:var(--red)}.badge-orange{background:var(--orange)}
-</style></head><body>
+</style><script src="config.js"></script></head><body>
 <div id="loginScreen"><div class="loginCard"><div style="font-size:42px">🏫</div><h2>🔐 <span id="loginSchoolName">School</span><br>Admin Login</h2><p class="loginSub" id="loginSessionLabel">School Management System</p><input id="l_user" placeholder="Username" style="width:100%"><br><input id="l_pass" type="password" placeholder="Password" style="width:100%"><br><br><button onclick="doLogin()" style="width:100%;padding:13px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
 <div id="adminContent" style="display:none;">
 <div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div style="min-width:0"><h2>Admin Panel — <span id="schoolName">School</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
@@ -273,7 +273,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label>Exam Access</label><select id="edit_exam" style="width:100%"><option value="YES">YES - Exam Enabled</option><option value="NO">NO - Exam Disabled</option></select>
 <br><br><div style="display:flex;gap:8px"><button onclick="saveEditUser()" id="editSaveBtn" class="btn-green" style="flex:1">Save</button><button onclick="closeEdit()" class="btn-gray" style="flex:1">Cancel</button></div><input type="hidden" id="edit_old"><p id="editUserMsg" style="font-weight:700"></p></div></div>
 <script>
-const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 let mapStore={}; let editMapStore={}; let SM_DATA=[];
 let ALL_SETTINGS={};
 const PERIOD_TYPES = ['Teaching','Leisure','Break','Lunch','Assembly','Library','Games','Zero Period','Prayer','Activity'];

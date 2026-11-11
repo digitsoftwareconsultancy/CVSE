@@ -69,7 +69,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
 .stat{flex:1;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
 .stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
 </style>
-</head>
+<script src="config.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -114,7 +114,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
 </div>
 
 <script>
-const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role'), examAccess:ls('cvse_examAccess'), isClassTeacher:ls('cvse_isClassTeacher') === 'true'};
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }

@@ -23,7 +23,7 @@
  .ele-create-row{display:flex;gap:5px;margin:4px 0;align-items:center;background:#f9f9f9;padding:4px;border-radius:4px}
  .mini-btn{padding:2px 6px !important;font-size:9px !important;background:#0a1931 !important;margin-top:2px}
  .mini-btn2{padding:2px 6px !important;font-size:9px !important;background:#888 !important;margin-top:2px}
-</style></head><body>
+</style><script src="config.js"></script></head><body>
 <div id="schoolHeaderPreview">Loading School Info...</div>
 <div class="controls">
   <select id="gradeSel"><option>Loading...</option></select>
@@ -54,7 +54,7 @@
 <div id="builder">Select class and Load...</div>
 <script src="tt-print.js"></script>
 <script>
-const WEB_URL="https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 let cfg={list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={}, schoolInfo={name:"",address:"",logo:""}, electiveByPeriod={}, electiveLookup={}, electiveGroups={};
 function toArray(x){if(Array.isArray(x))return x;if(!x)return[];if(typeof x==='string'){try{let j=JSON.parse(x);if(Array.isArray(j))return j;}catch(e){}return[x];}if(typeof x==='object'){if(x.teachers)return toArray(x.teachers);if(x.users)return toArray(x.users);if(x.list)return toArray(x.list);if(x.data)return toArray(x.data);if(x.subjects)return toArray(x.subjects);if(x.timetable)return toArray(x.timetable);if(x.electives)return toArray(x.electives);if(x.groups)return toArray(x.groups);return Object.values(x);}return[];}
 function authCheck(j){if(j&&j.code==='AUTH'){localStorage.clear();alert('Session expired. Please login again.');location.href='index.html';}return j;}

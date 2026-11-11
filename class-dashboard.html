@@ -46,7 +46,7 @@ body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;
 .tabBtn .tabIco{font-size:19px;line-height:1}
 .tabBtn.active{background:#e3f2fd;color:var(--blue)}
 </style>
-</head>
+<script src="config.js"></script></head>
 <body>
 
 <div class="topbar">
@@ -150,7 +150,7 @@ body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;
 
 <script src="tt-print.js"></script>
 <script>
-const WEB_URL = "https://script.google.com/macros/s/AKfycbyNYyNG5RYxe6tjztXsVbKEAkstJBNYmfwLWZvIqkPouFQsEOsovL-HPmb-KQ82_0NS/exec";
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 var TOKEN = localStorage.getItem('cvse_token') || localStorage.getItem('cvs_token') || '';
 var USER = {};
 try{ USER = JSON.parse(localStorage.getItem('cvse_user') || localStorage.getItem('cvs_user') || '{}'); }catch(e){ USER={}; }
