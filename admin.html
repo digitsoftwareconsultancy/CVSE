@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.13-S7"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.14-S8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -175,7 +175,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <details class="box"><summary style="font-weight:800;cursor:pointer">Old fee list (earlier version)</summary><div style="margin-top:10px"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:0"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div></details></div>
 <div id="backupTab" class="tab" style="display:none;">
 <div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>🔍 System check</h3><p class="sub">After you upload new files, press this. It shows if every Apps Script file and every page is the latest version.</p><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSysCheck()">Run system check</button><div id="sysOut" style="margin-top:10px;font-size:13px;line-height:1.6"></div></div>
-<div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>⏱️ Speed check</h3><p class="sub">Times the main pages one by one on your own data (about 1 minute). Green is quick, orange is slow, red needs fixing. Below it you see the slow requests that real users met. Run it when few people are using the app.</p><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSpeedCheck()" id="speedBtn">Run speed check</button><div id="speedOut" style="margin-top:10px;font-size:13px;line-height:1.5"></div></div>
+<div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>⏱️ Speed check</h3><p class="sub">Times the main pages one by one on your own data (about 1–2 minutes). Green is quick, orange is slow, red needs fixing. Below it you see the slow requests that real users met. Run it when few people are using the app.</p><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSpeedCheck()" id="speedBtn">Run speed check</button><div id="speedOut" style="margin-top:10px;font-size:13px;line-height:1.5"></div></div>
 
 <div class="box" style="background:#f0f9ff;border:2px solid #1976d2"><h3>🧑‍🎓 Student data check</h3><p class="sub">Reads the Students tab and lists what the school must correct: wrong or empty birth dates, missing or repeated admission numbers, unknown classes, repeated roll numbers. It changes nothing. Send the list to the school.</p>
 <div class="btnrow2"><button class="btn" id="dcRun" style="background:linear-gradient(135deg,#1976d2,#1e88e5);color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;width:100%;min-height:46px" onclick="runDataCheck()">🔍 Run student data check</button></div>
@@ -755,6 +755,14 @@ document.addEventListener('DOMContentLoaded', function(){
   fillAllClassDropdowns(); fillAllSubjectDropdowns();
 });
 
+async function clearSlowLog(){
+  if(!(await UI.ask('Clear the slow-request list? Only this list is emptied. Nothing else changes.', 'Clear', false))) return;
+  try{
+    let r=await apiPost('speedclear', {});
+    if(r&&r.success){ var b=document.getElementById('slowClearBtn'); if(b){ b.parentNode.innerHTML='<div class="hmut">✅ List cleared. It fills again as real users meet slow pages.</div>'; } }
+    else alert((r&&r.error)||'Could not clear the list.');
+  }catch(e){ alert('Network problem. Please try again.'); }
+}
 async function runSpeedCheck(){
   var out=document.getElementById('speedOut'), b=document.getElementById('speedBtn');
   b.disabled=true; out.innerHTML='Starting...';
@@ -775,7 +783,7 @@ async function runSpeedCheck(){
     draw(slow?('❌ '+slow+' need fixing, '+mid+' slow. Send me a screenshot of this list.'):(mid?('🟠 '+mid+' a little slow, the rest are quick.'):'✅ All quick.'));
     var rep=await apiGet('speedreport',{});
     if(rep&&rep.success){
-      out.innerHTML+='<div style="margin-top:12px"><b>Slow requests seen by real users</b> <span class="hmut">(over '+(rep.thresholdMs/1000)+' s, newest 500)</span>'+(rep.slow.length?'<div style="margin-top:4px">'+rep.slow.map(function(x){ return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:6px 0;border-top:1px solid #f1f5f9"><div style="min-width:0;word-break:break-word">'+esc(x.action)+'<br><small class="hmut">last '+esc(x.last)+'</small></div><div style="text-align:right;white-space:nowrap">'+x.count+' times<br><small class="hmut">avg '+(x.avgMs/1000).toFixed(1)+' s · max '+(x.maxMs/1000).toFixed(1)+' s</small></div></div>'; }).join('')+'</div>':'<div class="hmut">None so far.</div>')+'</div>';
+      out.innerHTML+='<div style="margin-top:12px"><b>Slow requests seen by real users</b> <span class="hmut">(over '+(rep.thresholdMs/1000)+' s, newest 500'+(rep.since?', since '+esc(rep.since.substring(0,10)):'')+')</span>'+(rep.slow.length?'<div style="margin-top:4px">'+rep.slow.map(function(x){ return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:6px 0;border-top:1px solid #f1f5f9"><div style="min-width:0;word-break:break-word">'+esc(x.action)+'<br><small class="hmut">last '+esc(x.last)+'</small></div><div style="text-align:right;white-space:nowrap">'+x.count+' times<br><small class="hmut">avg '+(x.avgMs/1000).toFixed(1)+' s · max '+(x.maxMs/1000).toFixed(1)+' s</small></div></div>'; }).join('')+'</div>':'<div class="hmut">None so far.</div>')+(rep.total?'<div class="btnrow" style="margin-top:10px"><button type="button" id="slowClearBtn" onclick="clearSlowLog()" style="width:100%;min-height:46px;border:0;border-radius:12px;background:#64748b;color:#fff;font-weight:700;font-size:15px">🧹 Clear this list</button></div>':'')+'</div>';
     }
   }catch(e){ draw('❌ '+(e&&e.message==='TIMEOUT'?'One step took more than 2 minutes. Send me the list so far.':'Could not connect. Check internet and try again.')); }
   b.disabled=false;

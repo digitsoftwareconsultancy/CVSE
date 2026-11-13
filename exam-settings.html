@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.14-S8">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Settings</title>
@@ -144,16 +144,27 @@ async function init(){
   $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
   show($('gMsg'), 'Loading...', 'load');
   try{
-    let r = await apiGet('getexamsettings');
+    let r = await apiGet('getexamsettings', {lite:1});
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.') + (String(r.error || '').indexOf('Tab') > -1 ? ' Run EXAM_setupTabs in Apps Script first.' : ''), 'err'); return; }
     applyData(r, true);
   }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
   hide($('gMsg'));
   showSec('exams');
+  loadProblems();
+}
+// the slow problem check runs after the page is already usable
+async function loadProblems(){
+  $('problems').innerHTML = '<div class="msg show load">Checking the settings for problems…</div>';
+  try{
+    let r = await apiGet('getexamproblems');
+    if(r.success){ REF.problems = r.problems || []; REF.hasMarks = !!r.hasMarks; }
+    else REF.problems = [];
+  }catch(e){ REF.problems = []; }
+  drawProblems();
 }
 function applyData(r, all, onlySec){
   REF.classes = r.classes || []; REF.subjects = r.subjects || []; REF.teachers = r.teachers || [];
-  REF.hasMarks = !!r.hasMarks; REF.problems = r.problems || [];
+  if(!r.lite){ REF.hasMarks = !!r.hasMarks; REF.problems = r.problems || []; }
   SECS.forEach(s => { if(all || s === onlySec) loadSection(s, r[s]); });
   drawProblems();
 }
@@ -221,9 +232,10 @@ async function saveSec(sec){
   try{
     let r = await apiPost('saveexamsettings', {section:sec, rows:ROWS[sec]});
     if(!r.success){ show(m, '❌ ' + (r.error || 'Could not save.'), 'err'); return; }
-    let f = await apiGet('getexamsettings');
+    let f = await apiGet('getexamsettings', {lite:1});
     if(f.success) applyData(f, false, sec); else loadSection(sec, ROWS[sec]);
     redraw(sec);
+    loadProblems();
     show($('msg_' + sec), '✅ Saved (' + r.saved + ' row' + (r.saved === 1 ? '' : 's') + ').', 'ok');
   }catch(e){ show(m, '❌ Network problem. Nothing may have been saved. Please check and try again.', 'err'); }
   finally{ let bb = $('save_' + sec); if(bb) bb.disabled = false; }
