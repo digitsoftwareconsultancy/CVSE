@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.10-S5"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.13-S7"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -100,7 +100,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 .hbtns button{margin:0;font-size:13.5px}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#fff}
 .badge-green{background:var(--green)}.badge-red{background:var(--red)}.badge-orange{background:var(--orange)}
-</style><script src="config.js"></script></head><body>
+</style><script src="config.js"></script><script src="ui.js"></script></head><body>
 <div id="loginScreen"><div class="loginCard"><div style="font-size:42px">🏫</div><h2>🔐 <span id="loginSchoolName">School</span><br>Admin Login</h2><p class="loginSub" id="loginSessionLabel">School Management System</p><input id="l_user" placeholder="Username" style="width:100%"><br><input id="l_pass" type="password" placeholder="Password" style="width:100%"><br><br><button onclick="doLogin()" style="width:100%;padding:13px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
 <div id="adminContent" style="display:none;">
 <div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div style="min-width:0"><h2>Admin Panel — <span id="schoolName">School</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
@@ -177,6 +177,11 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>🔍 System check</h3><p class="sub">After you upload new files, press this. It shows if every Apps Script file and every page is the latest version.</p><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSysCheck()">Run system check</button><div id="sysOut" style="margin-top:10px;font-size:13px;line-height:1.6"></div></div>
 <div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>⏱️ Speed check</h3><p class="sub">Times the main pages one by one on your own data (about 1 minute). Green is quick, orange is slow, red needs fixing. Below it you see the slow requests that real users met. Run it when few people are using the app.</p><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSpeedCheck()" id="speedBtn">Run speed check</button><div id="speedOut" style="margin-top:10px;font-size:13px;line-height:1.5"></div></div>
 
+<div class="box" style="background:#f0f9ff;border:2px solid #1976d2"><h3>🧑‍🎓 Student data check</h3><p class="sub">Reads the Students tab and lists what the school must correct: wrong or empty birth dates, missing or repeated admission numbers, unknown classes, repeated roll numbers. It changes nothing. Send the list to the school.</p>
+<div class="btnrow2"><button class="btn" id="dcRun" style="background:linear-gradient(135deg,#1976d2,#1e88e5);color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;width:100%;min-height:46px" onclick="runDataCheck()">🔍 Run student data check</button></div>
+<div id="dcOut" style="margin-top:10px"></div>
+<div id="dcTools" style="display:none"><div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" id="dcCsv" style="flex:1;min-width:120px;background:#0b2a5c;color:#fff;border:none;padding:12px;border-radius:12px;font-weight:800;min-height:46px" onclick="dcDownload()">⬇ Download CSV</button><button class="btn" id="dcPrint" style="flex:1;min-width:120px;background:#7c3aed;color:#fff;border:none;padding:12px;border-radius:12px;font-weight:800;min-height:46px" onclick="dcPrint()">🖨 Print list</button></div>
+<div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="dcFix" style="flex:1;min-width:160px;background:#16a34a;color:#fff;border:none;padding:12px;border-radius:12px;font-weight:800;min-height:46px" onclick="dcFix()">🛠 Fix dates I am sure about</button></div></div></div>
 <div class="box"><h3>📦 Backup</h3>
 <div style="font-size:13px;line-height:1.6">Workbook: <b id="bkName">-</b><br>Last backup: <b id="bkLast">-</b><br>Weekly automatic backup: <b id="bkWeekly">-</b></div>
 <div id="bkWarn" style="margin-top:8px;font-weight:700"></div>
@@ -240,7 +245,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <button class="tabBtn" id="b2" onclick="openTab('tabStudents')"><span class="tabIco">🎓</span>Students</button>
 <button class="tabBtn" id="b3" onclick="openTab('feesTab')"><span class="tabIco">💰</span>Fees</button>
 <button class="tabBtn" id="bTT" onclick="openTab('timetableTab')"><span class="tabIco">🗓️</span>Timetable</button>
-<button class="tabBtn" id="b7" onclick="window.location.href='daily.html'"><span class="tabIco">📝</span>Daily</button>
+<button class="tabBtn" id="b7" onclick="try{sessionStorage.setItem('cvse_admintab','homeTab');}catch(e){} window.location.href='daily.html'"><span class="tabIco">📝</span>Daily</button>
 <button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();"><span class="tabIco">⚙️</span>Settings</button>
 <button class="tabBtn" id="b1" onclick="openTab('tabUsers')" style="display:none"><span class="tabIco">👥</span>Teachers</button>
 <button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();" style="display:none"><span class="tabIco">📦</span>Backup</button>
@@ -502,18 +507,33 @@ function addSMRow(){
   smMsg.innerHTML='<span style="color:green">✅ New row added at TOP - Type name then Save All</span>';
 }
 async function saveSM(){
-  if(!confirm('Save '+SM_DATA.length+'?')) return;
+  if(!(await UI.ask('Save '+SM_DATA.length+'?'))) return;
   var clean=SM_DATA.filter(r=>String(r.subjectName||'').trim()!=='').map(r=>({ subjectId:r.subjectId, class:String(r.class||DYNAMIC_CLASSES[0]).toUpperCase(), subjectName:String(r.subjectName||'').trim().toUpperCase(), subjectType:smNormType(r.subjectType), maxPT:Number(r.maxPT||0), maxTerm:Number(r.maxTerm||0), isGradeSystem:smNormGrade(r.isGradeSystem), displayOrder:Number(r.displayOrder||0) }));
   let res=await apiPost('savesubjectmaster', {data:clean});
   if(res && res.success){ smMsg.innerHTML='<span style="color:green">Saved '+clean.length+'</span>'; loadSM(); }
   else { smMsg.innerHTML='<span style="color:red">❌ '+((res&&res.error)||'Save failed')+'</span>'; }
 }
 function logout(){ localStorage.clear(); window.location.href='index.html'; }
-async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_token', res.token); localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); openTab('homeTab'); loadHome(1); } else { loginMsg.innerText = res.success ? '❌ Not Admin' : '❌ '+(res.error||'Login failed'); } }
-window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); openTab('homeTab'); loadHome(1); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
+async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_token', res.token); localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); startTab(); } else { loginMsg.innerText = res.success ? '❌ Not Admin' : '❌ '+(res.error||'Login failed'); } }
+window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); startTab(); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
+var TAB_NAMES={home:'homeTab',students:'tabStudents',fees:'feesTab',timetable:'timetableTab',settings:'resultControlTab',users:'tabUsers',classes:'subjectMasterTab',backup:'backupTab'};
+/* which tab to open: ?tab=fees (or students, timetable, settings, users, classes, backup, home); ?tab=last = the tab you were on before you opened a page (this is what the Back buttons use) */
+function startTab(){
+  var id = 'homeTab';
+  try{
+    var q = new URLSearchParams(location.search).get('tab'), mem = sessionStorage.getItem('cvse_admintab') || 'homeTab';
+    if(q === 'last') id = mem; else if(q && TAB_NAMES[q]) id = TAB_NAMES[q];
+    else { var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}; if(nav.type === 'reload' || nav.type === 'back_forward') id = mem; }
+    if(!document.getElementById(id)) id = 'homeTab';
+  }catch(e){ id = 'homeTab'; }
+  openTab(id);
+  if(id === 'homeTab') loadHome(1);
+  else if(id === 'subjectMasterTab'){ try{ loadSM(); }catch(e){} }
+  else if(id === 'backupTab'){ try{ loadBackupInfo(); }catch(e){} }
+}
 var TAB_BTN={homeTab:'bHome',tabStudents:'b2',feesTab:'b3',timetableTab:'bTT',tabUsers:'b5',backupTab:'b5',resultControlTab:'b5',subjectMasterTab:'b5'};
 var SET_CHIP={resultControlTab:'sc1',tabUsers:'sc2',subjectMasterTab:'sc3',backupTab:'sc4'};
-function openTab(id){ var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); var bb=document.getElementById(TAB_BTN[id]); if(bb) bb.classList.add('active'); var sb=document.getElementById('setBar'); if(sb){ sb.style.display=SET_CHIP[id]?'flex':'none'; ['sc1','sc2','sc3','sc4'].forEach(function(c){ var e=document.getElementById(c); if(e) e.classList.toggle('on', SET_CHIP[id]===c); }); } window.scrollTo({top:0,behavior:'smooth'}); }
+function openTab(id){ try{ sessionStorage.setItem('cvse_admintab', id); }catch(e){} var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); var bb=document.getElementById(TAB_BTN[id]); if(bb) bb.classList.add('active'); var sb=document.getElementById('setBar'); if(sb){ sb.style.display=SET_CHIP[id]?'flex':'none'; ['sc1','sc2','sc3','sc4'].forEach(function(c){ var e=document.getElementById(c); if(e) e.classList.toggle('on', SET_CHIP[id]===c); }); } window.scrollTo({top:0,behavior:'smooth'}); }
 function getFp(pfx){ return [...document.querySelectorAll('.'+pfx+'_fp:checked')].map(function(i){return i.value;}).join(','); }
 function setFp(pfx,csv){ var s=','+String(csv||'')+','; document.querySelectorAll('.'+pfx+'_fp').forEach(function(i){ i.checked = s.indexOf(','+i.value+',')>-1; }); }
 async function create(){
@@ -527,6 +547,67 @@ async function create(){
     else msgTo(m,(res&&res.error)||'Could not create user.','err');
   }catch(e){ msgTo(m,'Could not reach the server. Check internet and try again.','err'); }
   b.disabled=false; b.textContent=orig;
+}
+
+/* ---------- Student data check ---------- */
+var DC = null;
+async function runDataCheck(){
+  var out = document.getElementById('dcOut'); out.innerHTML = '';
+  try{
+    var r = await apiGet('studentdatacheck', {});
+    if(!r || !r.success){ out.innerHTML = '<div class="ui-msg err">✖ ' + esc((r && r.error) || 'Could not check.') + '</div>'; return; }
+    DC = r; drawDataCheck();
+  }catch(e){ out.innerHTML = '<div class="ui-msg err">✖ Could not connect. Check internet and try again.</div>'; }
+}
+function dcRows(list){
+  return list.map(function(x){
+    var col = x.kind === 'ERROR' ? '#991b1b' : (x.kind === 'FIX' ? '#92400e' : '#9a3412'), bg = x.kind === 'ERROR' ? '#fef2f2' : (x.kind === 'FIX' ? '#fffbeb' : '#fff7ed');
+    var tag = x.kind === 'ERROR' ? 'Must fix' : (x.kind === 'FIX' ? 'Can be fixed' : 'Please check');
+    return '<div style="border:1px solid #e5e7eb;border-left:5px solid ' + col + ';background:' + bg + ';border-radius:10px;padding:9px 11px;margin:8px 0">' +
+      '<div style="display:flex;justify-content:space-between;gap:8px"><b>' + esc(x.name || '(no name)') + '</b><span style="color:' + col + ';font-weight:800;font-size:12px">' + tag + '</span></div>' +
+      '<div style="font-size:12.5px;color:#475569">Row ' + x.row + ' · Adm ' + esc(x.adm || '-') + ' · Class ' + esc(x.cls || '-') + '</div>' +
+      '<div style="color:' + col + ';font-weight:700;margin-top:3px">' + esc(x.issue) + '</div>' +
+      (x.value !== '' ? '<div style="font-size:12.5px">Found: <b>' + esc(x.value) + '</b>' + (x.fixTo ? ' &nbsp;→&nbsp; <b>' + esc(x.fixTo) + '</b>' : '') + '</div>' : '') + '</div>';
+  }).join('');
+}
+function drawDataCheck(){
+  var out = document.getElementById('dcOut'), r = DC, tools = document.getElementById('dcTools');
+  var head = '<div class="ui-msg ' + (r.problems.length ? (r.errors ? 'err' : 'warn') : 'ok') + '">' + (r.problems.length ?
+    r.total + ' students, ' + r.rowsWithProblems + ' need attention: ' + r.errors + ' to correct, ' + r.fixable + ' dates can be fixed safely, ' + r.warnings + ' to check. (' + esc(r.generated) + ')' :
+    '✔ ' + r.total + ' students checked. All clear.') + '</div>';
+  if(!r.problems.length){ out.innerHTML = head; tools.style.display = 'none'; return; }
+  out.innerHTML = head + dcRows(r.problems) + (r.more ? '<p class="sub">Only the first 1500 problems are shown. Fix these and run it again.</p>' : '');
+  tools.style.display = 'block';
+  document.getElementById('dcFix').style.display = r.fixable ? 'block' : 'none';
+}
+function dcCsvText(){
+  var q = function(v){ return '"' + String(v === undefined || v === null ? '' : v).replace(/"/g, '""') + '"'; };
+  var lines = [['Sheet row', 'Admission No', 'Name', 'Class', 'Field', 'Problem', 'Value found', 'Safe fix', 'Type'].map(q).join(',')];
+  DC.problems.forEach(function(x){ lines.push([x.row, x.adm, x.name, x.cls, x.field, x.issue, x.value, x.fixTo, x.kind === 'ERROR' ? 'Must fix' : (x.kind === 'FIX' ? 'Can be fixed' : 'Please check')].map(q).join(',')); });
+  return '\ufeff' + lines.join('\r\n');
+}
+function dcDownload(){
+  if(!DC) return;
+  var a = document.createElement('a'), d = new Date();
+  a.href = URL.createObjectURL(new Blob([dcCsvText()], {type:'text/csv;charset=utf-8'}));
+  a.download = 'student-data-check-' + d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function dcPrint(){
+  if(!DC) return;
+  var w = window.open('', '_blank');
+  if(!w){ UI.toast('Allow pop-ups for this site to print the list.', 'err'); return; }
+  w.document.write('<html><head><title>Student data check</title><style>@page{size:A4 landscape;margin:8mm}body{font-family:Arial;font-size:11px}h2{margin:0 0 4px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #444;padding:3px 5px;text-align:left}th{background:#eee}</style></head><body><h2>Student data check</h2><div>' + esc(DC.generated) + ' · ' + DC.total + ' students · ' + DC.rowsWithProblems + ' need attention</div><br><table><tr><th>Row</th><th>Adm No</th><th>Name</th><th>Class</th><th>Problem</th><th>Found</th></tr>' +
+    DC.problems.map(function(x){ return '<tr><td>' + x.row + '</td><td>' + esc(x.adm) + '</td><td>' + esc(x.name) + '</td><td>' + esc(x.cls) + '</td><td>' + esc(x.issue) + (x.fixTo ? ' → ' + esc(x.fixTo) : '') + '</td><td>' + esc(x.value) + '</td></tr>'; }).join('') + '</table></body></html>');
+  w.document.close(); w.focus(); setTimeout(function(){ w.print(); }, 400);
+}
+async function dcFix(){
+  if(!DC || !DC.fixable) return;
+  var fx = DC.problems.filter(function(x){ return x.kind === 'FIX'; });
+  var sample = fx.slice(0, 5).map(function(x){ return x.name + ': ' + x.value + ' → ' + x.fixTo; }).join('\n');
+  if(!(await UI.ask('Fix ' + fx.length + ' birth date' + (fx.length === 1 ? '' : 's') + '?\n\n' + sample + (fx.length > 5 ? '\n... and ' + (fx.length - 5) + ' more (see the list)' : '') + '\n\nDates that could mean two different days are not changed.', 'Fix them', false))) return;
+  var r = await apiPost('studentdatafix', {});
+  if(r && r.success) runDataCheck();
 }
 async function loadUsers(){
   ulist.innerHTML='Loading...';
@@ -560,9 +641,9 @@ async function userAct(action, data, busy, done){
        else msgTo(m,(res&&res.error)||'Did not work.','err'); }
   catch(e){ msgTo(m,'Could not reach the server. Check internet and try again.','err'); }
 }
-async function toggleStatus(u){ if(!confirm('Toggle LOGIN for '+u+'?')) return; userAct('toggleuserstatus',{username:u},'Changing login...',function(r){ return 'Login status: '+r.status; }); }
-async function toggleExam(u){ if(!confirm('Toggle EXAM ACCESS for '+u+'?')) return; userAct('toggleexamaccess',{username:u},'Changing exam access...',function(r){ return 'Exam access: '+r.examAccess; }); }
-async function delUser(u){ if(!confirm('Delete '+u+'?')) return; userAct('deleteuser',{username:u},'Deleting '+u+'...','User deleted.'); }
+async function toggleStatus(u){ if(!(await UI.ask('Toggle LOGIN for '+u+'?'))) return; userAct('toggleuserstatus',{username:u},'Changing login...',function(r){ return 'Login status: '+r.status; }); }
+async function toggleExam(u){ if(!(await UI.ask('Toggle EXAM ACCESS for '+u+'?'))) return; userAct('toggleexamaccess',{username:u},'Changing exam access...',function(r){ return 'Exam access: '+r.examAccess; }); }
+async function delUser(u){ if(!(await UI.ask('Delete '+u+'?'))) return; userAct('deleteuser',{username:u},'Deleting '+u+'...','User deleted.'); }
 var EG_CACHE={};
 function msgTo(el, text, kind){ el.innerHTML='<span style="color:'+(kind==='ok'?'#166534':kind==='err'?'#991b1b':'#075985')+'">'+(kind==='ok'?'✅ ':kind==='err'?'❌ ':'⏳ ')+esc(text)+'</span>'; }
 function esc(s){ return String(s===null||s===undefined?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -607,6 +688,7 @@ function studentFromForm(p){
   return {AdmissionNo:document.getElementById(p.ad).value.trim(), Name:document.getElementById(p.name).value.trim(), RollNo:document.getElementById(p.roll).value.trim(), Class:document.getElementById(p.cls).value.toUpperCase().trim(), DOB:document.getElementById(p.dob).value.trim(), FatherName:document.getElementById(p.father).value.trim(), MotherName:document.getElementById(p.mother).value.trim(), House:document.getElementById(p.house).value.trim()};
 }
 async function saveEdit(){
+  if(window.UI && !UI.checkDates(['e_dob'])){ msgTo(editMsg,'Please correct the date of birth first.','err'); return; }
   var b=btnSaveStu; b.disabled=true; msgTo(editMsg,'Saving...','load');
   try{
     let r=await apiPost('updatestudent', {student:studentFromForm({ad:'e_ad',name:'e_name',roll:'e_roll',cls:'e_class',dob:'e_dob',father:'e_father',mother:'e_mother',house:'e_house'}), electives:readElectives('e_electives')});
@@ -615,7 +697,7 @@ async function saveEdit(){
   finally{ b.disabled=false; }
 }
 async function delStu2(){
-  var ad=e_ad.value; if(!ad) return; if(!confirm('Delete student '+ad+' ('+e_name.value+')? This cannot be undone.')) return;
+  var ad=e_ad.value; if(!ad) return; if(!(await UI.ask('Delete student '+ad+' ('+e_name.value+')? This cannot be undone.'))) return;
   var b=btnDelStu; b.disabled=true; msgTo(editMsg,'Deleting...','load');
   try{
     let r=await apiPost('deletestudent', {admissionNo:ad});
@@ -627,6 +709,7 @@ async function delStu2(){
 async function addStu(){
   var s=studentFromForm({ad:'adno',name:'sname',roll:'roll',cls:'sclass',dob:'dob',father:'father',mother:'mother',house:'house'});
   if(!s.AdmissionNo||!s.Name||!s.Class){ msgTo(addMsg,'Enter Admission No, Name and Class.','err'); return; }
+  if(window.UI && !UI.checkDates(['dob'])){ msgTo(addMsg,'Please correct the date of birth first.','err'); return; }
   var b=btnAddStu; b.disabled=true; msgTo(addMsg,'Adding...','load');
   try{
     let r=await apiPost('addstudent', {student:s, electives:readElectives('s_electives')});

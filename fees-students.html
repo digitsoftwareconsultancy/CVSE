@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Fees</title>
@@ -106,7 +106,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .chk{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px;font-weight:700;color:var(--navy)}.chk input{width:22px;height:22px;min-height:0}
 .msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:300;padding:16px}.modal.on{display:flex}
-</style><script src="config.js"></script></head>
+</style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -122,7 +122,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
  <div id="vList">
   <div class="box"><div class="title">Student Fee Setup</div><div class="meta">Choose a class, tap a student to set new/old, admission date, brother/sister link, bus route, optional fees, concessions and previous dues. The calculated fees are shown below the form.</div>
    <label>Session</label><select id="sess" onchange="loadList()"></select>
-   <label>Search (name or admission no)</label><input id="q" oninput="drawList()" placeholder="Type to filter">
+   <label>Search (name or admission no)</label><div class="row2" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input id="q" type="search" enterkeyhint="search" oninput="drawList()" placeholder="Type to filter"><button class="btn b-grey" type="button" id="q_clear" style="width:auto;min-width:56px;display:none" onclick="$('q').value='';drawList();$('q').focus()" aria-label="Clear">✖</button></div><div class="meta" id="q_count"></div>
   </div>
   <div class="chips" id="chips"></div>
   <div class="msg" id="gMsg"></div>
@@ -159,7 +159,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html' : 'accountant.html'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -180,6 +180,7 @@ function openFix(d, adm, cb){
   hide($('fx_msg')); $('fixM').classList.add('on');
 }
 async function saveFix(){
+  if(window.UI && !UI.checkDates(['fx_dob'])){ show($('fx_msg'),'❌ Please correct the date of birth first.','err'); return; }
   let b = $('fx_btn'); b.disabled = true; show($('fx_msg'),'Saving... please wait','load');
   try{
     let r = await apiPost('feestudentfix',{adm:FIXC.adm,data:JSON.stringify({name:$('fx_name').value,father:$('fx_fa').value,mother:$('fx_mo').value,dob:$('fx_dob').value.trim(),house:$('fx_ho').value})});
@@ -206,6 +207,8 @@ async function loadList(first){
 function drawList(){
   if(!LIST) return; let q = $('q').value.trim().toLowerCase();
   let a = LIST.students.filter(s=>!q || (s.name+' '+s.adm).toLowerCase().indexOf(q) > -1);
+  $('q_clear').style.display = q ? 'block' : 'none';
+  $('q_count').innerText = q ? (a.length ? a.length+' of '+LIST.students.length+' students shown' : 'No student found') : LIST.students.length+' students';
   let t = LIST.totals;
   let h = '<div class="big"><div><b>'+LIST.students.length+'</b><span>Students</span></div><div><b>'+rs(t.balance)+'</b><span>Total unpaid</span></div></div>';
   if(!a.length) h += '<div class="empty-note">No students found.</div>';
@@ -239,7 +242,7 @@ function drawEdit(){
    '<h3 class="g">New or old student</h3><select id="e_type"><option value="">Automatic (by admission date)</option><option value="NEW"'+(s.type==='NEW'?' selected':'')+'>New student</option><option value="OLD"'+(s.type==='OLD'?' selected':'')+'>Old student</option></select><div class="help">Now treated as: <b>'+(s.effectiveType==='NEW'?'New':'Old')+'</b></div>'+
    '<label>Admission date</label><input id="e_date" inputmode="numeric" maxlength="10" oninput="maskD(this)" value="'+esc(s.admissionDate)+'" placeholder="DD-MM-YYYY"><div class="help">New students pay monthly fees from the admission month, and late-joiner slabs use this date.</div>'+
    '<h3 class="g">Brother / sister</h3>'+(r.siblings.length?'<div class="meta">This student is child no. <b>'+s.childNo+'</b> in the family. Others: '+r.siblings.map(x=>esc(x.name)+' ('+esc(x.cls)+', child '+x.childNo+')').join(', ')+'</div><label class="chk"><input type="checkbox" id="e_unlink"> Remove from this family</label>':'<div class="meta">Not linked to any brother or sister.</div>')+
-   '<label>Link with a brother/sister (their admission no)</label><input id="e_link" placeholder="Admission no of the other child">'+
+   '<label>Link with a brother/sister</label><div class="row2" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input id="e_link" placeholder="Admission no, or search by name" onkeydown="if(event.key===\'Enter\'){event.preventDefault();sibSearch();}"><button class="btn b-blue" type="button" id="sib_btn" style="width:auto;min-width:96px" onclick="sibSearch()">🔍 Search</button></div><div id="sib_res"></div><div id="sib_pick"></div>'+
    '<label class="chk"><input type="checkbox" id="e_sibOff"'+(u.siblingOff?' checked':'')+'> No sibling discount for this student</label>'+
    '<h3 class="g">Bus</h3><select id="e_route"><option value="">No bus</option>'+r.routes.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===u.routeId?' selected':'')+'>'+esc(x.name)+' — '+rs(x.monthly)+'/month'+(x.oneWay!==null&&x.oneWay!==''?' (one-way '+rs(x.oneWay)+')':'')+'</option>').join('')+'</select>'+
    '<label>Trip</label><select id="e_mode"><option value="BOTH"'+(u.routeMode!=='ONE_WAY'?' selected':'')+'>Both ways</option><option value="ONE_WAY"'+(u.routeMode==='ONE_WAY'?' selected':'')+'>One way (if the route has a one-way amount)</option></select>'+
@@ -263,7 +266,28 @@ function drawLines(){
   h += '<tr class="tot"><td>Total</td><td></td><td>'+rs(t.charge+t.openingBalance)+'</td><td>'+(t.discount?'-'+t.discount:'')+'</td><td>'+t.paid+'</td><td>'+t.totalDue+'</td></tr></table></div>';
   return h;
 }
+
+/* ---------- brother / sister search ---------- */
+async function sibSearch(){
+  let q = $('e_link').value.trim(), box = $('sib_res');
+  if(!q){ box.innerHTML = '<div class="meta" style="color:#c62828">Type a name or an admission number first.</div>'; return; }
+  box.innerHTML = '<div class="meta">Searching...</div>';
+  try{
+    let r = await apiPost('feestudentfind',{q:q,exclude:(ST && ST.student ? ST.student.adm : '')});
+    if(!r.success){ box.innerHTML = '<div class="meta" style="color:#c62828">❌ '+esc(r.error||'Could not search.')+'</div>'; return; }
+    if(!r.students.length){ box.innerHTML = '<div class="meta" style="color:#c62828">No student found for "'+esc(q)+'".</div>'; return; }
+    window.SIBS = r.students;
+    box.innerHTML = '<div class="meta">'+r.students.length+' found. Tap the right child:'+(r.more?' (more exist, type more letters)':'')+'</div>' +
+      r.students.map((x,i)=>'<div class="srow" style="cursor:pointer" onclick="sibPick('+i+')"><b>'+esc(x.name)+'</b><div class="meta">Class '+esc(x.cls)+' · Adm '+esc(x.adm)+(x.roll?' · Roll '+esc(x.roll):'')+(x.familyId?' · already in a family':'')+'</div></div>').join('');
+  }catch(e){ box.innerHTML = '<div class="meta" style="color:#c62828">❌ Could not connect. Try again.</div>'; }
+}
+function sibPick(i){
+  let x = (window.SIBS || [])[i]; if(!x) return;
+  $('e_link').value = x.adm; $('sib_res').innerHTML = '';
+  $('sib_pick').innerHTML = '<div class="probs" style="background:#e8f5e9;border-color:#a5d6a7;color:#14532d">✔ Will be linked with <b>'+esc(x.name)+'</b> · Class '+esc(x.cls)+' · Adm '+esc(x.adm)+'. Press Save to finish.</div>';
+}
 async function saveStu(){
+  if(window.UI && !UI.checkDates(['e_date'])){ show($('sMsg'),'❌ Please correct the admission date first.','err'); return; }
   let b = $('saveBtn'), m = $('sMsg'); b.disabled = true; show(m,'Saving...','load');
   let d = {type:$('e_type').value,admissionDate:$('e_date').value.trim(),linkTo:$('e_link').value.trim(),unlink:!!($('e_unlink')&&$('e_unlink').checked),siblingOff:$('e_sibOff').checked,
     routeId:$('e_route').value,routeMode:$('e_mode').value,optionalHeads:$('e_opt')?[...$('e_opt').querySelectorAll('input:checked')].map(i=>i.value):[],

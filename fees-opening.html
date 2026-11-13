@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Already Paid</title>
@@ -113,7 +113,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .gt td.nm button{display:block;margin-top:3px;font-size:10.5px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:3px 6px;min-height:28px;color:var(--navy);font-weight:700}
 .legend2{font-size:12px;color:var(--muted);line-height:1.6}
 .msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
-</style><script src="config.js"></script></head>
+</style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -161,7 +161,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html' : 'accountant.html'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -177,7 +177,7 @@ $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperC
 var G = null, DIRTY = false;
 function maxOf(c){ return Math.max(0, c.net - c.other); }
 async function load(){
-  if(DIRTY && !confirm('You have unsaved changes in this class. Leave them?')) return;
+  if(DIRTY && !(await UI.ask('You have unsaved changes in this class. Leave them?'))) return;
   let first = !$('sess').options.length;
   show($('gMsg'),'Loading class data... please wait','load'); $('saveBox').style.display = 'none';
   $('grid').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
@@ -234,7 +234,12 @@ async function save(){
   let recs = [...document.querySelectorAll('#grid input[data-k]')].map(x=>({adm:G.students[+x.dataset.s].adm,key:x.dataset.k,paid:x.value}));
   try{
     let r = await apiPost('feeopeningsave',{session:$('sess').value,'class':$('cls').value,records:JSON.stringify(recs),reason:$('reason')?$('reason').value:''});
-    if(r.success){ DIRTY = false; await load(); show($('gMsg'),'✅ '+r.message,'ok'); window.scrollTo(0,0); return; }
+    if(r.success){
+      DIRTY = false; b.disabled = false;
+      if(window.UI) m.className = 'msg'; else show(m,'✅ '+r.message,'ok');      // the green message under the button (ui.js) says it; never leave "Saving..." showing
+      load().then(function(){ show($('gMsg'),'✅ '+r.message,'ok'); });          // refresh quietly, the page stays where it is
+      return;
+    }
     show(m,'❌ '+(r.error||'Could not save.'),'err'); m.scrollIntoView({block:'center'});
   }catch(e){ show(m,'❌ Could not connect. Nothing was saved. Try again.','err'); }
   b.disabled = false;

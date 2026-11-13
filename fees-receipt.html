@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Money Receipt</title>
@@ -108,6 +108,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 
 .noprint{}
 .sheetwrap{margin:0 auto;width:720px;transform-origin:top left}
+html,body{overflow-x:hidden}
 .copy{background:#fff;border:2px solid #1a4bb5;border-radius:6px;padding:12px 14px;position:relative;margin-bottom:14px;color:#111;font-size:12px;line-height:1.35;overflow:hidden}
 .copy .hd{display:flex;align-items:center;gap:12px;border-bottom:2px solid #1a4bb5;padding-bottom:8px}
 .copy .hd img{width:64px;height:64px;object-fit:contain}.copy .hd .ph{flex:1;text-align:center}
@@ -134,11 +135,11 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
  body{background:#fff!important;padding:0!important}
  .top,.tabs,.noprint,.wrap>.box,#gMsg{display:none!important}
  .wrap{margin:0!important;padding:0!important;max-width:none!important}
- .sheetwrap{width:194mm!important;zoom:1!important;transform:none!important}
+ .sheetwrap{width:194mm!important;zoom:1!important;transform:none!important;margin-bottom:0!important}
  .copy{break-inside:avoid;margin-bottom:6mm}
  .pgbreak{break-after:page}
 }
-</style><script src="config.js"></script></head>
+</style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -179,7 +180,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = STU ? 'student.html' : (USER.role === 'admin' ? 'admin.html' : 'accountant.html'); }
+function goBack(){ window.location.href = STU ? 'student.html' : (USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'); }
 function doLogout(){ if(STU){ window.location.href = 'student.html'; return; } try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -228,7 +229,14 @@ function render(){
   $('hint').innerText = 'Layout: '+(r.layout.style==='LIST'?'simple list':'form boxes')+' · '+({ONE_PAGE:'parent + office copy on one page',TWO_PAGES:'two pages',ONE_COPY:'one copy'}[r.layout.copies])+'. In the print window choose A4 and turn off “Headers and footers”.';
   $('printBtn').disabled = false;
 }
-function fit(){ let w = Math.min(1, (window.innerWidth - 24) / 720); $('sheet').style.zoom = w; }
+/* the receipt is laid out 720px wide (like paper). On a phone it is scaled down to the screen width so nothing is cut off; printing is not affected */
+function fit(){
+  let el = $('sheet'), vw = Math.min(document.documentElement.clientWidth || 9999, window.innerWidth || 9999, (screen && screen.width) || 9999);
+  let w = Math.min(1, (vw - 16) / 720);
+  if(window.CSS && CSS.supports && CSS.supports('zoom','1')){ el.style.zoom = w; el.style.transform = ''; el.style.marginBottom = ''; }
+  else{ el.style.zoom = ''; el.style.transform = 'scale(' + w + ')'; el.style.transformOrigin = 'top left'; el.style.marginBottom = (-(el.offsetHeight * (1 - w))) + 'px'; }
+}
+window.addEventListener('resize', fit); window.addEventListener('orientationchange', fit);
 window.addEventListener('resize', fit);
 function sampleData(me){
   let L = me.layout, g = me.groups.length ? me.groups : [{id:'G1',name:'Admission',column:1},{id:'G2',name:'Accessories',column:2},{id:'G3',name:'Monthly',column:3}];

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Marks</title>
@@ -69,7 +69,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
 .stat{flex:1;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
 .stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
 </style>
-<script src="config.js"></script></head>
+<script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -135,7 +135,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = IS_ADMIN ? 'admin.html' : (IS_CT && ls('cvse_view') === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html'); }
+function goBack(){ window.location.href = IS_ADMIN ? 'admin.html?tab=last' : (IS_CT && ls('cvse_view') === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 var OPTS = [];           // exams -> classes -> subjects
@@ -179,14 +179,14 @@ function onClass(){
   $('selSubject').innerHTML = c ? c.subjects.map(s => `<option value="${esc(s.subjectName)}">${esc(s.subjectName)}${s.canEdit ? '' : ' (view only)'}</option>`).join('') : '';
   onSubject();
 }
-function onSubject(){ if(DIRTY && !confirm('You have unsaved marks. Leave them?')){ restoreSel(); return; } DIRTY = false; $('entryBox').style.display = 'none'; DATA = null; remember(); }
+async function onSubject(){ if(DIRTY && !(await UI.ask('You have unsaved marks. Leave them?'))){ restoreSel(); return; } DIRTY = false; $('entryBox').style.display = 'none'; DATA = null; remember(); }
 var SEL = {};
 function remember(){ SEL = {exam:$('selExam').value, cls:$('selClass').value, sub:$('selSubject').value}; }
 function restoreSel(){ $('selExam').value = SEL.exam; onExamQuiet(); }
 function onExamQuiet(){ let e = curExam(); $('selClass').innerHTML = e.classes.map(c => `<option value="${esc(c.className)}">${esc(c.className)}</option>`).join(''); $('selClass').value = SEL.cls; let c = curClass(); $('selSubject').innerHTML = c.subjects.map(s => `<option value="${esc(s.subjectName)}">${esc(s.subjectName)}${s.canEdit ? '' : ' (view only)'}</option>`).join(''); $('selSubject').value = SEL.sub; }
 
 async function loadMarks(){
-  if(DIRTY && !confirm('You have unsaved marks. Reload and lose them?')) return;
+  if(DIRTY && !(await UI.ask('You have unsaved marks. Reload and lose them?'))) return;
   let b = $('btnLoad'); b.disabled = true; show($('gMsg'), 'Loading...', 'load');
   try{
     let r = await apiGet('getexammarks', {examId:$('selExam').value, className:$('selClass').value, subject:$('selSubject').value});

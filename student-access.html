@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Access</title>
@@ -80,7 +80,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px}
 .badge-exam{background:#16a34a;color:#fff;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;text-align:center}
 </style>
-<script src="config.js"></script></head>
+<script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -143,7 +143,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = IS_ACC ? 'accountant.html' : 'admin.html'; }
+function goBack(){ window.location.href = IS_ACC ? 'accountant.html' : 'admin.html?tab=last'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 if(IS_ACC) $('roleBadge').innerText = 'ACCOUNTANT';
 $('wName').innerText = 'Welcome, ' + (USER.name || 'Admin'); $('wSub').innerText = 'Username: ' + USER.username;
@@ -237,7 +237,7 @@ function drawPw(r){
     '<div class="btnrow"><button class="btn b-purple" id="btnPwReset" onclick="resetPw()">🔄 Reset password</button></div>';
 }
 async function resetPw(){
-  if(!confirm('Reset the password of this student? They will login with the date of birth and create a new password.')) return;
+  if(!(await UI.ask('Reset the password of this student? They will login with the date of birth and create a new password.'))) return;
   let b = $('btnPwReset'); b.disabled = true; show($('pwMsg'), 'Resetting... please wait', 'load');
   try{
     let r = await apiPost('studentpwreset', {admissionNo:PWADM});

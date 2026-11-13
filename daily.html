@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Daily Updates</title>
@@ -66,7 +66,7 @@ textarea{min-height:76px;resize:vertical}
 .tabBtn .tabIco{font-size:20px;line-height:1}
 .tabBtn.active{background:#e3f2fd;color:var(--blue)}
 </style>
-<script src="config.js"></script></head>
+<script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -231,7 +231,7 @@ async function init(){
 
 function goBack(){
   let v = ls('cvse_view');
-  window.location.href = REAL_ROLE === 'accountant' ? 'accountant.html' : IS_ADMIN ? 'admin.html' : (IS_CT && v === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html');
+  window.location.href = REAL_ROLE === 'accountant' ? 'accountant.html' : IS_ADMIN ? 'admin.html?tab=last' : (IS_CT && v === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html');
 }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
@@ -392,9 +392,9 @@ async function publish(flag, which){
   }else{
     payload.date = document.getElementById('fDate').value;
     let c = document.getElementById('fClass').value; if(c && c !== 'ALL') payload.className = c;
-    if(!confirm('Publish every Done entry shown for this date' + (payload.className ? ' and class ' + payload.className : '') + '?')) return;
+    if(!(await UI.ask('Publish every Done entry shown for this date' + (payload.className ? ' and class ' + payload.className : '') + '?'))) return;
   }
-  if(flag === 'NO' && !confirm('Unpublish the selected periods? Teachers will be able to edit them again.')) return;
+  if(flag === 'NO' && !(await UI.ask('Unpublish the selected periods? Teachers will be able to edit them again.'))) return;
   show(msg, 'Working...', 'load');
   try{
     let r = await apiPost('setpublishstatus', payload);

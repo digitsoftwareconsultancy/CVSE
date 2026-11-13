@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Settings</title>
@@ -58,7 +58,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
 .tabBtn .dot{position:absolute;top:4px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--orange);display:none}
 .tabBtn.dirty .dot{display:block}
 </style>
-<script src="config.js"></script></head>
+<script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -116,7 +116,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = 'admin.html'; }
+function goBack(){ window.location.href = 'admin.html?tab=last'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 /* ===== state ===== */
@@ -209,8 +209,8 @@ function toggleChip(sec, i, field, val, on){
 function setF(sec, i, f, v){ ROWS[sec][i][f] = v; markDirty(); if(sec === 'reports' || sec === 'exams') refreshPreview(sec, i); }
 function setYN(sec, i, f, on){ ROWS[sec][i][f] = on ? 'YES' : 'NO'; markDirty(); }
 function redraw(sec){ let y = window.scrollY; ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, letters:drawAreas, results:drawAreas, assign:drawAssign})[sec](); window.scrollTo(0, y); }
-function delRow(sec, i){
-  if(!confirm('Remove this row? It is only removed for good when you press Save.')) return;
+async function delRow(sec, i){
+  if(!(await UI.ask('Remove this row? It is only removed for good when you press Save.'))) return;
   ROWS[sec].splice(i, 1); redraw(sec);
 }
 function yn(v){ return String(v || '').toUpperCase() === 'YES'; }

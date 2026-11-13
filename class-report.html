@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Class Report</title>
@@ -87,7 +87,7 @@ details.ps summary{min-height:46px;display:flex;align-items:center;font-weight:8
 .cnt{font-size:11px;color:var(--muted);text-align:right}
 
 </style>
-<script src="config.js"></script></head>
+<script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -169,7 +169,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ if(DIRTY.size && !confirm('You have unsaved changes. Leave them?')) return; window.location.href = IS_ADMIN ? 'admin.html' : 'class-dashboard.html'; }
+async function goBack(){ if(DIRTY.size && !(await UI.ask('You have unsaved changes. Leave them?'))) return; window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'class-dashboard.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 var OPTS = [], DATA = null, DIRTY = new Set();
@@ -198,18 +198,18 @@ async function init(){
   $('selReport').innerHTML = OPTS.map(r => `<option value="${esc(r.reportId)}">${esc(r.name)}${r.locked ? ' (locked)' : ''}</option>`).join('');
   onReport();
 }
-function onReport(){
-  if(!confirmLeave()) return;
+async function onReport(){
+  if(!(await confirmLeave())) return;
   let r = curRep();
   $('selClass').innerHTML = r ? r.classes.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('') : '';
   clearView();
 }
-function onSel(){ if(!confirmLeave()) return; clearView(); }
-function confirmLeave(){ return !DIRTY.size || confirm('You have unsaved changes. Leave them?') && (DIRTY.clear(), true); }
+async function onSel(){ if(!(await confirmLeave())) return; clearView(); }
+async function confirmLeave(){ return !DIRTY.size || (await UI.ask('You have unsaved changes. Leave them?')) && (DIRTY.clear(), true); }
 function clearView(){ DATA = null; DIRTY.clear(); $('main').style.display = 'none'; }
 
 async function loadClass(){
-  if(DIRTY.size && !confirm('You have unsaved changes. Reload and lose them?')) return;
+  if(DIRTY.size && !(await UI.ask('You have unsaved changes. Reload and lose them?'))) return;
   let b = $('btnLoad'); b.disabled = true; show($('gMsg'), 'Loading...', 'load');
   try{
     let r = await apiGet('getclassfinal', {reportId:$('selReport').value, className:$('selClass').value});
@@ -261,8 +261,8 @@ function draw(){
   }).join('');
 }
 function mark(i){ DIRTY.add(i); $('sc' + i).classList.add('dirty'); }
-function openCards(){
-  if(DIRTY.size && !confirm('You have unsaved changes. Leave them?')) return;
+async function openCards(){
+  if(DIRTY.size && !(await UI.ask('You have unsaved changes. Leave them?'))) return;
   window.location.href = 'report-card.html?report=' + encodeURIComponent(DATA.report.id) + '&class=' + encodeURIComponent(DATA.className);
 }
 function applyWd(){
@@ -315,7 +315,7 @@ async function finalise(){
     }
     hide($('fMsg'));
     let w = (r.warnings || []).length ? '\n\nPlease note:\n- ' + r.warnings.join('\n- ') : '';
-    if(!confirm('Finalise class ' + DATA.className + '? After this you cannot change anything. Only the admin can reopen it.' + w)) return;
+    if(!(await UI.ask('Finalise class ' + DATA.className + '? After this you cannot change anything. Only the admin can reopen it.' + w))) return;
     show($('fMsg'), 'Finalising...', 'load');
     let r2 = await apiPost('finalisereport', {reportId:DATA.report.id, className:DATA.className});
     if(!r2.success){ show($('fMsg'), '❌ ' + (r2.error || 'Could not finalise.'), 'err'); return; }
@@ -325,7 +325,7 @@ async function finalise(){
   finally{ b.disabled = false; }
 }
 async function reopen(){
-  if(!confirm('Reopen class ' + DATA.className + '? The class teacher will be able to change it again.')) return;
+  if(!(await UI.ask('Reopen class ' + DATA.className + '? The class teacher will be able to change it again.'))) return;
   let b = $('btnReopen'); b.disabled = true; show($('fMsg'), 'Reopening...', 'load');
   try{
     let r = await apiPost('reopenreport', {reportId:DATA.report.id, className:DATA.className});

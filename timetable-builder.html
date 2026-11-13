@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.09-S1"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.13-S7"><meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
  body{font-family:Arial;padding:10px;background:#fafafa}
  table{border-collapse:collapse;width:100%;border:2px solid #8b4513}
@@ -23,7 +23,7 @@
  .ele-create-row{display:flex;gap:5px;margin:4px 0;align-items:center;background:#f9f9f9;padding:4px;border-radius:4px}
  .mini-btn{padding:2px 6px !important;font-size:9px !important;background:#0a1931 !important;margin-top:2px}
  .mini-btn2{padding:2px 6px !important;font-size:9px !important;background:#888 !important;margin-top:2px}
-</style><script src="config.js"></script></head><body>
+</style><script src="config.js"></script><script src="ui.js"></script></head><body>
 <div id="schoolHeaderPreview">Loading School Info...</div>
 <div class="controls">
   <select id="gradeSel"><option>Loading...</option></select>
@@ -146,7 +146,7 @@ async function saveElectiveGroup(){
   alert('Saved '+rows.length+' elective subjects for '+grade+' - '+groupName);
   loadBuilder();
 }
- async function deleteElectiveGroup(){let grade=document.getElementById('eleGrade').value;let groupName=document.getElementById('eleGroup').value.trim();if(!confirm('Delete elective group '+groupName+' of '+grade+' ?'))return;let res=await apiPost('deleteelectivemap',{grade:grade,groupName:groupName});if(res&&res.success){alert('Deleted');loadBuilder();}else{alert('NOT DELETED: '+((res&&res.error)||'error'));}}
+ async function deleteElectiveGroup(){let grade=document.getElementById('eleGrade').value;let groupName=document.getElementById('eleGroup').value.trim();if(!(await UI.ask('Delete elective group '+groupName+' of '+grade+' ?')))return;let res=await apiPost('deleteelectivemap',{grade:grade,groupName:groupName});if(res&&res.success){alert('Deleted');loadBuilder();}else{alert('NOT DELETED: '+((res&&res.error)||'error'));}}
 async function saveAll(){let rows=[];let grade=document.getElementById('gradeSel').value;document.querySelectorAll('td.builder-cell').forEach(td=>{let sub=td.querySelector('.sub');let tea=td.querySelector('.teach');if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname,Group:'',IsElective:'NO'});}});document.querySelectorAll('.ele-item').forEach(div=>{rows.push({Day:div.dataset.day,Grade:grade,className:grade,Period_No:div.dataset.period,Subject:div.dataset.subject,TeacherUsername:'',TeacherName:'',Group:div.dataset.group,IsElective:'YES'});});document.querySelectorAll('.rest-box').forEach(b=>{let sub=b.querySelector('.rest-sub'),tea=b.querySelector('.rest-teach');if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname,Group:'',IsElective:'NO'});}});let res=await apiPost('savetimetable',{rows:rows,grade:grade});if(res&&res.success){alert('Saved '+rows.length+' entries');loadBuilder();}else{alert('NOT SAVED: '+((res&&res.error)||'error'));}}
 function dropOption(day,period,subject){captureGrid();let grade=document.getElementById('gradeSel').value;existingData=existingData.filter(r=>!(r.Day==day&&String(r.Period_No)==String(period)&&r.IsElective=='YES'&&String(r.Subject).toUpperCase()==String(subject).toUpperCase()));renderGrid(grade);}
 function addOption(day,period,subject){if(!subject)return;captureGrid();let grade=document.getElementById('gradeSel').value;let g=(existingData.find(r=>r.Day==day&&String(r.Period_No)==String(period)&&r.IsElective=='YES')||{}).Group||'Elective-1';existingData.push({Day:day,Period_No:String(period),Subject:subject,TeacherUsername:'',TeacherName:'',Group:g,IsElective:'YES'});renderGrid(grade);}

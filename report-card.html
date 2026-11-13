@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Report Cards</title>
@@ -81,7 +81,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
   @page{size:A4;margin:.8cm}
 }
 </style>
-<script src="config.js"></script></head>
+<script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -140,7 +140,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = IS_ADMIN ? 'admin.html' : 'class-dashboard.html'; }
+function goBack(){ window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'class-dashboard.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 var OPTS = [], DATA = null;
@@ -198,9 +198,9 @@ function drawCards(){
 }
 function fit(){ rcFit($('fit')); }
 window.addEventListener('resize', fit);
-function doPrint(){
+async function doPrint(){
   if(!DATA || !DATA.students.length) return;
-  if(DATA.draft && !confirm('This class is not finalised. The printed cards will carry a DRAFT mark. Print anyway?')) return;
+  if(DATA.draft && !(await UI.ask('This class is not finalised. The printed cards will carry a DRAFT mark. Print anyway?'))) return;
   window.print();
 }
 window.addEventListener('beforeprint', () => { document.querySelectorAll('.cw').forEach(c => { c.style.width = ''; c.style.height = ''; }); });

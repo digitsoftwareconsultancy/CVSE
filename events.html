@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>School Calendar - Events</title>
@@ -83,7 +83,7 @@ textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;fon
 pre.res{white-space:pre-wrap;font-family:inherit;margin:0}
 .fl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 </style>
-<script src="config.js"></script></head>
+<script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -152,7 +152,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = REAL_ROLE === 'accountant' ? 'accountant.html' : (USER.role === 'admin' ? 'admin.html' : 'class-dashboard.html'); }
+function goBack(){ window.location.href = REAL_ROLE === 'accountant' ? 'accountant.html' : (USER.role === 'admin' ? 'admin.html?tab=last' : 'class-dashboard.html'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;

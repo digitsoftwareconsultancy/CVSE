@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.09-S1">
+<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Collect Fees</title>
@@ -117,7 +117,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .ok-box b{display:block;font-size:22px;color:#166534;margin:4px 0}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:300;padding:16px}.modal.on{display:flex}
 .modal .mb{background:#fff;border-radius:16px;padding:16px;max-width:380px;width:100%}
-</style><script src="config.js"></script></head>
+</style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -167,7 +167,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html' : 'accountant.html'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -189,6 +189,7 @@ function openFix(d, adm, cb){
   hide($('fx_msg')); $('fixM').classList.add('on');
 }
 async function saveFix(){
+  if(window.UI && !UI.checkDates(['fx_dob'])){ show($('fx_msg'),'❌ Please correct the date of birth first.','err'); return; }
   let b = $('fx_btn'); b.disabled = true; show($('fx_msg'),'Saving... please wait','load');
   try{
     let r = await apiPost('feestudentfix',{adm:FIXC.adm,data:JSON.stringify({name:$('fx_name').value,father:$('fx_fa').value,mother:$('fx_mo').value,dob:$('fx_dob').value.trim(),house:$('fx_ho').value})});
