@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.14-S9">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Collect Fees</title>
@@ -258,18 +258,32 @@ function draw(){
    '<div class="big"><div><b>'+rs(G.totals.payableNow)+'</b><span>Overdue today</span></div><div><b>'+rs(G.totals.totalDue)+'</b><span>Total unpaid ('+esc(G.session)+')</span></div></div>'+
    lockHtml()+(G.warnings.length?'<div class="probs">⚠ '+G.warnings.map(esc).join('<br>⚠ ')+'</div>':'')+
    (showSession?'<label>Pay for session</label><select id="c_sess" onchange="pick(\''+esc(G.student.adm)+'\',this.value,\'\')">'+G.sessions.map(s=>'<option'+(s===G.session?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'+(G.asClass!==G.student.cls||true?'<label>Class in that session</label><select id="c_cls" onchange="pick(\''+esc(G.student.adm)+'\',$(\'c_sess\').value,this.value)">'+G.classes.map(c=>'<option'+(c===G.asClass?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select><div class="help">Use this to take the next session’s fees in advance. Choose the class the child will be in.</div>':''):'')+
-   '<div class="btnrow"><button class="btn b-navy" onclick="back()">⬅ Choose another student</button><button class="btn b-purple" onclick="openFix(G.details,G.student.adm,function(d){G.details=d;G.student.name=d.name;draw();})">✏ Correct name / parents</button></div></div>';
+   '<div class="btnrow"><button class="btn b-navy" onclick="back()">⬅ Choose another student</button>'+(PRIV.indexOf('CORRECT')>-1?'<button class="btn b-purple" onclick="openFix(G.details,G.student.adm,function(d){G.details=d;G.student.name=d.name;draw();})">✏ Correct name / parents</button>':'')+'</div></div>';
   h += '<div class="box"><div class="title">What is being paid</div>'+(due.length?due.map(rowHtml).join(''):'<div class="empty-note">Nothing is overdue.</div>')+
    (later.length?'<details style="margin-top:8px"><summary style="font-weight:800;color:var(--navy);min-height:40px;cursor:pointer">Not yet due — pay in advance ('+later.length+')</summary>'+later.map(rowHtml).join('')+'</details>':'')+
    '<label>Amount received (fills the boxes automatically)</label><div class="row2" style="grid-template-columns:1fr auto"><input id="recv" inputmode="decimal" placeholder="Amount"><button class="btn b-purple" style="width:auto" onclick="allocate()">Fill</button></div><div class="help">Filled '+(G.payOrder==='CURRENT_FIRST'?'current fees first':'oldest dues first')+' (changeable in Fees Settings). You can still change any box.</div></div>';
   h += '<div class="box"><div class="title">Accessories sold</div>'+(G.items.length?'<div class="row2" style="grid-template-columns:1fr 70px auto"><select id="itSel">'+G.items.map(i=>'<option value="'+esc(i.itemId)+'">'+esc(i.name+(i.size?' ('+i.size+')':''))+' — '+rs(i.price)+'</option>').join('')+'</select><input id="itQty" inputmode="numeric" value="1"><button class="btn b-blue" style="width:auto" onclick="addItem()">Add</button></div>':'<div class="meta">No accessory items are set for this session.</div>')+'<div id="itList"></div>'+
    '<h3 class="g">Fine (typed)</h3><div class="row2"><div><label>Reason</label><input id="fnL" maxlength="30" placeholder="Late fine..." oninput="sum()"></div><div><label>Amount</label><input id="fnA" inputmode="decimal" oninput="sum()"></div></div></div>';
   h += '<div class="box"><div class="title">Payment</div><label>Received by</label><select id="mode">'+G.modes.map(m=>'<option>'+esc(m)+'</option>').join('')+'</select>'+
-   '<label>Reference no (UPI / cheque, optional)</label><input id="ref" maxlength="40"><div class="row2"><div><label>Receipt date</label><input id="dt" inputmode="numeric" maxlength="10" oninput="maskD(this)" value="'+esc(today)+'"></div><div><label>Note (optional)</label><input id="note" maxlength="120"></div></div></div>';
+   '<label>Reference no (UPI / cheque, optional)</label><input id="ref" maxlength="40"><div class="row2"><div><label>Receipt date</label><input id="dt" inputmode="numeric" maxlength="10" oninput="maskD(this);backCheck()" onblur="backCheck()" value="'+esc(today)+'" data-max="'+esc(today)+'"'+(G.canBackdate?'':' data-min="'+esc(backMin())+'"')+'></div><div><label>Note (optional)</label><input id="note" maxlength="120"></div></div>'+
+   '<div class="help" id="dtHelp">'+backHelp()+'</div><div id="bdBox" style="display:none"><label>Reason for the old date (needed)</label><input id="bdr" maxlength="100" placeholder="Example: paid in cash on that day, paper receipt no. 0099"></div><div class="msg" id="dtMsg"></div></div>';
   h += '<div class="tot"><span>Total</span><span id="totAmt">₹0</span></div><div class="box"><div class="btnrow"><button class="btn b-green" id="payBtn" onclick="submitPay()">Take payment &amp; make receipt</button></div><div class="msg" id="pMsg"></div></div>';
   $('vPay').innerHTML = h; drawItems(); sum();
 }
 function todayIso(){ return G.today.split('-').reverse().join('-'); }
+/* back-dated receipts (Fees Settings: how many days back a receipt may be dated) */
+function isoAdd(iso, n){ let d = new Date(iso+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().substring(0,10); }
+function backMin(){ return isoAdd(todayIso(), -(G.backDays||0)).split('-').reverse().join('-'); }
+function backHelp(){ let n = G.backDays||0; return (n ? 'Today, or up to '+n+(n===1?' day':' days')+' back.' : 'Receipts are dated today (no older date allowed by Fees Settings).') + (G.canBackdate ? ' An older date needs a reason.' : ''); }
+function backDaysOf(v){ let m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(v||''); if(!m) return 0; let a = Date.UTC(+m[3],+m[2]-1,+m[1]), t = Date.parse(todayIso()+'T00:00:00Z'); return Math.round((t-a)/86400000); }
+function backCheck(){
+  let el = $('dt'); if(!el) return; let d = backDaysOf(el.value.trim()), lim = G.backDays||0, beyond = d > lim;
+  $('bdBox').style.display = (beyond && G.canBackdate) ? 'block' : 'none';
+  if(d < 0) show($('dtMsg'),'The receipt date cannot be in the future.','warn');
+  else if(beyond && !G.canBackdate) show($('dtMsg'),'This date is '+d+' days back. The limit is '+lim+(lim===1?' day':' days')+'. Ask the admin if an older date is needed.','warn');
+  else if(beyond) show($('dtMsg'),'This date is '+d+' days back, beyond the limit of '+lim+'. Please write the reason.','warn');
+  else hide($('dtMsg'));
+}
 function tick(k,on){
   let x = G.payables.find(y=>y.key===k); SEL[k] = {on:on, amount:on?String(x.balance):''};
   let i = document.querySelector('input.amt[data-k="'+k.replace(/"/g,'\\"')+'"]'); if(i) i.value = SEL[k].amount; sum();
@@ -304,7 +318,7 @@ async function submitPay(){
   if(!pay.length && !ITEMS.length && !fine){ show($('pMsg'),'Choose at least one thing to pay.','warn'); return; }
   BUSY = true; let b = $('payBtn'); b.disabled = true; show($('pMsg'),'Saving receipt... please wait','load');
   try{
-    let r = await apiPost('feecollect',{adm:G.student.adm,session:G.session,asClass:G.asClass,pay:JSON.stringify(pay),items:JSON.stringify(ITEMS),fine:JSON.stringify(fine),mode:$('mode').value,ref:$('ref').value,note:$('note').value,date:$('dt').value.trim(),reqId:REQ});
+    let r = await apiPost('feecollect',{adm:G.student.adm,session:G.session,asClass:G.asClass,pay:JSON.stringify(pay),items:JSON.stringify(ITEMS),fine:JSON.stringify(fine),mode:$('mode').value,ref:$('ref').value,note:$('note').value,date:$('dt').value.trim(),backReason:($('bdr')?$('bdr').value.trim():''),reqId:REQ});
     if(r.success){
       newReq();
       $('vPay').innerHTML = '<div class="ok-box">✅ Payment saved<b>Receipt '+esc(r.receiptNo)+'</b><div>'+esc(r.student.name)+' · '+rs(r.total)+' · '+esc(r.mode)+'</div><div class="meta">Balance still unpaid: '+rs(r.balanceAfter)+'</div>'+

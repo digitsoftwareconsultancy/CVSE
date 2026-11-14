@@ -1,5 +1,5 @@
 /* ui.js - one shared helper for every page (button feedback, messages, confirm box, date fields).
-   <meta name="app-version" content="2026.11.13-S7">
+   <meta name="app-version" content="2026.11.14-S9">
    Load it with <script src="ui.js"></script> before the page's own script.
 
    1. BUTTON FEEDBACK: when a button is tapped and the page asks the server, the button changes at once
@@ -89,8 +89,10 @@
     return {text:'Working...', load:false};
   }
   function start(btn){
-    var lab = labelFor(btn), job = {btn:btn, load:lab.load, html:btn.innerHTML, val:btn.value, dis:btn.disabled, busy:'⏳ ' + lab.text};
-    btn.__uiBusy = true; btn.disabled = true; btn.classList.add('ui-busy');
+    // own = ui.js greys the button itself. When the page has already greyed it (it saves on its own), the page also
+    // decides when it comes back, so ui.js never touches it (fix of 14-11-2026: a button stayed grey after a failed save).
+    var lab = labelFor(btn), job = {btn:btn, load:lab.load, html:btn.innerHTML, val:btn.value, own:!btn.disabled, busy:'⏳ ' + lab.text};
+    btn.__uiBusy = true; if(job.own) btn.disabled = true; btn.classList.add('ui-busy');
     if(btn.tagName === 'INPUT') btn.value = job.busy; else btn.innerHTML = job.busy;
     job.busyHtml = btn.tagName === 'INPUT' ? null : btn.innerHTML;
     job.msg = UI.msgAt(btn, 'Working... please wait', 'load');
@@ -100,15 +102,24 @@
     var b = job.btn; b.__uiBusy = false;
     if(!b.isConnected) return;
     b.classList.remove('ui-busy', 'ui-done', 'ui-fail');
-    if(b.tagName === 'INPUT'){ if(b.value.indexOf('⏳') === 0 || /^(✔|✖)/.test(b.value)){ b.value = job.val; b.disabled = job.dis; } }
-    else if(b.innerHTML === job.shown){ b.innerHTML = job.html; b.disabled = job.dis; }
+    if(b.tagName === 'INPUT'){ if(b.value.indexOf('⏳') === 0 || /^(✔|✖)/.test(b.value)){ b.value = job.val; if(job.own) b.disabled = false; } }
+    else if(b.innerHTML === job.shown){ b.innerHTML = job.html; if(job.own) b.disabled = false; }
   }
   function finish(job, j){
     var b = job.btn, ok = !(j && (j.success === false || (j.error && j.success !== true)));
     var text = ok ? '✔ Done' : '✖ Failed';
+    if(!b.isConnected){
+      // the page replaced the button (it shows its own result): tidy our own "Working..." message (fix of 14-11-2026)
+      var m = job.msg;
+      if(m && m.isConnected){
+        if(ok){ m.style.display = 'none'; }
+        else { m.className = 'ui-msg err'; m.textContent = '✖ ' + ((j && (j.error || j.message)) || 'Could not finish. Please try again.'); m.style.display = 'block'; }
+      }else if(!ok) UI.toast('✖ ' + ((j && (j.error || j.message)) || 'Could not finish. Please try again.'), 'err');
+      return;
+    }
     if(b.isConnected){
       b.classList.remove('ui-busy'); b.classList.add(ok ? 'ui-done' : 'ui-fail');
-      b.disabled = false;
+      if(job.own) b.disabled = false;
       if(b.tagName === 'INPUT') b.value = text; else b.innerHTML = text;
       job.shown = b.tagName === 'INPUT' ? text : b.innerHTML;
     }
@@ -141,7 +152,7 @@
         c.json().then(function(j){ finish(job, j); }, function(){ finish(job, res.ok ? null : {success:false, error:'The server did not answer properly. Please try again.'}); });
         return res;
       }, function(err){
-        finish(job, {success:false, error:'Could not connect. Nothing was saved. Check the internet and try again.'});
+        finish(job, {success:false, error:'Could not connect. Check the internet and try again.'});
         throw err;
       });
     };
@@ -259,6 +270,9 @@
     bt.onclick = function(){
       var v = (inp.value || '').trim(), m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(v);
       if(m && UI.dateOk(v)) hid.value = m[3] + '-' + m[2] + '-' + m[1]; else hid.value = '';
+      // optional limits on the field: data-min / data-max as DD-MM-YYYY (the picker greys out other days)
+      var iso = function(t){ var x = /^(\d{2})-(\d{2})-(\d{4})$/.exec(t || ''); return x ? x[3] + '-' + x[2] + '-' + x[1] : ''; };
+      hid.min = iso(inp.getAttribute('data-min')); hid.max = iso(inp.getAttribute('data-max'));
       try{ if(hid.showPicker) hid.showPicker(); else hid.click(); }catch(e){ hid.click(); }
     };
     hid.onchange = function(){

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.14-S9">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -185,6 +185,7 @@ var SETF = [
  ['Receipt_Style','Receipt layout','sel',[['FORM','Form (boxes like the paper receipt)'],['LIST','Simple list']]],
  ['Receipt_Copies','Receipt copies when printing','sel',[['ONE_PAGE','Parent copy + office copy on one page'],['TWO_PAGES','Two pages'],['ONE_COPY','One copy only']]],
  ['Receipt_ShowWords','Show amount in words','yn'],
+ ['Receipt_BackDays','How many days back can a receipt be dated?','num','','0 = today only (safest). 3 = today or up to 3 days back. Older dates: only the admin, or an accountant with the Users permission "Back-date receipts beyond the limit", and a reason is asked.'],
  ['Payment',null],
  ['Pay_Modes','Payment modes (comma separated)','text','','Example: Cash, UPI, Cheque, Bank transfer'],
  ['Fee_Decimals','Show paise','sel',[['0','No (whole rupees)'],['2','Yes (2 decimals)']]],

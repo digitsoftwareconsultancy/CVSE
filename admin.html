@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.14-S8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.14-S9"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -127,6 +127,8 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="BACKDATE"> Back-date receipts beyond the limit (a reason is asked)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="CORRECT"> Correct a student's name / parents from Collect Fees</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="TIMETABLE"> Timetable builder</label>
@@ -185,7 +187,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="box"><h3>📦 Backup</h3>
 <div style="font-size:13px;line-height:1.6">Workbook: <b id="bkName">-</b><br>Last backup: <b id="bkLast">-</b><br>Weekly automatic backup: <b id="bkWeekly">-</b></div>
 <div id="bkWarn" style="margin-top:8px;font-weight:700"></div>
-<br><button onclick="createBackup()" id="btnBackup" class="btn-green" style="width:100%;padding:13px">💾 Backup Now</button>
+<br><button onclick="createBackup()" id="btnBackup" data-nofb="1" class="btn-green" style="width:100%;padding:13px">💾 Backup Now</button>
 <div id="backupMsg" style="margin-top:8px;font-weight:700"></div>
 <p style="font-size:12px;color:#64748b;line-height:1.5;margin-top:10px">A backup is a full copy of this Google Sheet, kept in your Google Drive folder "DiGit Backups". The newest 12 are kept. To go back to a backup: open it from the list below, check it, then copy the tabs you need back (or File &gt; Make a copy).</p></div>
 <div class="box"><h3>📂 Recent backups</h3><div id="backupList">Loading...</div></div>
@@ -270,6 +272,8 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="BACKDATE"> Back-date receipts beyond the limit (a reason is asked)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="CORRECT"> Correct a student's name / parents from Collect Fees</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="TIMETABLE"> Timetable builder</label>
@@ -724,20 +728,20 @@ var allFeeData=[]; async function loadFees(){ feeListDiv.innerHTML='Loading...';
 function renderFees(list){ if(!list||list.length==0){ feeListDiv.innerHTML='No students'; return; } var html='<div class="tableWrap"><table><tr><th>Adm</th><th>Name</th><th>Class</th><th>Status</th><th>Change</th><th>Action</th></tr>'; for(var i=0;i<list.length;i++){ var r=list[i]; var c=(r.status&&r.status.toLowerCase()=='paid'?'green':'red'); html+='<tr><td>'+r.ad+'</td><td>'+r.name+'</td><td>'+r.cls+'</td><td><b style="color:'+c+'">'+r.status+'</b></td><td><select id="st_'+r.ad+'"><option '+(r.status=='Paid'?'selected':'')+'>Paid</option><option '+(r.status=='Withheld'?'selected':'')+'>Withheld</option><option '+(r.status=='Due'?'selected':'')+'>Due</option></select><br><input id="rm_'+r.ad+'" value="'+(r.remark||'')+'"></td><td><button onclick="updateFee(\''+r.ad+'\')" class="btn-green">Save</button></td></tr>'; } html+='</table></div>'; feeListDiv.innerHTML=html; }
 async function updateFee(ad){ var st=document.getElementById('st_'+ad).value; var rm=document.getElementById('rm_'+ad).value; await apiPost('setfeestatus', {admissionNo:ad, status:st, remark:rm}); alert('Updated '+ad); loadFees(); }
 function filterFees(){ var q=feeSearch.value.toLowerCase(); if(!q){ renderFees(allFeeData); return; } var f=allFeeData.filter(r=> (r.ad+' '+r.name+' '+r.cls).toLowerCase().indexOf(q)>-1); renderFees(f); }
-async function loadBackupInfo(){
+// quiet = right after Backup Now: its own message already says what happened, so the warning is not repeated
+async function loadBackupInfo(quiet){
   bkWarn.innerHTML=''; backupList.innerHTML='Loading...';
   try{
     let r=await apiGet('getbackupinfo');
     if(!r.success){ backupList.innerHTML='<span style="color:#991b1b">❌ '+esc(r.error||'Could not load.')+'</span>'; return; }
     bkName.innerText=r.sheetName||'-';
     bkLast.innerText=r.last?(r.last.time+' ('+r.last.type+')'):'No backup yet';
-    bkWeekly.innerText=r.weekly===true?'ON (every Sunday night)':(r.weekly===false?'OFF - run BACKUP_installWeekly once in the Apps Script editor':'not known yet - run BACKUP_authorize once in the Apps Script editor');
-    if(r.lastFailed) bkWarn.innerHTML='<span style="color:#991b1b">❌ The last backup attempt failed: '+esc(r.lastFailedText)+'</span>';
+    bkWeekly.innerText=r.weekly===true?'ON (every Sunday night)':'OFF. To switch it on: open the Apps Script editor, choose BACKUP_installWeekly in the function list at the top, press Run once and press Allow if Google asks.';
+    if(r.lastFailed && quiet!==true) bkWarn.innerHTML='<span style="color:#991b1b">❌ The last backup attempt failed: '+esc(r.lastFailedText)+'</span>';
     else if(!r.last) bkWarn.innerHTML='<span style="color:#9a3412">⚠️ No backup has been made yet. Tap Backup Now.</span>';
     if(!r.backups.length){ backupList.innerHTML='No backups yet.'; return; }
-    var h='<div class="tableWrap"><table><tr><th>Date</th><th>Type</th><th>Name</th><th>Open</th></tr>';
-    r.backups.forEach(function(f){ h+='<tr><td>'+esc(f.time)+'</td><td>'+esc(f.type)+'</td><td style="font-size:11px">'+esc(f.name)+'</td><td><a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(f.id)+'" target="_blank" rel="noopener">Open</a></td></tr>'; });
-    backupList.innerHTML=h+'</table></div>';
+    // stacked cards (a table was cut off on a phone)
+    backupList.innerHTML=r.backups.map(function(f){ return '<div style="border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-top:8px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>'+esc(f.time)+'</b><span style="font-size:12px;font-weight:700;color:#475569">'+esc(f.type)+'</span></div><div style="font-size:12px;color:#475569;word-break:break-word;margin:4px 0 8px">'+esc(f.name)+'</div><a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(f.id)+'" target="_blank" rel="noopener" style="display:inline-block;min-height:40px;line-height:40px;padding:0 14px;border-radius:10px;background:#1976d2;color:#fff;font-weight:700;text-decoration:none">Open</a></div>'; }).join('');
   }catch(e){ backupList.innerHTML='<span style="color:#991b1b">❌ Network problem. Please try again.</span>'; }
 }
 async function createBackup(){
@@ -745,7 +749,7 @@ async function createBackup(){
   try{
     let r=await apiPost('createbackup', {});
     msgTo(backupMsg, r.success?(r.message||'Backup created.'):(r.error||'Backup failed.'), r.success?'ok':'err');
-    loadBackupInfo();
+    loadBackupInfo(true);
   }catch(e){ msgTo(backupMsg,'Network problem. Please check Backup list in a minute before trying again.','err'); }
   finally{ btnBackup.disabled=false; }
 }
@@ -759,9 +763,10 @@ async function clearSlowLog(){
   if(!(await UI.ask('Clear the slow-request list? Only this list is emptied. Nothing else changes.', 'Clear', false))) return;
   try{
     let r=await apiPost('speedclear', {});
-    if(r&&r.success){ var b=document.getElementById('slowClearBtn'); if(b){ b.parentNode.innerHTML='<div class="hmut">✅ List cleared. It fills again as real users meet slow pages.</div>'; } }
-    else alert((r&&r.error)||'Could not clear the list.');
-  }catch(e){ alert('Network problem. Please try again.'); }
+    var box=document.getElementById('slowBox'), d=new Date(), pad=function(n){ return (n<10?'0':'')+n; }, today=pad(d.getDate())+'-'+pad(d.getMonth()+1)+'-'+d.getFullYear();
+    if(r&&r.success){ if(box){ box.innerHTML='<b>Slow requests seen by real users</b> <span class="hmut">(since '+today+')</span><div class="hmut" style="margin-top:4px">No slow requests since '+today+'.</div><div class="hmsg ok" style="margin-top:8px;color:#16a34a;font-weight:700">✅ List cleared. It fills again as real users meet slow pages.</div>'; } }
+    else if(box){ var m=document.createElement('div'); m.style.cssText='color:#c62828;font-weight:700;margin-top:8px'; m.textContent='✖ '+((r&&r.error)||'Could not clear the list.'); box.appendChild(m); }
+  }catch(e){ var bx=document.getElementById('slowBox'); if(bx){ var m2=document.createElement('div'); m2.style.cssText='color:#c62828;font-weight:700;margin-top:8px'; m2.textContent='✖ Could not connect. Nothing was cleared. Check the internet and try again.'; bx.appendChild(m2); } }
 }
 async function runSpeedCheck(){
   var out=document.getElementById('speedOut'), b=document.getElementById('speedBtn');
@@ -783,7 +788,7 @@ async function runSpeedCheck(){
     draw(slow?('❌ '+slow+' need fixing, '+mid+' slow. Send me a screenshot of this list.'):(mid?('🟠 '+mid+' a little slow, the rest are quick.'):'✅ All quick.'));
     var rep=await apiGet('speedreport',{});
     if(rep&&rep.success){
-      out.innerHTML+='<div style="margin-top:12px"><b>Slow requests seen by real users</b> <span class="hmut">(over '+(rep.thresholdMs/1000)+' s, newest 500'+(rep.since?', since '+esc(rep.since.substring(0,10)):'')+')</span>'+(rep.slow.length?'<div style="margin-top:4px">'+rep.slow.map(function(x){ return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:6px 0;border-top:1px solid #f1f5f9"><div style="min-width:0;word-break:break-word">'+esc(x.action)+'<br><small class="hmut">last '+esc(x.last)+'</small></div><div style="text-align:right;white-space:nowrap">'+x.count+' times<br><small class="hmut">avg '+(x.avgMs/1000).toFixed(1)+' s · max '+(x.maxMs/1000).toFixed(1)+' s</small></div></div>'; }).join('')+'</div>':'<div class="hmut">None so far.</div>')+(rep.total?'<div class="btnrow" style="margin-top:10px"><button type="button" id="slowClearBtn" onclick="clearSlowLog()" style="width:100%;min-height:46px;border:0;border-radius:12px;background:#64748b;color:#fff;font-weight:700;font-size:15px">🧹 Clear this list</button></div>':'')+'</div>';
+      out.innerHTML+='<div id="slowBox" style="margin-top:12px"><b>Slow requests seen by real users</b> <span class="hmut">(over '+(rep.thresholdMs/1000)+' s, newest 500'+(rep.since?', since '+esc(rep.since.substring(0,10)):'')+')</span>'+(rep.slow.length?'<div style="margin-top:4px">'+rep.slow.map(function(x){ return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:6px 0;border-top:1px solid #f1f5f9"><div style="min-width:0;word-break:break-word">'+esc(x.action)+'<br><small class="hmut">last '+esc(x.last)+'</small></div><div style="text-align:right;white-space:nowrap">'+x.count+' times<br><small class="hmut">avg '+(x.avgMs/1000).toFixed(1)+' s · max '+(x.maxMs/1000).toFixed(1)+' s</small></div></div>'; }).join('')+'</div>':'<div class="hmut">None so far.</div>')+(rep.total?'<div class="btnrow" style="margin-top:10px"><button type="button" id="slowClearBtn" onclick="clearSlowLog()" style="width:100%;min-height:46px;border:0;border-radius:12px;background:#64748b;color:#fff;font-weight:700;font-size:15px">🧹 Clear this list</button></div>':'')+'</div>';
     }
   }catch(e){ draw('❌ '+(e&&e.message==='TIMEOUT'?'One step took more than 2 minutes. Send me the list so far.':'Could not connect. Check internet and try again.')); }
   b.disabled=false;
