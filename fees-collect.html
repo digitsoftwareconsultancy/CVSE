@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.14-S9">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S10">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Collect Fees</title>
@@ -117,6 +117,8 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .ok-box b{display:block;font-size:22px;color:#166534;margin:4px 0}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:300;padding:16px}.modal.on{display:flex}
 .modal .mb{background:#fff;border-radius:16px;padding:16px;max-width:380px;width:100%}
+.row3.blk>div,.row3.blk input{opacity:.5}.row3 .bk{color:#9a3412;font-weight:800}
+.ordBox{background:#fff7ed;border:1px solid #ffcc80;border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
 </style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
@@ -217,7 +219,7 @@ async function saveUnlock(on){
   }catch(e){ if(on) show($('unl_msg'),'❌ Could not connect. Nothing was saved. Try again.','err'); else show($('gMsg'),'❌ Could not connect.','err'); }
   b.disabled = false;
 }
-var G = null, SEL = {}, ITEMS = [], REQ = '', BUSY = false;
+var G = null, SEL = {}, ITEMS = [], REQ = '', BUSY = false, BREAK = false;
 function rs(n){ return '₹' + (Math.round((Number(n)||0) * 100) / 100).toLocaleString('en-IN'); }
 function newReq(){ REQ = 'q' + Date.now().toString(36) + Math.random().toString(36).substring(2, 8); }
 async function classes(){
@@ -241,16 +243,50 @@ async function pick(adm, session, asClass){
     let p = {adm:adm}; if(session) p.session = session; if(asClass) p.asClass = asClass;
     let r = await apiGet('feecollectget',p);
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not open.'),'err'); return; }
-    hide($('gMsg')); G = r; SEL = {}; ITEMS = []; if(!REQ) newReq();
+    hide($('gMsg')); G = r; SEL = {}; ITEMS = []; BREAK = false; if(!REQ) newReq();
     $('vFind').style.display = 'none'; $('vPay').style.display = 'block'; draw(); window.scrollTo(0,0);
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
 }
 function back(){ $('vPay').style.display = 'none'; $('vFind').style.display = 'block'; G = null; }
+/* S10: fees must be paid in order (Fees Settings). A row opens only when the row before it (same fee head; previous dues
+   first) is ticked for its full unpaid amount. The server checks the same rule. Only the admin may break it, with a reason. */
+function rowOf(k){ return G.payables.find(y=>y.key===k); }
+function fullSel(p){ let s = SEL[p.key]; return !!(s && s.on && Number(s.amount) >= p.balance - 0.001); }
+function blocker(x, ignoreBreak){                 // the oldest row that must be paid first, or null
+  if(!G.inOrder || (BREAK && !ignoreBreak) || !x.prev) return null;
+  let p = rowOf(x.prev); if(!p) return null;
+  let b = blocker(p, ignoreBreak); if(b) return b;
+  return fullSel(p) ? null : p;
+}
+function clean(){                                 // un-tick rows whose earlier month is no longer fully ticked
+  let changed = true;
+  while(changed){ changed = false; G.payables.forEach(x=>{ let s = SEL[x.key]; if(s && s.on && blocker(x)){ SEL[x.key] = {on:false, amount:''}; changed = true; } }); }
+}
+function outOfOrderNow(){ return G.inOrder && G.payables.some(x=>{ let s = SEL[x.key]; return s && s.on && Number(s.amount) > 0 && blocker(x, true); }); }
+function refreshRows(){
+  document.querySelectorAll('.row3[data-row]').forEach(el=>{
+    let x = rowOf(el.dataset.row); if(!x) return;
+    let b = blocker(x), s = SEL[x.key] || {on:false,amount:''}, cb = el.querySelector('input[type=checkbox]'), am = el.querySelector('input.amt');
+    el.classList.toggle('blk', !!b); cb.disabled = !!b; am.disabled = !!b; cb.checked = !!s.on;
+    if(am !== document.activeElement) am.value = s.amount;
+    el.querySelector('.bk').innerText = b ? 'Pay '+b.label+' first' : '';
+  });
+}
+function breakToggle(on){
+  BREAK = !!on; $('ordRBox').style.display = BREAK ? 'block' : 'none';
+  if(!BREAK) clean(); refreshRows(); sum();
+}
 function rowHtml(x){
-  let s = SEL[x.key] || {on:false,amount:''};
-  return '<div class="row3"><input type="checkbox" '+(s.on?'checked':'')+' onchange="tick(\''+esc(x.key)+'\',this.checked)"><div>'+esc(x.label)+'<small>'+(x.due?'Due '+esc(x.due.split('-').reverse().join('-'))+' · ':'')+'Unpaid '+rs(x.balance)+'</small></div><input class="amt" inputmode="decimal" data-k="'+esc(x.key)+'" value="'+esc(s.amount)+'" oninput="typed(\''+esc(x.key)+'\',this)"></div>';
+  let s = SEL[x.key] || {on:false,amount:''}, b = blocker(x);
+  return '<div class="row3'+(b?' blk':'')+'" data-row="'+esc(x.key)+'"><input type="checkbox" '+(s.on?'checked':'')+(b?' disabled':'')+' onchange="tick(\''+esc(x.key)+'\',this.checked)"><div>'+esc(x.label)+'<small>'+(x.due?'Due '+esc(x.due.split('-').reverse().join('-'))+' · ':'')+'Unpaid '+rs(x.balance)+'</small><small class="bk">'+(b?esc('Pay '+b.label+' first'):'')+'</small></div><input class="amt" inputmode="decimal" data-k="'+esc(x.key)+'" value="'+esc(s.amount)+'"'+(b?' disabled':'')+' oninput="typed(\''+esc(x.key)+'\',this)"></div>';
+}
+function orderHtml(){
+  if(!G.inOrder) return '';
+  return '<div class="ordBox">🔢 Fees must be paid in order (Fees Settings): a month opens when the month before it is ticked in full. Accessories and a typed fine are never blocked.'+
+   (G.canBreakOrder ? '<label class="chk" style="margin:8px 0 0"><input type="checkbox" id="ordBrk" '+(BREAK?'checked':'')+' onchange="breakToggle(this.checked)"> Take fees out of order (admin only)</label><div id="ordRBox" style="display:'+(BREAK?'block':'none')+'"><label>Reason for taking fees out of order (needed, kept in the log)</label><input id="ordR" maxlength="100" placeholder="Example: parent asked to pay the bus fee of March first"></div>' : '')+'</div>';
 }
 function draw(){
+  clean();
   let today = G.today, due = [], later = [];
   G.payables.forEach(x=>{ if(!x.due || x.due <= todayIso()) due.push(x); else later.push(x); });
   let showSession = G.sessions.length > 1;
@@ -260,8 +296,8 @@ function draw(){
    (showSession?'<label>Pay for session</label><select id="c_sess" onchange="pick(\''+esc(G.student.adm)+'\',this.value,\'\')">'+G.sessions.map(s=>'<option'+(s===G.session?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'+(G.asClass!==G.student.cls||true?'<label>Class in that session</label><select id="c_cls" onchange="pick(\''+esc(G.student.adm)+'\',$(\'c_sess\').value,this.value)">'+G.classes.map(c=>'<option'+(c===G.asClass?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select><div class="help">Use this to take the next session’s fees in advance. Choose the class the child will be in.</div>':''):'')+
    '<div class="btnrow"><button class="btn b-navy" onclick="back()">⬅ Choose another student</button>'+(PRIV.indexOf('CORRECT')>-1?'<button class="btn b-purple" onclick="openFix(G.details,G.student.adm,function(d){G.details=d;G.student.name=d.name;draw();})">✏ Correct name / parents</button>':'')+'</div></div>';
   h += '<div class="box"><div class="title">What is being paid</div>'+(due.length?due.map(rowHtml).join(''):'<div class="empty-note">Nothing is overdue.</div>')+
-   (later.length?'<details style="margin-top:8px"><summary style="font-weight:800;color:var(--navy);min-height:40px;cursor:pointer">Not yet due — pay in advance ('+later.length+')</summary>'+later.map(rowHtml).join('')+'</details>':'')+
-   '<label>Amount received (fills the boxes automatically)</label><div class="row2" style="grid-template-columns:1fr auto"><input id="recv" inputmode="decimal" placeholder="Amount"><button class="btn b-purple" style="width:auto" onclick="allocate()">Fill</button></div><div class="help">Filled '+(G.payOrder==='CURRENT_FIRST'?'current fees first':'oldest dues first')+' (changeable in Fees Settings). You can still change any box.</div></div>';
+   (later.length?'<details style="margin-top:8px"><summary style="font-weight:800;color:var(--navy);min-height:40px;cursor:pointer">Not yet due — pay in advance ('+later.length+')</summary>'+later.map(rowHtml).join('')+'</details>':'')+orderHtml()+
+   '<label>Amount received (fills the boxes automatically)</label><div class="row2" style="grid-template-columns:1fr auto"><input id="recv" inputmode="decimal" placeholder="Amount"><button class="btn b-purple" style="width:auto" onclick="allocate()">Fill</button></div><div class="help">Filled '+(G.payOrder==='CURRENT_FIRST'?'current fees first':'oldest dues first')+(G.inOrder?' (fees must be paid in order).':' (changeable in Fees Settings).')+' You can still change any box.</div></div>';
   h += '<div class="box"><div class="title">Accessories sold</div>'+(G.items.length?'<div class="row2" style="grid-template-columns:1fr 70px auto"><select id="itSel">'+G.items.map(i=>'<option value="'+esc(i.itemId)+'">'+esc(i.name+(i.size?' ('+i.size+')':''))+' — '+rs(i.price)+'</option>').join('')+'</select><input id="itQty" inputmode="numeric" value="1"><button class="btn b-blue" style="width:auto" onclick="addItem()">Add</button></div>':'<div class="meta">No accessory items are set for this session.</div>')+'<div id="itList"></div>'+
    '<h3 class="g">Fine (typed)</h3><div class="row2"><div><label>Reason</label><input id="fnL" maxlength="30" placeholder="Late fine..." oninput="sum()"></div><div><label>Amount</label><input id="fnA" inputmode="decimal" oninput="sum()"></div></div></div>';
   h += '<div class="box"><div class="title">Payment</div><label>Received by</label><select id="mode">'+G.modes.map(m=>'<option>'+esc(m)+'</option>').join('')+'</select>'+
@@ -285,10 +321,11 @@ function backCheck(){
   else hide($('dtMsg'));
 }
 function tick(k,on){
-  let x = G.payables.find(y=>y.key===k); SEL[k] = {on:on, amount:on?String(x.balance):''};
-  let i = document.querySelector('input.amt[data-k="'+k.replace(/"/g,'\\"')+'"]'); if(i) i.value = SEL[k].amount; sum();
+  let x = G.payables.find(y=>y.key===k); if(on && blocker(x)){ refreshRows(); return; }
+  SEL[k] = {on:on, amount:on?String(x.balance):''};
+  let i = document.querySelector('input.amt[data-k="'+k.replace(/"/g,'\\"')+'"]'); if(i) i.value = SEL[k].amount; clean(); refreshRows(); sum();
 }
-function typed(k,el){ let v = el.value.trim(); SEL[k] = {on:v!=='' && Number(v)>0, amount:v}; let cb = el.parentNode.querySelector('input[type=checkbox]'); if(cb) cb.checked = SEL[k].on; sum(); }
+function typed(k,el){ let v = el.value.trim(); SEL[k] = {on:v!=='' && Number(v)>0, amount:v}; let cb = el.parentNode.querySelector('input[type=checkbox]'); if(cb) cb.checked = SEL[k].on; clean(); refreshRows(); sum(); }
 function allocate(){
   let amt = Number($('recv').value.replace(/,/g,'')); if(!(amt > 0)){ show($('pMsg'),'Type the amount received first.','warn'); return; }
   let rows = G.payables.slice(), kind = {OPENING:0,AUTOFINE:1,FEE:2};
@@ -316,9 +353,11 @@ async function submitPay(){
   let pay = Object.keys(SEL).filter(k=>SEL[k].on && Number(SEL[k].amount) > 0).map(k=>({key:k,amount:SEL[k].amount}));
   let fine = $('fnA').value.trim() ? {label:$('fnL').value,amount:$('fnA').value} : null;
   if(!pay.length && !ITEMS.length && !fine){ show($('pMsg'),'Choose at least one thing to pay.','warn'); return; }
+  let ordReason = (BREAK && $('ordR')) ? $('ordR').value.trim() : '';
+  if(BREAK && outOfOrderNow() && ordReason.length < 3){ show($('pMsg'),'Write the reason for taking fees out of order (at least 3 letters).','warn'); $('ordR').focus(); return; }
   BUSY = true; let b = $('payBtn'); b.disabled = true; show($('pMsg'),'Saving receipt... please wait','load');
   try{
-    let r = await apiPost('feecollect',{adm:G.student.adm,session:G.session,asClass:G.asClass,pay:JSON.stringify(pay),items:JSON.stringify(ITEMS),fine:JSON.stringify(fine),mode:$('mode').value,ref:$('ref').value,note:$('note').value,date:$('dt').value.trim(),backReason:($('bdr')?$('bdr').value.trim():''),reqId:REQ});
+    let r = await apiPost('feecollect',{adm:G.student.adm,session:G.session,asClass:G.asClass,pay:JSON.stringify(pay),items:JSON.stringify(ITEMS),fine:JSON.stringify(fine),mode:$('mode').value,ref:$('ref').value,note:$('note').value,date:$('dt').value.trim(),backReason:($('bdr')?$('bdr').value.trim():''),orderReason:ordReason,reqId:REQ});
     if(r.success){
       newReq();
       $('vPay').innerHTML = '<div class="ok-box">✅ Payment saved<b>Receipt '+esc(r.receiptNo)+'</b><div>'+esc(r.student.name)+' · '+rs(r.total)+' · '+esc(r.mode)+'</div><div class="meta">Balance still unpaid: '+rs(r.balanceAfter)+'</div>'+

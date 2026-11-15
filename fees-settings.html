@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.14-S9">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S10">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -206,6 +206,7 @@ var SETF = [
  ['Rules',null],
  ['Transport_HeadID','Monthly head used for bus fee','headsel','','The bus amount comes from the route chosen for each student. This head decides the months and due day.'],
  ['Discount_Combine','Sibling + other concession','sel',[['ADD','Add both (never more than the fee)'],['BEST','Give only the bigger one']]],
+ ['Pay_InOrder','Fees must be paid in order','yn','','Yes (recommended): each fee head is paid month by month (February waits for January; an instalment waits for the one before), and previous-session dues come first. Accessories and a typed fine are never blocked. Only the admin can take fees out of order, with a reason. While this is Yes, a part amount always goes to the oldest dues first.'],
  ['Pay_Order','When a parent pays a part amount','sel',[['OLDEST_FIRST','Oldest dues first'],['CURRENT_FIRST','Current fees first']]],
  ['Carry_Forward','Carry unpaid dues to the next session','sel',[['MANUAL','Only when I press the button'],['AUTO','Automatically']]],
  ['Sibling_Basis','Who is counted as the first child','sel',[['HIGHER_CLASS_FIRST','Child in the higher class'],['EARLIER_ADMISSION_FIRST','Child admitted earlier']]],
@@ -258,7 +259,14 @@ function dSettings(){
     if(f[4]) h += '<div class="help">'+esc(f[4])+'</div>';
   });
   h += '<div class="btnrow"><button class="btn b-purple" onclick="preview()">👁 Preview a sample receipt</button></div><div class="help">Save first, then preview, to see your latest receipt settings.</div>';
+  setTimeout(orderLink, 0);
   return h;
+}
+/* S10: while "Fees must be paid in order" is Yes, the payment order is fixed to Oldest dues first (the server checks the same) */
+function orderLink(){
+  let a = $('s_Pay_InOrder'), b = $('s_Pay_Order'); if(!a || !b) return;
+  let f = function(){ let on = a.value === 'YES'; if(on) b.value = 'OLDEST_FIRST'; b.disabled = on; };
+  a.onchange = f; f();
 }
 function preview(){ window.open('fees-receipt.html?sample=1','_blank'); }
 function rSettings(){ return SETF.filter(f=>f[1]!==null).map(f=>({key:f[0],value:$('s_'+f[0]).value})); }
