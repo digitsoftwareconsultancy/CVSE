@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.14-S9"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.15-S12"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -125,10 +125,13 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="c_fp" value="REPORTS"> Fee reports</label>
 <div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDENTDB"> Students (add and edit student details)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="RECVIEW" onchange="recTick(this,'c')"> Student records: VIEW the full record (Aadhaar "Show" is logged)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="RECEDIT" onchange="recTick(this,'c')"> Student records: EDIT the full record (includes view)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="BACKDATE"> Back-date receipts beyond the limit (a reason is asked)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="CORRECT"> Correct a student's name / parents from Collect Fees</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="WAIVE"> Waive late fine (full or part, a reason is asked)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="TIMETABLE"> Timetable builder</label>
@@ -144,6 +147,11 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 </div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()" style="width:100%">🔄 Refresh</button><p id="userMsg" style="font-weight:700;margin:8px 0"></p><div id="ulist">Click Refresh...</div></div></div>
 <div id="tabStudents" class="tab" style="display:none;">
+<div class="box" style="background:#f5f3ff;border:2px solid #7c3aed"><h3>📇 Student records (master)</h3><p class="sub">The full record of every student (current, left, passed out): 6 sections, registration form and profile print, brothers / sisters. The quick forms below still work and save into the master too.</p>
+<button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="location.href='students.html'">🎓 Students list – open a full record</button>
+<button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='student-record.html?new=1'">➕ Add student (full record, automatic number)</button>
+<button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='student-settings.html'">⚙️ Settings – Student record (number, lists, fill master)</button>
+<button class="btn" style="background:#e5e7eb;color:#475569;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.open('student-print.html?blank=1','_blank')">🖨️ Print a blank registration form</button></div>
 <div class="box"><h3>Add New Student</h3>
 <div class="formGrid">
 <div class="field"><label>Admission No</label><input id="adno" placeholder="Adm No"></div>
@@ -270,10 +278,13 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="e_fp" value="REPORTS"> Fee reports</label>
 <div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDENTDB"> Students (add and edit student details)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="RECVIEW" onchange="recTick(this,'e')"> Student records: VIEW the full record (Aadhaar "Show" is logged)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="RECEDIT" onchange="recTick(this,'e')"> Student records: EDIT the full record (includes view)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="BACKDATE"> Back-date receipts beyond the limit (a reason is asked)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="CORRECT"> Correct a student's name / parents from Collect Fees</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="WAIVE"> Waive late fine (full or part, a reason is asked)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="ATTENDANCE"> Attendance and monthly performance</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="DAILY"> Daily updates (view, edit, publish)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="TIMETABLE"> Timetable builder</label>
@@ -538,6 +549,8 @@ function startTab(){
 var TAB_BTN={homeTab:'bHome',tabStudents:'b2',feesTab:'b3',timetableTab:'bTT',tabUsers:'b5',backupTab:'b5',resultControlTab:'b5',subjectMasterTab:'b5'};
 var SET_CHIP={resultControlTab:'sc1',tabUsers:'sc2',subjectMasterTab:'sc3',backupTab:'sc4'};
 function openTab(id){ try{ sessionStorage.setItem('cvse_admintab', id); }catch(e){} var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); var bb=document.getElementById(TAB_BTN[id]); if(bb) bb.classList.add('active'); var sb=document.getElementById('setBar'); if(sb){ sb.style.display=SET_CHIP[id]?'flex':'none'; ['sc1','sc2','sc3','sc4'].forEach(function(c){ var e=document.getElementById(c); if(e) e.classList.toggle('on', SET_CHIP[id]===c); }); } window.scrollTo({top:0,behavior:'smooth'}); }
+// S12: Student records = None / View / Edit (Edit includes View)
+function recTick(el,pfx){ var v=document.querySelector('.'+pfx+'_fp[value=RECVIEW]'), e=document.querySelector('.'+pfx+'_fp[value=RECEDIT]'); if(el.value==='RECEDIT'&&el.checked) v.checked=true; if(el.value==='RECVIEW'&&!el.checked) e.checked=false; }
 function getFp(pfx){ return [...document.querySelectorAll('.'+pfx+'_fp:checked')].map(function(i){return i.value;}).join(','); }
 function setFp(pfx,csv){ var s=','+String(csv||'')+','; document.querySelectorAll('.'+pfx+'_fp').forEach(function(i){ i.checked = s.indexOf(','+i.value+',')>-1; }); }
 async function create(){

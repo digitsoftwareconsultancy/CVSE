@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S10">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -191,10 +191,14 @@ var SETF = [
  ['Fee_Decimals','Show paise','sel',[['0','No (whole rupees)'],['2','Yes (2 decimals)']]],
  ['Late fine',null],
  ['Fine_Auto','Add late fine automatically','yn'],
- ['Fine_Mode','Fine type','sel',[['FIXED','Fixed amount once'],['PER_DAY','Amount per day late']]],
- ['Fine_Amount','Fine amount','num'],
- ['Fine_Grace','Grace days before fine','num'],
- ['Fine_Max','Maximum fine (0 = no limit)','num'],
+ ['Fine_Mode','Fine type','sel',[['FIXED','Fixed amount once for each late month'],['PER_DAY','Amount per day late'],['PERCENT','Percent of that month\'s fee']]],
+ ['Fine_Amount','Fine amount (Rs, or percent for "Percent")','num','','Each late month gets its own fine. It stays after the fee is paid, until it is paid or waived. A per-day fine stops growing on the day that month is fully paid.'],
+ ['Fine_Grace','Grace days before fine','num','','Plain calendar days after the due date. Previous-session dues and months entered in Already Paid get no fine.'],
+ ['Fine_Max','Maximum fine for one month (0 = no limit)','num'],
+ ['Fine_MaxStudent','Maximum total fine for one student in a session (0 = no limit)','num','','Counted from the oldest month.'],
+ ['Fine_Heads','Which fees get a late fine','headticks'],
+ ['Fine_From','Late fine counts from (DD-MM-YYYY)','date','','Filled with today when you switch the late fine on. Months fully paid before this day never get a fine, so parents get no surprise fines for months already settled. Unpaid months still get their fine from their due date.'],
+ ['__waive','Waive late fines for a class or the whole school','waivebox'],
  ['Who can collect',null],
  ['Role_ClassTeacherCollects','Class teachers may collect fees for their own class','yn','','Accountants are given their permissions in Admin → Users.'],
  ['Unpaid fees (Result tab lock)',null],
@@ -255,6 +259,9 @@ function dSettings(){
     if(f[2]==='sel') h += sel(id,v,f[3]);
     else if(f[2]==='headsel') h += sel(id,v,[['','(no bus fee)']].concat(D.heads.filter(x=>x.type==='MONTHLY').map(x=>[x.id,x.name])));
     else if(f[2]==='yn') h += sel(id,v,[['YES','Yes'],['NO','No']]);
+    else if(f[2]==='date') h += '<input id="'+id+'" data-date value="'+esc(v||'')+'">';      // S11: mask + 📅 picker (ui.js)
+    else if(f[2]==='headticks'){ let all = !v || String(v).toUpperCase()==='ALL', on = ','+String(v||'')+','; h += '<div class="cl" id="'+id+'">'+D.heads.filter(x=>x.status!=='INACTIVE').map(x=>'<label><input type="checkbox" value="'+esc(x.id)+'"'+(all||on.indexOf(','+x.id+',')>-1?' checked':'')+'>'+esc(x.name)+'</label>').join('')+'</div>'; }
+    else if(f[2]==='waivebox'){ h += '<div class="card2"><div class="help">Admin only. Every unpaid late fine of the students chosen is forgiven (fees stay). First tap Check, then Waive. It shows as "Fine waived" in each student ledger and in FeeLog.</div><label>Class</label>'+sel('wv_cls','ALL',[['ALL','Whole school']].concat(D.classes.map(c=>[c,'Class '+c])))+'<label>Reason (needed)</label><input id="wv_reason" maxlength="120" placeholder="Example: school closed for floods"><div class="btnrow"><button class="btn b-blue" id="wv_chk" onclick="waiveAll(1)">Check how much</button><button class="btn b-purple" id="wv_go" onclick="waiveAll(0)" disabled>Waive</button></div><div class="msg" id="wv_msg"></div></div>'; }
     else h += inp(id,v);
     if(f[4]) h += '<div class="help">'+esc(f[4])+'</div>';
   });
@@ -269,7 +276,21 @@ function orderLink(){
   a.onchange = f; f();
 }
 function preview(){ window.open('fees-receipt.html?sample=1','_blank'); }
-function rSettings(){ return SETF.filter(f=>f[1]!==null).map(f=>({key:f[0],value:$('s_'+f[0]).value})); }
+function rSettings(){ return SETF.filter(f=>f[1]!==null && f[0].indexOf('__')!==0).map(f=>({key:f[0],value:f[2]==='headticks'?headTicks(f[0]):$('s_'+f[0]).value})); }
+/* S11: which fees get a late fine (all ticked = ALL) */
+function headTicks(k){ let box = $('s_'+k); if(!box) return 'ALL'; let all = [...box.querySelectorAll('input')], on = all.filter(i=>i.checked).map(i=>i.value); return on.length === all.length ? 'ALL' : (on.length ? on.join(',') : 'NONE'); }
+/* S11: waive the late fine of a class or the whole school (admin). Check first, then Waive. */
+async function waiveAll(preview){
+  let m = $('wv_msg'), cls = $('wv_cls').value, reason = $('wv_reason').value.trim();
+  if(!preview && reason.length < 3){ show(m,'Write the reason (at least 3 letters).','warn'); return; }
+  if(!preview && !(await UI.ask('Waive every unpaid late fine of '+(cls==='ALL'?'the whole school':'class '+cls)+'? This cannot be undone from the app.'))) return;
+  show(m, preview ? 'Checking...' : 'Waiving... please wait', 'load');
+  try{
+    let r = await apiPost('feefinewaiveall',{cls:cls,reason:reason,session:D.session,preview:preview?'1':''});
+    if(!r.success){ show(m,'❌ '+(r.error||'Could not do it.'),'err'); return; }
+    show(m,(preview?'ℹ ':'✅ ')+r.message, preview?'warn':'ok'); $('wv_go').disabled = !(preview && r.students > 0);
+  }catch(e){ show(m,'❌ Could not connect. Nothing was saved. Try again.','err'); }
+}
 /* ---- groups ---- */
 function dGroups(){
   return '<div id="list">'+D.groups.map(grp).join('')+'</div><div class="btnrow"><button class="btn b-blue" onclick="addGroup()">+ Add group</button></div>';

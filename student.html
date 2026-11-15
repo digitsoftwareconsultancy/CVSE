@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -494,7 +494,8 @@ async function loadFees(){
     h += '<div class="meta" style="margin-top:8px">Fees are paid at the school office. This page shows your account.</div></div>';
     if(s.previous > 0 || s.fine > 0){
       h += '<div class="box"><div class="title">Other amounts</div>' + (s.previous > 0 ? '<div class="frow"><div class="l"><b>Previous dues</b><small>Brought forward from earlier</small></div><div class="r"><b>' + frs(s.previous, d) + '</b></div></div>' : '') +
-        (s.fine > 0 ? '<div class="frow"><div class="l"><b>Late fine so far</b></div><div class="r"><b>' + frs(s.fine, d) + '</b></div></div>' : '') + '</div>';
+        (s.fine > 0 ? ((r.fines || []).filter(f => f.unpaid > 0).map(f => '<div class="frow"><div class="l"><b>Late fine – ' + esc(f.label) + '</b><small>' + (f.due ? 'Due ' + esc(f.due) : '') + (f.paid > 0 ? ' · paid ' + frs(f.paid, d) : '') + (f.waived > 0 ? ' · waived ' + frs(f.waived, d) : '') + '</small></div><div class="r"><b>' + frs(f.unpaid, d) + '</b></div></div>').join('') ||
+          '<div class="frow"><div class="l"><b>Late fine so far</b></div><div class="r"><b>' + frs(s.fine, d) + '</b></div></div>') : '') + '</div>';   // S11: late fine month by month
     }
     if(r.siblingOff > 0 || r.concessionOff > 0){
       h += '<div class="box"><div class="title">🎁 Discounts you get</div>' +

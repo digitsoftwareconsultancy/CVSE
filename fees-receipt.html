@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Money Receipt</title>
@@ -205,12 +205,13 @@ function copyHtml(r, label){
     h += '<table class="l"><tr><th>Particulars</th><th>Amount</th></tr>'+r.lines.map(l=>'<tr><td>'+esc(l.label)+(l.qty>1?' × '+l.qty:'')+'</td><td>'+money(l.amount,dec)+'</td></tr>').join('')+'</table>';
   }else{
     let cols = {1:[],2:[],3:[]}, gm = {}; r.groups.forEach(g=>{ gm[g.id] = g; cols[g.column] = cols[g.column] || []; });
-    let boxes = {}; r.groups.forEach(g=>boxes[g.id] = {g:g, lines:[]}); let other = {g:{name:'Other',column:3}, lines:[]};
+    /* S11: the same form on every receipt – every column chosen in Fees Settings → Groups is always drawn (empty boxes show "—");
+       lines without a group (late fine, typed fine, previous dues) go to an "Other" box at the bottom of the last column, only when used */
+    let used = [1,2,3].filter(c=>r.groups.some(g=>+g.column===c)); if(!used.length) used = [1];
+    let boxes = {}; r.groups.forEach(g=>boxes[g.id] = {g:g, lines:[]}); let other = {g:{name:'Other',column:used[used.length-1]}, lines:[]};
     r.lines.forEach(l=>{ (boxes[l.groupId] || other).lines.push(l); });
     let all = r.groups.map(g=>boxes[g.id]); if(other.lines.length) all.push(other);
-    let used = [1,2,3].filter(c=>all.some(b=>b.g.column===c && b.lines.length));
-    if(!used.length) used = [1];
-    h += '<div class="cols" style="grid-template-columns:repeat('+used.length+',1fr)">'+used.map(c=>'<div>'+all.filter(b=>b.g.column===c).map(b=>'<div class="gb" style="margin-bottom:6px"><h6>'+esc(b.g.name)+'</h6>'+(b.lines.length?b.lines.map(l=>'<div class="ln"><span>'+esc(l.label)+(l.qty>1?' ×'+l.qty:'')+'</span><i>'+money(l.amount,dec)+'</i></div>').join(''):'<div class="ln"><span>—</span><i></i></div>')+'</div>').join('')+'</div>').join('')+'</div>';
+    h += '<div class="cols" style="grid-template-columns:repeat('+used.length+',1fr)">'+used.map(c=>'<div>'+all.filter(b=>+b.g.column===c).map(b=>'<div class="gb" style="margin-bottom:6px"><h6>'+esc(b.g.name)+'</h6>'+(b.lines.length?b.lines.map(l=>'<div class="ln"><span>'+esc(l.label)+(l.qty>1?' ×'+l.qty:'')+'</span><i>'+money(l.amount,dec)+'</i></div>').join(''):'<div class="ln"><span>—</span><i></i></div>')+'</div>').join('')+'</div>').join('')+'</div>';
   }
   h += '<div class="tt"><span>TOTAL</span><span>₹ '+money(r.total,dec)+'</span></div>'+(L.showWords?'<div class="words">'+esc(r.words)+'</div>':'')+
    '<div class="pm">Paid by <b>'+esc(r.mode)+'</b>'+(r.ref?' · Ref: '+esc(r.ref):'')+(r.note?' · '+esc(r.note):'')+(r.status==='ACTIVE'&&r.balanceAfter>0?' · Balance due: ₹ '+money(r.balanceAfter,dec):'')+'</div>'+
@@ -240,10 +241,11 @@ window.addEventListener('resize', fit); window.addEventListener('orientationchan
 window.addEventListener('resize', fit);
 function sampleData(me){
   let L = me.layout, g = me.groups.length ? me.groups : [{id:'G1',name:'Admission',column:1},{id:'G2',name:'Accessories',column:2},{id:'G3',name:'Monthly',column:3}];
-  let id = n => (g.find(x=>new RegExp(n,'i').test(x.name))||g[0]).id;
+  let sg = me.sampleGroups || {}, real = {admis:sg.admission, access:sg.accessory, month:sg.monthly};    // S11: groups of the real fee heads
+  let id = n => (real[n] && g.some(x=>x.id===real[n])) ? real[n] : (g.find(x=>new RegExp(n,'i').test(x.name))||g[0]).id;
   let no = String(1); while(no.length < L.pad) no = '0' + no;
   return {sample:true, receiptNo:(L.prefix||'')+no, date:'08-11-2026', status:'ACTIVE', student:{name:'Sample Student', cls:'I', adm:'101', father:'Sample Father'}, mode:'Cash', ref:'', note:'', total:2520, words:'Rupees Two Thousand Five Hundred Twenty Only', balanceAfter:3600, collectedBy:me.name,
-   lines:[{label:'Admission Fee – 1st',amount:600,kind:'FEE',qty:1,groupId:id('admis')},{label:'Tie (M)',amount:70,kind:'ITEM',qty:1,groupId:id('access')},{label:'Tuition – Apr',amount:1200,kind:'FEE',qty:1,groupId:id('month')},{label:'Tuition – May',amount:600,kind:'FEE',qty:1,groupId:id('month')},{label:'Late fine',amount:50,kind:'FINE',qty:1,groupId:''}],
+   lines:[{label:'Admission Fee – 1st',amount:600,kind:'FEE',qty:1,groupId:id('admis')},{label:'Tie (M)',amount:70,kind:'ITEM',qty:1,groupId:id('access')},{label:'Tuition – Apr',amount:1200,kind:'FEE',qty:1,groupId:id('month')},{label:'Tuition – May',amount:600,kind:'FEE',qty:1,groupId:id('month')},{label:'Late fine – Tuition – Apr',amount:50,kind:'AUTOFINE',qty:1,groupId:''}],
    groups:g, school:me.schoolInfo, layout:L};
 }
 async function init(){

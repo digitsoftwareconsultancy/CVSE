@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Settings – Student record</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-orange{background:linear-gradient(135deg,#ef6c00,#fb8c00)}.b-grey{background:#e5e7eb;color:#475569}.b-red{background:var(--red)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-line}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}.msg.info{background:#e0f2fe;color:#075985}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chk{display:flex;align-items:flex-start;gap:10px;margin:8px 0;font-size:14px;font-weight:700;color:var(--navy);min-height:36px}.chk input{width:22px;height:22px;min-height:0;flex-shrink:0;margin-top:1px}
+.chk small{display:block;font-weight:600;color:var(--muted);font-size:11.5px}
+.chk.dis{opacity:.6}
+h4.g{margin:14px 0 2px;color:var(--purple);font-size:13.5px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:6px 8px;margin-top:6px;font-size:14px}
+.opt.hid{opacity:.6;background:#f8fafc}
+.opt b{flex:1}.opt small{color:var(--muted);font-weight:700}
+.opt button{border:none;border-radius:10px;min-height:40px;padding:0 10px;font-weight:800;font-size:12px;cursor:pointer;background:#e0f2fe;color:#075985}
+.opt button.d{background:#fee2e2;color:#991b1b}
+.prob{border-left:4px solid var(--orange);background:#fff7ed;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.big div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}.big b{display:block;font-size:20px;color:var(--navy)}.big span{font-size:11px;color:var(--muted);font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+</style><script src="config.js"></script><script src="ui.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left"><div class="avatar" id="avatarLetter">A</div><div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div></div>
+  <div class="top-right"><div class="badge">ADMIN</div><button class="btn-logout" onclick="doLogout()">Logout</button></div>
+</div>
+<div class="wrap">
+  <div class="box"><div class="title">⚙️ Settings – Student record</div><div class="meta">Admission number, compulsory fields, the columns kept in the Students tab, the drop-down lists, and filling the master record from today's students.</div></div>
+  <div class="msg" id="gMsg"></div>
+  <div id="main"></div>
+</div>
+<div class="tabs"><button class="tabBtn active"><span class="tabIco">⚙️</span>Student record</button><button class="tabBtn" onclick="location.href='students.html'"><span class="tabIco">🎓</span>Students</button><button class="tabBtn" onclick="location.href='admin.html?tab=last'"><span class="tabIco">⬅️</span>Back</button></div>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || USER.role !== 'admin'){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; } }
+async function apiGet(action, params){ let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token')); for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]); let r = await fetch(url); let j = await r.json(); authCheck(j); return j; }
+async function apiPost(action, payload){ let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))}); let j = await r.json(); authCheck(j); return j; }
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ if(el) el.className = 'msg'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+var LIST_LABEL = {Gender:'Gender', BloodGroup:'Blood group', Category:'Category', Community:'Community', Religion:'Religion'};
+var D = null;
+
+async function load(keepMsg){
+  if(!keepMsg) show($('gMsg'), 'Loading... please wait', 'load');
+  try{
+    let r = await apiGet('mrsettingsget', {});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    D = r; if(!keepMsg) hide($('gMsg')); draw();
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); }
+}
+function draw(){
+  let a = D.adm, f = D.meta.fields, h = '';
+  // 1. admission number
+  h += '<div class="box" style="border-left-color:var(--blue)"><div class="title">1. Admission number</div><div class="meta">Automatic numbers follow this pattern. A number already given is never changed. Change the digits only at the start of a new year.</div>'+
+    '<label for="a_pre">Text before the number (for example MCS, may be empty)</label><input id="a_pre" maxlength="10" value="'+esc(a.prefix)+'" autocapitalize="characters">'+
+    '<div class="row2"><div><label for="a_year">Year in the number</label><select id="a_year"><option value="YES"'+(a.useYear==='YES'?' selected':'')+'>Yes (YYYY)</option><option value="NO"'+(a.useYear==='NO'?' selected':'')+'>No</option></select></div>'+
+    '<div><label for="a_dig">Digits of the serial</label><input id="a_dig" inputmode="numeric" maxlength="1" value="'+esc(a.digits)+'"></div></div>'+
+    '<label for="a_rs">Serial starts again at 1 every year</label><select id="a_rs"><option value="YES"'+(a.restart==='YES'?' selected':'')+'>Yes</option><option value="NO"'+(a.restart==='NO'?' selected':'')+'>No, keeps counting</option></select>'+
+    '<div class="msg show info">Pattern now: <b>'+esc(a.pattern)+'</b> · next automatic number for '+esc(a.year)+': <b>'+esc(a.next || '—')+'</b>'+(a.nextError?'\n⚠️ '+esc(a.nextError):'')+'\nExamples: Carey 202601 = year + 2 digits. Mount Calvary MCS20260001 = text MCS + year + 4 digits.</div>'+
+    '<div class="btnrow"><button class="btn b-green" id="b1" onclick="saveAdm()">Save admission number pattern</button></div><div class="msg" id="m1"></div></div>';
+  // 2. compulsory fields
+  h += '<div class="box" style="border-left-color:var(--orange)"><div class="title">2. Compulsory fields</div><div class="meta">A form is not saved while a ticked field is empty. Old records with empty compulsory fields are only marked "incomplete", never blocked.</div>';
+  for(let n = 1; n <= 6; n++){
+    let fs = f.filter(x=>x.section===n && x.type!=='family' && x.type!=='history'); if(!fs.length) continue;
+    h += '<h4 class="g">'+n+'. '+esc(D.meta.sections[n])+'</h4>' + fs.map(x=>{ let fixed = D.meta.fixedRequired.indexOf(x.key) > -1, on = D.meta.required.indexOf(x.key) > -1;
+      return '<label class="chk'+(fixed?' dis':'')+'"><input type="checkbox" class="rq" value="'+x.key+'"'+(on?' checked':'')+(fixed?' disabled':'')+'><span>'+esc(x.label)+(fixed?'<small>always compulsory</small>':'')+'</span></label>'; }).join('');
+  }
+  h += '<div class="btnrow"><button class="btn b-green" id="b2" onclick="saveReq()">Save compulsory fields</button></div><div class="msg" id="m2"></div></div>';
+  // 3. daily fields
+  h += '<div class="box" style="border-left-color:var(--green)"><div class="title">3. Daily student fields (Students tab)</div><div class="meta">The Students tab is read many times a day, so it keeps only what pages need. Everything stays in the master record.</div>'+
+    '<h4 class="g">Always kept</h4>' + D.fixedStudents.concat(D.feeStudents).map(k=>'<label class="chk dis"><input type="checkbox" checked disabled><span>'+esc(k)+'<small>'+(D.feeStudents.indexOf(k)>-1?'needed by fees (new/old student, admission month, sibling discount)':'needed everywhere')+'</small></span></label>').join('')+
+    '<h4 class="g">The school chooses</h4>' + D.dailyOptions.map(o=>'<label class="chk"><input type="checkbox" class="dl" value="'+o.key+'"'+(D.daily.indexOf(o.key)>-1?' checked':'')+'><span>'+esc(o.label)+'<small>Used by: '+esc(o.usedBy)+'</small></span></label>').join('')+
+    '<div class="meta">Switching one OFF empties that column in the Students tab (the data stays in the master). Switching it ON fills it again from the master.</div>'+
+    '<div class="btnrow"><button class="btn b-green" id="b3" onclick="saveDaily()">Save daily student fields</button></div><div class="msg" id="m3"></div></div>';
+  // 4. lists
+  h += '<div class="box" style="border-left-color:var(--purple)"><div class="title">4. Drop-down lists</div><div class="meta">An option used by a student can only be hidden (old records keep it, new forms do not offer it). Renaming also changes the old records. An unused option can be deleted.</div>';
+  Object.keys(D.meta.lists).forEach(k=>{
+    let c = D.counts[k] || {};
+    h += '<h4 class="g">'+esc(LIST_LABEL[k] || k)+'</h4>' + D.meta.lists[k].map(o=>{ let n = c[o.v] || 0;
+      return '<div class="opt'+(o.hidden?' hid':'')+'"><b>'+esc(o.v)+(o.hidden?' (hidden)':'')+'</b><small>'+n+' used</small>'+
+        '<button onclick="opt(\''+k+'\',\'rename\',this.dataset.v)" data-v="'+esc(o.v)+'">Rename</button>'+
+        '<button onclick="opt(\''+k+'\',\''+(o.hidden?'show':'hide')+'\',this.dataset.v)" data-v="'+esc(o.v)+'">'+(o.hidden?'Show':'Hide')+'</button>'+
+        (n ? '' : '<button class="d" onclick="opt(\''+k+'\',\'delete\',this.dataset.v)" data-v="'+esc(o.v)+'">Delete</button>')+'</div>'; }).join('') +
+      '<div style="display:flex;gap:8px;margin-top:8px"><input id="new_'+k+'" placeholder="New option" maxlength="40" style="flex:1;min-width:0"><button class="btn b-blue" style="width:auto;min-width:90px" onclick="opt(\''+k+'\',\'add\',$(\'new_'+k+'\').value)">Add</button></div>';
+  });
+  h += '<div class="msg" id="m4"></div></div>';
+  // 5. fill master
+  h += '<div class="box" style="border-left-color:var(--red)"><div class="title">5. Fill master from current students</div><div class="meta">Copies every student of the Students tab who is not in the master record yet. Students already in the master are never doubled or overwritten, so it is safe to run again. An automatic backup is made just before copying.</div>'+
+    '<div class="big"><div><b>'+D.masterCount+'</b><span>in the master</span></div><div><b>'+D.notInMaster+'</b><span>not in the master yet</span></div><div><b>'+(D.masterCount+D.notInMaster)+'</b><span>together</span></div></div>'+
+    '<div class="btnrow"><button class="btn b-navy" id="b5" onclick="fillCheck()">Check first (nothing is copied)</button></div><div class="msg" id="m5"></div><div id="fillOut"></div></div>';
+  $('main').innerHTML = h;
+}
+async function post(action, payload, btn, m, okReload){
+  btn.disabled = true; show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await apiPost(action, payload);
+    if(r.needConfirm){
+      btn.disabled = false; hide(m);
+      if(await UI.ask(r.warning + '\n\nGo ahead?', 'Yes, go ahead', false)) return post(action, Object.assign({}, payload, {confirmOff:1}), btn, m, okReload);
+      show(m, 'Nothing was changed.', 'warn'); return null;
+    }
+    if(r.success){ if(okReload){ await load(true); } let mm = $(m.id); show(mm, '✅ ' + (r.message || 'Saved.'), 'ok'); return r; }
+    show(m, '❌ ' + (r.error || 'Could not save.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Check internet and try again.', 'err'); }
+  btn.disabled = false; return null;
+}
+function saveAdm(){ post('mrsettingssave', {admPrefix:$('a_pre').value.trim(), admUseYear:$('a_year').value, admDigits:$('a_dig').value.trim(), admRestart:$('a_rs').value}, $('b1'), $('m1'), true); }
+function saveReq(){ post('mrsettingssave', {required:[...document.querySelectorAll('.rq:checked:not(:disabled)')].map(x=>x.value).join(',')}, $('b2'), $('m2'), true); }
+function saveDaily(){ post('mrsettingssave', {daily:[...document.querySelectorAll('.dl:checked')].map(x=>x.value).join(',')}, $('b3'), $('m3'), true); }
+async function opt(list, op, value){
+  let m = $('m4'), nv = '';
+  if(op === 'add' && !String(value||'').trim()){ show(m, 'Type the new option first.', 'warn'); return; }
+  if(op === 'rename'){ nv = await UI.prompt('New name for "' + value + '" (old records are changed too):', value); if(nv === null || !nv.trim() || nv.trim() === value) return; }
+  if(op === 'delete' && !(await UI.ask('Delete "' + value + '" from the list?', 'Delete'))) return;
+  show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await apiPost('mroption', {list:list, op:op, value:String(value||'').trim(), newValue:nv.trim()});
+    if(r.success){ await load(true); show($('m4'), '✅ ' + r.message, 'ok'); $('m4').scrollIntoView({block:'center'}); }
+    else show(m, '❌ ' + (r.error || 'Could not save.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Try again.', 'err'); }
+}
+async function fillCheck(){
+  let b = $('b5'), m = $('m5'); b.disabled = true; show(m, 'Checking... please wait', 'load'); $('fillOut').innerHTML = '';
+  try{
+    let r = await apiGet('mrfillpreview', {});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not check.'), 'err'); b.disabled = false; return; }
+    hide(m);
+    let h = '<div class="big"><div><b>'+r.total+'</b><span>in the Students tab</span></div><div><b>'+r.already+'</b><span>already in the master</span></div><div><b>'+r.toCopy+'</b><span>will be copied</span></div></div>';
+    if(r.problems.length) h += '<div class="meta"><b>Problems found ('+r.problems.length+(r.more?'+':'')+'). Nothing is guessed: the school corrects them.</b></div>' + r.problems.map(p=>'<div class="prob">Row '+p.row+(p.adm?' · Adm '+esc(p.adm):'')+(p.name?' · '+esc(p.name):'')+'<br>'+esc(p.issue)+'</div>').join('');
+    else h += '<div class="msg show ok">No problems found.</div>';
+    if(r.toCopy) h += '<div class="btnrow"><button class="btn b-orange" id="b5b" onclick="fillNow('+r.toCopy+')">Copy '+r.toCopy+' student'+(r.toCopy===1?'':'s')+' now (backup first)</button></div><div class="msg" id="m5b"></div>';
+    $('fillOut').innerHTML = h;
+  }catch(e){ show(m, '❌ Could not connect. Try again.', 'err'); }
+  b.disabled = false;
+}
+async function fillNow(n){
+  if(!(await UI.ask('Make a backup and then copy ' + n + ' student' + (n===1?'':'s') + ' into the master record?', 'Yes, copy', false))) return;
+  let b = $('b5b'), m = $('m5b'); b.disabled = true; show(m, 'Making the backup and copying... this can take up to a minute', 'load');
+  try{
+    let r = await apiPost('mrfill', {});
+    if(r.success){ await load(true); show($('m5'), '✅ ' + r.message, 'ok'); $('m5').scrollIntoView({block:'center'}); return; }
+    show(m, '❌ ' + (r.error || 'Could not copy.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Nothing may have been copied. Tap "Check first" again to see.', 'err'); }
+  b.disabled = false;
+}
+load();
+</script>
+</body></html>

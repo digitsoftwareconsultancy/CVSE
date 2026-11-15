@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S10">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Collect Fees</title>
@@ -150,6 +150,10 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 <label>Student name</label><input id="fx_name" maxlength="80"><label>Father name</label><input id="fx_fa" maxlength="80"><label>Mother name</label><input id="fx_mo" maxlength="80">
 <div class="row2"><div><label>Date of birth</label><input id="fx_dob" inputmode="numeric" maxlength="10" oninput="maskD(this)" placeholder="DD-MM-YYYY"></div><div><label>House</label><input id="fx_ho" maxlength="30"></div></div>
 <div class="msg" id="fx_msg"></div><div class="btnrow"><button class="btn b-green" id="fx_btn" onclick="saveFix()">Save correction</button><button class="btn b-navy" onclick="$('fixM').classList.remove('on')">Cancel</button></div></div></div>
+<div class="modal" id="wvM"><div style="background:#fff;border-radius:16px;padding:16px;max-width:400px;width:100%;max-height:90vh;overflow:auto"><div class="title">Waive late fine</div><div class="meta" id="wv_who"></div>
+<label>Amount to waive (full or part)</label><input id="wv_amt" inputmode="decimal">
+<label>Reason (needed, kept in the log)</label><input id="wv_reason" maxlength="120" placeholder="Example: parent was in hospital">
+<div class="msg" id="wv_msg"></div><div class="btnrow"><button class="btn b-purple" id="wv_btn" onclick="saveWaive()">Waive</button><button class="btn b-navy" onclick="$('wvM').classList.remove('on')">Cancel</button></div></div></div>
 <div class="tabs" id="tabsBar"><button class="tabBtn active"><span class="tabIco">💵</span>Collect</button><button class="tabBtn" onclick="window.location.href='fees-receipts.html'"><span class="tabIco">🧾</span>Receipts</button><button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button></div><script>
 const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
@@ -214,9 +218,9 @@ async function saveUnlock(on){
   let b = $('unl_btn'); if(on){ b.disabled = true; show($('unl_msg'),'Saving... please wait','load'); }
   try{
     let r = await apiPost('feeunlock',{adm:G.student.adm,days:on?$('unl_days').value.trim():0,reason:on?$('unl_reason').value:''});
-    if(r.success){ G.lock = r.lock; $('unlM').classList.remove('on'); draw(); show($('gMsg'),'✅ '+r.message,'ok'); }
-    else if(on) show($('unl_msg'),'❌ '+(r.error||'Could not save.'),'err'); else show($('gMsg'),'❌ '+(r.error||'Could not remove.'),'err');
-  }catch(e){ if(on) show($('unl_msg'),'❌ Could not connect. Nothing was saved. Try again.','err'); else show($('gMsg'),'❌ Could not connect.','err'); }
+    if(r.success){ G.lock = r.lock; $('unlM').classList.remove('on'); draw(); show($('vMsg'),'✅ '+r.message,'ok'); }
+    else if(on) show($('unl_msg'),'❌ '+(r.error||'Could not save.'),'err'); else show($('vMsg'),'❌ '+(r.error||'Could not remove.'),'err');
+  }catch(e){ if(on) show($('unl_msg'),'❌ Could not connect. Nothing was saved. Try again.','err'); else show($('vMsg'),'❌ Could not connect.','err'); }
   b.disabled = false;
 }
 var G = null, SEL = {}, ITEMS = [], REQ = '', BUSY = false, BREAK = false;
@@ -278,7 +282,7 @@ function breakToggle(on){
 }
 function rowHtml(x){
   let s = SEL[x.key] || {on:false,amount:''}, b = blocker(x);
-  return '<div class="row3'+(b?' blk':'')+'" data-row="'+esc(x.key)+'"><input type="checkbox" '+(s.on?'checked':'')+(b?' disabled':'')+' onchange="tick(\''+esc(x.key)+'\',this.checked)"><div>'+esc(x.label)+'<small>'+(x.due?'Due '+esc(x.due.split('-').reverse().join('-'))+' · ':'')+'Unpaid '+rs(x.balance)+'</small><small class="bk">'+(b?esc('Pay '+b.label+' first'):'')+'</small></div><input class="amt" inputmode="decimal" data-k="'+esc(x.key)+'" value="'+esc(s.amount)+'"'+(b?' disabled':'')+' oninput="typed(\''+esc(x.key)+'\',this)"></div>';
+  return '<div class="row3'+(b?' blk':'')+'" data-row="'+esc(x.key)+'"><input type="checkbox" '+(s.on?'checked':'')+(b?' disabled':'')+' onchange="tick(\''+esc(x.key)+'\',this.checked)"><div>'+esc(x.label)+'<small>'+(x.due?'Due '+esc(x.due.split('-').reverse().join('-'))+' · ':'')+'Unpaid '+rs(x.balance)+'</small><small class="bk">'+(b?esc('Pay '+b.label+' first'):'')+'</small>'+(x.kind==='AUTOFINE'&&G.canWaive?'<button class="chip" style="min-height:34px;margin-top:4px" onclick="openWaive(\''+esc(x.key)+'\')">Waive</button>':'')+(x.kind==='AUTOFINE'&&x.fineWaived>0?'<small>Waived before: '+rs(x.fineWaived)+'</small>':'')+'</div><input class="amt" inputmode="decimal" data-k="'+esc(x.key)+'" value="'+esc(s.amount)+'"'+(b?' disabled':'')+' oninput="typed(\''+esc(x.key)+'\',this)"></div>';
 }
 function orderHtml(){
   if(!G.inOrder) return '';
@@ -290,7 +294,7 @@ function draw(){
   let today = G.today, due = [], later = [];
   G.payables.forEach(x=>{ if(!x.due || x.due <= todayIso()) due.push(x); else later.push(x); });
   let showSession = G.sessions.length > 1;
-  let h = '<div class="box"><div class="title">'+esc(G.student.name)+'</div><div class="meta">Class '+esc(G.student.cls)+(G.student.roll?' · Roll '+esc(G.student.roll):'')+' · Adm '+esc(G.student.adm)+'</div>'+
+  let h = '<div class="msg" id="vMsg"></div><div class="box"><div class="title">'+esc(G.student.name)+'</div><div class="meta">Class '+esc(G.student.cls)+(G.student.roll?' · Roll '+esc(G.student.roll):'')+' · Adm '+esc(G.student.adm)+'</div>'+
    '<div class="big"><div><b>'+rs(G.totals.payableNow)+'</b><span>Overdue today</span></div><div><b>'+rs(G.totals.totalDue)+'</b><span>Total unpaid ('+esc(G.session)+')</span></div></div>'+
    lockHtml()+(G.warnings.length?'<div class="probs">⚠ '+G.warnings.map(esc).join('<br>⚠ ')+'</div>':'')+
    (showSession?'<label>Pay for session</label><select id="c_sess" onchange="pick(\''+esc(G.student.adm)+'\',this.value,\'\')">'+G.sessions.map(s=>'<option'+(s===G.session?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'+(G.asClass!==G.student.cls||true?'<label>Class in that session</label><select id="c_cls" onchange="pick(\''+esc(G.student.adm)+'\',$(\'c_sess\').value,this.value)">'+G.classes.map(c=>'<option'+(c===G.asClass?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select><div class="help">Use this to take the next session’s fees in advance. Choose the class the child will be in.</div>':''):'')+
@@ -301,7 +305,7 @@ function draw(){
   h += '<div class="box"><div class="title">Accessories sold</div>'+(G.items.length?'<div class="row2" style="grid-template-columns:1fr 70px auto"><select id="itSel">'+G.items.map(i=>'<option value="'+esc(i.itemId)+'">'+esc(i.name+(i.size?' ('+i.size+')':''))+' — '+rs(i.price)+'</option>').join('')+'</select><input id="itQty" inputmode="numeric" value="1"><button class="btn b-blue" style="width:auto" onclick="addItem()">Add</button></div>':'<div class="meta">No accessory items are set for this session.</div>')+'<div id="itList"></div>'+
    '<h3 class="g">Fine (typed)</h3><div class="row2"><div><label>Reason</label><input id="fnL" maxlength="30" placeholder="Late fine..." oninput="sum()"></div><div><label>Amount</label><input id="fnA" inputmode="decimal" oninput="sum()"></div></div></div>';
   h += '<div class="box"><div class="title">Payment</div><label>Received by</label><select id="mode">'+G.modes.map(m=>'<option>'+esc(m)+'</option>').join('')+'</select>'+
-   '<label>Reference no (UPI / cheque, optional)</label><input id="ref" maxlength="40"><div class="row2"><div><label>Receipt date</label><input id="dt" inputmode="numeric" maxlength="10" oninput="maskD(this);backCheck()" onblur="backCheck()" value="'+esc(today)+'" data-max="'+esc(today)+'"'+(G.canBackdate?'':' data-min="'+esc(backMin())+'"')+'></div><div><label>Note (optional)</label><input id="note" maxlength="120"></div></div>'+
+   '<label>Reference no (UPI / cheque, optional)</label><input id="ref" maxlength="40"><div class="row2"><div><label>Receipt date</label><input id="dt" inputmode="numeric" maxlength="10" oninput="maskD(this);backCheck()" onblur="backCheck();dateChanged()" value="'+esc(today)+'" data-max="'+esc(today)+'"'+(G.canBackdate?'':' data-min="'+esc(backMin())+'"')+'></div><div><label>Note (optional)</label><input id="note" maxlength="120"></div></div>'+
    '<div class="help" id="dtHelp">'+backHelp()+'</div><div id="bdBox" style="display:none"><label>Reason for the old date (needed)</label><input id="bdr" maxlength="100" placeholder="Example: paid in cash on that day, paper receipt no. 0099"></div><div class="msg" id="dtMsg"></div></div>';
   h += '<div class="tot"><span>Total</span><span id="totAmt">₹0</span></div><div class="box"><div class="btnrow"><button class="btn b-green" id="payBtn" onclick="submitPay()">Take payment &amp; make receipt</button></div><div class="msg" id="pMsg"></div></div>';
   $('vPay').innerHTML = h; drawItems(); sum();
@@ -320,6 +324,43 @@ function backCheck(){
   else if(beyond) show($('dtMsg'),'This date is '+d+' days back, beyond the limit of '+lim+'. Please write the reason.','warn');
   else hide($('dtMsg'));
 }
+/* S11: waive a late fine (admin, or accountant with the Users tick) */
+var WV = null;
+function openWaive(k){ let x = rowOf(k); if(!x) return; WV = x; $('wv_who').innerText = G.student.name + ' · ' + x.label + ' · unpaid ' + rs(x.balance); $('wv_amt').value = String(x.balance); $('wv_reason').value = ''; hide($('wv_msg')); $('wvM').classList.add('on'); }
+async function saveWaive(){
+  let a = $('wv_amt').value.trim(), reason = $('wv_reason').value.trim();
+  if(!(Number(a) > 0)){ show($('wv_msg'),'Enter an amount above 0.','warn'); return; }
+  if(reason.length < 3){ show($('wv_msg'),'Write the reason (at least 3 letters).','warn'); return; }
+  let b = $('wv_btn'); b.disabled = true; show($('wv_msg'),'Saving... please wait','load');
+  try{
+    let r = await apiPost('feefinewaive',{adm:G.student.adm,session:G.session,waive:JSON.stringify([{key:WV.key,amount:a}]),reason:reason});
+    if(r.success){ $('wvM').classList.remove('on'); b.disabled = false; await refreshKeep({}); show($('vMsg'),'✅ '+r.message,'ok'); window.scrollTo(0,0); return; }
+    show($('wv_msg'),'❌ '+(r.error||'Could not save.'),'err');
+  }catch(e){ show($('wv_msg'),'❌ Could not connect. Nothing was saved. Try again.','err'); }
+  b.disabled = false;
+}
+/* S11: the late fine is counted up to the receipt date: when the date changes, the amounts are fetched again (ticks are kept) */
+function dateChanged(){
+  if(!G || !G.fineOn) return; let v = $('dt').value.trim();
+  if(!/^\d{2}-\d{2}-\d{4}$/.test(v) || v === G.fineDate || backDaysOf(v) < 0) return;
+  refreshKeep({date:v});
+}
+async function refreshKeep(extra){
+  let keep = {}; ['mode','ref','dt','note','bdr','recv','fnL','fnA','ordR'].forEach(id=>{ if($(id)) keep[id] = $(id).value; });
+  let brk = BREAK;
+  try{
+    let p = Object.assign({adm:G.student.adm, session:G.session, asClass:G.asClass}, extra); if(!p.date && keep.dt && keep.dt !== G.today) p.date = keep.dt;
+    let r = await apiGet('feecollectget', p);
+    if(!r.success){ show($('vMsg'),'❌ '+(r.error||'Could not refresh.'),'err'); return; }
+    let old = SEL; G = r; SEL = {};
+    Object.keys(old).forEach(k=>{ let x = rowOf(k); if(x && old[k].on){ let a = Math.min(Number(old[k].amount)||0, x.balance); if(a > 0) SEL[k] = {on:true, amount:String(a)}; } });
+    BREAK = brk; draw();
+    Object.keys(keep).forEach(id=>{ if($(id)) $(id).value = keep[id]; });
+    if($('ordBrk')) $('ordBrk').checked = BREAK; if($('ordRBox')) $('ordRBox').style.display = BREAK ? 'block' : 'none';
+    backCheck(); sum();
+    if(extra.date) show($('vMsg'),'ℹ Late fine counted up to '+extra.date+'.','warn');
+  }catch(e){ show($('vMsg'),'❌ Could not connect. Check internet and try again.','err'); }
+}
 function tick(k,on){
   let x = G.payables.find(y=>y.key===k); if(on && blocker(x)){ refreshRows(); return; }
   SEL[k] = {on:on, amount:on?String(x.balance):''};
@@ -328,7 +369,7 @@ function tick(k,on){
 function typed(k,el){ let v = el.value.trim(); SEL[k] = {on:v!=='' && Number(v)>0, amount:v}; let cb = el.parentNode.querySelector('input[type=checkbox]'); if(cb) cb.checked = SEL[k].on; clean(); refreshRows(); sum(); }
 function allocate(){
   let amt = Number($('recv').value.replace(/,/g,'')); if(!(amt > 0)){ show($('pMsg'),'Type the amount received first.','warn'); return; }
-  let rows = G.payables.slice(), kind = {OPENING:0,AUTOFINE:1,FEE:2};
+  let rows = G.payables.slice(), kind = {OPENING:0,FEE:1,AUTOFINE:2};          // S11: fees first, late fine last
   if(G.payOrder === 'CURRENT_FIRST') kind = {FEE:0,OPENING:1,AUTOFINE:2};
   rows.sort((a,b)=>kind[a.kind]-kind[b.kind] || (a.due||'').localeCompare(b.due||''));
   SEL = {}; let left = amt;

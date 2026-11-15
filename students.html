@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Students</title>
@@ -123,7 +123,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
  <div id="vList">
   <div class="box"><div class="title">Students</div><div class="meta">Choose a class, tap a student to change the details, or add a new student.</div>
    <label>Search (name or admission no)</label><input id="q" oninput="drawList()" placeholder="Type to filter">
-   <div class="btnrow"><button class="btn b-green" onclick="newStu()">+ Add new student</button></div></div>
+   <div class="btnrow"><button class="btn b-green" id="addBtn" onclick="newStu()">+ Add new student</button></div><div class="btnrow" id="recRow" style="display:none"><button class="btn b-purple" onclick="window.open('student-print.html?blank=1','_blank')">🖨️ Blank registration form</button><button class="btn b-navy" id="setBtn" style="display:none" onclick="location.href='student-settings.html'">⚙️ Student record settings</button></div></div>
   <div class="chips" id="chips"></div>
   <div class="msg" id="gMsg"></div>
   <div id="list"></div>
@@ -164,14 +164,18 @@ $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperC
 
 
 
-var CLS = null, D = null, EDIT = null, ISNEW = false, DEL = '';
+var CLS = new URLSearchParams(location.search).get('class') || null, D = null, EDIT = null, ISNEW = false, DEL = '';
+var ST_LABEL = {LEFT:'Left (TC)', DROPOUT:'Drop out', PASSEDOUT:'Passed out'};
+function dailyOn(k){ return !D || !D.daily || D.daily.indexOf(k) > -1; }
 async function load(){
   show($('gMsg'),'Loading students... please wait','load'); $('list').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
   try{
     let r = await apiGet('liststudents', CLS ? {'class':CLS} : {});
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); $('list').innerHTML=''; return; }
     D = r; hide($('gMsg'));
-    if(!CLS && r.classes.length){ CLS = r.classes[0]; return load(); }
+    if((!CLS || r.classes.indexOf(CLS) < 0) && r.classes.length){ CLS = r.classes[0]; return load(); }
+    $('addBtn').style.display = (r.recordsEdit || r.quickEdit) ? '' : 'none';
+    $('recRow').style.display = r.records ? '' : 'none'; $('setBtn').style.display = USER.role === 'admin' ? '' : 'none';
     $('chips').innerHTML = r.classes.map(c=>'<button class="chip'+(c===CLS?' on':'')+'" onclick="CLS=\''+esc(c)+'\';load()">'+esc(c)+'</button>').join('');
     drawList();
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); $('list').innerHTML=''; }
@@ -179,11 +183,18 @@ async function load(){
 function drawList(){
   if(!D) return; let q = $('q').value.trim().toLowerCase();
   let a = D.students.filter(s=>!q || (s.Name+' '+s.AdmissionNo).toLowerCase().indexOf(q) > -1);
-  $('list').innerHTML = a.length ? a.map((s,i)=>'<div class="srow" onclick="editStu(\''+esc(s.AdmissionNo)+'\')"><b>'+esc(s.Name)+'</b><div class="meta">Class '+esc(s.Class)+(s.RollNo?' · Roll '+esc(s.RollNo):'')+' · Adm '+esc(s.AdmissionNo)+(s.DOB?' · DOB '+esc(s.DOB):'')+'</div></div>').join('') : '<div class="empty-note">No students found.</div>';
+  $('list').innerHTML = a.length ? a.map((s,i)=>'<div class="srow" onclick="editStu(\''+esc(s.AdmissionNo)+'\')"'+(s.Status&&s.Status!=='ACTIVE'?' style="border-left-color:#94a3b8;opacity:.8"':'')+'><b>'+esc(s.Name)+'</b><div class="meta">Class '+esc(s.Class)+(s.RollNo?' · Roll '+esc(s.RollNo):'')+' · Adm '+esc(s.AdmissionNo)+(s.DOB?' · DOB '+esc(s.DOB):'')+'</div>'+pills(s)+'</div>').join('') : '<div class="empty-note">No students found.</div>';
+}
+function pills(s){
+  let h = '';
+  if(s.Status && s.Status !== 'ACTIVE') h += '<span class="pill o">'+esc(ST_LABEL[s.Status] || s.Status)+'</span>';
+  if(s.master === 'NONE') h += '<span class="pill d">not in master yet</span>';
+  if(s.master === 'INCOMPLETE') h += '<span class="pill" style="background:#fff7ed;color:#9a3412">incomplete</span>';
+  return h ? '<div class="l2">'+h+'</div>' : '';
 }
 function grp(cls){ let g = (D.groups||{})[cls] || {}; return Object.keys(g).map(k=>({group:k,subjects:g[k]})); }
-function editStu(adm){ EDIT = D.students.find(s=>s.AdmissionNo===adm); ISNEW = false; drawEdit(); }
-function newStu(){ EDIT = {AdmissionNo:'',Name:'',RollNo:'',Class:CLS||'',DOB:'',FatherName:'',MotherName:'',House:'',electives:[]}; ISNEW = true; drawEdit(); }
+function editStu(adm){ if(D.records){ location.href = 'student-record.html?adm=' + encodeURIComponent(adm) + '&class=' + encodeURIComponent(CLS || ''); return; } EDIT = D.students.find(s=>s.AdmissionNo===adm); ISNEW = false; drawEdit(); }
+function newStu(){ if(D && D.recordsEdit){ location.href = 'student-record.html?new=1&class=' + encodeURIComponent(CLS || ''); return; } EDIT = {AdmissionNo:'',Name:'',RollNo:'',Class:CLS||'',DOB:'',FatherName:'',MotherName:'',House:'',electives:[]}; ISNEW = true; drawEdit(); }
 function elHtml(cls, chosen){
   let gs = grp(cls); if(!gs.length) return '';
   return '<h3 class="g">Elective subjects</h3>'+gs.map((g,i)=>{ let c = (chosen||[]).find(x=>x.group===g.group); return '<label>'+esc(g.group)+'</label><select class="el" data-g="'+esc(g.group)+'"><option value="">Choose</option>'+g.subjects.map(s=>'<option'+(c&&c.subject===s?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'; }).join('');
@@ -196,7 +207,7 @@ function drawEdit(){
    '<label>Name</label><input id="f_name" value="'+esc(s.Name)+'" maxlength="80">'+
    '<div class="row2"><div><label>Class</label><select id="f_cls" onchange="clsChange()">'+D.classes.map(c=>'<option'+(c===s.Class?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select></div><div><label>Roll no</label><input id="f_roll" inputmode="numeric" value="'+esc(s.RollNo)+'"></div></div>'+
    '<label>Date of birth</label><input id="f_dob" inputmode="numeric" maxlength="10" oninput="maskD(this)" value="'+esc(s.DOB)+'" placeholder="DD-MM-YYYY">'+
-   '<label>Father name</label><input id="f_fa" value="'+esc(s.FatherName)+'"><label>Mother name</label><input id="f_mo" value="'+esc(s.MotherName)+'"><label>House</label><input id="f_ho" value="'+esc(s.House)+'">'+
+   (dailyOn('FatherName')?'<label>Father name</label><input id="f_fa" value="'+esc(s.FatherName)+'">':'')+(dailyOn('MotherName')?'<label>Mother name</label><input id="f_mo" value="'+esc(s.MotherName)+'">':'')+(dailyOn('House')?'<label>House</label><input id="f_ho" value="'+esc(s.House)+'">':'')+
    '<div id="elBox">'+elHtml(s.Class, s.electives)+'</div>'+
    '<div class="btnrow"><button class="btn b-green" id="saveBtn" onclick="saveStu()">Save</button><button class="btn b-navy" onclick="closeEdit()">Back to list</button></div>'+
    (!ISNEW && D.canDelete?'<div class="btnrow"><button class="btn" style="background:var(--red)" onclick="askDelete()">Delete this student</button></div>':'')+
@@ -207,7 +218,7 @@ function closeEdit(){ $('vEdit').style.display = 'none'; $('vList').style.displa
 async function saveStu(){
   if(window.UI && !UI.checkDates(['f_dob'])){ show($('sMsg'),'❌ Please correct the date of birth first.','err'); return; }
   let b = $('saveBtn'), m = $('sMsg'); b.disabled = true; show(m,'Saving... please wait','load');
-  let st = {AdmissionNo:$('f_adm').value.trim(),Name:$('f_name').value,Class:$('f_cls').value,RollNo:$('f_roll').value.trim(),DOB:$('f_dob').value.trim(),FatherName:$('f_fa').value,MotherName:$('f_mo').value,House:$('f_ho').value};
+  let st = {AdmissionNo:$('f_adm').value.trim(),Name:$('f_name').value,Class:$('f_cls').value,RollNo:$('f_roll').value.trim(),DOB:$('f_dob').value.trim(),FatherName:$('f_fa')?$('f_fa').value:'',MotherName:$('f_mo')?$('f_mo').value:'',House:$('f_ho')?$('f_ho').value:''};
   let els = [...document.querySelectorAll('.el')].map(x=>({group:x.dataset.g,subject:x.value}));
   try{
     let r = await apiPost(ISNEW?'addstudent':'updatestudent',{student:JSON.stringify(st),electives:JSON.stringify(els)});

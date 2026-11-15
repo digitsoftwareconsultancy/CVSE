@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Office</title>
@@ -190,6 +190,7 @@ var CARDS = [
  ['SETTINGS','⚙️','Fees Settings','Heads, amounts, due dates, receipt look','fees-settings.html'],
  ['REPORTS','📊','Fee Reports','Daily, head-wise, dues, defaulters, ledger','fees-reports.html'],
  ['STUDENTDB','🎓','Students','Add and edit student details','students.html'],
+ ['RECVIEW','📇','Student Records','Full student record and registration form print','students.html'],
  ['STUDPW','🔑','Student Passwords','Reset a student\'s app password','student-access.html'],
  ['ATTENDANCE','✅','Attendance','Mark and see attendance','daily.html?tab=att'],
  ['ATTENDANCE','📈','Monthly Performance','Attendance and test report of a class','performance.html'],
@@ -275,7 +276,7 @@ async function init(){
     hide($('gMsg'));
     $('hi').innerText = (r.school || 'School') + ' — Office'; $('sub').innerText = 'Session ' + (r.session || '-');
     if(USER.role === 'admin') $('adminBack').style.display = 'block';
-    let mine = CARDS.filter(c=>r.privileges.indexOf(c[0]) > -1);
+    let mine = CARDS.filter(c=>r.privileges.indexOf(c[0]) > -1 && !(c[0]==='RECVIEW' && r.privileges.indexOf('STUDENTDB') > -1));   // S12: one Students card
     let feeCards = mine.filter(c=>String(c[4]||'').indexOf('fees-') === 0), moreCards = mine.filter(c=>String(c[4]||'').indexOf('fees-') !== 0);
     $('cardsFees').innerHTML = feeCards.map(cardHtml).join('');
     $('cardsMore').innerHTML = moreCards.map(cardHtml).join('');
