@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S15">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fee Reports</title>
@@ -155,7 +155,7 @@ $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText 
 $('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
-var M = null, DEF = null, OUT = null, BUSY = false, ICON = {DAILY:'💵', RECEIPTS:'🧾', HEADWISE:'🧩', CLASSDUES:'🏫', DEFAULTERS:'⏰', CONCESSIONS:'🎁', LEDGER:'📒', ALLDATA:'📦'};
+var M = null, DEF = null, OUT = null, BUSY = false, ICON = {DAILY:'💵', RECEIPTS:'🧾', HEADWISE:'🧩', CLASSDUES:'🏫', DEFAULTERS:'⏰', CONCESSIONS:'🎁', LEDGER:'📒', ALLDATA:'📦', LEFTDUES:'🚪'};
 function pad2(n){ return String(n).padStart(2, '0'); }
 function ddmm(d){ return pad2(d.getDate()) + '-' + pad2(d.getMonth() + 1) + '-' + d.getFullYear(); }
 function todayDate(){ let a = M.today.split('-'); return new Date(+a[2], +a[1] - 1, +a[0]); }
@@ -237,7 +237,9 @@ function tableHtml(t, dec){
 }
 function draw(){
   let r = OUT, s = M.school;
-  $('pHead').innerHTML = '<b style="font-size:16px">' + esc(s.name) + '</b><br><span style="font-size:11px">' + esc(s.address) + (s.phone ? ' · ' + esc(s.phone) : '') + '</span>';
+  let txt = '<b style="font-size:16px">' + esc(s.name) + '</b><br><span style="font-size:11px">' + esc(s.address) + (s.phone ? ' · ' + esc(s.phone) : '') + '</span>';
+  // S15: print header image (Settings → School info); if it cannot be shown, the name + address text comes back
+  $('pHead').innerHTML = s.printHeader ? '<img src="' + esc(s.printHeader) + '" alt="" style="display:block;width:100%;max-height:120px;object-fit:contain" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'"><div style="display:none">' + txt + '</div>' : txt;
   $('rTitle').innerText = r.title; $('rSub').innerText = r.subtitle || ''; $('rGen').innerText = 'Prepared on ' + r.generated + (USER.name ? ' by ' + USER.name : '');
   $('rSum').innerHTML = r.summary.map(x => '<div class="stat"><b>' + (x.type === 'money' ? rs(x.value) : esc(x.value)) + '</b><span>' + esc(x.label) + '</span></div>').join('');
   $('rTables').innerHTML = r.tables.map(t => tableHtml(t, r.decimals)).join('');

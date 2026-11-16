@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S14">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Students</title>
@@ -165,7 +165,7 @@ $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperC
 
 
 var CLS = new URLSearchParams(location.search).get('class') || null, D = null, EDIT = null, ISNEW = false, DEL = '';
-var ST_LABEL = {LEFT:'Left (TC)', DROPOUT:'Drop out', PASSEDOUT:'Passed out'};
+var ST_LABEL = {LEFT:'Left (TC)', DROPOUT:'Drop out', PASSEDOUT:'Passed out', NEXT:'Joins next session'};   // S14: NEXT
 function dailyOn(k){ return !D || !D.daily || D.daily.indexOf(k) > -1; }
 async function load(){
   show($('gMsg'),'Loading students... please wait','load'); $('list').innerHTML = '<div class="empty-note">⏳ Loading...</div>';

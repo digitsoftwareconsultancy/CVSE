@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.15-S12"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.16-S18"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -127,6 +127,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="RECVIEW" onchange="recTick(this,'c')"> Student records: VIEW the full record (Aadhaar "Show" is logged)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="RECEDIT" onchange="recTick(this,'c')"> Student records: EDIT the full record (includes view)</label>
+<label class="fp"><input type="checkbox" class="c_fp" value="PHOTOS"> Student photos: take / replace photos on Class photo day (sees only name, class, roll, admission no; Student records EDIT includes it)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="BACKDATE"> Back-date receipts beyond the limit (a reason is asked)</label>
@@ -149,9 +150,15 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div id="tabStudents" class="tab" style="display:none;">
 <div class="box" style="background:#f5f3ff;border:2px solid #7c3aed"><h3>📇 Student records (master)</h3><p class="sub">The full record of every student (current, left, passed out): 6 sections, registration form and profile print, brothers / sisters. The quick forms below still work and save into the master too.</p>
 <button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="location.href='students.html'">🎓 Students list – open a full record</button>
+<button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='registration-requests.html'">📝 Registration requests (forms filled by parents)</button>
+<button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnPhotoDay" onclick="location.href='photos.html'">📷 Class photo day (student photos)</button>
+<button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnIdCards" onclick="location.href='idcards.html'">🪪 Print ID cards (a class or one student)</button>
+<button class="btn" style="background:#e5e7eb;color:#475569;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnIdDesign" onclick="location.href='idcard-settings.html'">🎨 ID card design (sides, shape, fields, colours)</button>
 <button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='student-record.html?new=1'">➕ Add student (full record, automatic number)</button>
 <button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='student-settings.html'">⚙️ Settings – Student record (number, lists, fill master)</button>
 <button class="btn" style="background:#e5e7eb;color:#475569;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.open('student-print.html?blank=1','_blank')">🖨️ Print a blank registration form</button></div>
+<div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>🎓 Promotion / new session</h3><p class="sub">Once a year: Part 1 starts the new session (backup, archive copy, fees carried forward). Part 2 promotes the classes (in batches; classes still in exams can finish later). Everything is shown first as a preview. Practise on a copy of the sheet first and run it in a holiday.</p>
+<button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="location.href='promotion.html'">🎓 Open Promotion / new session</button></div>
 <div class="box"><h3>Add New Student</h3>
 <div class="formGrid">
 <div class="field"><label>Admission No</label><input id="adno" placeholder="Adm No"></div>
@@ -185,6 +192,10 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <details class="box"><summary style="font-weight:800;cursor:pointer">Old fee list (earlier version)</summary><div style="margin-top:10px"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:0"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div></details></div>
 <div id="backupTab" class="tab" style="display:none;">
 <div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>🔍 System check</h3><p class="sub">After you upload new files, press this. It shows if every Apps Script file and every page is the latest version.</p><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSysCheck()">Run system check</button><div id="sysOut" style="margin-top:10px;font-size:13px;line-height:1.6"></div></div>
+<div class="box" style="background:#fef2f2;border:2px solid #c62828"><h3>⏸️ Pause all saves</h3><p class="sub">For a short maintenance (for example while the developer corrects the sheet by hand). While paused, nobody can save anything: staff see "Saving is paused", the student app shows "School data is being updated". Pages can still be opened, people can still log in and Backup Now still works. Tap Resume when you are finished.</p>
+<div id="pzState" style="font-weight:800;margin:6px 0">-</div>
+<label>Reason (optional)</label><input id="pzNote" maxlength="120" placeholder="Example: correcting class names" style="width:100%">
+<div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="pzOn" style="flex:1;min-width:140px;background:#c62828;color:#fff;border:none;padding:12px;border-radius:12px;font-weight:800;min-height:46px" onclick="setPause(1)">⏸ Pause all saves</button><button class="btn" id="pzOff" style="flex:1;min-width:140px;background:#16a34a;color:#fff;border:none;padding:12px;border-radius:12px;font-weight:800;min-height:46px" onclick="setPause(0)">▶ Resume saving</button></div></div>
 <div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>⏱️ Speed check</h3><p class="sub">Times the main pages one by one on your own data (about 1–2 minutes). Green is quick, orange is slow, red needs fixing. Below it you see the slow requests that real users met. Run it when few people are using the app.</p><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="runSpeedCheck()" id="speedBtn">Run speed check</button><div id="speedOut" style="margin-top:10px;font-size:13px;line-height:1.5"></div></div>
 
 <div class="box" style="background:#f0f9ff;border:2px solid #1976d2"><h3>🧑‍🎓 Student data check</h3><p class="sub">Reads the Students tab and lists what the school must correct: wrong or empty birth dates, missing or repeated admission numbers, unknown classes, repeated roll numbers. It changes nothing. Send the list to the school.</p>
@@ -209,19 +220,22 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div class="settingsGrid">
 <div class="box" style="background:#fff"><h4>📚 Academic</h4>
 <label>Academic Session</label><br><input id="s_Session" placeholder="2026-2027" style="width:100%"><br>
+<div class="sub" id="s_SessionNote" style="display:none;font-size:12px;color:#555;margin:4px 0 8px">🔒 Changed only by <b>Promotion → Part 1 "Start new session"</b> (it carries the dues, closes the old session and makes the archive copy).</div>
 <label>Active Term (I / II)</label><br><select id="s_ActiveTerm" style="width:100%"><option value="I">I</option><option value="II">II</option></select><br>
-<label>Publish Result (YES/NO)</label><br><select id="s_PublishResult" style="width:100%"><option>YES</option><option>NO</option></select><br>
-<label>Publish Term I</label><br><select id="s_PubT1" style="width:100%"><option>YES</option><option>NO</option></select><br>
-<label>Publish Term II</label><br><select id="s_PubT2" style="width:100%"><option>YES</option><option>NO</option></select><br>
 <label>Enable Daily Update</label><br><select id="s_EnableDaily" style="width:100%"><option>YES</option><option>NO</option></select>
+<div style="display:none" aria-hidden="true"><!-- S15: not used anywhere (results are published per report in Exam Settings → Reports); kept so the saved values stay -->
+<select id="s_PublishResult"><option>YES</option><option>NO</option></select><select id="s_PubT1"><option>YES</option><option>NO</option></select><select id="s_PubT2"><option>YES</option><option>NO</option></select></div>
 </div>
-<div class="box" style="background:#fff"><h4>🏫 School Info - Used in Timetable Prints</h4>
+<div class="box" style="background:#fff"><h4>🏫 School info (prints, receipts, report cards)</h4>
 <label>School Name</label><br><input id="s_SchoolName" style="width:100%"><br>
 <label>School Address</label><br><input id="s_Address" style="width:100%"><br>
 <label>Affiliation No</label><br><input id="s_Affiliation" style="width:100%"><br>
 <label>School Phone</label><br><input id="s_Phone" style="width:100%"><br>
-<label>Header Path (URL)</label><br><input id="s_Header" style="width:100%"><br>
-<label>Logo Path (URL)</label><br><input id="s_Logo" style="width:100%">
+<label>Logo Path (URL)</label><br><input id="s_Logo" style="width:100%"><br>
+<label>Report card header image (URL)</label><br><input id="s_Header" style="width:100%" placeholder="https://…/icons/report-header.png">
+<div class="sub" style="font-size:12px;color:#555;margin:4px 0 8px">A wide banner at the top of report cards (it may carry the words "Student Progress Report"). It takes the place of the logo and school name there. Empty = logo + name.</div>
+<label>Print header image (URL)</label><br><input id="s_PrintHeader" style="width:100%" placeholder="https://…/icons/print-header.png">
+<div class="sub" style="font-size:12px;color:#555;margin:4px 0 8px">The same banner WITHOUT a title, at the top of receipts, fee reports and the registration form / profile. Each page writes its own title under it. Empty = logo + name. Keep the pictures in the icons folder of the website (Google Drive links often do not show).</div>
 </div>
 </div>
 <div class="box" style="background:#fffbe6;border:2px solid #ff9800;margin-top:12px">
@@ -230,11 +244,16 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label>Total Periods</label> <input id="s_TotalPeriods" type="number" min="1" max="10" style="width:80px" onchange="renderPeriodInputs()"><br><br>
 <div id="periodInputs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
 </div>
+<details class="box adv" id="advAdmin" style="margin-top:12px;background:#f8fafc;border:2px dashed #94a3b8"><summary style="font-weight:800;cursor:pointer;min-height:30px">⚙️ Advanced (rarely changed) <span class="advInfo" style="font-weight:600;color:#555"></span></summary>
+<div style="margin-top:10px">
+<div class="advF" data-def="4"><label>Session starts in month <span class="advTag"></span></label><br><select id="s_StartMonth" style="width:100%"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select><br>
+<div class="sub" id="s_StartNote" style="font-size:12px;color:#555;margin:4px 0 8px">A change is used only from the NEXT new session. The session already running keeps its months. Session name: 2026-27 (or 2027 when the session starts in January).</div></div>
+<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">Show all saved values (for the developer)</summary><div id="currentSettings" style="margin-top:10px;background:#fff;padding:10px;border-radius:6px;font-size:12px;word-break:break-all"></div></details>
+</div></details>
 <button onclick="saveAllSettings()" class="btn-green" style="padding:13px 22px;font-size:14px;font-weight:bold;margin-top:12px;width:100%">💾 SAVE ALL SETTINGS</button>
 <div id="settingsMsg" style="margin-top:10px;font-weight:bold"></div>
 <br>
 <div id="publishControlDiv" style="margin-top:10px"></div>
-<div id="currentSettings" style="margin-top:10px;background:#fff;padding:10px;border-radius:6px;font-size:12px"></div>
 </div>
 </div>
 <div id="subjectMasterTab" class="tab" style="display:none;">
@@ -244,7 +263,9 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div style="display:flex;gap:8px;flex-wrap:wrap">
 <select id="smClassFilter" onchange="renderSMTable()" style="flex:1;min-width:120px"><option value="ALL">All</option><option value="">Loading classes...</option></select>
 <button onclick="loadSM()" class="btn">Load</button><button onclick="saveSM()" class="btn-green">Save All</button><button onclick="addSMRow()" style="background:#ff9800">+ Add</button>
+<button onclick="smCopyOpen()" style="background:#7c3aed;color:#fff">📋 Copy to other sections</button>
 </div>
+<div id="smCopyBox" style="display:none;background:#f3e8ff;border:1.5px solid #7c3aed;border-radius:12px;padding:10px;margin-top:8px"></div>
 <div class="tableWrap" style="max-height:550px"><table id="smTable"><thead><tr><th>ID</th><th>Class</th><th>Subject</th><th>Type</th><th>Max_PT</th><th>Max_Term</th><th>Total</th><th>Grade?</th><th>Order</th><th>Del</th></tr></thead><tbody id="smTbody"><tr><td colspan="10" style="text-align:center">Click Load</td></tr></tbody></table></div>
 <div id="smMsg"></div>
 </div>
@@ -280,6 +301,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="RECVIEW" onchange="recTick(this,'e')"> Student records: VIEW the full record (Aadhaar "Show" is logged)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="RECEDIT" onchange="recTick(this,'e')"> Student records: EDIT the full record (includes view)</label>
+<label class="fp"><input type="checkbox" class="e_fp" value="PHOTOS"> Student photos: take / replace photos on Class photo day (sees only name, class, roll, admission no; Student records EDIT includes it)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDPW"> Student passwords (reset a student's app password)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="UNLOCK"> Unlock Result tab of a student (unpaid fees)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="BACKDATE"> Back-date receipts beyond the limit (a reason is asked)</label>
@@ -432,10 +454,12 @@ async function loadAllSettings(){
   function gv(m, ...keys){ for(var k=0;k<keys.length;k++){ var search=keys[k].toLowerCase(); for(var mk in m){ if(mk.toLowerCase()===search && String(m[mk]).trim()!=='') return m[mk]; } } for(var i=0;i<keys.length;i++){ if(m[keys[i]]!==undefined && String(m[keys[i]]).trim()!=='') return m[keys[i]]; } return ''; }
   document.getElementById('settingsMsg').innerText='⏳ Loading all settings...';
   try{
-    let map = await apiGet('getfullsettings');
+    let map = await apiGet('getfullsettings', {lock:1});
+    SESSION_LOCKED = !!(map && map.sessionLocked);     // S15
     if(map && map.settings) map = map.settings; if(map && map.map) map = map.map;
     ALL_SETTINGS = map || {};
     s_Session.value=gv(map,'Academic_Session','Academic Session','ACAD_SESSION')||'2026-2027';
+    s_StartMonth.value=String(gv(map,'Session_StartMonth')||'4');
     s_ActiveTerm.value=gv(map,'Active_Term','Active Term')||'I';
     s_PublishResult.value=gv(map,'Publish_Result','Publish Result')||'YES';
     s_PubT1.value=gv(map,'Publish_Term_I','Publish Term I')||'YES';
@@ -447,9 +471,12 @@ async function loadAllSettings(){
     s_Phone.value=gv(map,'School_Phone','School Phone','Phone')||'';
     s_Header.value=gv(map,'Header Path','Header_Path','HeaderPath')||'';
     s_Logo.value=gv(map,'Logo Path','Logo_Path','LogoPath')||'';
+    s_PrintHeader.value=gv(map,'Print Header Path')||'';     // S15
+    s_Session.readOnly = SESSION_LOCKED; s_Session.style.background = SESSION_LOCKED ? '#eef2f7' : ''; document.getElementById('s_SessionNote').style.display = SESSION_LOCKED ? 'block' : 'none';
     s_TotalPeriods.value=gv(map,'Total_Periods','Total Periods')||6;
     renderPeriodInputs(map);
     document.getElementById('currentSettings').innerHTML=Object.keys(map).map(k=>'<b>'+k+':</b> '+map[k]).join('<br>');
+    advMark('advAdmin');
     document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Loaded '+Object.keys(map).length+' keys | Periods: '+s_TotalPeriods.value+'</span>';
     try{ var _sn=String(s_SchoolName.value||'').trim(); var _ss=String(s_Session.value||'').trim(); if(_sn){ var _a=document.getElementById('schoolName'); if(_a) _a.textContent=_sn; var _b=document.getElementById('loginSchoolName'); if(_b) _b.textContent=_sn; } if(_ss){ var _c=document.getElementById('sessionLabel'); if(_c) _c.textContent='Session • '+_ss; var _d=document.getElementById('loginSessionLabel'); if(_d) _d.textContent='Session '+_ss+' • School Management System'; } }catch(_e){}
   }catch(e){ document.getElementById('settingsMsg').innerHTML='<span style="color:red">Error: '+e.message+'</span>'; }
@@ -466,14 +493,24 @@ function renderPeriodInputs(map){
     div.innerHTML+=`<div style="border:1px solid #ffb74d;padding:10px;border-radius:8px;background:#fff"><label><b>Period ${i} - Type</b></label><br><select id="p_type_${i}" style="width:95%;font-weight:bold;background:#fff9e6">${typeOptions}</select><br><label>Time (e.g. 09:00-09:45)</label><br><input id="p_${i}" value="${savedTime.replace(/"/g,'&quot;')}" placeholder="09:00-09:45" style="width:90%"><br><label>Custom Label</label><br><input id="p_label_${i}" value="${savedLabel.replace(/"/g,'&quot;')}" placeholder="LEISURE / BREAK" style="width:90%"></div>`;
   }
 }
+var SESSION_LOCKED = false;
+/* S15: Advanced fold – counts the fields inside and tags the ones that differ from their normal value (data-def) */
+function advMark(id){
+  var box = document.getElementById(id); if(!box) return;
+  var fs = box.querySelectorAll('.advF'), n = 0, ch = 0;
+  fs.forEach(function(f){ n++; var el = f.querySelector('input,select'); var d = f.getAttribute('data-def'); if(el && !el.dataset.advOn){ el.dataset.advOn = '1'; el.addEventListener('change', function(){ advMark(id); }); } var on = el && d !== null && String(el.value).trim() !== d;
+    if(on) ch++; var t = f.querySelector('.advTag'); if(t) t.innerHTML = on ? '<span style="background:#ef6c00;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800">changed</span>' : ''; });
+  var info = box.querySelector('.advInfo'); if(info) info.innerHTML = '– ' + n + ' setting' + (n === 1 ? '' : 's') + (ch ? ', <span style="color:#ef6c00">' + ch + ' changed</span>' : '');
+}
 async function saveAllSettings(){
-  var payload={ Academic_Session: s_Session.value.trim(), Active_Term: s_ActiveTerm.value, Publish_Result: s_PublishResult.value, Publish_Term_I: s_PubT1.value, Publish_Term_II: s_PubT2.value, Enable_DailyUpdate: s_EnableDaily.value, School_Name: s_SchoolName.value.trim(), School_Address: s_Address.value.trim(), Affiliation_No: s_Affiliation.value.trim(), School_Phone: s_Phone.value.trim(), 'Header Path': s_Header.value.trim(), 'Logo Path': s_Logo.value.trim(), Total_Periods: String(s_TotalPeriods.value) };
+  var payload={ Academic_Session: s_Session.value.trim(), 'Print Header Path': s_PrintHeader.value.trim(), Session_StartMonth: s_StartMonth.value, Active_Term: s_ActiveTerm.value, Publish_Result: s_PublishResult.value, Publish_Term_I: s_PubT1.value, Publish_Term_II: s_PubT2.value, Enable_DailyUpdate: s_EnableDaily.value, School_Name: s_SchoolName.value.trim(), School_Address: s_Address.value.trim(), Affiliation_No: s_Affiliation.value.trim(), School_Phone: s_Phone.value.trim(), 'Header Path': s_Header.value.trim(), 'Logo Path': s_Logo.value.trim(), Total_Periods: String(s_TotalPeriods.value) };
   var tot = parseInt(s_TotalPeriods.value||6);
   for(var i=1;i<=tot;i++){ var typeEl=document.getElementById('p_type_'+i); var timeEl=document.getElementById('p_'+i); var labelEl=document.getElementById('p_label_'+i); payload['Period_'+i]= timeEl ? timeEl.value.trim() : ''; payload['Period_'+i+'_Type']= typeEl ? typeEl.value : 'Teaching'; payload['Period_'+i+'_Label']= labelEl ? labelEl.value.trim() : (i+'th Period'); }
   for(var j=tot+1;j<=10;j++){ payload['Period_'+j]=''; payload['Period_'+j+'_Type']=''; payload['Period_'+j+'_Label']=''; }
   document.getElementById('settingsMsg').innerText='⏳ Saving...';
   let res = await apiPost('savefullsettings', payload);
-  if(res && res.success){ document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Saved!</span>'; setTimeout(loadAllSettings, 1000); } else { document.getElementById('settingsMsg').innerHTML='<span style="color:red">❌ Failed'+(res&&res.error?': '+res.error:'')+'</span>'; }
+  if(res && res.success) advMark('advAdmin');
+  if(res && res.success){ document.getElementById('settingsMsg').innerHTML='<span style="color:green">✅ Saved!'+(res.frozen&&res.frozen.length?' Session start month changed: '+res.frozen.join(', ')+' keep'+(res.frozen.length>1?'':'s')+' the old months; new sessions use the new month.':'')+'</span>'; setTimeout(loadAllSettings, 1000); } else { document.getElementById('settingsMsg').innerHTML='<span style="color:red">❌ Failed'+(res&&res.error?': '+res.error:'')+'</span>'; }
 }
 function smNormGrade(v){ if(v===true || String(v).toUpperCase()==='YES' || String(v).toUpperCase()==='TRUE') return 'YES'; return 'NO'; }
 function smNormType(v){ var s=String(v||'SCHOLASTIC').toUpperCase().trim(); if(s==='CO' || s==='CO-SCHOLASTIC' || s.indexOf('CO-')===0) return 'CO-SCHOLASTIC'; if(s==='PSD' || s==='PERSONAL') return 'PSD'; return 'SCHOLASTIC'; }
@@ -487,7 +524,7 @@ async function loadSM(){
     if(!Array.isArray(SM_DATA)) SM_DATA=[];
     SM_DATA = SM_DATA.map(r=>{
       if(r.class && String(r.class).toUpperCase().indexOf('SUB')===0){ var tmp=r.class; r.class=r.subjectId||DYNAMIC_CLASSES[0]; r.subjectId=tmp; }
-      return { subjectId: r.subjectId || r.SubjectID || '', class: String(r.class || r.Class || DYNAMIC_CLASSES[0]||'').toUpperCase(), subjectName: r.subjectName || r.SubjectName || r.subject || '', subjectType: smNormType(r.subjectType || r.SubjectType), maxPT: Number(r.maxPT ?? r.Max_PT ?? 0), maxTerm: Number(r.maxTerm ?? r.Max_Term ?? 0), isGradeSystem: smNormGrade(r.isGradeSystem ?? r.IsGradeSystem ?? 'NO'), displayOrder: Number(r.displayOrder ?? r.DisplayOrder ?? 0) };
+      return { subjectId: r.subjectId || r.SubjectID || '', class: String(r.class || r.Class || DYNAMIC_CLASSES[0]||'').toUpperCase(), subjectName: r.subjectName || r.SubjectName || r.subject || '', subjectType: smNormType(r.subjectType || r.SubjectType), maxPT: Number(r.maxPT ?? r.Max_PT ?? 0), maxTerm: Number(r.maxTerm ?? r.Max_Term ?? 0), isGradeSystem: smNormGrade(r.isGradeSystem ?? r.IsGradeSystem ?? 'NO'), displayOrder: Number(r.displayOrder ?? r.DisplayOrder ?? 0), passPT: r.passPT ?? r.Pass_PT, passTerm: r.passTerm ?? r.Pass_Term, iaPT: r.iaPT ?? r.IA_PT, iaTerm: r.iaTerm ?? r.IA_Term };
     });
     SM_DATA.forEach(r=>{ if(r.class && DYNAMIC_CLASSES.indexOf(r.class)===-1) DYNAMIC_CLASSES.push(r.class); });
     let subjNames=[]; SM_DATA.forEach(r=>{ let n=String(r.subjectName||'').toUpperCase(); if(n && subjNames.indexOf(n)===-1) subjNames.push(n); });
@@ -521,9 +558,39 @@ function addSMRow(){
   if(tb && tb.firstElementChild){ tb.firstElementChild.style.background='#fff9c4'; var inp=tb.firstElementChild.querySelectorAll('input')[2]; if(inp){ inp.focus(); inp.placeholder='Type subject name here'; } var box=tb.parentElement; if(box) box.scrollTop=0; }
   smMsg.innerHTML='<span style="color:green">✅ New row added at TOP - Type name then Save All</span>';
 }
+/* S13: enter the subjects once for one section, then copy them to the other sections (normal rows; nothing else changes) */
+function smLevel(c){ var m=String(c||'').toUpperCase().match(/^(.+?)\s*-\s*([A-Z0-9]+)$/); return m?m[1].trim():''; }
+function smCopyOpen(){
+  var box=document.getElementById('smCopyBox'), from=smClassFilter.value;
+  if(!SM_DATA.length){ box.style.display='block'; box.innerHTML='<b style="color:#c62828">Tap Load first.</b>'; return; }
+  if(!from || from==='ALL'){ box.style.display='block'; box.innerHTML='<b style="color:#c62828">First choose the class to copy FROM in the list on the left (for example X-A).</b>'; return; }
+  var mine=SM_DATA.filter(r=>r.class===from && String(r.subjectName||'').trim());
+  if(!mine.length){ box.style.display='block'; box.innerHTML='<b style="color:#c62828">Class '+esc(from)+' has no subjects to copy.</b>'; return; }
+  var lv=smLevel(from);
+  box.style.display='block';
+  box.innerHTML='<b>Copy the '+mine.length+' subjects of '+esc(from)+' to:</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">'+
+    DYNAMIC_CLASSES.filter(c=>c!==from).map(c=>'<label style="border:1px solid #c4b5fd;border-radius:999px;padding:4px 10px;background:#fff;font-weight:700;font-size:13px"><input type="checkbox" class="smCpTo" value="'+esc(c)+'"'+(lv&&smLevel(c)===lv?' checked':'')+'> '+esc(c)+'</label>').join('')+
+    '</div><div style="font-size:12px;color:#555;margin-bottom:6px">Full marks, pass marks, type and order are copied. A subject the class already has is left as it is. Nothing is saved until you tap Save All.</div>'+
+    '<button onclick="smCopyGo()" style="background:#7c3aed;color:#fff">Copy</button> <button onclick="document.getElementById(\'smCopyBox\').style.display=\'none\'" style="background:#64748b;color:#fff">Close</button><div id="smCopyMsg" style="margin-top:6px;font-weight:700"></div>';
+}
+function smCopyGo(){
+  var from=smClassFilter.value, to=[...document.querySelectorAll('.smCpTo:checked')].map(i=>i.value), msg=document.getElementById('smCopyMsg');
+  if(!to.length){ msg.innerHTML='<span style="color:#c62828">Tick at least one class.</span>'; return; }
+  var mine=SM_DATA.filter(r=>r.class===from && String(r.subjectName||'').trim()), added=0, kept=[];
+  to.forEach(c=>{
+    var have={}; SM_DATA.filter(r=>r.class===c).forEach(r=>{ have[String(r.subjectName||'').trim().toUpperCase()]=1; });
+    mine.forEach(r=>{
+      var n=String(r.subjectName).trim().toUpperCase();
+      if(have[n]){ kept.push(c+' '+n); return; }
+      var x=Object.assign({}, r); x.subjectId=''; x.class=c; SM_DATA.push(x); added++;
+    });
+  });
+  renderSMTable();
+  msg.innerHTML='<span style="color:#16a34a">✅ '+added+' subject rows added to '+to.map(esc).join(', ')+'.'+(kept.length?' Already there (left as they are): '+kept.length+'.':'')+' Now tap Save All.</span>';
+}
 async function saveSM(){
   if(!(await UI.ask('Save '+SM_DATA.length+'?'))) return;
-  var clean=SM_DATA.filter(r=>String(r.subjectName||'').trim()!=='').map(r=>({ subjectId:r.subjectId, class:String(r.class||DYNAMIC_CLASSES[0]).toUpperCase(), subjectName:String(r.subjectName||'').trim().toUpperCase(), subjectType:smNormType(r.subjectType), maxPT:Number(r.maxPT||0), maxTerm:Number(r.maxTerm||0), isGradeSystem:smNormGrade(r.isGradeSystem), displayOrder:Number(r.displayOrder||0) }));
+  var clean=SM_DATA.filter(r=>String(r.subjectName||'').trim()!=='').map(r=>{ var o={ subjectId:r.subjectId, class:String(r.class||DYNAMIC_CLASSES[0]).toUpperCase(), subjectName:String(r.subjectName||'').trim().toUpperCase(), subjectType:smNormType(r.subjectType), maxPT:Number(r.maxPT||0), maxTerm:Number(r.maxTerm||0), isGradeSystem:smNormGrade(r.isGradeSystem), displayOrder:Number(r.displayOrder||0) }; ['passPT','passTerm','iaPT','iaTerm'].forEach(k=>{ if(r[k]!==undefined) o[k]=r[k]; }); return o; });
   let res=await apiPost('savesubjectmaster', {data:clean});
   if(res && res.success){ smMsg.innerHTML='<span style="color:green">Saved '+clean.length+'</span>'; loadSM(); }
   else { smMsg.innerHTML='<span style="color:red">❌ '+((res&&res.error)||'Save failed')+'</span>'; }
@@ -743,6 +810,7 @@ async function updateFee(ad){ var st=document.getElementById('st_'+ad).value; va
 function filterFees(){ var q=feeSearch.value.toLowerCase(); if(!q){ renderFees(allFeeData); return; } var f=allFeeData.filter(r=> (r.ad+' '+r.name+' '+r.cls).toLowerCase().indexOf(q)>-1); renderFees(f); }
 // quiet = right after Backup Now: its own message already says what happened, so the warning is not repeated
 async function loadBackupInfo(quiet){
+  loadPause();                                  // S13
   bkWarn.innerHTML=''; backupList.innerHTML='Loading...';
   try{
     let r=await apiGet('getbackupinfo');
@@ -807,12 +875,26 @@ async function runSpeedCheck(){
   b.disabled=false;
 }
 
-var SYS_PAGES = ["accountant.html", "admin.html", "class-dashboard.html", "class-report.html", "classtest.html", "daily.html", "events.html", "exam-marks.html", "exam-settings.html", "fees-collect.html", "fees-opening.html", "fees-receipt.html", "fees-receipts.html", "fees-reports.html", "fees-settings.html", "fees-students.html", "index.html", "performance.html", "report-card-preview.html", "report-card-settings.html", "report-card.html", "student-access.html", "student.html", "students.html", "subject-dashboard.html", "timetable-builder.html"];
+var SYS_PAGES = ["accountant.html", "admin.html", "class-dashboard.html", "class-report.html", "classtest.html", "daily.html", "events.html", "exam-marks.html", "exam-settings.html", "fees-collect.html", "fees-opening.html", "fees-receipt.html", "fees-receipts.html", "fees-reports.html", "fees-settings.html", "fees-students.html", "index.html", "performance.html", "promotion.html", "report-card-preview.html", "report-card-settings.html", "report-card.html", "student-access.html", "student.html", "students.html", "subject-dashboard.html", "timetable-builder.html"];
 function verOk(v,min){
   var re=/^(\d{4})\.(\d{2})\.(\d{2})-S(\d+)$/, a=re.exec(v||''), b=re.exec(min||'');
   if(!a||!b) return false;
   for(var i=1;i<=4;i++){ var x=+a[i], y=+b[i]; if(x!==y) return x>y; }
   return true;
+}
+/* ---------- S13: Pause all saves ---------- */
+function drawPause(pz){
+  var el=document.getElementById('pzState'); if(!el) return;
+  if(pz && pz.on){ el.innerHTML='<span style="color:#c62828">⏸ Saves are PAUSED'+(pz.kind==='PROMOTION'?' (promotion is running)':'')+' since '+esc(pz.at||'')+' by '+esc(pz.by||'')+(pz.note?' – '+esc(pz.note):'')+'</span>'; }
+  else el.innerHTML='<span style="color:#16a34a">▶ Saving works normally.</span>';
+  var on=document.getElementById('pzOn'), off=document.getElementById('pzOff');
+  if(on) on.style.display=pz&&pz.on?'none':''; if(off) off.style.display=pz&&pz.on?'':'none';
+}
+async function loadPause(){ try{ var r=await apiGet('getpause',{}); if(r&&r.success) drawPause(r.paused); }catch(e){} }
+async function setPause(on){
+  if(on && !(await UI.ask('Pause ALL saves for everyone? Nobody can save anything until you tap Resume.'))) return;
+  var r=await apiPost('pausesaves',{on:on?'true':'false', note:(document.getElementById('pzNote').value||'').trim()});
+  if(r&&r.success){ drawPause(r.paused); HOME_AT=0; }
 }
 async function runSysCheck(){
   var out = document.getElementById('sysOut'); out.innerHTML = 'Checking... please wait';
@@ -832,7 +914,10 @@ async function runSysCheck(){
     }));
     res.forEach(function(x){ if(!verOk(x[1], x[0].min)) bad.push(x[0].page + ' (has ' + x[1] + ', needs ' + x[0].min + ')'); });
     h += (bad.length ? '❌ Pages to update: ' + bad.join(', ') + '<br>Upload these again, then reload with ?v=N.' : '✅ All ' + pages.length + ' pages are fine');
-    out.innerHTML = h;
+    var cc = j.classCheck || [];      // S13: class names in the Classes tab
+    h += '<br>' + (cc.length ? '⚠️ Class names to correct in the Classes tab (then run SPEED_clearKept once):<br>' + cc.map(function(x){ return '• Row ' + x.row + ': ' + esc(x.problem); }).join('<br>') : '✅ Class names are fine');
+    if(j.paused) h += '<br>⏸ <b style="color:#c62828">Saves are paused</b> (see "Pause all saves" below)';
+    out.innerHTML = h; drawPause(j.paused);
   }catch(e){ out.innerHTML = '❌ Could not connect. Check internet and try again.'; }
 }
 
@@ -863,6 +948,9 @@ function hErr(r,k){ return r.errors && r.errors[k] ? '<div class="hrow"><span cl
 function drawHome(r){
   var h='<div class="hHead"><div><b>'+esc(r.day.charAt(0)+r.day.slice(1).toLowerCase())+', '+esc(r.today)+'</b><br><small>Session '+esc(r.session||'-')+'</small></div><button onclick="HOME_AT=0; loadHome(1);" style="margin:0;padding:8px 14px;min-height:40px;background:#fff;color:var(--blue);border:1.5px solid #bbdefb">🔄 Refresh</button></div>';
   if(r.noSchool) h+='<div class="box" style="background:#fff7ed;border:1.5px solid #fdba74;font-weight:700">🏖️ No school today: '+esc(r.noSchool)+'</div>';
+  if(r.paused) h+='<div class="box" style="background:#fef2f2;border:2px solid #c62828;font-weight:800;color:#c62828">⏸ '+(r.paused.kind==='PROMOTION'?'Promotion is running: saving is stopped until it is finished. <a href="promotion.html">Continue the promotion</a>':'All saves are PAUSED since '+esc(r.paused.at||'')+'. Nobody can save anything. <a href="#" onclick="openTab(\'backupTab\'); loadPause(); return false;">Resume in Backup &amp; Check</a>')+'</div>';
+  if(r.reg && r.reg.waiting) h+='<div class="box" style="background:#eff6ff;border:2px solid #1976d2;font-weight:800;color:#0b2a5c">📝 '+r.reg.waiting+' parent registration form'+(r.reg.waiting>1?'s wait':' waits')+' for checking. <a href="registration-requests.html">Check now</a></div>';   // S16
+  if(r.promo && r.promo.finishing && r.promo.finishing.length) h+='<div class="box" style="background:#f5f3ff;border:2px solid #7c3aed;font-weight:700;color:#4c1d95">🎓 Not yet promoted (still finishing the old session): '+esc(r.promo.finishing.join(', '))+'. They pay only previous dues until promoted. <a href="promotion.html">Promote them when ready</a></div>';
   h+='<div class="hGrid">';
   var a=r.attention, rows='';
   if(a){

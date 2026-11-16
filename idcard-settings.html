@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ID card design</title>
+<style>
+
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+label .req{color:var(--red)}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+textarea{min-height:70px}
+input:disabled,select:disabled,textarea:disabled,input[readonly]{background:#f1f5f9;color:#334155}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-orange{background:linear-gradient(135deg,#ef6c00,#fb8c00)}.b-grey{background:#e5e7eb;color:#475569}.b-red{background:var(--red)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-line}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}.msg.info{background:#e0f2fe;color:#075985}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sec{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--blue);margin-bottom:10px;overflow:hidden}
+.sech{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px;cursor:pointer;min-height:56px;font-weight:800;color:var(--navy);font-size:15px}
+.sech small{font-weight:700;color:var(--muted);font-size:11.5px}
+.secb{padding:0 14px 14px;display:none}.sec.open .secb{display:block}.sec.open .arr{transform:rotate(90deg)}
+.arr{transition:transform .2s;font-size:14px;color:var(--muted)}
+h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#e0f2fe;color:#075985;white-space:nowrap;display:inline-block}
+.pill.ok{background:#dcfce7;color:#166534}.pill.warn{background:#fff7ed;color:#9a3412}.pill.bad{background:#fee2e2;color:#991b1b}.pill.grey{background:#e5e7eb;color:#374151}
+.chk{display:flex;align-items:center;gap:10px;margin:12px 0 4px;font-size:14px;font-weight:700;color:var(--navy);min-height:40px}.chk input{width:24px;height:24px;min-height:0;flex-shrink:0}
+.help{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+.fam{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13.5px}
+.res{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13.5px}
+.res .btn{width:auto;min-width:90px}
+.hist{font-size:13px;line-height:1.6;background:#f8fafc;border-radius:10px;padding:8px 10px;border:1px solid var(--line)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+@media print{body>.top,body>.tabs{display:none!important}}
+
+
+.radio{display:flex;align-items:flex-start;gap:10px;margin:6px 0;font-size:14px;font-weight:700;color:var(--navy);min-height:40px;cursor:pointer}.radio input{width:22px;height:22px;min-height:0;flex-shrink:0;margin-top:1px}
+.radio small{display:block;font-weight:600;color:var(--muted);font-size:11.5px;margin-top:2px}
+.pv{background:#f8fafc;border-left-color:var(--purple)}.pv.small{position:sticky;top:66px;z-index:20;padding:8px 12px}
+.pvc{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:flex-start;padding:4px 0}
+.pvc .idc{box-shadow:0 2px 12px rgba(0,0,0,.2);border-radius:3mm}
+.pv.small .pvc{zoom:.62}
+.pvtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.pvtools input{flex:1;min-width:120px;min-height:40px;padding:8px 10px;font-size:14px}
+.pvtools .btn{width:auto;min-height:40px;padding:8px 12px;font-size:13px}
+.fr{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;background:#fff}
+.fr.on{border-left:4px solid var(--green)}.fr.offr{border-left:4px solid #cbd5e1;background:#f8fafc}
+.fr .t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;color:var(--navy);font-size:14px}
+.fr .g{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.fr .g label{margin:0 0 2px;font-size:11px}
+.fr select,.fr input{min-height:42px;padding:8px 10px;font-size:15px}
+.mv{display:flex;gap:4px;flex-shrink:0}.mv button{width:42px;height:42px;border:1px solid #cbd5e1;background:#fff;border-radius:10px;font-size:16px;cursor:pointer}.mv button:disabled{opacity:.3}
+.sw{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.sw button{width:46px;height:46px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #cbd5e1;cursor:pointer}
+.sw button.on{box-shadow:0 0 0 3px var(--navy)}
+.changed{background:#fff7ed;border:1px solid #fdba74;color:#9a3412;border-radius:10px;padding:8px 10px;font-size:12.5px;font-weight:700;margin-top:8px;display:none}
+.savebar{background:#fff;margin-bottom:12px;border-radius:16px;padding:10px;box-shadow:0 -4px 20px rgba(0,0,0,.08);border:1px solid var(--line)}
+</style><script src="config.js"></script><script src="ui.js"></script><script src="idcard.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="box" style="border-left-color:var(--navy)">
+    <div class="title">🎨 ID card design</div>
+    <div class="meta">The school's own ID card: shape, one or two sides, which details, their order, words and colours. The preview shows a real student and changes at once. Nothing changes for printing until you press <b>Save design</b>. Photo, name, class, admission number and the school name are always on the front.</div>
+    <div class="msg" id="gMsg"></div>
+  </div>
+  <div id="main"></div>
+</div>
+<div class="tabs"><button class="tabBtn active"><span class="tabIco">🎨</span>ID card design</button><button class="tabBtn" onclick="location.href='idcards.html'"><span class="tabIco">🪪</span>Print</button><button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button></div>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} try{ sessionStorage.setItem('cvse_flash', JSON.stringify({m:'Session expired. Please login again.', t:Date.now()})); }catch(e){} window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ if(el) el.className = 'msg'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+
+
+if(USER.role !== 'admin'){ window.location.href = 'idcards.html'; }
+var R = null, DS = null, SAVED = '', PIC = '', OPEN = {s1:true}, SMALL = window.innerWidth < 600;
+(function(){ var st = document.createElement('style'); st.textContent = IDCARD.css(); document.head.appendChild(st); })();
+var MOBN = {PrimaryMobile:'Primary mobile', FatherMobile:"Father's mobile", MotherMobile:"Mother's mobile", GuardianMobile:"Guardian's mobile", Phone:'Family phone'};
+var LCOL = {dark:'Black', main:'Main colour', navy:'Navy', blue:'Blue', red:'Red', green:'Green', purple:'Purple', orange:'Orange'};
+var ACCN = {yellow:'Yellow', lightblue:'Light blue', lightgreen:'Light green', lightorange:'Light orange', lightpurple:'Light purple', grey:'Grey'};
+var HOUSEC = [['#c62828','Red'],['#1976d2','Blue'],['#16a34a','Green'],['#fbc02d','Yellow'],['#ef6c00','Orange'],['#7c3aed','Purple'],['#0b2a5c','Navy'],['#d81b60','Pink'],['#6d4c41','Brown'],['#64748b','Grey']];
+
+async function init(adm){
+  show($('gMsg'), 'Loading... please wait', 'load');
+  try{
+    let r = await apiGet('idcsettingsget', adm ? {adm:adm} : {});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return false; }
+    hide($('gMsg'));
+    let keep = DS && R ? DS : null;
+    R = r; DS = keep || JSON.parse(JSON.stringify(r.design)); if(!keep) SAVED = JSON.stringify(r.design);
+    PIC = ''; drawAll(); loadPic(); return true;
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and reload.', 'err'); return false; }
+}
+async function loadPic(){
+  let s = R.sample; if(!s || !s.photo || !s.photo.has) return;
+  try{ let r = await apiGet('photoget', {adms:s.adm}); if(r.success){ PIC = r.photos[s.adm] || r.photos[String(s.adm).toUpperCase()] || ''; preview(); } }catch(e){}
+}
+function sample(){
+  return R.sample || {adm:'202601', name:'Sample Student Name', cls:'II', roll:'08', dob:'10-03-2019', blood:'B+', house:'Red', gender:'Girl', father:"Father's Name",
+    mother:"Mother's Name", guardian:'', address:'Village, Town, District', mobile:'9876543210', mobile2:'9876543211', photo:{has:false}};
+}
+// address + mobiles follow the choices on the page (same rules as the server: 33_IDCards.gs IDC_person_)
+function srcPick(src, k){
+  let v = src[k] || '';
+  if(!v && k === 'PrimaryMobile') v = src.FatherMobile || src.MotherMobile || src.Phone || '';
+  if(!v && k === 'CorrespondenceAddress') v = src.PermanentAddress || '';
+  return v;
+}
+/* ---------- drawing ---------- */
+function drawAll(){
+  let d = DS, h = '';
+  h += '<div class="box pv' + (SMALL ? ' small' : '') + '" id="pvBox"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="title" style="margin:0;font-size:15px">👁 Preview</div><button class="btn b-grey" style="width:auto;min-height:36px;padding:6px 12px;font-size:12px" data-nofb onclick="SMALL=!SMALL;$(\'pvBox\').classList.toggle(\'small\',SMALL)">Smaller (stays on top) / bigger</button></div>' +
+    '<div class="pvc" id="pvc"></div><div class="msg" id="pvMsg"></div></div>' +
+    '<div class="box" style="border-left-color:var(--purple);padding:10px 14px"><div class="pvtools" style="margin-top:0"><input id="pvAdm" placeholder="Preview with admission no" value="' + esc(R.sample ? R.sample.adm : '') + '"><button class="btn b-blue" id="bPv" onclick="pvStudent()">Show</button></div><div class="help">' + (R.sample ? 'Student: ' + esc(R.sample.name) + ' (' + esc(R.sample.adm) + ')' : 'No students yet – a sample is shown.') + ' Try a student with a long name or address.</div></div>';
+
+  h += sec('s1', '1. Card shape and sides', (d.shape === 'P' ? 'Portrait' : 'Landscape') + ' · ' + (d.sides === '2' ? 'front + back' : 'one side'),
+    '<h4 class="g">Shape</h4>' + radio('shape', 'L', 'Landscape (lying)', '85.6 × 54 mm – 10 cards on one A4 page') + radio('shape', 'P', 'Portrait (standing)', '54 × 85.6 mm – 9 cards on one A4 page, bigger photo') +
+    '<h4 class="g">Sides</h4>' + radio('sides', '1', 'One side', 'Everything on the front') + radio('sides', '2', 'Front and back', 'Choose Front or Back for each detail in box 3') +
+    (d.sides === '2' ? '<h4 class="g">Back side on A4</h4>' + radio('backMode', 'PAGE', 'On the next page, mirrored', 'Print the sheet on both sides of the paper – each back falls behind its front') + radio('backMode', 'BESIDE', 'Beside the front', 'Front and back next to each other – cut out and stick / laminate back to back') : '') +
+    '<h4 class="g">Normal way of printing</h4>' + radio('printMode', 'CARD', 'Card printer – one card per page', 'PVC card printer, or a PDF for a print shop') + radio('printMode', 'A4', 'A4 sheet with cutting marks', 'Paper or A4 sticker sheets') +
+    chk('marks', 'Cutting marks on A4 sheets') + '<div class="help">The print page can still switch between the two ways each time.</div>');
+
+  h += sec('s2', '2. Header', d.header === 'IMAGE' ? 'Header image' : 'Logo + school name',
+    radio('header', 'TEXT', 'Logo + school name', 'Name, address and affiliation from Settings → School info') + radio('header', 'IMAGE', 'ID-card header image', 'A banner picture made by your designer, about 1000 × 160 pixels') +
+    (d.header === 'IMAGE' ? '<label for="i_headerImg">Header image address</label><input id="i_headerImg" value="' + esc(d.headerImg) + '" placeholder="icons/idcard-header.png" oninput="setv(\'headerImg\', this.value)"><div class="help">Upload the picture to the icons folder on GitHub, then write icons/&lt;file name&gt;. A wrong address shows the logo + name instead.</div>' :
+      '<label for="i_logoPos">School logo</label><select id="i_logoPos" onchange="setv(\'logoPos\', this.value)">' + opts([['R','On the right'],['L','On the left'],['N','No logo']], d.logoPos) + '</select>' +
+      chk('showAddress', 'Show the school address') + chk('showAffil', 'Show the affiliation number') + chk('showPhone', 'Show the school phone') +
+      (!R.school.name ? '<div class="msg show warn">School name is empty – fill it in Settings → School info.</div>' : '')) +
+    '<label for="i_title">Card title</label><input id="i_title" maxlength="40" value="' + esc(d.title) + '" placeholder="IDENTITY CARD" oninput="setv(\'title\', this.value)">' +
+    chk('showSession', 'Add the session after the title (' + esc(R.school.session || 'no session set') + ')'));
+
+  h += sec('s3', '3. Details on the card', countOn() + ' switched on', fieldsHtml());
+
+  h += sec('s4', '4. Colours and look', IDCARD.mainNames[d.color] + ', ' + (d.deco === 'CLASSIC' ? 'corners' : d.deco === 'BAND' ? 'colour band' : 'plain'),
+    '<label>Main colour (title, decoration)</label><div class="sw">' + Object.keys(IDCARD.mainNames).map(k => '<button type="button" data-nofb aria-label="' + IDCARD.mainNames[k] + '" title="' + IDCARD.mainNames[k] + '" class="' + (d.color === k ? 'on' : '') + '" style="background:' + IDCARD.colors[k] + '" onclick="setv(\'color\',\'' + k + '\', true)"></button>').join('') + '</div>' +
+    '<label>Second colour (stripe, highlights)</label><div class="sw">' + Object.keys(IDCARD.accents).map(k => '<button type="button" data-nofb aria-label="' + ACCN[k] + '" title="' + ACCN[k] + '" class="' + (d.accent === k ? 'on' : '') + '" style="background:' + IDCARD.accents[k] + '" onclick="setv(\'accent\',\'' + k + '\', true)"></button>').join('') + '</div>' +
+    '<h4 class="g">Decoration</h4>' + radio('deco', 'CLASSIC', 'Corners and stripe', 'Coloured corners top-right and bottom-left') + radio('deco', 'BAND', 'Colour band', 'Header in the main colour with white letters') + radio('deco', 'PLAIN', 'Plain', 'Only a thin border') +
+    chk('pills', 'Highlight the short details (class, roll, date of birth …) in the second colour') + chk('nameCaps', 'Student name in CAPITAL letters') +
+    chk('houseBand', 'House colour strip on the card edge') + (d.houseBand ? houseHtml() : ''));
+
+  h += '<div class="savebar"><div class="changed" id="chg">You have changes that are not saved yet.</div><div class="btnrow" style="margin-top:6px"><button class="btn b-green" id="bSave" onclick="save()">💾 Save design</button><button class="btn b-grey" id="bNormal" data-nofb onclick="normal()">↺ Ready-made design</button></div><div class="msg" id="sMsg"></div></div>';
+  $('main').innerHTML = h;
+  preview(); changed();
+}
+function sec(id, title, small, body){ return '<div class="sec' + (OPEN[id] ? ' open' : '') + '" id="' + id + '"><div class="sech" onclick="OPEN[\'' + id + '\']=!OPEN[\'' + id + '\'];this.parentNode.classList.toggle(\'open\')"><span>' + title + ' <small>' + esc(small) + '</small></span><span class="arr">▶</span></div><div class="secb">' + body + '</div></div>'; }
+function radio(k, v, t, sm){ return '<label class="radio"><input type="radio" name="r_' + k + '" value="' + v + '"' + (DS[k] === v ? ' checked' : '') + ' onchange="setv(\'' + k + '\', this.value, true)"><span>' + t + (sm ? '<small>' + sm + '</small>' : '') + '</span></label>'; }
+function chk(k, t){ return '<label class="chk"><input type="checkbox" id="c_' + k + '"' + (DS[k] ? ' checked' : '') + ' onchange="setv(\'' + k + '\', this.checked, ' + (k === 'houseBand' ? 'true' : 'false') + ')"> ' + t + '</label>'; }
+function opts(list, cur){ return list.map(o => '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join(''); }
+function fdef(k){ return R.fields.find(f => f.key === k) || {}; }
+function countOn(){ return Object.keys(DS.fields).filter(k => DS.fields[k].side === 'F' || (DS.fields[k].side === 'B' && DS.sides === '2')).length; }
+function fieldsHtml(){
+  let d = DS, two = d.sides === '2', normal = d.order.filter(k => fdef(k).kind !== 'X'), special = d.order.filter(k => fdef(k).kind === 'X');
+  let sideSel = k => { let f = d.fields[k], fx = fdef(k).fixed;
+    if(fx) return '<span class="pill ok">Always on the front</span>';
+    let o = [['O','Off'],['F','Front']]; if(two || f.side === 'B') o.push(['B', two ? 'Back' : 'Back (needs two sides)']);
+    return '<select id="sd_' + k + '" aria-label="Where: ' + esc(fdef(k).name) + '" onchange="setf(\'' + k + '\',\'side\',this.value,true)" style="width:auto;min-width:110px">' + opts(o, f.side) + '</select>'; };
+  let colSel = k => '<div><label for="cl_' + k + '">Colour</label><select id="cl_' + k + '" onchange="setf(\'' + k + '\',\'c\',this.value)">' + opts(Object.keys(LCOL).map(c => [c, LCOL[c]]), d.fields[k].c) + '</select></div>';
+  let lab = (k, ph) => '<div><label for="lb_' + k + '">Label word</label><input id="lb_' + k + '" maxlength="30" value="' + esc(d.fields[k].label) + '" placeholder="' + esc(ph || '(no label)') + '" oninput="setf(\'' + k + '\',\'label\',this.value)"></div>';
+  let extra = k => {
+    if(k === 'adm') return '<div style="grid-column:1/-1"><label for="x_admPos">Place</label><select id="x_admPos" onchange="setv(\'admPos\', this.value)">' + opts([['PHOTO','Above the photo'],['LIST','In the list of details']], d.admPos) + '</select></div>';
+    if(k === 'address') return '<div style="grid-column:1/-1"><label for="x_addr">Which address</label><select id="x_addr" onchange="setv(\'addrSrc\', this.value)">' + opts([['CorrespondenceAddress','Correspondence address (where the child lives now)'],['PermanentAddress','Permanent address']], d.addrSrc) + '</select></div>';
+    if(k === 'mobile') return '<div style="grid-column:1/-1"><label for="x_mob">Which number</label><select id="x_mob" onchange="setv(\'mobSrc\', this.value)">' + opts(Object.keys(MOBN).map(m => [m, MOBN[m]]), d.mobSrc) + '</select></div>';
+    if(k === 'mobile2') return '<div style="grid-column:1/-1"><label for="x_mob2">Which number</label><select id="x_mob2" onchange="setv(\'mob2Src\', this.value)">' + opts(Object.keys(MOBN).map(m => [m, MOBN[m]]), d.mob2Src) + '</select></div>';
+    if(k === 'note') return '<div style="grid-column:1/-1"><label for="x_note">Text</label><input id="x_note" maxlength="80" value="' + esc(d.note) + '" placeholder="e.g. Bus no. ____" oninput="setv(\'note\', this.value)"></div>';
+    if(k === 'ret') return '<div style="grid-column:1/-1"><label for="x_ret">Text (the school phone is added)</label><input id="x_ret" maxlength="120" value="' + esc(d.retText) + '" oninput="setv(\'retText\', this.value)"></div>';
+    if(k === 'footer') return '<div style="grid-column:1/-1"><label for="x_footer">Footer text</label><input id="x_footer" maxlength="120" value="' + esc(d.footer) + '" oninput="setv(\'footer\', this.value)"></div>';
+    if(k === 'valid') return '<div style="grid-column:1/-1" class="help">Shows ' + esc(R.school.validFrom ? R.school.validFrom + ' – ' + R.school.validTo : '(no session set)') + ' – the start and end of the session.</div>';
+    if(k === 'school') return '<div style="grid-column:1/-1" class="help">From Settings → School info (address, phone).</div>';
+    if(k === 'sign') return '<div style="grid-column:1/-1" class="help">' + (R.school.sign ? 'Signature picture from Report-card settings.' : 'No signature picture set – add it in Report-card settings (Principal signature); until then an empty space is left for signing.') + '</div>';
+    if(k === 'qr') return '<div style="grid-column:1/-1" class="help">Holds only the admission number (nothing private if a card is lost).</div>';
+    return '';
+  };
+  let row = (k, i, n, movable) => { let f = d.fields[k], df = fdef(k), on = f.side === 'F' || (f.side === 'B' && two);
+    return '<div class="fr ' + (on ? 'on' : 'offr') + '" id="fr_' + k + '"><div class="t"><span>' + esc(df.name) + '</span>' + (movable ? '<span class="mv"><button type="button" data-nofb aria-label="Move up" ' + (i === 0 ? 'disabled' : '') + ' onclick="move(\'' + k + '\',-1)">▲</button><button type="button" data-nofb aria-label="Move down" ' + (i === n - 1 ? 'disabled' : '') + ' onclick="move(\'' + k + '\',1)">▼</button></span>' : '') + '</div>' +
+      '<div class="g"><div><label>Where</label>' + sideSel(k) + '</div>' +
+      (on ? (['qr'].indexOf(k) < 0 ? colSel(k) : '') + (['qr', 'footer', 'note', 'ret'].indexOf(k) < 0 ? lab(k, df.label) : '') + extra(k) : (['adm','cls'].indexOf(k) > -1 ? extra(k) : '')) + '</div></div>'; };
+  return '<div class="help">Details in their order on the card (▲ ▼ to move). Short details (class, roll, date of birth, blood group, house, gender) next to each other stand on one line.' + (two ? '' : ' Choose "Front and back" in box 1 to use the back side.') + '</div>' +
+    normal.map((k, i) => row(k, i, normal.length, true)).join('') + '<h4 class="g">Special places</h4>' + special.map(k => row(k, 0, 1, false)).join('');
+}
+function houseHtml(){
+  if(!R.houses.length) return '<div class="msg show warn">No student has a House yet – fill the House in the student records first.</div>';
+  return '<div class="help">Colour for each House:</div>' + R.houses.map((hn, i) => '<div class="fr"><div class="t"><span>' + esc(hn) + '</span><select id="hc_' + i + '" aria-label="Colour of ' + esc(hn) + '" style="width:auto" onchange="setHouse(' + i + ', this.value)"><option value="">No strip</option>' + opts(HOUSEC, DS.houseColors[hn] || '') + '</select></div></div>').join('');
+}
+function preview(){
+  let d = DS, s = Object.assign({}, sample());
+  if(R.sample && R.sample.src){ s.address = srcPick(R.sample.src, d.addrSrc); s.mobile = srcPick(R.sample.src, d.mobSrc); s.mobile2 = srcPick(R.sample.src, d.mob2Src); }
+  let h = IDCARD.html(d, R.fields, R.school, s, 'F', {photo:PIC});
+  if(d.sides === '2') h += IDCARD.html(d, R.fields, R.school, s, 'B', {photo:PIC});
+  $('pvc').innerHTML = h;
+  requestAnimationFrame(() => {
+    let ok = true; $('pvc').querySelectorAll('.idc').forEach(c => { if(!IDCARD.fit(c)) ok = false; });
+    if(ok) hide($('pvMsg')); else show($('pvMsg'), '⚠️ Too many details – some lines do not fit on the card (red border). Switch a detail off, move it to the back, or shorten a label.', 'err');
+  });
+}
+function changed(){ let c = JSON.stringify(DS) !== SAVED; let e = $('chg'); if(e) e.style.display = c ? 'block' : 'none'; }
+/* ---------- changes ---------- */
+function setv(k, v, full){ DS[k] = v; if(full) keepScroll(drawAll); else { preview(); changed(); } }
+function setf(k, p, v, full){ DS.fields[k][p] = v; if(full) keepScroll(drawAll); else { preview(); changed(); } }
+function setHouse(i, v){ let hn = R.houses[i]; if(v) DS.houseColors[hn] = v; else delete DS.houseColors[hn]; preview(); changed(); }
+function move(k, dir){
+  let normal = DS.order.filter(x => fdef(x).kind !== 'X'), i = normal.indexOf(k), j = i + dir; if(j < 0 || j >= normal.length) return;
+  let other = normal[j], a = DS.order.indexOf(k), b = DS.order.indexOf(other); DS.order[a] = other; DS.order[b] = k;
+  keepScroll(drawAll); let el = $('fr_' + k); if(el) el.scrollIntoView({block:'center'});
+}
+function keepScroll(fn){ let y = window.scrollY; fn(); window.scrollTo(0, y); }
+async function normal(){
+  if(!(await UI.ask('Go back to the ready-made design (Carey style: landscape, one side)? Your own choices are replaced on the screen; nothing is saved until you press Save design.', 'Yes, ready-made', false))) return;
+  DS = JSON.parse(JSON.stringify(R.normal)); keepScroll(drawAll);
+}
+async function pvStudent(){
+  let a = $('pvAdm').value.trim(); if(!a) return;
+  let b = $('bPv'); b.disabled = true;
+  let ok = await init(a);
+  b = $('bPv'); if(b) b.disabled = false;
+  if(!ok) return;
+}
+async function save(){
+  let b = $('bSave'), m = $('sMsg');
+  if(DS.fields.note.side !== 'O' && !DS.note.trim()){ show(m, '❌ Free text line is switched on but empty – write the text or switch it off. Nothing was saved.', 'err'); return; }
+  if(DS.fields.footer.side !== 'O' && !DS.footer.trim()){ show(m, '❌ Footer line is switched on but empty – write the text or switch it off. Nothing was saved.', 'err'); return; }
+  if(DS.header === 'IMAGE' && !DS.headerImg.trim()){ show(m, '❌ Write the header image address, or choose "Logo + school name". Nothing was saved.', 'err'); return; }
+  b.disabled = true; b.textContent = 'Saving…'; show(m, 'Saving the design… please wait', 'load');
+  try{
+    let r = await apiPost('idcsettingssave', {design:JSON.stringify(DS)});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Not saved.'), 'err'); }
+    else { DS = r.design; SAVED = JSON.stringify(r.design); R.design = r.design; show(m, r.message || '✅ Saved.', 'ok'); changed(); }
+  }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Check internet and try again.', 'err'); }
+  b.disabled = false; b.textContent = '💾 Save design';
+}
+window.addEventListener('beforeunload', e => { if(DS && JSON.stringify(DS) !== SAVED){ e.preventDefault(); e.returnValue = ''; } });
+init();
+</script>
+</body></html>

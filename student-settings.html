@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S16">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Settings – Student record</title>
@@ -45,6 +45,11 @@ h4.g{margin:14px 0 2px;color:var(--purple);font-size:13.5px;border-bottom:2px so
 @media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
 .tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
 .tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+
+/* S15: Advanced fold */
+details.adv{margin-top:14px;border:2px dashed #94a3b8;border-radius:12px;padding:10px;background:#f8fafc}
+details.adv>summary{font-weight:800;cursor:pointer;min-height:30px;padding:4px 0}
+.advInfo{font-weight:600;color:#555}
 </style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
@@ -52,7 +57,7 @@ h4.g{margin:14px 0 2px;color:var(--purple);font-size:13.5px;border-bottom:2px so
   <div class="top-right"><div class="badge">ADMIN</div><button class="btn-logout" onclick="doLogout()">Logout</button></div>
 </div>
 <div class="wrap">
-  <div class="box"><div class="title">⚙️ Settings – Student record</div><div class="meta">Admission number, compulsory fields, the columns kept in the Students tab, the drop-down lists, and filling the master record from today's students.</div></div>
+  <div class="box"><div class="title">⚙️ Settings – Student record</div><div class="meta">Admission number, compulsory fields, the columns kept in the Students tab, the drop-down lists, the parent registration form, and filling the master record from today's students.</div></div>
   <div class="msg" id="gMsg"></div>
   <div id="main"></div>
 </div>
@@ -84,7 +89,7 @@ async function load(keepMsg){
   }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); }
 }
 function draw(){
-  let a = D.adm, f = D.meta.fields, h = '';
+  let a = D.adm, f = D.meta.fields, h = '', advOpen = !!($('advStu') && $('advStu').open);     // S15: keep the fold open after a save
   // 1. admission number
   h += '<div class="box" style="border-left-color:var(--blue)"><div class="title">1. Admission number</div><div class="meta">Automatic numbers follow this pattern. A number already given is never changed. Change the digits only at the start of a new year.</div>'+
     '<label for="a_pre">Text before the number (for example MCS, may be empty)</label><input id="a_pre" maxlength="10" value="'+esc(a.prefix)+'" autocapitalize="characters">'+
@@ -101,14 +106,8 @@ function draw(){
       return '<label class="chk'+(fixed?' dis':'')+'"><input type="checkbox" class="rq" value="'+x.key+'"'+(on?' checked':'')+(fixed?' disabled':'')+'><span>'+esc(x.label)+(fixed?'<small>always compulsory</small>':'')+'</span></label>'; }).join('');
   }
   h += '<div class="btnrow"><button class="btn b-green" id="b2" onclick="saveReq()">Save compulsory fields</button></div><div class="msg" id="m2"></div></div>';
-  // 3. daily fields
-  h += '<div class="box" style="border-left-color:var(--green)"><div class="title">3. Daily student fields (Students tab)</div><div class="meta">The Students tab is read many times a day, so it keeps only what pages need. Everything stays in the master record.</div>'+
-    '<h4 class="g">Always kept</h4>' + D.fixedStudents.concat(D.feeStudents).map(k=>'<label class="chk dis"><input type="checkbox" checked disabled><span>'+esc(k)+'<small>'+(D.feeStudents.indexOf(k)>-1?'needed by fees (new/old student, admission month, sibling discount)':'needed everywhere')+'</small></span></label>').join('')+
-    '<h4 class="g">The school chooses</h4>' + D.dailyOptions.map(o=>'<label class="chk"><input type="checkbox" class="dl" value="'+o.key+'"'+(D.daily.indexOf(o.key)>-1?' checked':'')+'><span>'+esc(o.label)+'<small>Used by: '+esc(o.usedBy)+'</small></span></label>').join('')+
-    '<div class="meta">Switching one OFF empties that column in the Students tab (the data stays in the master). Switching it ON fills it again from the master.</div>'+
-    '<div class="btnrow"><button class="btn b-green" id="b3" onclick="saveDaily()">Save daily student fields</button></div><div class="msg" id="m3"></div></div>';
   // 4. lists
-  h += '<div class="box" style="border-left-color:var(--purple)"><div class="title">4. Drop-down lists</div><div class="meta">An option used by a student can only be hidden (old records keep it, new forms do not offer it). Renaming also changes the old records. An unused option can be deleted.</div>';
+  h += '<div class="box" style="border-left-color:var(--purple)"><div class="title">3. Drop-down lists</div><div class="meta">An option used by a student can only be hidden (old records keep it, new forms do not offer it). Renaming also changes the old records. An unused option can be deleted.</div>';
   Object.keys(D.meta.lists).forEach(k=>{
     let c = D.counts[k] || {};
     h += '<h4 class="g">'+esc(LIST_LABEL[k] || k)+'</h4>' + D.meta.lists[k].map(o=>{ let n = c[o.v] || 0;
@@ -119,11 +118,73 @@ function draw(){
       '<div style="display:flex;gap:8px;margin-top:8px"><input id="new_'+k+'" placeholder="New option" maxlength="40" style="flex:1;min-width:0"><button class="btn b-blue" style="width:auto;min-width:90px" onclick="opt(\''+k+'\',\'add\',$(\'new_'+k+'\').value)">Add</button></div>';
   });
   h += '<div class="msg" id="m4"></div></div>';
+  h += '<div id="regBox"></div>';                                   // S16: 4. Parent registration (drawn by loadReg)
+  // S15: rarely changed settings + one-time tools in a closed 'Advanced' fold
+  h += '<details class="adv" id="advStu"><summary>⚙️ Advanced (rarely changed) <span class="advInfo">– daily student fields, one-time tools</span></summary>';
+  // 3. daily fields
+  h += '<div class="box" style="border-left-color:var(--green)"><div class="title">Daily student fields (Students tab)</div><div class="meta">The Students tab is read many times a day, so it keeps only what pages need. Everything stays in the master record.</div>'+
+    '<h4 class="g">Always kept</h4>' + D.fixedStudents.concat(D.feeStudents).map(k=>'<label class="chk dis"><input type="checkbox" checked disabled><span>'+esc(k)+'<small>'+(D.feeStudents.indexOf(k)>-1?'needed by fees (new/old student, admission month, sibling discount)':'needed everywhere')+'</small></span></label>').join('')+
+    '<h4 class="g">The school chooses</h4>' + D.dailyOptions.map(o=>'<label class="chk"><input type="checkbox" class="dl" value="'+o.key+'"'+(D.daily.indexOf(o.key)>-1?' checked':'')+'><span>'+esc(o.label)+'<small>Used by: '+esc(o.usedBy)+'</small></span></label>').join('')+
+    '<div class="meta">Switching one OFF empties that column in the Students tab (the data stays in the master). Switching it ON fills it again from the master.</div>'+
+    '<div class="btnrow"><button class="btn b-green" id="b3" onclick="saveDaily()">Save daily student fields</button></div><div class="msg" id="m3"></div></div>';
+  h += '<h4 class="g" style="margin:14px 4px 6px">One-time tools</h4>';
   // 5. fill master
-  h += '<div class="box" style="border-left-color:var(--red)"><div class="title">5. Fill master from current students</div><div class="meta">Copies every student of the Students tab who is not in the master record yet. Students already in the master are never doubled or overwritten, so it is safe to run again. An automatic backup is made just before copying.</div>'+
+  h += '<div class="box" style="border-left-color:var(--red)"><div class="title">Fill master from current students</div><div class="meta">Copies every student of the Students tab who is not in the master record yet. Students already in the master are never doubled or overwritten, so it is safe to run again. An automatic backup is made just before copying.</div>'+
     '<div class="big"><div><b>'+D.masterCount+'</b><span>in the master</span></div><div><b>'+D.notInMaster+'</b><span>not in the master yet</span></div><div><b>'+(D.masterCount+D.notInMaster)+'</b><span>together</span></div></div>'+
     '<div class="btnrow"><button class="btn b-navy" id="b5" onclick="fillCheck()">Check first (nothing is copied)</button></div><div class="msg" id="m5"></div><div id="fillOut"></div></div>';
+  h += '</details>';
   $('main').innerHTML = h;
+  if(advOpen && $('advStu')) $('advStu').open = true;
+  loadReg();
+}
+/* ---------- S16: 4. Parent registration (student app) ---------- */
+var RS = null, RMODE = {FILL:'Parent fills', REQUEST:'Request only (office checks)', VIEW:'View only', HIDDEN:'Hidden'};
+async function loadReg(msg){
+  let box = $('regBox'); if(!box) return;
+  if(!RS) box.innerHTML = '<div class="box" style="border-left-color:var(--blue)"><div class="msg show load">Loading the parent registration settings…</div></div>';
+  try{
+    let r = await apiGet('regsettingsget', {});
+    if(!r.success){ box.innerHTML = '<div class="box"><div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div></div>'; return; }
+    RS = r; drawReg(); if(msg) show($('m6'), '✅ ' + msg, 'ok');
+  }catch(e){ box.innerHTML = '<div class="box"><div class="msg show err">❌ Could not connect. Check internet and reload.</div></div>'; }
+}
+function drawReg(){
+  let r = RS, a = r.access || {}, c = r.counts || {}, open = $('regAdv') && $('regAdv').open;
+  let acc = a.mode === 'OPEN' ? 'OPEN for every class' : (a.mode === 'CLOSED' ? (a.classes ? 'CLOSED for ' + a.classes + ' (open for the other classes)' : 'CLOSED for every class') : 'OPEN (Auto)');
+  let h = '<div class="box" style="border-left-color:var(--blue)"><div class="title">4. Parent registration (student app)</div>'+
+    '<div class="meta">Parents fill or correct the record in the student app (tab "Registration"). Nothing reaches the record until the office accepts it in Registration requests.</div>'+
+    '<div class="big"><div><b>'+(c.SUBMITTED||0)+'</b><span>waiting for the office</span></div><div><b>'+((c.DRAFT||0)+(c.REOPENED||0)+(c.REJECTED||0))+'</b><span>with the parents</span></div><div><b>'+((c.ACCEPTED||0)+(c.PARTLY||0))+'</b><span>accepted</span></div></div>'+
+    '<div class="msg show '+(a.mode==='CLOSED'&&!a.classes?'warn':'info')+'">Registration tab now: <b>'+esc(acc)+'</b>\nOpen or close it per class in Student Access (tab "Registration form (parents)").</div>'+
+    '<div class="btnrow"><button class="btn b-navy" onclick="location.href=\'student-access.html\'">🔐 Open Student Access</button><button class="btn b-blue" onclick="location.href=\'registration-requests.html\'">📝 Registration requests</button></div>'+
+    '<label for="r_last">Last date for parents (empty = no last date)</label><input id="r_last" data-date inputmode="numeric" maxlength="10" placeholder="DD-MM-YYYY" value="'+esc(r.lastDate)+'">'+
+    (r.dateClosed ? '<div class="msg show warn">The last date has passed: parents can only read the form. Forms already sent can still be checked.</div>' : '')+
+    '<details class="adv" id="regAdv"'+(open?' open':'')+'><summary>What the parent may do with each field</summary>'+
+    '<div class="meta">Parent fills = the parent types it. Request only = the parent may type a correction, the office checks it with a certificate (name, date of birth). View only = shown, not changeable. Hidden = not shown. Admission no, class, roll, status, fees, house and remarks are never in the parent form.</div>';
+  r.parts.forEach(p=>{
+    h += '<h4 class="g">Part '+p.n+'. '+esc(p.name)+'</h4>' + p.fields.map(f=>'<div class="opt"><b>'+esc(f.label)+(f.req?' <span style="color:var(--red)">*</span>':'')+'</b><select class="rmode" data-k="'+f.key+'" style="width:auto;max-width:56%;min-height:40px;padding:6px;font-size:13px">'+
+      Object.keys(RMODE).map(m=>'<option value="'+m+'"'+(m===f.mode?' selected':'')+'>'+RMODE[m]+(m===f.def?' (normal)':'')+'</option>').join('')+'</select></div>').join('');
+  });
+  h += '<div class="meta" style="margin-top:6px"><span style="color:var(--red)">*</span> compulsory (box 2): the parent cannot send the form while it is empty.</div></details>'+
+    '<div class="btnrow"><button class="btn b-green" id="b6" onclick="saveRegSet()">Save parent registration settings</button></div><div class="msg" id="m6"></div>'+
+    '<h4 class="g">Ask all parents of a class to check again</h4><div class="meta">Opens the accepted forms of the class again (for example at the start of a new year). Forms waiting for the office are not touched.</div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><select id="r_cls" style="flex:1;min-width:0"><option value="">Choose the class</option>'+r.classes.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select>'+
+    '<button class="btn b-orange" id="b7" style="width:auto;min-width:110px" onclick="reopenClass()">Reopen</button></div><div class="msg" id="m7"></div></div>';
+  $('regBox').innerHTML = h;
+  if(window.UI && UI.enhanceDates) UI.enhanceDates($('regBox'));
+}
+async function saveRegSet(){
+  let ld = $('r_last').value.trim();
+  if(ld && window.UI && UI.checkDate && !UI.dateOk(ld)){ show($('m6'), '❌ Last date must be a real date written DD-MM-YYYY.', 'err'); return; }
+  let modes = {}; document.querySelectorAll('.rmode').forEach(x=>modes[x.dataset.k] = x.value);
+  let r = await post('regsettingssave', {lastDate:ld, modes:JSON.stringify(modes)}, $('b6'), $('m6'), false);
+  if(r) loadReg(r.message);
+}
+async function reopenClass(){
+  let c = $('r_cls').value;
+  if(!c){ show($('m7'), 'Choose the class first.', 'warn'); return; }
+  if(!(await UI.ask('Open the accepted registration forms of class ' + c + ' again for the parents?', 'Yes, reopen'))) return;
+  let r = await post('regreopenclass', {cls:c}, $('b7'), $('m7'), false);
+  if(r){ $('b7').disabled = false; let m = r.message; await loadReg(); show($('m7'), '✅ ' + m, 'ok'); }
 }
 async function post(action, payload, btn, m, okReload){
   btn.disabled = true; show(m, 'Saving... please wait', 'load');

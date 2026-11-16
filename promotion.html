@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S14">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Promotion / new session</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-orange{background:linear-gradient(135deg,#ef6c00,#fb8c00)}.b-grey{background:#e5e7eb;color:#475569}.b-red{background:var(--red)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-line}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}.msg.info{background:#e0f2fe;color:#075985}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chk{display:flex;align-items:flex-start;gap:10px;margin:8px 0;font-size:14px;font-weight:700;color:var(--navy);min-height:36px}.chk input{width:22px;height:22px;min-height:0;flex-shrink:0;margin-top:1px}
+.chk small{display:block;font-weight:600;color:var(--muted);font-size:11.5px}
+.chk.dis{opacity:.6}
+h4.g{margin:14px 0 2px;color:var(--purple);font-size:13.5px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:6px 8px;margin-top:6px;font-size:14px}
+.opt.hid{opacity:.6;background:#f8fafc}
+.opt b{flex:1}.opt small{color:var(--muted);font-weight:700}
+.opt button{border:none;border-radius:10px;min-height:40px;padding:0 10px;font-weight:800;font-size:12px;cursor:pointer;background:#e0f2fe;color:#075985}
+.opt button.d{background:#fee2e2;color:#991b1b}
+.prob{border-left:4px solid var(--orange);background:#fff7ed;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.big div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}.big b{display:block;font-size:20px;color:var(--navy)}.big span{font-size:11px;color:var(--muted);font-weight:700}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800}.pill.ok{background:#dcfce7;color:#166534}.pill.grey{background:#e5e7eb;color:#475569}.pill.warn{background:#ffedd5;color:#9a3412}.pill.red{background:#fee2e2;color:#991b1b}.pill.pur{background:#ede9fe;color:#5b21b6}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;background:#fff}
+.card .h{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:800;color:var(--navy)}
+.small{font-size:12px;color:var(--muted);line-height:1.45}
+.prob{border-left:4px solid var(--red);background:#fef2f2;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px;color:#7f1d1d;font-weight:700}
+.warnl{border-left:4px solid var(--orange);background:#fff7ed;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px;color:#7c2d12}
+.st{display:grid;grid-template-columns:26px 1fr 92px 64px;gap:6px;align-items:center;border-top:1px solid #f1f5f9;padding:6px 0;font-size:13px}
+.st select{min-height:40px;padding:6px;font-size:13px}.st input[type=checkbox]{width:22px;height:22px;min-height:0}
+.st .nm b{display:block}.st .nm span{font-size:11.5px;color:var(--muted)}
+.steps div{padding:6px 0;border-top:1px solid #f1f5f9;font-size:13.5px;font-weight:700}
+.steps .dn{color:var(--green)}.steps .cur{color:var(--blue)}.steps .wt{color:var(--muted)}
+table.ct{width:100%;border-collapse:collapse;font-size:12.5px}table.ct td,table.ct th{border-top:1px solid #f1f5f9;padding:5px 4px;text-align:left;vertical-align:top}
+.secT{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;font-family:inherit;min-height:60px}
+@media print{.top,.tabs,.btnrow,.noprint,button{display:none!important}body{background:#fff;padding:0}.box{box-shadow:none;border:1px solid #ddd;break-inside:avoid}}
+</style><script src="config.js"></script><script src="ui.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left"><div class="avatar" id="avatarLetter">A</div><div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div></div>
+  <div class="top-right"><div class="badge">ADMIN</div><button class="btn-logout" onclick="doLogout()">Logout</button></div>
+</div>
+<div class="wrap">
+  <div class="box" style="border-left-color:var(--orange)"><div class="title">🎓 Promotion / new session</div><div class="meta">Once a year, in a holiday. <b>Part 1 – Start new session</b> (once): backup, archive copy, unpaid fees carried forward, the new session starts. <b>Part 2 – Promote classes</b> (in batches): last year's results saved, students moved, roll numbers, the year's attendance / marks of those classes emptied. Classes still in exams can be ticked "still finishing" and promoted later. Everything is shown first as a preview; nothing changes until you type the session name and tap Start. Practise on a COPY of the sheet first.</div></div>
+  <div class="msg" id="gMsg"></div>
+  <div id="runBox"></div>
+  <div id="main"></div>
+</div>
+<div class="tabs noprint"><button class="tabBtn active"><span class="tabIco">🎓</span>Promotion</button><button class="tabBtn" onclick="location.href='students.html'"><span class="tabIco">👥</span>Students</button><button class="tabBtn" onclick="location.href='admin.html?tab=last'"><span class="tabIco">⬅️</span>Back</button></div>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || USER.role !== 'admin'){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; } }
+async function apiGet(action, params){ let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token')); for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]); let r = await fetch(url); let j = await r.json(); authCheck(j); return j; }
+async function apiPost(action, payload){ let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))}); let j = await r.json(); authCheck(j); return j; }
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ if(el) el.className = 'msg'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+function money(n){ n = Number(n) || 0; return '₹' + n.toLocaleString('en-IN', {maximumFractionDigits:2}); }
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+
+var D = null, P1 = null, P2 = null, CARRY = {}, EDITS = {}, ELEC = {}, PICK = {}, FIN = {}, TICK = {}, OPEN = {map:false};
+var CH = {PROMOTE:'Promote', REPEAT:'Repeat', LEFT:'Left (TC)', DROPOUT:'Drop out', PASSEDOUT:'Passed out'};
+
+async function load(keep){
+  if(!keep) show($('gMsg'), 'Loading... please wait', 'load');
+  try{
+    let r = await apiGet('promoget', {});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    D = r; if(!keep) hide($('gMsg')); drawRun(); draw();
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); }
+}
+
+/* ---------- a run that is going on ---------- */
+function drawRun(){
+  let st = D.state, b = $('runBox');
+  if(!st || st.status !== 'RUNNING'){
+    b.innerHTML = st && st.status === 'DONE' ? '<div class="box" style="border-left-color:var(--green)"><div class="title">✅ Last run finished</div><div class="meta">'+(st.part===1?'Part 1 – Start new session '+esc(st.newSession):'Part 2 – Promote classes '+esc((st.classes||[]).join(', ')))+' · finished '+esc(st.finishedAt||'')+' by '+esc(st.by||'')+'</div></div>' : '';
+    return;
+  }
+  let h = '<div class="box" style="border-left-color:var(--red);background:#fef2f2"><div class="title">⏸ A promotion run is not finished – saving is frozen for everyone</div>'+
+    '<div class="meta">'+(st.part===1?'Part 1 – Start new session '+esc(st.newSession):'Part 2 – Promote classes '+esc((st.classes||[]).join(', ')))+' · started '+esc(st.at)+' by '+esc(st.by)+'</div>'+
+    '<div class="steps" id="stepList">'+st.steps.map((s,i)=>'<div class="'+(i<st.next?'dn':i===st.next?'cur':'wt')+'">'+(i<st.next?'✅ ':i===st.next?'▶ ':'○ ')+(i+1)+'. '+esc(D.steps[s]||s)+'</div>').join('')+'</div>'+
+    (st.lastError ? '<div class="prob">Last try failed: '+esc(st.lastError)+'</div>' : '')+
+    '<div class="btnrow"><button class="btn b-green" id="bCont" onclick="runSteps()">▶ Continue</button>'+(canCancel(st)?'<button class="btn b-grey" id="bCan" onclick="cancelRun()">Cancel (nothing changed yet)</button>':'')+'</div>'+
+    '<div class="msg" id="runMsg"></div>'+
+    (!canCancel(st) && st.backup ? '<div class="small">Undo after this point = restore the backup "'+esc(st.backup.name)+'" (Developer guide: open it from Drive, put its Sheet ID on line 8 of 00_Config.gs and deploy, or copy the tabs back).</div>' : '')+'</div>';
+  b.innerHTML = h;
+}
+function canCancel(st){ var data = {CARRY:1, CLOSE:1, TRIM:1, LOGS:1, RENAME:1, MOVE:1, ELECTIVES:1, CLEAR:1, CLEANUP:1}; return !(st.done || []).some(s=>data[s]); }
+async function runSteps(){
+  let m = $('runMsg'), b = $('bCont'); if(b) b.disabled = true;
+  show(m, 'Working... keep this page open. Each step takes a few seconds.', 'load');
+  try{
+    for(let i = 0; i < 40; i++){
+      let r = await apiPost('promostep', {});
+      if(r.state){ D.state = r.state; }
+      if(!r.success){ drawRun(); show($('runMsg'), '❌ ' + (r.error || 'The step did not finish.') + '\nTap Continue to try again.', 'err'); return; }
+      drawRun(); show($('runMsg'), '✅ ' + (r.label || '') + (r.details ? ': ' + r.details : '') + (r.done ? '' : '\nNext: ' + (r.nextLabel || '')), r.done ? 'ok' : 'load');
+      if(r.done){ $('runMsg').className = 'msg show ok'; $('runMsg').innerText = '✅ Finished. ' + (r.details || '') + '\nSaving works again for everyone.'; P1 = null; P2 = null; CARRY = {}; EDITS = {}; ELEC = {}; setTimeout(()=>load(true), 1500); return; }
+    }
+  }catch(e){ show($('runMsg'), '❌ Connection lost. Nothing is lost: tap Continue when the internet is back.', 'err'); drawRunBtn(); }
+}
+function drawRunBtn(){ let b = $('bCont'); if(b) b.disabled = false; }
+async function cancelRun(){
+  if(!(await UI.ask('Cancel this run? Nothing in the data has been changed yet. Saving will work again.', 'Cancel the run', true))) return;
+  let r = await apiPost('promocancel', {});
+  if(r.success){ show($('gMsg'), '✅ ' + r.message, 'ok'); load(true); } else show($('runMsg'), '❌ ' + (r.error || 'Could not cancel.'), 'err');
+}
+
+/* ---------- page ---------- */
+function running(){ return D.state && D.state.status === 'RUNNING'; }
+function draw(){
+  let s = D.sessions, h = '';
+  h += '<div class="box"><div class="title">Sessions</div><div class="meta">Current session: <b>'+esc(s.cur || 'not set')+'</b>'+(s.prev?' (started from '+esc(s.prev)+' by Part 1)':'')+' · Next session: <b>'+esc(s.next || '-')+'</b>'+
+    '<br>Fee setup for '+esc(s.next)+': '+(D.feeSetupNext?'<span class="pill ok">ready</span>':'<span class="pill red">not made yet</span> – Fees Settings → Copy session')+
+    (D.finishing.length?'<br>Still finishing the old session: <b>'+esc(D.finishing.join(', '))+'</b>':'')+'</div></div>';
+  h += mapHtml() + part1Html() + part2Html() + logHtml();
+  $('main').innerHTML = h;
+}
+
+/* ---- 1. the map ---- */
+function mapHtml(){
+  let classes = D.classes, all = D.all.filter(c=>!/\(\d{4}[^()]*\)$/.test(c));
+  let cc = (D.classCheck || []).length ? '<div class="warnl">Class names to correct in the Classes tab first:<br>'+D.classCheck.map(x=>'• Row '+x.row+': '+esc(x.problem)).join('<br>')+'</div>' : '';
+  let rows = classes.map(c=>{
+    let nx = '<option value="">Choose</option>' + all.filter(x=>x!==c.cls).map(x=>'<option'+(x===c.next?' selected':'')+'>'+esc(x)+'</option>').join('') + '<option value="CHOOSE"'+(c.next==='CHOOSE'?' selected':'')+'>Choose for each student</option><option value="PASSOUT"'+(c.next==='PASSOUT'?' selected':'')+'>Passes out (last class)</option>';
+    let rp = c.reports.length ? c.reports.map(r=>'<option value="'+esc(r.id)+'"'+(r.id===c.reportUsed?' selected':'')+'>'+esc(r.name)+'</option>').join('') : '<option value="">(no report for this class)</option>';
+    return '<div class="card mp" data-c="'+esc(c.cls)+'"><div class="h"><span>'+esc(c.cls)+'</span>'+(c.saved?'':'<span class="pill warn">first guess</span>')+(c.promotedFor===D.sessions.cur?'<span class="pill ok">promoted in '+esc(c.promotedFor)+'</span>':'')+'</div>'+
+      '<label>Next class</label><select class="m_next">'+nx+'</select>'+
+      '<div class="row2"><div><label>Roll numbers</label><select class="m_rule"><option value="ALPHA"'+(c.rule==='ALPHA'?' selected':'')+'>Alphabetical</option><option value="RESULT"'+(c.rule==='RESULT'?' selected':'')+'>By result (%)</option></select></div>'+
+      '<div><label>Order</label><select class="m_order"><option value="MIXED"'+(c.order==='MIXED'?' selected':'')+'>Mixed</option><option value="GIRLS"'+(c.order==='GIRLS'?' selected':'')+'>Girls first</option><option value="BOYS"'+(c.order==='BOYS'?' selected':'')+'>Boys first</option></select></div></div>'+
+      '<label>Pass / fail from the report</label><select class="m_rep">'+rp+'</select></div>';
+  }).join('');
+  return '<div class="box" style="border-left-color:var(--purple)"><div class="secT" onclick="OPEN.map=!OPEN.map;draw()"><div class="title">1. Promotion map '+(OPEN.map?'▼':'▶')+'</div><span class="small">'+classes.filter(c=>c.saved).length+' of '+classes.length+' saved</span></div>'+
+    '<div class="meta">For every class: where its students go next year, how roll numbers are given in that class (as the RECEIVING class), and which report decides pass / fail. Set once; kept for every year.</div>'+
+    (OPEN.map ? cc + rows + '<div class="btnrow"><button class="btn b-green" id="bMap" onclick="saveMap()">Save promotion map</button></div><div class="msg" id="mMap"></div>' : '<div class="btnrow"><button class="btn b-grey" onclick="OPEN.map=true;draw()">Open the map</button></div>')+'</div>';
+}
+async function saveMap(){
+  let list = [...document.querySelectorAll('.mp')].map(e=>({cls:e.dataset.c, next:e.querySelector('.m_next').value, rule:e.querySelector('.m_rule').value, order:e.querySelector('.m_order').value, report:e.querySelector('.m_rep').value}));
+  let m = $('mMap');
+  if(list.some(x=>!x.next)){ show(m, '❌ Choose the next class for every class.', 'err'); return; }
+  show(m, 'Saving... please wait', 'load');
+  try{ let r = await apiPost('promomapsave', {map:JSON.stringify(list)}); if(r.success){ show(m, '✅ ' + r.message, 'ok'); setTimeout(()=>load(true), 800); } else show(m, '❌ ' + (r.error || 'Could not save.'), 'err'); }
+  catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); }
+}
+
+/* ---- 2. Part 1 ---- */
+function part1Html(){
+  let s = D.sessions, done = !!s.prev;
+  let h = '<div class="box" style="border-left-color:var(--blue)"><div class="title">2. Part 1 – Start new session '+esc(s.next)+'</div>';
+  if(done) return h + '<div class="meta">✅ Done: '+esc(s.cur)+' was started from '+esc(s.prev)+'. Its unpaid fees were carried forward. Next year this part is used again.</div></div>';
+  h += '<div class="meta">Steps: backup → archive copy of the whole sheet (private, in the backup folder) → every unpaid amount of '+esc(s.cur)+' (fees, late fine, older dues, also of students who left) becomes ONE "previous dues" amount in '+esc(s.next)+', kept per head → '+esc(s.cur)+' is closed for receipts → '+esc(s.next)+' becomes the current session → fee rows older than '+esc(s.cur)+' leave the live sheet (they stay in the archive copies).</div>';
+  h += '<div class="btnrow"><button class="btn b-blue" id="bP1" onclick="prev1()"'+(running()?' disabled':'')+'>🔍 Preview Part 1 (changes nothing)</button></div><div class="msg" id="mP1"></div><div id="p1Out">'+(P1?p1Html():'')+'</div></div>';
+  return h;
+}
+async function prev1(){
+  let m = $('mP1'); show(m, 'Working out the carry-forward of every student... please wait', 'load');
+  try{ let r = await apiGet('promopreview1', {}); if(!r.success){ show(m, '❌ ' + (r.error || 'Could not load.'), 'err'); return; } P1 = r; hide(m); $('p1Out').innerHTML = p1Html(); }
+  catch(e){ show(m, '❌ Could not connect. Try again.', 'err'); }
+}
+function p1Html(){
+  let r = P1, h = '';
+  r.problems.forEach(x=>{ h += '<div class="prob">⛔ '+esc(x)+'</div>'; });
+  r.warnings.forEach(x=>{ h += '<div class="warnl">⚠️ '+esc(x)+'</div>'; });
+  h += '<div class="big"><div><b>'+r.count+'</b><span>students carry dues</span></div><div><b>'+money(r.total)+'</b><span>total carried</span></div><div><b>'+esc(r.carryDate)+'</b><span>carry date (late fine stops)</span></div></div>';
+  h += r.rows.length ? r.rows.map(x=>{
+    let e = CARRY[x.adm] || {};
+    return '<div class="card"><div class="h"><span>'+esc(x.name)+'</span><span>'+money(x.amount)+'</span></div><div class="small">Adm '+esc(x.adm)+' · Class '+esc(x.cls)+(x.roll?' · Roll '+esc(x.roll):'')+(x.left?' · <span class="pill grey">'+esc(x.warn.split(';')[0])+'</span>':'')+'<br>'+x.breakdown.map(b=>esc(b.head)+' '+money(b.amount)).join(', ')+(x.warn && !x.left?'<br>⚠️ '+esc(x.warn):'')+'</div>'+
+      '<div class="row2 noprint"><div><label>Carry this amount</label><input inputmode="decimal" class="c_amt" data-a="'+esc(x.adm)+'" value="'+esc(e.amount !== undefined ? e.amount : x.amount)+'" onchange="carryEdit(this)"></div><div><label>Reason (if changed)</label><input class="c_rs" data-a="'+esc(x.adm)+'" maxlength="120" value="'+esc(e.reason||'')+'" onchange="carryEdit(this)"></div></div></div>';
+  }).join('') : '<div class="meta">Nobody owes money. Nothing is carried.</div>';
+  h += '<div class="btnrow noprint"><button class="btn b-grey" onclick="window.print()">🖨 Print the preview</button></div>';
+  if(!r.problems.length) h += '<div class="box noprint" style="border-left-color:var(--red);margin-top:12px"><div class="title">Start Part 1</div><div class="meta">Do this in a holiday. All saving stops for everyone until the last step is finished (a few minutes). Type the new session name to confirm.</div>'+
+    '<label>Type <b>'+esc(r.newSession)+'</b></label><input id="c1" autocomplete="off" placeholder="'+esc(r.newSession)+'"><div class="btnrow"><button class="btn b-red" id="bS1" onclick="start1()">Start Part 1 now</button></div><div class="msg" id="mS1"></div></div>';
+  return h;
+}
+function carryEdit(el){
+  let a = el.dataset.a, amt = document.querySelector('.c_amt[data-a="'+CSS.escape(a)+'"]').value.trim(), rs = document.querySelector('.c_rs[data-a="'+CSS.escape(a)+'"]').value.trim();
+  let row = P1.rows.find(x=>String(x.adm)===String(a));
+  if(row && Number(amt) === Number(row.amount) && !rs) delete CARRY[a]; else CARRY[a] = {amount:amt, reason:rs};
+}
+async function start1(){
+  let m = $('mS1'), c = $('c1').value.trim();
+  if(c !== P1.newSession){ show(m, '❌ Type the new session name exactly: ' + P1.newSession, 'err'); return; }
+  let bad = Object.keys(CARRY).filter(a=>{ let e = CARRY[a], row = P1.rows.find(x=>String(x.adm)===String(a)); return row && Number(e.amount) !== Number(row.amount) && (e.reason||'').length < 3; });
+  if(bad.length){ show(m, '❌ Write the reason for every changed amount (' + bad.length + ' missing).', 'err'); return; }
+  if(!(await UI.ask('Start Part 1 now? A backup is made first. Saving stops for everyone until it is finished.', 'Start Part 1', false))) return;
+  show(m, 'Starting... please wait', 'load');
+  try{
+    let r = await apiPost('promostart', {part:1, confirm:c, carry:JSON.stringify(CARRY)});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not start.'), 'err'); return; }
+    D.state = r.state; drawRun(); window.scrollTo({top:0}); runSteps();
+  }catch(e){ show(m, '❌ Could not connect. Nothing was started. Try again.', 'err'); }
+}
+
+/* ---- 3. Part 2 ---- */
+function part2Html(){
+  let s = D.sessions, h = '<div class="box" style="border-left-color:var(--green)"><div class="title">3. Part 2 – Promote classes ('+esc(s.cur)+')</div>';
+  if(!s.prev) return h + '<div class="meta">Works after Part 1 (Start new session).</div></div>';
+  h += '<div class="meta">Tick the classes that are ready. Tick "still finishing" for a class whose exams are not over: it is renamed (for example IX ('+esc(s.prev)+')) with all its data, and promoted later from here. A class can receive students only when its own students move in the same batch (or it is empty).</div>';
+  let list = D.all.filter(c=>c);
+  h += list.map(c=>{
+    let tag = /\(\d{4}[^()]*\)$/.test(c), m = D.classes.find(x=>x.cls===c), done = m && m.promotedFor === s.cur;
+    return '<div class="card"><label class="chk'+(done?' dis':'')+'"><input type="checkbox" class="p2c" value="'+esc(c)+'"'+(TICK[c]?' checked':'')+(done?' disabled':'')+' onchange="TICK[this.value]=this.checked;P2=null;$(\'p2Out\').innerHTML=\'\'"><span>'+esc(c)+(tag?' <span class="pill pur">finishing</span>':'')+(done?'<small>already promoted in '+esc(s.cur)+'</small>':'<small>next: '+esc(m?(m.next==='PASSOUT'?'passes out':m.next==='CHOOSE'?'choose for each student':m.next):(tag?'from the map of the real class':''))+'</small>')+'</span></label>'+
+      (!tag && !done ? '<label class="chk" style="margin-left:30px"><input type="checkbox" class="p2f" value="'+esc(c)+'"'+(FIN[c]?' checked':'')+' onchange="FIN[this.value]=this.checked;P2=null;$(\'p2Out\').innerHTML=\'\'"><span>still finishing (exams not over)</span></label>' : '')+'</div>';
+  }).join('');
+  h += '<div class="btnrow"><button class="btn b-grey" onclick="tickAll(1)">Tick all ready</button><button class="btn b-grey" onclick="tickAll(0)">Untick all</button></div>';
+  h += '<div class="btnrow"><button class="btn b-blue" id="bP2" onclick="prev2()"'+(running()?' disabled':'')+'>🔍 Preview Part 2 (changes nothing)</button></div><div class="msg" id="mP2"></div><div id="p2Out">'+(P2?p2Html():'')+'</div></div>';
+  return h;
+}
+function tickAll(on){ D.all.forEach(c=>{ let m = D.classes.find(x=>x.cls===c); if(!(m && m.promotedFor === D.sessions.cur)) TICK[c] = !!on; }); P2 = null; draw(); }
+function chosen(){ return Object.keys(TICK).filter(c=>TICK[c]); }
+async function prev2(keepScroll){
+  let m = $('mP2'), cls = chosen();
+  if(!cls.length){ show(m, '❌ Tick at least one class.', 'err'); return; }
+  show(m, 'Reading the results of ' + cls.length + ' classes... this can take about a minute.', 'load');
+  try{
+    let r = await apiPost('promopreview2', {classes:JSON.stringify(cls), finishing:JSON.stringify(Object.keys(FIN).filter(c=>FIN[c] && TICK[c])), edits:JSON.stringify(EDITS), electives:JSON.stringify(ELEC)});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    P2 = r; hide(m); $('p2Out').innerHTML = p2Html();
+  }catch(e){ show(m, '❌ Could not connect. Try again.', 'err'); }
+}
+function p2Html(){
+  let r = P2, h = '';
+  r.problems.forEach(x=>{ h += '<div class="prob">⛔ '+esc(x)+'</div>'; });
+  r.warnings.forEach(x=>{ h += '<div class="warnl">⚠️ '+esc(x)+'</div>'; });
+  h += '<div class="small">'+Object.keys(r.count).map(k=>esc((CH[k]||(k==='JOIN'?'Joins':k)))+': <b>'+r.count[k]+'</b>').join(' · ')+'</div>';
+  r.classes.forEach(c=>{
+    if(c.finishing){ h += '<div class="card"><div class="h"><span>'+esc(c.cls)+'</span><span class="pill pur">still finishing</span></div><div class="small">'+c.count+' students are renamed to <b>'+esc(c.tag)+'</b> with all their data and a copy of their subjects. Promote them later from this page.</div></div>'; return; }
+    let opts = c.options && c.options.length ? c.options : D.all.filter(x=>!/\(\d{4}[^()]*\)$/.test(x));
+    h += '<div class="card"><div class="h"><span>'+esc(c.cls)+' → '+esc(c.next==='PASSOUT'?'passes out':c.next==='CHOOSE'?'choose for each':c.next)+'</span><span class="small">'+esc(c.report||'no report')+'</span></div>';
+    if(c.next === 'CHOOSE') h += '<div class="row2 noprint"><select id="bulk_'+esc(c.cls)+'">'+opts.map(o=>'<option>'+esc(o)+'</option>').join('')+'</select><button class="btn b-purple" style="background:var(--purple)" onclick="moveTicked(\''+esc(c.cls)+'\')">Move ticked to …</button></div>';
+    h += c.students.map(s=>{
+      let sel = '<select onchange="setChoice(\''+esc(s.adm)+'\',this.value)">'+Object.keys(CH).map(k=>'<option value="'+k+'"'+(k===s.choice?' selected':'')+'>'+CH[k]+'</option>').join('')+'</select>';
+      let to = s.choice === 'PROMOTE' ? '<select onchange="setTo(\''+esc(s.adm)+'\',this.value)"><option value="">Class?</option>'+opts.map(o=>'<option'+(o===s.to?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>' : '<span class="small">'+(s.choice==='REPEAT'?esc(s.to):'—')+'</span>';
+      return '<div class="st">'+(c.next==='CHOOSE'?'<input type="checkbox" class="pk" data-c="'+esc(c.cls)+'" value="'+esc(s.adm)+'"'+(PICK[s.adm]?' checked':'')+' onchange="PICK[this.value]=this.checked">':'<span></span>')+
+        '<div class="nm"><b>'+esc(s.name)+(s.edited?' ✎':'')+'</b><span>'+esc(s.adm)+(s.roll?' · roll '+esc(s.roll):'')+(s.pct!==''?' · '+esc(s.pct)+'%':'')+(s.grade?' '+esc(s.grade):'')+' · '+esc(s.result||'no result')+(s.newRoll?' · new roll <b>'+esc(s.newRoll)+'</b>':'')+'</span></div>'+sel+to+'</div>';
+    }).join('') + '</div>';
+  });
+  if(r.joiners.length) h += '<div class="card"><div class="h"><span>New admissions joining now</span><span class="pill ok">'+r.joiners.length+'</span></div>'+r.joiners.map(j=>'<div class="small">'+esc(j.name)+' ('+esc(j.adm)+') → '+esc(j.to)+(j.newRoll?' · roll '+esc(j.newRoll):'')+'</div>').join('')+'</div>';
+  if(r.elecNeed.length){
+    let groups = {}; r.elecNeed.forEach(e=>{ let k = e.to + '|' + e.group; (groups[k] = groups[k] || {to:e.to, group:e.group, options:e.options, list:[]}).list.push(e); });
+    h += '<div class="card" style="border-color:var(--orange)"><div class="h"><span>Electives to choose</span><span class="pill warn">'+r.elecNeed.length+'</span></div><div class="small">The same subject is not offered in the new class. Choose one for each student (or "none"), then tap Update preview.</div>';
+    Object.values(groups).forEach(g=>{
+      let opt = g.list[0].optional, none = opt ? '<option value="NONE">none (optional subject)</option>' : '';
+      h += '<h4 class="g">'+esc(g.to)+' – '+esc(g.group)+(opt?' <span class="pill grey">optional</span>':'')+'</h4><div class="row2 noprint"><select id="ga_'+esc(g.to+'|'+g.group)+'">'+none+g.options.map(o=>'<option>'+esc(o)+'</option>').join('')+'</select><button class="btn b-grey" onclick="elecAll(\''+esc(g.to)+'\',\''+esc(g.group)+'\')">Set all of this group</button></div>'+
+        g.list.map(e=>'<div class="st" style="grid-template-columns:1fr 150px"><div class="nm"><b>'+esc(e.name)+'</b></div><select onchange="setElec(\''+esc(e.adm)+'\',\''+esc(e.group)+'\',this.value)"><option value="">Choose</option>'+(e.optional?'<option value="NONE"'+(((ELEC[e.adm]||{})[e.group])==='NONE'?' selected':'')+'>none</option>':'')+e.options.map(o=>'<option'+(((ELEC[e.adm]||{})[e.group])===o?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>').join('');
+    });
+    h += '</div>';
+  }
+  h += '<div class="btnrow noprint"><button class="btn b-blue" id="bUp" onclick="prev2()">🔄 Update preview</button><button class="btn b-grey" onclick="window.print()">🖨 Print the preview</button></div>';
+  if(!r.problems.length) h += '<div class="box noprint" style="border-left-color:var(--red);margin-top:12px"><div class="title">Start Part 2</div><div class="meta">All saving stops for everyone until the last step is finished. The year\'s attendance, tests, marks and results of the promoted classes are emptied after they are saved in the archive copy and in Previous results.</div>'+
+    (r.noResult.length ? '<label>Reason for going on although '+r.noResult.length+' student(s) have no final result</label><input id="nrr" maxlength="150">' : '')+
+    '<label>Type <b>'+esc(r.session)+'</b></label><input id="c2" autocomplete="off" placeholder="'+esc(r.session)+'"><div class="btnrow"><button class="btn b-red" id="bS2" onclick="start2()">Start Part 2 now</button></div><div class="msg" id="mS2"></div></div>';
+  return h;
+}
+function setChoice(a, v){ EDITS[a] = Object.assign(EDITS[a] || {}, {choice:v}); hint(); }
+function setTo(a, v){ EDITS[a] = Object.assign(EDITS[a] || {}, {to:v}); hint(); }
+function setElec(a, g, v){ (ELEC[a] = ELEC[a] || {})[g] = v; hint(); }
+function elecAll(to, g){ let v = $('ga_' + to + '|' + g).value; P2.elecNeed.filter(e=>e.to===to && e.group===g).forEach(e=>{ (ELEC[e.adm] = ELEC[e.adm] || {})[g] = v; }); prev2(); }
+function moveTicked(c){ let to = $('bulk_' + c).value; document.querySelectorAll('.pk[data-c="'+CSS.escape(c)+'"]').forEach(x=>{ if(x.checked){ EDITS[x.value] = {choice:'PROMOTE', to:to}; PICK[x.value] = false; } }); prev2(); }
+function hint(){ show($('mP2'), 'Changed. Tap "Update preview" to see the new roll numbers and checks before you start.', 'warn'); let s = $('bS2'); if(s) s.disabled = true; }
+async function start2(){
+  let m = $('mS2'), c = $('c2').value.trim();
+  if(c !== P2.session){ show(m, '❌ Type the session name exactly: ' + P2.session, 'err'); return; }
+  let nrr = $('nrr') ? $('nrr').value.trim() : '';
+  if(P2.noResult.length && nrr.length < 3){ show(m, '❌ Write the reason for the missing results (at least 3 letters).', 'err'); return; }
+  if(!(await UI.ask('Start Part 2 for ' + chosen().join(', ') + '? An archive copy is made first. Saving stops for everyone until it is finished.', 'Start Part 2', false))) return;
+  show(m, 'Starting... please wait (the preview is checked again).', 'load');
+  try{
+    let r = await apiPost('promostart', {part:2, confirm:c, classes:JSON.stringify(chosen()), finishing:JSON.stringify(Object.keys(FIN).filter(x=>FIN[x] && TICK[x])), edits:JSON.stringify(EDITS), electives:JSON.stringify(ELEC), noResultReason:nrr});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not start.'), 'err'); return; }
+    D.state = r.state; drawRun(); window.scrollTo({top:0}); TICK = {}; FIN = {}; runSteps();
+  }catch(e){ show(m, '❌ Could not connect. Nothing was started. Try again.', 'err'); }
+}
+
+/* ---- log ---- */
+function logHtml(){
+  let l = D.log || [];
+  return '<div class="box"><div class="title">Promotion log</div>'+(l.length ? '<table class="ct"><tr><th>When</th><th>Step</th><th>Result</th></tr>'+l.map(x=>'<tr><td>'+esc(x.time)+'<br><span class="small">'+esc(x.part)+' · '+esc(x.by)+'</span></td><td>'+esc(D.steps[x.step]||x.step)+'<br><span class="small">'+esc(x.details)+'</span></td><td>'+(x.result==='DONE'||x.result==='OK'?'<span class="pill ok">'+esc(x.result)+'</span>':'<span class="pill red">'+esc(x.result)+'</span>')+'</td></tr>').join('')+'</table>' : '<div class="meta">Nothing yet.</div>')+'</div>';
+}
+load();
+</script>
+</body></html>

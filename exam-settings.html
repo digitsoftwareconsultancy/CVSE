@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.14-S8">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S14">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Settings</title>
@@ -122,7 +122,7 @@ function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href
 /* ===== state ===== */
 var ROWS = {exams:[], reports:[], grades:[], areas:[], letters:[], results:[], assign:[]};
 var SAVED = {};          // JSON of each section as last loaded/saved, to know what is unsaved
-var REF = {classes:[], subjects:[], teachers:[], hasMarks:false, problems:[]};
+var REF = {classes:[], levels:[], subjects:[], teachers:[], hasMarks:false, problems:[]};
 var CUR = 'exams';
 var SECS = ['exams', 'reports', 'grades', 'areas', 'letters', 'results', 'assign'];
 
@@ -143,12 +143,14 @@ async function init(){
   $('wSub').innerText = 'Username: ' + USER.username.toUpperCase();
   $('avatarLetter').innerText = String(USER.name || USER.username).trim().charAt(0).toUpperCase();
   show($('gMsg'), 'Loading...', 'load');
+  let r = null;
   try{
-    let r = await apiGet('getexamsettings', {lite:1});
+    r = await apiGet('getexamsettings', {lite:1});
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.') + (String(r.error || '').indexOf('Tab') > -1 ? ' Run EXAM_setupTabs in Apps Script first.' : ''), 'err'); return; }
     applyData(r, true);
   }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
   hide($('gMsg'));
+  if(r.finishing && r.finishing.length) show($('gMsg'), '⚠️ Classes still finishing the old session: ' + r.finishing.join(', ') + '. A change to the grade scale, the exam list or the report layouts also changes THEIR report cards. Print or save their report cards first if you change these now.', 'warn');   // S14
   showSec('exams');
   loadProblems();
 }
@@ -163,7 +165,7 @@ async function loadProblems(){
   drawProblems();
 }
 function applyData(r, all, onlySec){
-  REF.classes = r.classes || []; REF.subjects = r.subjects || []; REF.teachers = r.teachers || [];
+  REF.classes = r.classes || []; REF.levels = r.levels || []; REF.subjects = r.subjects || []; REF.teachers = r.teachers || [];
   if(!r.lite){ REF.hasMarks = !!r.hasMarks; REF.problems = r.problems || []; }
   SECS.forEach(s => { if(all || s === onlySec) loadSection(s, r[s]); });
   drawProblems();
@@ -194,6 +196,8 @@ function saveBar(sec, addLabel, addFn){
     (addFn ? '<button class="btn b-blue" onclick="' + addFn + '">' + addLabel + '</button>' : '') +
     '<button class="btn b-green" id="save_' + sec + '" onclick="saveSec(\'' + sec + '\')">💾 Save ' + ({exams:'Exams', reports:'Reports', grades:'Grade scale', areas:'Extra areas', letters:'Letter grades', results:'Result choices', assign:'Access'})[sec] + '</button></div></div>';
 }
+// S13: 'X (all sections)' = one tick for every section of X; a section ticked on its own is also fine
+function clsOpts(){ return REF.levels.map(l => ({value:l, label:l + ' (all sections)'})).concat(REF.classes); }
 function chipsHtml(sec, i, field, options, selectedCsv, allLabel){
   let sel = csv(selectedCsv).map(x => x.toUpperCase());
   let h = '<div class="chips">';
@@ -212,7 +216,7 @@ function toggleChip(sec, i, field, val, on){
   if(on && idx < 0) list.push(val);
   if(!on && idx > -1) list.splice(idx, 1);
   // keep list in the same order as the options
-  let order = field === 'Exams' ? ROWS.exams.map(e => e.ExamID) : field === 'Reports' ? ROWS.reports.map(e => e.ReportID) : REF.classes;
+  let order = field === 'Exams' ? ROWS.exams.map(e => e.ExamID) : field === 'Reports' ? ROWS.reports.map(e => e.ReportID) : REF.levels.concat(REF.classes);
   list.sort((a, b) => order.indexOf(a) - order.indexOf(b));
   ROWS[sec][i][field] = list.join(',');
   redraw(sec);
@@ -251,7 +255,7 @@ function drawExams(){
       '<div style="flex:2"><label>Exam name</label><input value="' + esc(e.ExamName) + '" placeholder="e.g. Periodic Test 1" oninput="setF(\'exams\',' + i + ',\'ExamName\',this.value)"></div></div>' +
       '<div class="row"><div><label>Short name (on report)</label><input maxlength="12" value="' + esc(e.ShortName) + '" placeholder="e.g. PT-1" oninput="setF(\'exams\',' + i + ',\'ShortName\',this.value)"></div>' +
       '<div><label>Type</label><select onchange="setF(\'exams\',' + i + ',\'ExamType\',this.value)"><option value="PT"' + (String(e.ExamType).toUpperCase() === 'PT' ? ' selected' : '') + '>PT (periodic test)</option><option value="TERM"' + (String(e.ExamType).toUpperCase() === 'TERM' ? ' selected' : '') + '>TERM (half yearly / annual)</option></select></div></div>' +
-      '<label>Classes</label>' + chipsHtml('exams', i, 'Classes', REF.classes, e.Classes, 'None ticked = all classes') +
+      '<label>Classes</label>' + chipsHtml('exams', i, 'Classes', clsOpts(), e.Classes, 'None ticked = all classes') +
       '<div class="row"><label class="sw"><input type="checkbox" ' + (yn(e.EntryOpen) ? 'checked' : '') + ' onchange="setYN(\'exams\',' + i + ',\'EntryOpen\',this.checked)">Marks entry open for teachers</label>' +
       '<label class="sw"><input type="checkbox" ' + (yn(e.Locked) ? 'checked' : '') + ' onchange="setYN(\'exams\',' + i + ',\'Locked\',this.checked);redraw(\'exams\')">Locked (no more changes)</label></div>' +
       '<div class="btnrow"><button class="btn b-grey" onclick="moveRow(\'exams\',' + i + ',-1)">⬆ Up</button><button class="btn b-grey" onclick="moveRow(\'exams\',' + i + ',1)">⬇ Down</button><button class="btn b-red" onclick="delRow(\'exams\',' + i + ')">🗑 Remove</button></div></div>';
@@ -295,7 +299,7 @@ function drawReports(){
       let w = weightMap(r);
       h += '<label>Weight of each exam (must total 100)</label>' + csv(r.Exams).map(x => '<div class="wrow"><span>' + esc(examShort(x)) + '</span><input type="number" inputmode="decimal" min="0" max="100" value="' + esc(w[x.toUpperCase()] === undefined ? '' : w[x.toUpperCase()]) + '" oninput="setWeight(' + i + ',\'' + esc(x) + '\',this.value)"><b>%</b></div>').join('');
     }
-    h += '<label>Classes</label>' + chipsHtml('reports', i, 'Classes', REF.classes, r.Classes, 'None ticked = all classes') +
+    h += '<label>Classes</label>' + chipsHtml('reports', i, 'Classes', clsOpts(), r.Classes, 'None ticked = all classes') +
       '<label>Pass rule (note for your own reference)</label><input value="' + esc(r.PassRule) + '" oninput="setF(\'reports\',' + i + ',\'PassRule\',this.value)" placeholder="e.g. each subject pass marks from SubjectMaster">' +
       '<div class="preview" id="pv_' + i + '">' + esc(previewText(r)) + '</div>' +
       '<div class="row"><label class="sw"><input type="checkbox" ' + (yn(r.Published) ? 'checked' : '') + ' onchange="setYN(\'reports\',' + i + ',\'Published\',this.checked);redraw(\'reports\')">Published to students</label>' +
@@ -348,7 +352,7 @@ function drawAreas(){
       '<div class="row"><div style="flex:2"><label>Name</label><input value="' + esc(a.AreaName) + '" placeholder="e.g. Art Education" oninput="setF(\'areas\',' + i + ',\'AreaName\',this.value)"></div>' +
       '<div><label>Type</label><select onchange="setF(\'areas\',' + i + ',\'AreaType\',this.value)"><option value="PSD"' + (String(a.AreaType).toUpperCase() === 'PSD' ? ' selected' : '') + '>Personal / Social (PSD)</option>' + (String(a.AreaType).toUpperCase() === 'CO-SCHOLASTIC' ? '<option value="CO-SCHOLASTIC" selected>Co-scholastic (old - remove this row)</option>' : '') + '</select></div></div>' +
       '<label>Grade choices (comma separated)</label><input value="' + esc(a.GradeOptions) + '" placeholder="A,B,C,D,E" oninput="setF(\'areas\',' + i + ',\'GradeOptions\',this.value)">' +
-      '<label>Classes</label>' + chipsHtml('areas', i, 'Classes', REF.classes, a.Classes, 'None ticked = all classes') +
+      '<label>Classes</label>' + chipsHtml('areas', i, 'Classes', clsOpts(), a.Classes, 'None ticked = all classes') +
       '<div class="btnrow"><button class="btn b-grey" onclick="moveRow(\'areas\',' + i + ',-1)">⬆ Up</button><button class="btn b-grey" onclick="moveRow(\'areas\',' + i + ',1)">⬇ Down</button><button class="btn b-red" onclick="delRow(\'areas\',' + i + ')">🗑 Remove</button></div></div>';
   });
   h += saveBar('areas', '➕ Add Area', 'addArea()');

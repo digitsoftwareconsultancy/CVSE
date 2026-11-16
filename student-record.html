@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student record</title>
@@ -53,7 +53,7 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
 .tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
 .tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
 @media print{body>.top,body>.tabs{display:none!important}}
-</style><script src="config.js"></script><script src="ui.js"></script></head>
+</style><script src="config.js"></script><script src="ui.js"></script><script src="photo.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
@@ -97,7 +97,7 @@ $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperC
 
 var Q = new URLSearchParams(location.search), ADM = Q.get('adm') || '', ISNEW = !ADM && Q.get('new') === '1';
 var D = null, R = null, OPEN = {1:true};
-var STATUS_LABEL = {ACTIVE:'Active', LEFT:'Left (TC)', DROPOUT:'Drop out', PASSEDOUT:'Passed out'};
+var STATUS_LABEL = {ACTIVE:'Active', LEFT:'Left (TC)', DROPOUT:'Drop out', PASSEDOUT:'Passed out', NEXT:'Joins next session'};
 function F(k){ return D.meta.fields.find(f=>f.key===k); }
 function req(k){ return D.meta.required.indexOf(k) > -1; }
 function printIt(type){
@@ -138,7 +138,7 @@ function input(k, val, ro){
     case 'year': return lab + '<input id="'+id+'" inputmode="numeric" maxlength="4" placeholder="2026" value="'+esc(v)+'"'+dis+'>';
     case 'status': {
       let show = R ? R.StatusShow : 'ACTIVE', raw = (R && R.Status) || '';
-      let h = D.meta.statuses.map(s=>'<option value="'+s[0]+'"'+(s[0]===show?' selected':'')+'>'+esc(s[1])+'</option>').join('');
+      let h = D.meta.statuses.filter(s=>s[0]!=='NEXT'||show==='NEXT').map(s=>'<option value="'+s[0]+'"'+(s[0]===show?' selected':'')+'>'+esc(s[1])+'</option>').join('');   // S14: 'Joins next session' only through Add student
       if(!STATUS_LABEL[show]) h += '<option value="'+esc(show)+'" selected>'+esc(show)+' (old word, kept)</option>';
       let note = raw && raw.toUpperCase() !== show ? '<div class="help">The sheet has the old word "'+esc(raw)+'". It is kept as it is unless you choose another status.</div>' : '';
       return lab + '<select id="'+id+'"'+dis+'>'+h+'</select>' + note;
@@ -167,6 +167,9 @@ function drawNew(){
    '<label class="chk"><input type="radio" name="am" id="amMan" onchange="admMode()"> Type the number myself (for example a higher class in the middle of the year)</label>'+
    '<div id="amAutoBox"><div class="row2"><div><label for="am_year">Year of admission</label><input id="am_year" inputmode="numeric" maxlength="4" value="'+esc(D.yearNow)+'" oninput="if(this.value.length===4)nextNo()"></div><div><label>Next number</label><input id="am_next" readonly value="…"></div></div><div class="help" id="am_help"></div></div>'+
    '<div id="amManBox" style="display:none"><label for="am_no">Admission number</label><input id="am_no" maxlength="30" autocapitalize="characters"><div class="help">A number already used is refused. The number cannot be changed after saving.</div></div>'+
+   (D.nextSession ? '<h4 class="g">The child joins</h4>'+
+   '<label class="chk"><input type="radio" name="jn" id="jnNow" checked onchange="joinMode()"> Now, in this session</label>'+
+   '<label class="chk"><input type="radio" name="jn" id="jnNext" onchange="joinMode()"> In the next session ('+esc(D.nextSession)+') – admission taken early<small>Not in any class list now. Fees of '+esc(D.nextSession)+' can be taken in Collect Fees. Class and roll number are given at the promotion.</small></label>' : '')+
    '<h4 class="g">Student</h4>' + keys.map(k=>{ let v = k==='Class' ? c : ''; return input(k, v, false); }).join('') +
    '<div id="elBox"></div>'+
    '<div class="btnrow"><button class="btn b-green" id="addBtn" onclick="addStu()">Add student</button><button class="btn b-navy" onclick="goBack()">Cancel</button></div><div class="msg" id="addMsg"></div></div>';
@@ -174,6 +177,13 @@ function drawNew(){
   $('tPrint').querySelector('.tabIco').nextSibling.textContent = 'Blank form';
 }
 function admMode(){ let man = $('amMan').checked; $('amAutoBox').style.display = man ? 'none' : ''; $('amManBox').style.display = man ? '' : 'none'; }
+// S14: admitted now for the next session: no roll number, admission year = the next session's year
+function joinMode(){
+  let nx = $('jnNext') && $('jnNext').checked, r = $('f_RollNo');
+  if(r){ r.disabled = nx; if(nx) r.value = ''; }
+  let l = document.querySelector('label[for="f_Class"]'); if(l) l.firstChild.textContent = nx ? 'Class in ' + D.nextSession + ' ' : 'Class ';
+  $('am_year').value = nx ? (D.nextYear || D.yearNow) : D.yearNow; nextNo();
+}
 async function nextNo(){
   let y = $('am_year').value.trim(); $('am_next').value = '…';
   try{ let r = await apiGet('mrnextno', {year:y}); $('am_next').value = r.success ? r.adm : '—'; $('am_help').innerText = r.success ? 'School pattern: ' + r.pattern + '. The number is given when you tap Add (the next free one).' : '⚠️ ' + (r.error || ''); }
@@ -192,7 +202,7 @@ async function addStu(flags){
   let man = $('amMan').checked, b = $('addBtn'), m = $('addMsg');
   b.disabled = true; show(m, 'Saving... please wait', 'load');
   try{
-    let r = await apiPost('mradd', Object.assign({student:JSON.stringify(st), admMode:man?'MANUAL':'AUTO', admNo:man?$('am_no').value.trim():'', year:st.AdmissionYear, electives:JSON.stringify(electives())}, flags || {}));
+    let r = await apiPost('mradd', Object.assign({student:JSON.stringify(st), admMode:man?'MANUAL':'AUTO', admNo:man?$('am_no').value.trim():'', year:st.AdmissionYear, electives:JSON.stringify(electives()), joins:($('jnNext') && $('jnNext').checked) ? 'NEXT' : ''}, flags || {}));
     if(r.needConfirm){
       b.disabled = false; hide(m);
       let yes = await UI.ask(r.warning + '\n\nSave anyway?', 'Save anyway', false);
@@ -207,12 +217,13 @@ async function addStu(flags){
 
 /* ---------- the record: 6 sections ---------- */
 function headBox(){
-  let st = R.StatusShow, pill = st === 'ACTIVE' ? '<span class="pill ok">Active</span>' : '<span class="pill grey">'+esc(STATUS_LABEL[st] || st)+'</span>';
+  let st = R.StatusShow, pill = st === 'ACTIVE' ? '<span class="pill ok">Active</span>' : '<span class="pill grey">'+esc(STATUS_LABEL[st] || st)+(st === 'NEXT' && R.JoinSession ? ' ' + esc(R.JoinSession) : '')+'</span>';
   let warn = '';
   if(!D.inMaster) warn += '<div class="msg show warn">This student is not in the master record yet (shown from the Students tab). Saving any section adds the record.</div>';
   if(D.missing && D.missing.length) warn += '<div class="msg show warn">Incomplete: '+esc(D.missing.join(', '))+'</div>';
   if(!D.canEdit) warn += '<div class="msg show info">View only. Your login may see but not change student records.</div>';
   return '<div class="box"><div class="title">'+esc(R.Name || '(no name)')+'</div><div class="meta">Adm '+esc(R.AdmissionNo)+' · Class '+esc(R.Class || '-')+(R.RollNo?' · Roll '+esc(R.RollNo):'')+' &nbsp;'+pill+'</div>'+warn+
+   '<div id="phArea">'+photoArea()+'</div>'+
    '<div class="btnrow"><button class="btn b-purple" onclick="printIt(\'form\')">🖨️ Registration form</button><button class="btn b-navy" onclick="printIt(\'profile\')">🖨️ Student profile</button></div></div>';
 }
 function secHtml(n){
@@ -248,11 +259,75 @@ function famHtml(){
   if(D.canEdit) h += '<label for="fq">Find the brother / sister (name, admission no or mobile)</label><div style="display:flex;gap:8px"><input id="fq" style="flex:1;min-width:0" onkeyup="if(event.key===\'Enter\')famFind()"><button class="btn b-blue" style="width:auto;min-width:90px" id="fqb" onclick="famFind()">Search</button></div><div id="fres"></div>';
   return h + '<div class="msg" id="fMsg"></div>';
 }
+// S16: the parent registration form of this student (student app)
+function regBox(){
+  let g = D.reg; if(!g) return '';
+  let tone = g.status === 'SUBMITTED' ? 'warn' : 'info';
+  let h = '<div class="box" style="border-left-color:var(--blue)"><div class="title" style="font-size:15px">📝 Parent registration form</div><div class="msg show '+tone+'">'+esc(g.statusText)+(g.submittedAt && g.status === 'SUBMITTED' ? ' · sent '+esc(g.submittedAt) : '')+(g.decidedAt && g.status !== 'SUBMITTED' ? ' · checked '+esc(g.decidedAt)+(g.decidedBy ? ' by '+esc(g.decidedBy) : '') : '')+'</div>';
+  let b = [];
+  if(g.status) b.push('<button class="btn '+(g.status === 'SUBMITTED' ? 'b-orange' : 'b-navy')+'" onclick="location.href=\'registration-requests.html?adm='+encodeURIComponent(ADM)+'\'">'+(g.status === 'SUBMITTED' && D.canEdit ? '✅ Check the form' : '👁 Open the form')+'</button>');
+  if(D.canEdit && (g.status === 'ACCEPTED' || g.status === 'PARTLY')) b.push('<button class="btn b-grey" id="bRegReo" onclick="regReopen()">🔓 Reopen the form for the parent</button>');
+  if(b.length) h += '<div class="btnrow">'+b.join('')+'</div>';
+  return h + '<div class="msg" id="regMsg"></div></div>';
+}
+async function regReopen(){
+  if(!(await UI.ask('Open the registration form again for the parent? It starts from the record as it is now.', 'Yes, reopen'))) return;
+  let b = $('bRegReo'), m = $('regMsg'); b.disabled = true; show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await apiPost('regreopen', {adm:ADM});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not save.'), 'err'); b.disabled = false; return; }
+    D.reg = {status:r.status, statusText:'Reopened for the parent'}; drawRecord(); show($('regMsg'), '✅ ' + r.message, 'ok');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); b.disabled = false; }
+}
 function drawRecord(){
-  let h = headBox(); for(let n = 1; n <= 6; n++) h += secHtml(n);
+  let h = headBox() + regBox(); for(let n = 1; n <= 6; n++) h += secHtml(n);
   $('main').innerHTML = h;
   clsChange();
   sameAddr(true);
+  photoLoad();
+}
+/* ---------- S17: the student's photo (one photo, used everywhere) ---------- */
+var PH_URL = '', PH_FOR = '';
+function photoArea(){
+  let p = D.photo || {has:false};
+  let info = p.has ? 'Photo taken <b>'+esc(p.date)+'</b>'+(p.by?' by '+esc(p.by):'')+(p.old?' <span class="pill grey">from '+esc(p.session)+'</span>':'') : 'No photo yet.';
+  let btns = '';
+  if(p.canAdd) btns += '<button class="btn b-blue" id="phCam" onclick="phTake(true)">📷 Take photo</button><button class="btn b-grey" id="phGal" onclick="phTake(false)">🖼 Choose from gallery</button>';
+  if(p.canRemove && p.has) btns += '<button class="btn b-red" id="phDel" onclick="phRemove()">🗑 Remove photo</button>';
+  if(p.canAdd) btns += '<button class="btn b-navy" id="phCard" data-nofb onclick="window.open(\'idcards.html?adm=\'+encodeURIComponent(ADM),\'_blank\')">🪪 Print ID card</button>';
+  return '<div style="display:flex;gap:12px;align-items:center;margin-top:10px"><div id="phBox">'+PHOTO.box(p.has ? PH_URL : '')+'</div><div style="min-width:0;flex:1"><div class="meta" id="phInfo">'+info+'</div>'+
+    (p.has && !PH_URL ? '<div class="help" id="phLoad">Loading the photo…</div>' : '')+(p.canAdd ? '<div class="help">The same photo is used on the report card, ID card, prints and the student app.</div>' : '')+'</div></div>'+
+    (btns ? '<div class="btnrow">'+btns+'</div>' : '')+'<div class="msg" id="phMsg"></div>';
+}
+function photoRedraw(){ let a = $('phArea'); if(a) a.innerHTML = photoArea(); }
+async function photoLoad(){
+  if(!D.photo || !D.photo.has || (PH_URL && PH_FOR === ADM)) return;
+  try{
+    let r = await apiGet('photoget', {adms:ADM});
+    let u = r.success ? (r.photos[ADM] || r.photos[ADM.toUpperCase()] || '') : '';
+    PH_URL = u; PH_FOR = ADM; photoRedraw();
+    if(!u){ let l = $('phInfo'); if(l) l.innerHTML += '<br><span style="color:#9a3412">The photo file could not be opened. Take the photo again.</span>'; }
+  }catch(e){ let l = $('phLoad'); if(l) l.innerText = 'The photo could not be loaded (internet).'; }
+}
+async function phTake(camera){
+  let file = await PHOTO.choose(camera); if(!file) return;
+  PHOTO.open({file:file, title:'Photo of ' + (R.Name || ADM), sub:'Adm ' + ADM + ' · Class ' + (R.Class || '-'), onSave:async function(data, kb, url){
+    let r = await apiPost('photosave', {adm:ADM, data:data});
+    if(!r.success) return {ok:false, msg:'❌ ' + (r.error || 'The photo was not saved.')};
+    PH_URL = url; PH_FOR = ADM;
+    D.photo = Object.assign({}, r.photo, {canAdd:D.photo.canAdd, canRemove:D.photo.canRemove});
+    photoRedraw(); show($('phMsg'), r.message || '✅ Photo saved.', 'ok');
+    return {ok:true};
+  }});
+}
+async function phRemove(){
+  if(!(await UI.ask('Remove the photo of ' + (R.Name || ADM) + '? The photo box becomes empty. The file is moved to "Old photos" in Drive (not deleted).', 'Yes, remove', true))) return;
+  try{
+    let r = await apiPost('photoremove', {adm:ADM});
+    if(!r.success){ show($('phMsg'), '❌ ' + (r.error || 'Could not remove.'), 'err'); return; }
+    PH_URL = ''; D.photo = Object.assign({}, D.photo, {has:false, date:'', by:'', session:'', old:false});
+    photoRedraw(); show($('phMsg'), r.message, 'ok');
+  }catch(e){ show($('phMsg'), '❌ Could not connect. Check internet and try again. Nothing was changed.', 'err'); }
 }
 function tog(n){ OPEN[n] = !OPEN[n]; $('sec'+n).classList.toggle('open', !!OPEN[n]); if(n === 4 && OPEN[n]) clsChange(); }
 function sameAddr(first){ let c = $('f_SameAddressBox'); if(!c) return; $('corrBox').style.display = c.checked ? 'none' : ''; }
@@ -277,6 +352,12 @@ async function saveSec(n, flags){
   b.disabled = true; show(m, 'Saving... please wait', 'load');
   try{
     let r = await apiPost('mrsave', payload);
+    if(r.needConfirm === 'ROLLREASON'){                         // S14: roll numbers locked since the promotion (admin + reason)
+      b.disabled = false; hide(m);
+      let why = await UI.prompt(r.warning);
+      if(why && why.trim().length >= 3) return saveSec(n, Object.assign({}, flags || {}, {rollReason:why.trim()}));
+      show(m, 'Not saved. A reason of at least 3 letters is needed to change a locked roll number.', 'warn'); return;
+    }
     if(r.needConfirm){
       b.disabled = false; hide(m);
       let link = (r.dups || []).find(x=>x.kind === 'MOBILE');

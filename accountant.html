@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Office</title>
@@ -191,6 +191,9 @@ var CARDS = [
  ['REPORTS','📊','Fee Reports','Daily, head-wise, dues, defaulters, ledger','fees-reports.html'],
  ['STUDENTDB','🎓','Students','Add and edit student details','students.html'],
  ['RECVIEW','📇','Student Records','Full student record and registration form print','students.html'],
+ ['RECVIEW','📝','Registration Requests','Forms filled by parents in the student app','registration-requests.html'],
+ ['PHOTOS','📷','Class Photo Day','Take student photos class by class (report card, ID card, prints)','photos.html'],
+ ['PHOTOS','🪪','ID Cards','Print student ID cards for a class or one student','idcards.html'],
  ['STUDPW','🔑','Student Passwords','Reset a student\'s app password','student-access.html'],
  ['ATTENDANCE','✅','Attendance','Mark and see attendance','daily.html?tab=att'],
  ['ATTENDANCE','📈','Monthly Performance','Attendance and test report of a class','performance.html'],
@@ -210,6 +213,7 @@ async function loadHome(me){
       return;
     }
     let out = '';
+    if(h.reg && h.reg.waiting) out += '<div class="box" style="background:#eff6ff;border:1.5px solid #1976d2;font-weight:800;color:#0b2a5c">📝 '+h.reg.waiting+' parent registration form'+(h.reg.waiting>1?'s wait':' waits')+' for checking. <a href="registration-requests.html">Check now</a></div>';   // S16
     if(h.noSchool) out += '<div class="box" style="background:#fff7ed;border:1.5px solid #fdba74;font-weight:700">🏖️ No school today: '+esc(h.noSchool)+'</div>';
     if(h.collection){
       let c = h.collection, d = c.decimals || 0, modes = Object.keys(c.byMode || {}).map(k=>'<span class="hchip">'+esc(k)+' '+hMoney(c.byMode[k],d)+'</span>').join('');

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S15">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -69,6 +69,12 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   body>.top,body>.tabs,.noprint,#screens>.scr:not(#s_result),#resList,#resMsg,#cardBar{display:none!important}
   .wrap{margin:0;padding:0;max-width:none}
 }
+
+/* S15: Advanced fold */
+details.adv{margin-top:14px;border:2px dashed #94a3b8;border-radius:12px;padding:10px;background:#f8fafc}
+details.adv>summary{font-weight:800;cursor:pointer;min-height:30px;padding:4px 0}
+.advInfo{font-weight:600;color:#555}
+.advTagOn{background:#ef6c00;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800}
 </style><style>
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cl{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
@@ -212,7 +218,6 @@ var SETF = [
  ['Discount_Combine','Sibling + other concession','sel',[['ADD','Add both (never more than the fee)'],['BEST','Give only the bigger one']]],
  ['Pay_InOrder','Fees must be paid in order','yn','','Yes (recommended): each fee head is paid month by month (February waits for January; an instalment waits for the one before), and previous-session dues come first. Accessories and a typed fine are never blocked. Only the admin can take fees out of order, with a reason. While this is Yes, a part amount always goes to the oldest dues first.'],
  ['Pay_Order','When a parent pays a part amount','sel',[['OLDEST_FIRST','Oldest dues first'],['CURRENT_FIRST','Current fees first']]],
- ['Carry_Forward','Carry unpaid dues to the next session','sel',[['MANUAL','Only when I press the button'],['AUTO','Automatically']]],
  ['Sibling_Basis','Who is counted as the first child','sel',[['HIGHER_CLASS_FIRST','Child in the higher class'],['EARLIER_ADMISSION_FIRST','Child admitted earlier']]],
  ['Monthly_Start','Monthly fees for a new child start','sel',[['FROM_ADMISSION_MONTH','From the admission month'],['ALWAYS','From the first month of the session']]],
  ['Monthly_NextMonthAfterDay','If admitted after this day of month, start next month (0 = off)','num']
@@ -229,6 +234,7 @@ async function load(session){
     let r = await apiGet('getfeesetup', session ? {session:session} : {});
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); return; }
     D = r; hide($('gMsg'));
+    var _sm = Number(r.startMonth)||4; MORDER = []; for(var _i=0;_i<12;_i++) MORDER.push((_sm-1+_i)%12+1);     // S13: months in session order
     $('sess').innerHTML = r.sessions.map(s=>'<option'+(s===r.session?' selected':'')+'>'+esc(s)+'</option>').join('') || '<option value="">(no session)</option>';
     chips(); draw();
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
@@ -247,27 +253,71 @@ function draw(){
   let h = '<div class="box"><div class="title">'+esc((TABS.find(t=>t[0]===TAB)||[])[1])+(sessionTab()?' <small style="color:#64748b;font-size:12px">· '+esc(D.session)+'</small>':'')+'</div><div class="meta">'+esc(HELP[TAB])+'</div>';
   h += ({settings:dSettings,groups:dGroups,heads:dHeads,structure:dStructure,instalments:dInstalments,items:dItems,routes:dRoutes,slabs:dSlabs,sibling:dSibling,copy:dCopy})[TAB]();
   if(TAB!=='copy') h += '<div class="btnrow"><button class="btn b-green" id="saveBtn" onclick="save()">Save '+esc((TABS.find(t=>t[0]===TAB)||[])[1])+'</button></div><div class="msg" id="sMsg"></div>';
+  let advOpen = !!($('advFee') && $('advFee').open);     // S15: keep the fold open after a save
   $('secs').innerHTML = h + '</div>';
+  if(advOpen && $('advFee')) $('advFee').open = true;
 }
 /* ---- settings ---- */
+/* S15: Basic on screen, rarely changed ones in a closed 'Advanced' fold (normal value = FEE_DEFAULTS on the server).
+   Fine details show only while the late fine is on, Result-lock details only while the lock is on. Nothing is removed from the sheet. */
+var ADVF = {Receipt_Prefix:'', Receipt_Pad:'4', Receipt_Start:'1', Receipt_ResetEachSession:'YES', Receipt_Style:'FORM', Receipt_Copies:'ONE_PAGE', Receipt_ShowWords:'YES',
+  Receipt_BackDays:'0', Fee_Decimals:'0', Fine_Max:'0', Fine_MaxStudent:'0', Fine_Heads:'ALL', Fine_From:null, Role_ClassTeacherCollects:'NO', Dues_MinAmount:'0',
+  Dues_IncludePrevious:'YES', Pay_Order:'OLDEST_FIRST', Discount_Combine:'ADD', Sibling_Basis:'HIGHER_CLASS_FIRST', Monthly_Start:'FROM_ADMISSION_MONTH', Monthly_NextMonthAfterDay:'0'};
+var DEPF = {Fine_Mode:'FINE', Fine_Amount:'FINE', Fine_Grace:'FINE', Fine_Max:'FINE', Fine_MaxStudent:'FINE', Fine_Heads:'FINE', Fine_From:'FINE', __waive:'FINE',
+  Dues_Grace_Days:'LOCK', Dues_MinAmount:'LOCK', Dues_IncludePrevious:'LOCK', Dues_Message:'LOCK'};
+function fieldHtml(f){
+  let v = D.settings[f[0]], id = 's_'+f[0], h = '';
+  h += '<label>'+esc(f[1])+(ADVF.hasOwnProperty(f[0]) ? ' <span class="advTag"></span>' : '')+'</label>';
+  if(f[2]==='sel') h += sel(id,v,f[3]);
+  else if(f[2]==='headsel') h += sel(id,v,[['','(no bus fee)']].concat(D.heads.filter(x=>x.type==='MONTHLY').map(x=>[x.id,x.name])));
+  else if(f[2]==='yn') h += sel(id,v,[['YES','Yes'],['NO','No']]);
+  else if(f[2]==='date') h += '<input id="'+id+'" data-date value="'+esc(v||'')+'">';      // S11: mask + 📅 picker (ui.js)
+  else if(f[2]==='headticks'){ let all = !v || String(v).toUpperCase()==='ALL', on = ','+String(v||'')+','; h += '<div class="cl" id="'+id+'">'+D.heads.filter(x=>x.status!=='INACTIVE').map(x=>'<label><input type="checkbox" value="'+esc(x.id)+'"'+(all||on.indexOf(','+x.id+',')>-1?' checked':'')+'>'+esc(x.name)+'</label>').join('')+'</div>'; }
+  else if(f[2]==='waivebox'){ h += '<div class="card2"><div class="help">Admin only. Every unpaid late fine of the students chosen is forgiven (fees stay). First tap Check, then Waive. It shows as "Fine waived" in each student ledger and in FeeLog.</div><label>Class</label>'+sel('wv_cls','ALL',[['ALL','Whole school']].concat(D.classes.map(c=>[c,'Class '+c])))+'<label>Reason (needed)</label><input id="wv_reason" maxlength="120" placeholder="Example: school closed for floods"><div class="btnrow"><button class="btn b-blue" id="wv_chk" onclick="waiveAll(1)">Check how much</button><button class="btn b-purple" id="wv_go" onclick="waiveAll(0)" disabled>Waive</button></div><div class="msg" id="wv_msg"></div></div>'; }
+  else h += inp(id,v);
+  if(f[4]) h += '<div class="help">'+esc(f[4])+'</div>';
+  return '<div class="fld" data-k="'+esc(f[0])+'"'+(DEPF[f[0]] ? ' data-dep="'+DEPF[f[0]]+'"' : '')+(ADVF.hasOwnProperty(f[0]) && ADVF[f[0]] !== null ? ' data-def="'+esc(ADVF[f[0]])+'"' : '')+'>'+h+'</div>';
+}
 function dSettings(){
-  let h = '';
+  let basic = '', adv = '', gB = '', gA = '', head = '';
   SETF.forEach(f=>{
-    if(f[1]===null){ h += '<h3 class="g">'+esc(f[0])+'</h3>'; return; }
-    let v = D.settings[f[0]], id = 's_'+f[0];
-    h += '<label>'+esc(f[1])+'</label>';
-    if(f[2]==='sel') h += sel(id,v,f[3]);
-    else if(f[2]==='headsel') h += sel(id,v,[['','(no bus fee)']].concat(D.heads.filter(x=>x.type==='MONTHLY').map(x=>[x.id,x.name])));
-    else if(f[2]==='yn') h += sel(id,v,[['YES','Yes'],['NO','No']]);
-    else if(f[2]==='date') h += '<input id="'+id+'" data-date value="'+esc(v||'')+'">';      // S11: mask + 📅 picker (ui.js)
-    else if(f[2]==='headticks'){ let all = !v || String(v).toUpperCase()==='ALL', on = ','+String(v||'')+','; h += '<div class="cl" id="'+id+'">'+D.heads.filter(x=>x.status!=='INACTIVE').map(x=>'<label><input type="checkbox" value="'+esc(x.id)+'"'+(all||on.indexOf(','+x.id+',')>-1?' checked':'')+'>'+esc(x.name)+'</label>').join('')+'</div>'; }
-    else if(f[2]==='waivebox'){ h += '<div class="card2"><div class="help">Admin only. Every unpaid late fine of the students chosen is forgiven (fees stay). First tap Check, then Waive. It shows as "Fine waived" in each student ledger and in FeeLog.</div><label>Class</label>'+sel('wv_cls','ALL',[['ALL','Whole school']].concat(D.classes.map(c=>[c,'Class '+c])))+'<label>Reason (needed)</label><input id="wv_reason" maxlength="120" placeholder="Example: school closed for floods"><div class="btnrow"><button class="btn b-blue" id="wv_chk" onclick="waiveAll(1)">Check how much</button><button class="btn b-purple" id="wv_go" onclick="waiveAll(0)" disabled>Waive</button></div><div class="msg" id="wv_msg"></div></div>'; }
-    else h += inp(id,v);
-    if(f[4]) h += '<div class="help">'+esc(f[4])+'</div>';
+    if(f[1]===null){ head = f[0]; gB = gA = ''; return; }
+    let isAdv = ADVF.hasOwnProperty(f[0]);
+    if(isAdv){ if(!gA){ gA = head; adv += '<h3 class="g">'+esc(head)+'</h3>'; } adv += fieldHtml(f); }
+    else { if(!gB){ gB = head; basic += '<h3 class="g">'+esc(head)+'</h3>'; } basic += fieldHtml(f); }
+    if(f[0]==='Pay_InOrder') basic += '<div class="help" style="margin-top:8px">ℹ Unpaid dues are carried to the next session by <b>Promotion → Part 1 "Start new session"</b> (Admin → Students).</div>';
   });
+  let h = basic + '<details class="adv" id="advFee"><summary>⚙️ Advanced (rarely changed) <span class="advInfo"></span></summary><div class="help">Normal values suit most schools. A value that differs from the normal one is marked <span class="advTagOn">changed</span>.</div>'+adv+'</details>';
   h += '<div class="btnrow"><button class="btn b-purple" onclick="preview()">👁 Preview a sample receipt</button></div><div class="help">Save first, then preview, to see your latest receipt settings.</div>';
-  setTimeout(orderLink, 0);
+  setTimeout(function(){ orderLink(); depLink(); advMark(); }, 0);
   return h;
+}
+/* S15: show the fine details only while the late fine is on, the lock details only while the lock is on (hidden fields are still saved) */
+function depLink(){
+  let fa = $('s_Fine_Auto'), dr = $('s_Dues_Rule'); if(!fa || !dr) return;
+  let f = function(){
+    let on = {FINE: fa.value === 'YES', LOCK: dr.value === 'RESULT'};
+    document.querySelectorAll('.fld[data-dep]').forEach(function(x){ x.style.display = on[x.getAttribute('data-dep')] ? '' : 'none'; });
+    advMark();
+  };
+  fa.addEventListener('change', f); dr.addEventListener('change', f); f();
+}
+/* S15: count the advanced settings and mark the ones that differ from the normal value */
+function advMark(){
+  let box = $('advFee'); if(!box) return;
+  let n = 0, ch = 0;
+  box.querySelectorAll('.fld').forEach(function(x){
+    if(x.style.display === 'none') return;
+    n++;
+    let d = x.getAttribute('data-def'), k = x.getAttribute('data-k'), val = '';
+    if(d === null) return;
+    let el = $('s_'+k); if(!el) return;
+    if(!el.dataset.advOn){ el.dataset.advOn = '1'; el.addEventListener('change', advMark); }
+    val = el.tagName === 'DIV' ? headTicks(k) : String(el.value).trim();
+    let on = val !== d; if(on) ch++;
+    let t = x.querySelector('.advTag'); if(t) t.innerHTML = on ? '<span class="advTagOn">changed</span>' : '';
+  });
+  let info = box.querySelector('.advInfo'); if(info) info.innerHTML = '– '+n+' setting'+(n===1?'':'s')+(ch ? ', <b style="color:var(--orange,#ef6c00)">'+ch+' changed</b>' : '');
 }
 /* S10: while "Fees must be paid in order" is Yes, the payment order is fixed to Oldest dues first (the server checks the same) */
 function orderLink(){
@@ -308,7 +358,7 @@ function head(h){
   '<div><label>Type</label><select class="f_type" onchange="typeCh(this)"><option value="INSTALMENTS"'+(h.type!=='MONTHLY'?' selected':'')+'>Instalments / one-time</option><option value="MONTHLY"'+(h.type==='MONTHLY'?' selected':'')+'>Monthly</option></select></div></div>'+
   '<div class="row2"><div><label>Applies to</label><select class="f_app">'+[['ALL','All students'],['NEW','New students only'],['OLD','Old students only']].map(o=>'<option value="'+o[0]+'"'+(h.applies===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>'+
   '<div><label>Given to</label><select class="f_scope"><option value="COMPULSORY"'+(h.scope!=='OPTIONAL'?' selected':'')+'>Everyone (compulsory)</option><option value="OPTIONAL"'+(h.scope==='OPTIONAL'?' selected':'')+'>Chosen students (optional)</option></select></div></div>'+
-  '<label>Classes (none ticked = all classes)</label><div class="cl f_cls">'+D.classes.map(c=>'<label><input type="checkbox" value="'+esc(c)+'"'+(cl.indexOf(c)>-1?' checked':'')+'>'+esc(c)+'</label>').join('')+'</div>'+
+  '<label>Classes (none ticked = all classes)</label><div class="cl f_cls">'+(D.levels||[]).map(l=>'<label style="background:#f3e8ff"><input type="checkbox" value="'+esc(l)+'"'+(cl.indexOf(l)>-1?' checked':'')+'>'+esc(l)+' (all sections)</label>').join('')+D.classes.map(c=>'<label><input type="checkbox" value="'+esc(c)+'"'+(cl.indexOf(c)>-1?' checked':'')+'>'+esc(c)+'</label>').join('')+'</div>'+
   '<div class="mon" style="display:'+(h.type==='MONTHLY'?'block':'none')+'"><label>Months charged</label><div class="mo f_mon">'+MORDER.map(m=>'<label><input type="checkbox" value="'+m+'"'+(ms.indexOf(m)>-1?' checked':'')+'>'+MN[m]+'</label>').join('')+'</div>'+
   '<div class="row2"><div><label>Due day of month</label><input class="f_day" type="number" value="'+esc(h.dueDay||10)+'"></div><div><label>Starts</label><select class="f_start"><option value="FROM_ADMISSION_MONTH"'+(h.startRule!=='ALWAYS'?' selected':'')+'>From admission month</option><option value="ALWAYS"'+(h.startRule==='ALWAYS'?' selected':'')+'>Always from first month</option></select></div></div></div>'+
   '<label>Status</label><select class="f_stat"><option value="ACTIVE">Active</option><option value="INACTIVE"'+(h.status==='INACTIVE'?' selected':'')+'>Inactive (hidden, kept for old receipts)</option></select></div>';
@@ -328,8 +378,16 @@ function dStructure(){
   let hs = activeHeads(); if(!hs.length) return '<div class="empty-note">Add the Fee Heads first.</div>';
   if(!D.classes.length) return '<div class="empty-note">No classes found. Add classes in the Classes tab first.</div>';
   let h = '<div class="scroll"><table class="amt"><tr><th>Class</th>'+hs.map(x=>'<th>'+esc(x.name)+'<br><small>'+(x.type==='MONTHLY'?'per month':'total')+'</small></th>').join('')+'</tr>';
-  D.classes.forEach(c=>{ h += '<tr><td>'+esc(c)+'</td>'+hs.map(x=>'<td><input inputmode="decimal" data-h="'+esc(x.id)+'" data-c="'+esc(c)+'" value="'+esc(amtOf(x.id,c))+'"></td>').join('')+'</tr>'; });
-  return h + '</table></div>';
+  // S13: a row 'X (all sections)' before the sections of X; a section left blank uses the X amount, its own amount wins (0 = not charged)
+  let lv = D.levels||[], shown = {};
+  const lvOf = c => { let m = String(c).toUpperCase().match(/^(.+?)\s*-\s*([A-Z0-9]+)$/); return m ? m[1].trim() : ''; };
+  D.classes.forEach(c=>{
+    let l = lvOf(c);
+    if(l && lv.indexOf(l)>-1 && !shown[l]){ shown[l]=1; h += '<tr style="background:#f3e8ff"><td><b>'+esc(l)+'</b><br><small>all sections</small></td>'+hs.map(x=>'<td><input inputmode="decimal" data-h="'+esc(x.id)+'" data-c="'+esc(l)+'" value="'+esc(amtOf(x.id,l))+'"></td>').join('')+'</tr>'; }
+    let useLv = l && lv.indexOf(l)>-1;
+    h += '<tr><td>'+esc(c)+'</td>'+hs.map(x=>'<td><input inputmode="decimal" data-h="'+esc(x.id)+'" data-c="'+esc(c)+'" value="'+esc(amtOf(x.id,c))+'"'+(useLv&&amtOf(x.id,l)!==''?' placeholder="'+esc(amtOf(x.id,l))+' (as '+esc(l)+')"':'')+'></td>').join('')+'</tr>';
+  });
+  return (lv.length?'<div class="help">Purple row = enter once for all sections of that class. A section left blank pays the purple amount; type an amount in a section only when it is different (0 = not charged).</div>':'') + h + '</table></div>';
 }
 function rStructure(){
   let rows = [], seen = {};

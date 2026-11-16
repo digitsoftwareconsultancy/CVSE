@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Class photo day</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+label .req{color:var(--red)}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+textarea{min-height:70px}
+input:disabled,select:disabled,textarea:disabled,input[readonly]{background:#f1f5f9;color:#334155}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-orange{background:linear-gradient(135deg,#ef6c00,#fb8c00)}.b-grey{background:#e5e7eb;color:#475569}.b-red{background:var(--red)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-line}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}.msg.info{background:#e0f2fe;color:#075985}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sec{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--blue);margin-bottom:10px;overflow:hidden}
+.sech{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px;cursor:pointer;min-height:56px;font-weight:800;color:var(--navy);font-size:15px}
+.sech small{font-weight:700;color:var(--muted);font-size:11.5px}
+.secb{padding:0 14px 14px;display:none}.sec.open .secb{display:block}.sec.open .arr{transform:rotate(90deg)}
+.arr{transition:transform .2s;font-size:14px;color:var(--muted)}
+h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#e0f2fe;color:#075985;white-space:nowrap;display:inline-block}
+.pill.ok{background:#dcfce7;color:#166534}.pill.warn{background:#fff7ed;color:#9a3412}.pill.bad{background:#fee2e2;color:#991b1b}.pill.grey{background:#e5e7eb;color:#374151}
+.chk{display:flex;align-items:center;gap:10px;margin:12px 0 4px;font-size:14px;font-weight:700;color:var(--navy);min-height:40px}.chk input{width:24px;height:24px;min-height:0;flex-shrink:0}
+.help{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+.fam{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13.5px}
+.res{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13.5px}
+.res .btn{width:auto;min-width:90px}
+.hist{font-size:13px;line-height:1.6;background:#f8fafc;border-radius:10px;padding:8px 10px;border:1px solid var(--line)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+@media print{body>.top,body>.tabs{display:none!important}}
+
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.bar .chipb{flex:1;min-width:90px;min-height:40px;border:1px solid #cbd5e1;background:#fff;border-radius:999px;font-weight:800;font-size:12.5px;color:#334155;cursor:pointer}
+.bar .chipb.on{background:#e3f2fd;border-color:#1976d2;color:#0d47a1}
+.cnt{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.st{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #eef0f3;border-left:4px solid var(--line);border-radius:14px;padding:8px 10px;margin-bottom:8px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.st.done{border-left-color:var(--green)}.st.miss{border-left-color:var(--orange)}.st.cur{outline:3px solid #93c5fd}
+.st .phbox{width:54px;font-size:9px;border-radius:8px}
+.st .nm{font-weight:800;color:var(--navy);font-size:14.5px;line-height:1.25}.st .sm{font-size:11.5px;color:var(--muted);margin-top:2px}
+.st .act{display:flex;gap:6px;flex-shrink:0}.st .act .btn{width:auto;min-width:46px;padding:10px 12px;font-size:18px}
+.st .inf{flex:1;min-width:0}
+.next{position:sticky;top:66px;z-index:20}
+</style><script src="config.js"></script><script src="ui.js"></script><script src="photo.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="box" style="border-left-color:var(--purple)">
+    <div class="title">📷 Class photo day</div>
+    <div class="meta">Choose a class. Students come in roll order. Tap 📷 to take a photo with the phone camera (or 🖼 to choose a picture), fit the face in the oval and Save. The same photo is used on the report card, ID card, prints and the student app.</div>
+    <label for="selClass">Class</label>
+    <select id="selClass" onchange="loadClass()"><option value="">Loading classes…</option></select>
+    <div class="msg" id="gMsg"></div>
+  </div>
+  <div id="main"></div>
+</div>
+<div class="tabs"><button class="tabBtn active"><span class="tabIco">📷</span>Photos</button><button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button></div>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} try{ sessionStorage.setItem('cvse_flash', JSON.stringify({m:'Session expired. Please login again.', t:Date.now()})); }catch(e){} window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ if(el) el.className = 'msg'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+
+var Q = new URLSearchParams(location.search), D = null, PICS = {}, FILTER = 'ALL', LAST = '';
+
+async function init(){
+  show($('gMsg'), 'Loading... please wait', 'load');
+  try{
+    let r = await apiGet('photoclass', {});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); $('selClass').innerHTML = '<option value="">-</option>'; return; }
+    hide($('gMsg'));
+    $('selClass').innerHTML = '<option value="">Choose a class</option>' + r.classes.map(c => '<option>' + esc(c) + '</option>').join('');
+    if(!r.classes.length) show($('gMsg'), 'No classes found. The admin adds classes first.', 'warn');
+    let c = Q.get('class'); if(c && r.classes.indexOf(c) > -1){ $('selClass').value = c; loadClass(); }
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and reload.', 'err'); }
+}
+async function loadClass(){
+  let cls = $('selClass').value; D = null; $('main').innerHTML = ''; LAST = '';
+  if(!cls){ hide($('gMsg')); return; }
+  show($('gMsg'), 'Loading class ' + cls + '... please wait', 'load');
+  try{
+    let r = await apiGet('photoclass', {cls:cls});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    hide($('gMsg')); D = r;
+    try{ history.replaceState(null, '', 'photos.html?class=' + encodeURIComponent(cls)); }catch(e){}
+    draw(); loadPics();
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); }
+}
+function counts(){
+  let done = D.students.filter(s => s.photo.has).length, old = D.students.filter(s => s.photo.old).length;
+  return {done:done, miss:D.students.length - done, old:old};
+}
+function nextMissing(){
+  let list = D.students, i0 = LAST ? list.findIndex(s => s.adm === LAST) + 1 : 0;
+  for(let k = 0; k < list.length; k++){ let s = list[(i0 + k) % list.length]; if(!s.photo.has) return s; }
+  return null;
+}
+function draw(){
+  if(!D) return;
+  if(!D.students.length){ $('main').innerHTML = '<div class="empty-note">No current students in class ' + esc(D.cls) + '.</div>'; return; }
+  let c = counts(), nx = nextMissing();
+  let h = '<div class="box next"><div class="cnt"><span class="pill ok">✓ ' + c.done + ' done</span><span class="pill warn">✗ ' + c.miss + ' missing</span>' + (c.old ? '<span class="pill grey">' + c.old + ' from an earlier session</span>' : '') + '<span class="pill">' + D.students.length + ' students</span></div>' +
+    (nx ? '<div class="btnrow"><button class="btn b-green" id="bNext" onclick="take(\'' + esc(nx.adm) + '\', true)">📷 Next missing: Roll ' + esc(nx.roll || '-') + ' – ' + esc(nx.name) + '</button></div>' : '<div class="msg show ok">✅ Every student of ' + esc(D.cls) + ' has a photo.</div>') +
+    '<div class="bar">' + [['ALL','All'],['MISS','Missing only'],['OLD','Old photos']].map(f => '<button class="chipb' + (FILTER === f[0] ? ' on' : '') + '" data-nofb onclick="setFilter(\'' + f[0] + '\')">' + f[1] + '</button>').join('') + '</div>' +
+    '<div class="btnrow"><button class="btn b-navy" id="bCards" data-nofb onclick="location.href=\'idcards.html?class=\' + encodeURIComponent(D.cls)">🪪 Print ID cards of ' + esc(D.cls) + '</button></div>' +
+    '<div class="msg" id="dMsg"></div></div>';
+  let list = D.students.filter(s => FILTER === 'ALL' || (FILTER === 'MISS' && !s.photo.has) || (FILTER === 'OLD' && s.photo.old));
+  if(!list.length) h += '<div class="empty-note">' + (FILTER === 'MISS' ? 'No student is missing a photo.' : 'No photo from an earlier session.') + '</div>';
+  h += list.map(s => {
+    let tag = s.photo.has ? '<span class="pill ok">✓ ' + esc(s.photo.date) + '</span>' + (s.photo.old ? ' <span class="pill grey">from ' + esc(s.photo.session) + '</span>' : '') : '<span class="pill warn">✗ No photo</span>';
+    return '<div class="st ' + (s.photo.has ? 'done' : 'miss') + (s.adm === LAST ? ' cur' : '') + '" id="row_' + esc(s.adm) + '">' + PHOTO.box(PICS[s.adm] || '') +
+      '<div class="inf"><div class="nm">' + esc(s.name) + '</div><div class="sm">Roll ' + esc(s.roll || '-') + ' · Adm ' + esc(s.adm) + '</div><div style="margin-top:4px">' + tag + '</div></div>' +
+      '<div class="act"><button class="btn b-blue" title="Take photo" aria-label="Take photo of ' + esc(s.name) + '" data-nofb onclick="take(\'' + esc(s.adm) + '\', true)">📷</button><button class="btn b-grey" title="Choose from gallery" aria-label="Choose a picture for ' + esc(s.name) + '" data-nofb onclick="take(\'' + esc(s.adm) + '\', false)">🖼</button></div></div>';
+  }).join('');
+  $('main').innerHTML = h;
+}
+function setFilter(f){ FILTER = f; draw(); }
+// the saved photos come a few at a time, so the list shows at once
+async function loadPics(){
+  let want = D.students.filter(s => s.photo.has && !PICS[s.adm]).map(s => s.adm), cls = D.cls;
+  for(let i = 0; i < want.length; i += 10){
+    try{
+      let r = await apiGet('photoget', {adms:want.slice(i, i + 10).join(',')});
+      if(!D || D.cls !== cls) return;
+      if(r.success) want.slice(i, i + 10).forEach(a => { let u = r.photos[a] || r.photos[a.toUpperCase()]; if(u){ PICS[a] = u; let row = $('row_' + a); if(row){ let b = row.querySelector('.phbox'); if(b) b.outerHTML = PHOTO.box(u); } } });
+    }catch(e){ return; }
+  }
+}
+async function take(adm, camera){
+  let s = D.students.find(x => x.adm === adm); if(!s) return;
+  let file = await PHOTO.choose(camera); if(!file) return;
+  PHOTO.open({file:file, title:'Roll ' + (s.roll || '-') + ' – ' + s.name, sub:'Class ' + s.cls + ' · Adm ' + s.adm + (s.photo.has ? ' · replaces the photo of ' + s.photo.date : ''), onSave:async function(data, kb, url){
+    let r = await apiPost('photosave', {adm:adm, data:data});
+    if(!r.success) return {ok:false, msg:'❌ ' + (r.error || 'The photo was not saved.')};
+    s.photo = r.photo; PICS[adm] = url; LAST = adm; draw();
+    show($('dMsg'), (r.message || '✅ Photo saved.') + ' – ' + s.name, 'ok');
+    return {ok:true};
+  }});
+}
+init();
+</script>
+</body></html>

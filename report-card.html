@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S17">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Report Cards</title>
@@ -195,6 +195,16 @@ function drawCards(){
   let only = $('selStu').value, list = DATA.students.filter(s => !only || s.admissionNo === only);
   $('fit').innerHTML = rcCardsHtml(DATA, list);
   fit();
+  loadPhotos();
+}
+// S17: photos come after the cards; Print waits until they are in
+var PRINT_LABEL = '🖨️ Print';
+function loadPhotos(){
+  let b = $('btnPrint'), rep = $('selReport').value, cls = $('selClass').value;
+  rcPhotos($('fit'), adms => apiGet('rcphotos', {reportId:rep, className:cls, adms:adms.join(',')}), (done, total) => {
+    if(!total || done >= total){ b.innerHTML = PRINT_LABEL; b.disabled = !DATA || !DATA.students.length; return; }
+    b.disabled = true; b.innerHTML = '⏳ Loading photos ' + done + '/' + total + '…';
+  });
 }
 function fit(){ rcFit($('fit')); }
 window.addEventListener('resize', fit);

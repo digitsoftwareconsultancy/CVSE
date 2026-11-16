@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S15">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Money Receipt</title>
@@ -110,6 +110,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .sheetwrap{margin:0 auto;width:720px;transform-origin:top left}
 html,body{overflow-x:hidden}
 .copy{background:#fff;border:2px solid #1a4bb5;border-radius:6px;padding:12px 14px;position:relative;margin-bottom:14px;color:#111;font-size:12px;line-height:1.35;overflow:hidden}
+.copy .hdi{position:relative;border-bottom:2px solid #1a4bb5;padding-bottom:6px;text-align:center}.copy .hdi img{display:block;width:100%;max-height:110px;object-fit:contain}.copy .hdi .hdl{font-size:11px;color:#334155;margin-top:2px}.copy .hdi .tag{position:absolute;right:0;bottom:-2px}
 .copy .hd{display:flex;align-items:center;gap:12px;border-bottom:2px solid #1a4bb5;padding-bottom:8px}
 .copy .hd img{width:64px;height:64px;object-fit:contain}.copy .hd .ph{flex:1;text-align:center}
 .copy .hd .ph b{font-size:20px;color:#0b2a5c;display:block;line-height:1.15}.copy .hd .ph span{display:block;font-size:11px;color:#334155}
@@ -198,7 +199,9 @@ var R = null, QS = new URLSearchParams(location.search);
 function money(n,dec){ n = Number(n)||0; return n.toLocaleString('en-IN',{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
 function copyHtml(r, label){
   let L = r.layout, dec = L.decimals, sc = r.school;
-  let h = '<div class="copy"><div class="hd">'+(sc.logo?'<img src="'+esc(sc.logo)+'" alt="" onerror="this.style.display=\'none\'">':'')+'<div class="ph"><b>'+esc(sc.name||'School')+'</b>'+(sc.address?'<span>'+esc(sc.address)+(sc.phone?' · '+esc(sc.phone):'')+'</span>':'')+(sc.affiliation?'<span>Affiliation No: '+esc(sc.affiliation)+'</span>':'')+L.header.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><span class="tag">'+esc(label)+'</span></div>'+
+  /* S15: print header image (Settings → School info) on top; if it cannot be shown, the old logo + name header comes back */
+  let txtHd = '<div class="hd">'+(sc.logo?'<img src="'+esc(sc.logo)+'" alt="" onerror="this.style.display=\'none\'">':'')+'<div class="ph"><b>'+esc(sc.name||'School')+'</b>'+(sc.address?'<span>'+esc(sc.address)+(sc.phone?' · '+esc(sc.phone):'')+'</span>':'')+(sc.affiliation?'<span>Affiliation No: '+esc(sc.affiliation)+'</span>':'')+L.header.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><span class="tag">'+esc(label)+'</span></div>';
+  let h = '<div class="copy">'+(sc.printHeader ? '<div class="hdi"><img src="'+esc(sc.printHeader)+'" alt="" onerror="this.parentNode.style.display=\'none\';this.parentNode.nextSibling.style.display=\'flex\'">'+(L.header.length?'<div class="hdl">'+L.header.map(x=>'<span>'+esc(x)+'</span>').join(' · ')+'</div>':'')+'<span class="tag">'+esc(label)+'</span></div>'+txtHd.replace('<div class="hd">','<div class="hd" style="display:none">') : txtHd)+
    '<div class="meta2"><span>MONEY RECEIPT &nbsp; No: '+esc(r.receiptNo)+'</span><span>Date: '+esc(r.date)+'</span></div>'+
    '<div class="st"><div><span>Name: </span><b>'+esc(r.student.name)+'</b></div><div><span>Class: </span><b>'+esc(r.student.cls)+'</b></div><div><span>Adm No: </span><b>'+esc(r.student.adm)+'</b></div>'+(r.student.father?'<div style="grid-column:1/4"><span>Father: </span><b>'+esc(r.student.father)+'</b></div>':'')+'</div>';
   if(L.style === 'LIST'){

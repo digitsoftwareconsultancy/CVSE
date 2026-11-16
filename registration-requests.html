@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S16">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Registration requests</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+label .req{color:var(--red)}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+textarea{min-height:70px}
+input:disabled,select:disabled,textarea:disabled,input[readonly]{background:#f1f5f9;color:#334155}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-orange{background:linear-gradient(135deg,#ef6c00,#fb8c00)}.b-grey{background:#e5e7eb;color:#475569}.b-red{background:var(--red)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-line}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}.msg.info{background:#e0f2fe;color:#075985}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sec{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--blue);margin-bottom:10px;overflow:hidden}
+.sech{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px;cursor:pointer;min-height:56px;font-weight:800;color:var(--navy);font-size:15px}
+.sech small{font-weight:700;color:var(--muted);font-size:11.5px}
+.secb{padding:0 14px 14px;display:none}.sec.open .secb{display:block}.sec.open .arr{transform:rotate(90deg)}
+.arr{transition:transform .2s;font-size:14px;color:var(--muted)}
+h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#e0f2fe;color:#075985;white-space:nowrap;display:inline-block}
+.pill.ok{background:#dcfce7;color:#166534}.pill.warn{background:#fff7ed;color:#9a3412}.pill.bad{background:#fee2e2;color:#991b1b}.pill.grey{background:#e5e7eb;color:#374151}
+.chk{display:flex;align-items:center;gap:10px;margin:12px 0 4px;font-size:14px;font-weight:700;color:var(--navy);min-height:40px}.chk input{width:24px;height:24px;min-height:0;flex-shrink:0}
+.help{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+.fam{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13.5px}
+.res{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13.5px}
+.res .btn{width:auto;min-width:90px}
+.hist{font-size:13px;line-height:1.6;background:#f8fafc;border-radius:10px;padding:8px 10px;border:1px solid var(--line)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+@media print{body>.top,body>.tabs{display:none!important}}
+
+/* S16: registration requests */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px}
+.chip{flex-shrink:0;border:1px solid #cbd5e1;border-radius:999px;padding:0 14px;min-height:40px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.ritem{background:#fff;border-radius:14px;padding:12px;border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:8px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.ritem.w{border-left-color:var(--orange)}.ritem.a{border-left-color:var(--green)}.ritem.r{border-left-color:var(--red)}
+.ritem b{color:var(--navy)}.ritem .s{font-size:12px;color:var(--muted);font-weight:700;margin-top:3px}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:800;background:#e0f2fe;color:#075985}
+.pill.w{background:#fff7ed;color:#9a3412}.pill.a{background:#dcfce7;color:#166534}.pill.r{background:#fee2e2;color:#991b1b}
+.fld{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+.fld.ch{border-color:#fdba74;background:#fffbf5}
+.fld .lab{font-weight:800;color:var(--navy);font-size:13.5px}
+.fld .ov{font-size:13px;color:var(--muted);margin-top:4px;text-decoration:line-through;word-break:break-word}
+.fld .nv{font-size:14px;font-weight:700;margin-top:2px;word-break:break-word}
+.fld .req{font-size:11.5px;color:#9a3412;font-weight:800;margin-top:4px}
+.dec{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.dec label{display:flex;align-items:center;gap:6px;border:1px solid #cbd5e1;border-radius:10px;padding:6px 10px;min-height:40px;margin:0;font-size:12.5px;cursor:pointer;background:#fff}
+.dec input{width:18px;height:18px;min-height:0;margin:0}
+.same{font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.same span{color:var(--muted);font-weight:700}
+</style><script src="config.js"></script><script src="ui.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="msg" id="gMsg"></div>
+  <div id="main"><div class="empty-note">⏳ Loading...</div></div>
+</div>
+<div class="tabs"><button class="tabBtn active" onclick="toList()"><span class="tabIco">📝</span>Requests</button><button class="tabBtn" onclick="location.href='students.html'"><span class="tabIco">🎓</span>Students</button><button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button></div>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} try{ sessionStorage.setItem('cvse_flash', JSON.stringify({m:'Session expired. Please login again.', t:Date.now()})); }catch(e){} window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ if(el) el.className = 'msg'; }
+function goBack(){ window.location.href = USER.role === 'accountant' ? 'accountant.html' : 'admin.html?tab=last'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+
+var Q = new URLSearchParams(location.search), L = null, V = null, FILTER = 'SUBMITTED', SEARCH = '';
+var ST_CLASS = {SUBMITTED:'w', ACCEPTED:'a', PARTLY:'a', REJECTED:'r'};
+var FILTERS = [['SUBMITTED','Waiting'], ['DRAFT','Being filled'], ['REJECTED','Returned'], ['REOPENED','Reopened'], ['PARTLY','Partly accepted'], ['ACCEPTED','Accepted'], ['ALL','All']];
+var MODE_NOTE = {REQUEST:'⚠️ Request only – check it with the birth certificate / documents before accepting.'};
+
+/* ---------- list ---------- */
+async function loadList(msg){
+  V = null; show($('gMsg'), 'Loading the registration forms... please wait', 'load');
+  try{
+    let r = await apiGet('reglist', {});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); $('main').innerHTML = ''; return; }
+    L = r; if(msg) show($('gMsg'), '✅ ' + msg, 'ok'); else hide($('gMsg'));
+    if(FILTER === 'SUBMITTED' && !r.counts.SUBMITTED && r.items.length) FILTER = 'ALL';
+    drawList();
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); $('main').innerHTML = '<div class="btnrow"><button class="btn b-navy" onclick="loadList()">Try again</button></div>'; }
+}
+function toList(){ if(V){ history.replaceState(null, '', 'registration-requests.html'); loadList(); } }
+function drawList(){
+  let r = L, n = k => k === 'ALL' ? r.items.length : (r.counts[k] || 0);
+  let h = '<div class="box" style="border-left-color:var(--purple)"><div class="title">📝 Registration requests</div><div class="meta">Forms filled by parents in the student app. Nothing reaches the student record until you accept it.' +
+    (r.canEdit ? '' : ' You can look at the forms; accepting needs the Student records "Edit" permission.') + '</div>' +
+    (r.lastDate ? '<div class="msg show ' + (r.dateClosed ? 'warn' : 'info') + '">Last date for parents: ' + esc(r.lastDate) + (r.dateClosed ? ' (passed – parents can only read the form)' : '') + '</div>' : '') +
+    '<div class="chips" style="margin-top:10px">' + FILTERS.map(f => '<button class="chip' + (FILTER === f[0] ? ' on' : '') + '" onclick="setFilter(\'' + f[0] + '\')">' + f[1] + ' (' + n(f[0]) + ')</button>').join('') + '</div>' +
+    '<input id="srch" placeholder="Search name, class or admission no" value="' + esc(SEARCH) + '" oninput="SEARCH=this.value;drawItems()"></div><div id="items"></div>';
+  $('main').innerHTML = h; drawItems();
+}
+function setFilter(f){ FILTER = f; drawList(); }
+function drawItems(){
+  let q = SEARCH.trim().toLowerCase();
+  let list = L.items.filter(x => (FILTER === 'ALL' || x.status === FILTER) && (!q || (x.name + ' ' + x.cls + ' ' + x.adm).toLowerCase().indexOf(q) > -1));
+  if(!list.length){ $('items').innerHTML = '<div class="empty-note">' + (L.items.length ? 'No form in this list.' : 'No parent has started the registration form yet. Open it for the classes in Student Access (tab "Registration form (parents)").') + '</div>'; return; }
+  $('items').innerHTML = list.map(x => '<div class="ritem ' + (ST_CLASS[x.status] || '') + '" onclick="openReq(\'' + esc(x.adm) + '\')"><b>' + esc(x.name) + '</b> · Class ' + esc(x.cls) + ' · ' + esc(x.adm) +
+    '<div class="s"><span class="pill ' + (ST_CLASS[x.status] || '') + '">' + esc(x.statusText) + '</span>' +
+    (x.status === 'SUBMITTED' ? ' · sent ' + esc(x.submittedAt) + ' · ' + x.changes + ' change(s)' + (x.note ? ' · 💬 note' : '') : '') +
+    (x.decidedAt && x.status !== 'SUBMITTED' ? ' · checked ' + esc(x.decidedAt) : '') + (x.status === 'DRAFT' ? ' · part ' + x.step + ' of 4 saved' : '') + '</div></div>').join('');
+}
+
+/* ---------- one form ---------- */
+async function openReq(adm, msg){
+  history.replaceState(null, '', 'registration-requests.html?adm=' + encodeURIComponent(adm));
+  show($('gMsg'), 'Opening the form... please wait', 'load'); window.scrollTo({top:0});
+  try{
+    let r = await apiGet('regview', {adm:adm});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    V = r; if(msg) show($('gMsg'), '✅ ' + msg, 'ok'); else hide($('gMsg'));
+    drawReq();
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); }
+}
+function opts(list, cur){
+  let a = ((V.lists || {})[list] || []).filter(o => !o.hidden || o.v === cur);
+  let h = '<option value="">Choose</option>' + a.map(o => '<option' + (o.v === cur ? ' selected' : '') + '>' + esc(o.v) + '</option>').join('');
+  if(cur && !a.some(o => o.v === cur)) h += '<option selected>' + esc(cur) + '</option>';
+  return h;
+}
+function editBox(f){
+  let id = 'c_' + f.key, v = f.edit;
+  switch(f.type){
+    case 'list': return '<select id="' + id + '">' + opts(f.list, v) + '</select>';
+    case 'yesno': return '<select id="' + id + '"><option value="">Choose</option><option value="YES"' + (v === 'YES' ? ' selected' : '') + '>Yes</option><option value="NO"' + (v === 'NO' ? ' selected' : '') + '>No</option></select>';
+    case 'date': return '<input id="' + id + '" data-date inputmode="numeric" maxlength="10" placeholder="DD-MM-YYYY" value="' + esc(v) + '">';
+    case 'mobile': return '<input id="' + id + '" inputmode="numeric" maxlength="10" value="' + esc(v) + '" oninput="this.value=this.value.replace(/\\D/g,\'\').substring(0,10)">';
+    case 'area': return '<textarea id="' + id + '" maxlength="' + (f.max || 300) + '">' + esc(v) + '</textarea>';
+  }
+  return '<input id="' + id + '" maxlength="' + (f.max || 100) + '" value="' + esc(v) + '">';
+}
+function drawReq(){
+  let r = V, wait = r.status === 'SUBMITTED', can = r.canEdit && wait;
+  let h = '<div class="box" style="border-left-color:var(--purple)"><div class="title">📝 ' + esc(r.name) + '</div><div class="meta">Class ' + esc(r.cls) + ' · Adm No ' + esc(r.adm) + '</div>' +
+    '<div style="margin-top:6px"><span class="pill ' + (ST_CLASS[r.status] || '') + '">' + esc(r.statusText) + '</span></div>' +
+    (r.submittedAt ? '<div class="meta" style="margin-top:6px">Sent by the parent: ' + esc(r.submittedAt) + (r.decidedAt ? ' · Checked: ' + esc(r.decidedAt) + ' by ' + esc(r.decidedBy) : '') + '</div>' : '') +
+    (r.reason && !wait ? '<div class="msg show warn">Reason given to the parent: ' + esc(r.reason) + '</div>' : '') +
+    (r.note ? '<div class="msg show info">💬 Note from the parent: ' + esc(r.note) + '</div>' : '') +
+    '<div class="btnrow"><button class="btn b-navy" onclick="location.href=\'student-record.html?adm=' + encodeURIComponent(r.adm) + '\'">📇 Open the student record</button></div></div>';
+  if(!r.fields.length){ h += '<div class="empty-note">The parent has not started the form yet.</div>'; $('main').innerHTML = h; return; }
+  if(wait && r.dups && r.dups.length) h += '<div class="box" style="border-left-color:var(--orange)"><div class="title">⚠️ Please check</div>' + r.dups.map(d => '<div class="prob" style="border-left:4px solid var(--orange);background:#fff7ed;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px">' + esc(d.text) +
+    (d.kind === 'MOBILE' ? ' <a href="student-record.html?adm=' + encodeURIComponent(r.adm) + '">Link the family in the record</a>' : '') + '</div>').join('') + '<div class="meta" style="margin-top:6px">Only a warning: you can still accept.</div></div>';
+  if(wait){
+    let ch = r.fields.filter(f => f.changed);
+    h += '<div class="box" style="border-left-color:var(--orange)"><div class="title">Changes made by the parent (' + ch.length + ')</div>' +
+      (ch.length ? '<div class="meta">Old value crossed out, new value below. For each change: accept, accept with your correction, or do not accept (the parent sees your reason).</div>' : '<div class="meta">The parent changed nothing: the record is confirmed as it is. Tap Accept.</div>');
+    [1, 2, 3, 4].forEach(p => {
+      let fs = ch.filter(f => f.part === p); if(!fs.length) return;
+      h += '<h4 class="g">' + p + '. ' + esc(r.partNames[p]) + '</h4>' + fs.map(f => '<div class="fld ch" id="fl_' + f.key + '"><div class="lab">' + esc(f.label) + '</div>' +
+        '<div class="ov">' + (f.old ? esc(f.old) : '(empty)') + '</div><div class="nv">' + (f.now ? esc(f.now) : '(empty)') + '</div>' +
+        (MODE_NOTE[f.mode] ? '<div class="req">' + MODE_NOTE[f.mode] + '</div>' : '') +
+        (can ? '<div class="dec"><label><input type="radio" name="d_' + f.key + '" value="A" checked onchange="decChange(\'' + f.key + '\')"> Accept</label>' +
+          (f.key === 'Aadhaar' ? '' : '<label><input type="radio" name="d_' + f.key + '" value="C" onchange="decChange(\'' + f.key + '\')"> Accept with my correction</label>') +
+          '<label><input type="radio" name="d_' + f.key + '" value="R" onchange="decChange(\'' + f.key + '\')"> Do not accept</label></div>' +
+          '<div id="cb_' + f.key + '" style="display:none"><label for="c_' + f.key + '">Your correction</label>' + editBox(f) + '</div>' +
+          '<div id="rb_' + f.key + '" style="display:none"><label for="w_' + f.key + '">Why not accepted (the parent sees it)</label><input id="w_' + f.key + '" maxlength="200"></div>' : '') + '</div>').join('');
+    });
+    h += '</div>';
+  }
+  let same = r.fields.filter(f => !f.changed);
+  h += '<div class="box"><details' + (wait ? '' : ' open') + '><summary style="font-weight:800;color:var(--navy);cursor:pointer;min-height:30px">' + (wait ? 'Fields not changed (' + same.length + ')' : 'The form') + '</summary>' +
+    same.map(f => '<div class="same"><span>' + esc(f.label) + '</span><b>' + (f.now ? esc(f.now) : '—') + '</b></div>').join('') + '</details></div>';
+  if(can){
+    h += '<div class="box" style="border-left-color:var(--green)"><div class="btnrow"><button class="btn b-green" id="bAcc" onclick="decide(\'ACCEPT\')">✅ Accept</button></div>' +
+      '<label for="rReason">Reason (needed to return the form; also used for fields you do not accept)</label><input id="rReason" maxlength="300">' +
+      '<div class="btnrow"><button class="btn b-orange" id="bRej" onclick="decide(\'REJECT\')">↩️ Return the whole form to the parent</button></div><div class="msg" id="dMsg"></div></div>';
+  } else if(r.canEdit && (r.status === 'ACCEPTED' || r.status === 'PARTLY')){
+    h += '<div class="box"><div class="meta">The form is locked for the parent. If the parent finds a mistake, open it again, or correct the record yourself.</div><div class="btnrow"><button class="btn b-orange" id="bReo" onclick="reopen()">🔓 Reopen the form for the parent</button></div><div class="msg" id="oMsg"></div></div>';
+  }
+  $('main').innerHTML = h;
+  if(window.UI && UI.enhanceDates) UI.enhanceDates($('main'));
+}
+function decChange(k){
+  let v = (document.querySelector('input[name="d_' + k + '"]:checked') || {}).value;
+  $('cb_' + k).style.display = v === 'C' ? '' : 'none'; $('rb_' + k).style.display = v === 'R' ? '' : 'none';
+}
+async function decide(action, dupOk){
+  let m = $('dMsg'), btn = action === 'ACCEPT' ? $('bAcc') : $('bRej'), reason = $('rReason').value.trim(), dec = {}, refused = 0;
+  if(action === 'REJECT'){
+    if(reason.length < 3){ show(m, 'Write the reason first (the parent sees it).', 'warn'); $('rReason').focus(); return; }
+    if(!(await UI.ask('Return the whole form to ' + V.name + '\'s parent? Nothing is saved into the record.', 'Yes, return it'))) return;
+  } else {
+    V.fields.filter(f => f.changed).forEach(f => {
+      let v = (document.querySelector('input[name="d_' + f.key + '"]:checked') || {}).value || 'A';
+      if(v === 'C') dec[f.key] = {ok:true, v:$('c_' + f.key).value.trim()};
+      else if(v === 'R'){ dec[f.key] = {ok:false, why:$('w_' + f.key).value.trim()}; refused++; }
+      else dec[f.key] = {ok:true};
+    });
+  }
+  btn.disabled = true; show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await apiPost('regdecide', {adm:V.adm, decision:action, decisions:JSON.stringify(dec), reason:reason, dupOk:dupOk ? 1 : ''});
+    if(r.needConfirm === 'DUP'){
+      btn.disabled = false; hide(m);
+      if(await UI.ask(r.warning + '\n\nAccept anyway?', 'Yes, accept')) return decide(action, true);
+      show(m, 'Nothing was saved.', 'warn'); return;
+    }
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not save.'), 'err'); btn.disabled = false; return; }
+    history.replaceState(null, '', 'registration-requests.html'); FILTER = 'SUBMITTED'; loadList(r.message);
+  }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); btn.disabled = false; }
+}
+async function reopen(){
+  if(!(await UI.ask('Open the form again for ' + V.name + '\'s parent? It starts from the record as it is now.', 'Yes, reopen'))) return;
+  let b = $('bReo'), m = $('oMsg'); b.disabled = true; show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await apiPost('regreopen', {adm:V.adm});
+    if(!r.success){ show(m, '❌ ' + (r.error || 'Could not save.'), 'err'); b.disabled = false; return; }
+    openReq(V.adm, r.message);
+  }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); b.disabled = false; }
+}
+if(Q.get('adm')) openReq(Q.get('adm')); else loadList();
+</script>
+</body>
+</html>

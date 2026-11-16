@@ -1,5 +1,5 @@
 /* ui.js - one shared helper for every page (button feedback, messages, confirm box, date fields).
-   <meta name="app-version" content="2026.11.14-S9">
+   <meta name="app-version" content="2026.11.15-S13">
    Load it with <script src="ui.js"></script> before the page's own script.
 
    1. BUTTON FEEDBACK: when a button is tapped and the page asks the server, the button changes at once
@@ -105,7 +105,16 @@
     if(b.tagName === 'INPUT'){ if(b.value.indexOf('⏳') === 0 || /^(✔|✖)/.test(b.value)){ b.value = job.val; if(job.own) b.disabled = false; } }
     else if(b.innerHTML === job.shown){ b.innerHTML = job.html; if(job.own) b.disabled = false; }
   }
+  // S13: while the admin has paused all saves (or a promotion runs), a red bar at the top says so
+  function pausedBar(j){
+    if(!j || j.code !== 'PAUSED' || doc.getElementById('uiPaused')) return;
+    var d = doc.createElement('div'); d.id = 'uiPaused'; d.textContent = '⏸ ' + (j.error || 'Saving is paused.');
+    d.style.cssText = 'position:sticky;top:0;z-index:9999;background:#c62828;color:#fff;font-weight:800;padding:10px 14px;font-size:14px;text-align:center';
+    d.onclick = function(){ d.remove(); };
+    doc.body.insertBefore(d, doc.body.firstChild);
+  }
   function finish(job, j){
+    pausedBar(j);
     var b = job.btn, ok = !(j && (j.success === false || (j.error && j.success !== true)));
     var text = ok ? '✔ Done' : '✖ Failed';
     if(!b.isConnected){

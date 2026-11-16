@@ -1,4 +1,4 @@
-/* report card drawing - shared by report-card.html (staff) and student.html (student / parent)
+/* report card drawing - shared by report-card.html (staff) and student.html (student / parent)   (S17: photos, rcPhotos)
    cardHtml(model, student) -> the A4 card as HTML.   rcFit(container) -> shrinks every .cw card to the screen width. */
 function rcEsc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 /* ================= drawing a card ================= */
@@ -52,7 +52,7 @@ function cardHtml(d, s){
   h += '<div class="ctitle">' + rcEsc((d.cfg.title || d.report.name).toUpperCase()) + '<br>ACADEMIC SESSION : ' + rcEsc(sc.session) + '</div><div class="inner">';
   if(P.info){
     h += '<div class="info"><div class="l"><div class="rows">' + s.details.map(r => '<div class="il"><b>' + rcEsc(r.label) + '</b>: <span>' + rcEsc(r.value) + '</span></div>').join('') + '</div>' +
-      (P.photo ? '<div class="photo">' + (s.photo ? '<img src="' + rcEsc(s.photo) + '" alt="" onerror="this.parentNode.innerHTML=\'STUDENT<br>PHOTO\'">' : 'STUDENT<br>PHOTO') + '</div>' : '') + '</div></div>';
+      (P.photo ? '<div class="photo"' + (s.hasPhoto ? ' data-padm="' + rcEsc(s.admissionNo) + '"' : '') + '>' + (s.photo ? '<img src="' + rcEsc(s.photo) + '" alt="" onerror="this.parentNode.innerHTML=\'STUDENT<br>PHOTO\'">' : 'STUDENT<br>PHOTO') + '</div>' : '') + '</div></div>';
   }
   if(P.scholastic) h += tableFor(d, s);
   let left = '', right = '', f = s.final;
@@ -91,3 +91,26 @@ function rcFit(container, pad){
   });
 }
 function rcCardsHtml(model, list){ return list.map(function(s){ return '<div class="cw"><div class="scaler">' + cardHtml(model, s) + '</div></div>'; }).join(''); }
+
+/* ================= S17: student photos from the school's Drive =================
+   The cards are drawn first; the photos come a few at a time (10 per request) and fill the photo boxes.
+   rcPhotos(container, fetchFn(adms) -> Promise<{photos:{adm:dataUrl}}>, onProgress(done, total)) -> Promise
+   A student without a Drive photo keeps the old picture link (Students 'Photo' column / photo link pattern) or the empty box. */
+var RC_PICS = {}, RC_PIC_RUN = 0;
+function rcPhotoBoxes(container){ return Array.prototype.slice.call(container.querySelectorAll('.photo[data-padm]')); }
+function rcApplyPhotos(container){
+  rcPhotoBoxes(container).forEach(function(b){ var u = RC_PICS[b.getAttribute('data-padm')]; if(u && !b.__done){ b.innerHTML = '<img src="' + u + '" alt="">'; b.__done = true; } });
+}
+async function rcPhotos(container, fetchFn, onProgress){
+  var run = ++RC_PIC_RUN, seen = {}, want = [];
+  rcPhotoBoxes(container).forEach(function(b){ var a = b.getAttribute('data-padm'); if(!seen[a] && !(a in RC_PICS)){ seen[a] = 1; want.push(a); } });
+  var total = want.length, done = 0;
+  rcApplyPhotos(container); if(onProgress) onProgress(done, total);
+  for(var i = 0; i < want.length; i += 10){
+    var part = want.slice(i, i + 10), r = null;
+    try{ r = await fetchFn(part); }catch(e){ r = null; }
+    if(run !== RC_PIC_RUN) return;                     // a newer drawing started
+    part.forEach(function(a){ var u = r && r.photos ? (r.photos[a] || r.photos[String(a).toUpperCase()]) : ''; if(u || r) RC_PICS[a] = u || ''; });
+    done += part.length; rcApplyPhotos(container); if(onProgress) onProgress(done, total);
+  }
+}

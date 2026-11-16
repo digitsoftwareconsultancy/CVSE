@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
+<html lang="en"><head><meta name="app-version" content="2026.11.15-S13">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Collect Fees</title>
@@ -238,7 +238,7 @@ async function search(p){
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not search.'),'err'); return; }
     hide($('gMsg'));
     if(!r.students.length){ $('res').innerHTML = '<div class="empty-note">No student found.</div>'; return; }
-    $('res').innerHTML = r.students.map(s=>'<div class="srow" onclick="pick(\''+esc(s.adm)+'\')"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(s.name)+'</b><span class="pill '+(s.balance>0?'d':'g')+'">'+(s.balance>0?'Unpaid '+rs(s.balance):'Clear')+'</span></div><div class="meta">Class '+esc(s.cls)+(s.roll?' · Roll '+esc(s.roll):'')+' · Adm '+esc(s.adm)+'</div></div>').join('') + (r.more?'<div class="meta">Showing the first 40. Type more letters to narrow down.</div>':'');
+    $('res').innerHTML = r.students.map(s=>'<div class="srow" onclick="pick(\''+esc(s.adm)+'\')"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(s.name)+'</b>'+(s.left?'<span class="pill" style="background:#e5e7eb;color:#374151">'+esc(s.left)+'</span>':'')+'<span class="pill '+(s.balance>0?'d':'g')+'">'+(s.balance>0?'Unpaid '+rs(s.balance):'Clear')+'</span></div><div class="meta">Class '+esc(s.cls)+(s.roll?' · Roll '+esc(s.roll):'')+' · Adm '+esc(s.adm)+'</div></div>').join('') + (r.more?'<div class="meta">Showing the first 40. Type more letters to narrow down.</div>':'');
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
 }
 async function pick(adm, session, asClass){
@@ -294,7 +294,7 @@ function draw(){
   let today = G.today, due = [], later = [];
   G.payables.forEach(x=>{ if(!x.due || x.due <= todayIso()) due.push(x); else later.push(x); });
   let showSession = G.sessions.length > 1;
-  let h = '<div class="msg" id="vMsg"></div><div class="box"><div class="title">'+esc(G.student.name)+'</div><div class="meta">Class '+esc(G.student.cls)+(G.student.roll?' · Roll '+esc(G.student.roll):'')+' · Adm '+esc(G.student.adm)+'</div>'+
+  let h = '<div class="msg" id="vMsg"></div><div class="box"><div class="title">'+esc(G.student.name)+(G.student.left?' <span class="pill" style="background:#e5e7eb;color:#374151;font-size:12px">'+esc(G.student.left)+'</span>':'')+'</div>'+(G.student.left?'<div class="meta" style="color:#374151">No longer studying here. Only what was due up to the leaving date is shown.</div>':'')+'<div class="meta">Class '+esc(G.student.cls)+(G.student.roll?' · Roll '+esc(G.student.roll):'')+' · Adm '+esc(G.student.adm)+'</div>'+
    '<div class="big"><div><b>'+rs(G.totals.payableNow)+'</b><span>Overdue today</span></div><div><b>'+rs(G.totals.totalDue)+'</b><span>Total unpaid ('+esc(G.session)+')</span></div></div>'+
    lockHtml()+(G.warnings.length?'<div class="probs">⚠ '+G.warnings.map(esc).join('<br>⚠ ')+'</div>':'')+
    (showSession?'<label>Pay for session</label><select id="c_sess" onchange="pick(\''+esc(G.student.adm)+'\',this.value,\'\')">'+G.sessions.map(s=>'<option'+(s===G.session?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'+(G.asClass!==G.student.cls||true?'<label>Class in that session</label><select id="c_cls" onchange="pick(\''+esc(G.student.adm)+'\',$(\'c_sess\').value,this.value)">'+G.classes.map(c=>'<option'+(c===G.asClass?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select><div class="help">Use this to take the next session’s fees in advance. Choose the class the child will be in.</div>':''):'')+

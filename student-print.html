@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S12">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S17">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student print</title>
@@ -12,12 +12,14 @@ body{font-family:Arial,Helvetica,sans-serif;background:#eef2f7;margin:0;color:#1
 .msg{margin:12px;padding:12px;border-radius:12px;font-weight:700;background:#e0f2fe;color:#075985}.msg.err{background:#fee2e2;color:#991b1b}
 .page{background:#fff;width:210mm;min-height:297mm;margin:12px auto;padding:10mm 12mm;box-shadow:0 4px 18px rgba(0,0,0,.1);font-size:12px;position:relative}
 @media(max-width:820px){.page{width:auto;min-height:0;margin:10px;padding:12px}}
+.hdi{border-bottom:2px solid #0b2a5c;padding-bottom:6px;margin-bottom:6px}.hdi img{display:block;width:100%;max-height:120px;object-fit:contain}
 .hd{display:flex;gap:10px;align-items:center;border-bottom:2px solid #0b2a5c;padding-bottom:6px;margin-bottom:6px}
 .hd img{width:54px;height:54px;object-fit:contain}
 .hd b{font-size:18px;color:#0b2a5c;display:block}.hd span{font-size:11px;color:#333}
 h1{text-align:center;font-size:17px;margin:4px 0 8px;font-weight:700;letter-spacing:.3px}
 .topb{display:flex;gap:10px;align-items:flex-start}.topb>.lft{flex:1;min-width:0}
-.photo{width:30mm;height:38mm;flex-shrink:0;border:1.5px solid #333;display:flex;align-items:center;justify-content:center;font-size:10px;color:#666;text-align:center;background:#fff;margin-top:5px}
+.photo{width:30mm;height:38mm;flex-shrink:0;border:1.5px solid #333;display:flex;align-items:center;justify-content:center;font-size:10px;color:#666;text-align:center;background:#fff;margin-top:5px;overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
 .fr{display:flex;gap:8px;align-items:flex-end;margin:5px 0}
 .fr .l{white-space:nowrap;font-size:11.5px}
 .fr .v{flex:1;border:1px solid #444;min-height:21px;padding:2px 6px;font-size:12px;font-weight:700;line-height:1.35}
@@ -39,7 +41,7 @@ table.pt{width:100%;border-collapse:collapse;font-size:11.5px}table.pt td{border
 </style><script src="config.js"></script></head>
 <body>
 <div class="bar" id="bar">
-  <button class="btn g" onclick="window.print()">🖨️ Print</button>
+  <button class="btn g" id="bPrint" onclick="window.print()">🖨️ Print</button>
   <button class="btn p" id="bForm" onclick="setType('form')">Registration form</button>
   <button class="btn p" id="bProf" onclick="setType('profile')">Student profile</button>
   <button class="btn" onclick="history.length>1?history.back():window.close()">⬅️ Back</button>
@@ -69,14 +71,20 @@ async function load(){
   try{
     let [s, r] = await Promise.all([apiGet('getfullsettings', {}), apiGet('mrget', ADM && !BLANK ? {adm:ADM} : {})]);
     let m = (s && (s.settings || s.map)) || {};
-    S = {name:gv(m, 'School_Name', 'School Name', 'SCHOOL_NAME'), address:gv(m, 'School_Address', 'School Address', 'SCHOOL_ADDRESS'), phone:gv(m, 'School_Phone', 'School Phone', 'Phone'), logo:gv(m, 'Logo Path', 'Logo_Path', 'LogoPath')};
+    S = {name:gv(m, 'School_Name', 'School Name', 'SCHOOL_NAME'), address:gv(m, 'School_Address', 'School Address', 'SCHOOL_ADDRESS'), phone:gv(m, 'School_Phone', 'School Phone', 'Phone'), logo:gv(m, 'Logo Path', 'Logo_Path', 'LogoPath'), printHeader:gv(m, 'Print Header Path')};     // S15: print header image
     if(!r.success){ $('msg').className = 'msg err'; $('msg').innerText = '❌ ' + (r.error || 'Could not load.'); return; }
     D = r; R = BLANK ? {} : (r.record || {});
     $('msg').style.display = 'none'; draw();
+    if(!BLANK && r.photo && r.photo.has) loadPhoto();                      // S17: the student's photo in the photo box
   }catch(e){ $('msg').className = 'msg err'; $('msg').innerText = '❌ Could not connect. Check internet and try again.'; }
 }
 function v(k){ return esc(R[k] || ''); }
 function head(){
+  // S15: print header image (Settings → School info); if it cannot be shown, the logo + name header comes back
+  if(S.printHeader) return '<div class="hdi"><img src="'+esc(S.printHeader)+'" alt="" onerror="this.parentNode.style.display=\'none\';this.parentNode.nextSibling.style.display=\'flex\'"></div>'+txtHead().replace('<div class="hd">','<div class="hd" style="display:none">');
+  return txtHead();
+}
+function txtHead(){
   return '<div class="hd">'+(S.logo?'<img src="'+esc(S.logo)+'" alt="" onerror="this.style.display=\'none\'">':'')+'<div><b>'+esc(S.name || 'School')+'</b><span>'+esc(S.address)+(S.phone?' · Phone '+esc(S.phone):'')+'</span></div></div>';
 }
 function fr(label, val, cls){ return '<div class="fr'+(cls?' '+cls:'')+'"><span class="l">'+label+'</span><span class="v">'+val+'</span></div>'; }
@@ -94,7 +102,7 @@ function form(){
   let tc = R.TCBrought ? (R.TCBrought === 'YES' ? 'Yes' : 'No') : '';
   return '<div class="page">' + head() + '<h1>Student’s Registration Form</h1><div class="topb"><div class="lft">' +
     fr('Admission No. (Office use only)', v('AdmissionNo')) + fr('Full Name', v('Name')) + fr('Phone No.', v('Phone')) + fr('Date of Birth', v('DOB')) +
-    frs([['Category', v('Category')], ['Community', v('Community')]]) + '</div><div class="photo">Photo</div></div>' +
+    frs([['Category', v('Category')], ['Community', v('Community')]]) + '</div>'+phHtml()+'</div>' +
     frs([['Religion', v('Religion')], ['Gender', v('Gender')], ['Blood group', v('BloodGroup')]]) +
     fr('Identity Mark', v('IdentityMark')) + fr('Disability (if any)', v('Disability')) +
     frs([['Aadhaar', BLANK ? '' : esc(R.Aadhaar || '')], ['Mother tongue', v('MotherTongue')]]) +
@@ -117,11 +125,23 @@ function profile(){
     if(f.type==='stype') x = x==='NEW'?'New':(x==='OLD'?'Old':'');
     return '<td class="k">'+esc(f.label)+'</td><td>'+esc(x)+'</td>';
   }).reduce((a,c,i,arr)=>a+(i%2===0?'<tr>'+c+(i+1<arr.length?'':'<td class="k"></td><td></td>')+(i+1<arr.length?'':'</tr>'):c+'</tr>'),'');
-  let h = '<div class="page ph2">' + head() + '<h1>Student Profile</h1><div class="topb"><div class="lft" style="font-size:13px;line-height:1.6"><b style="font-size:16px">'+v('Name')+'</b><br>Admission No <b>'+v('AdmissionNo')+'</b> · Class <b>'+v('Class')+'</b>'+(R.RollNo?' · Roll <b>'+v('RollNo')+'</b>':'')+'<br>Status <b>'+esc(STATUS_LABEL[R.StatusShow]||R.StatusShow||'')+'</b>'+(R.StatusDate?' since '+v('StatusDate'):'')+'</div><div class="photo">Photo</div></div>';
+  let h = '<div class="page ph2">' + head() + '<h1>Student Profile</h1><div class="topb"><div class="lft" style="font-size:13px;line-height:1.6"><b style="font-size:16px">'+v('Name')+'</b><br>Admission No <b>'+v('AdmissionNo')+'</b> · Class <b>'+v('Class')+'</b>'+(R.RollNo?' · Roll <b>'+v('RollNo')+'</b>':'')+'<br>Status <b>'+esc(STATUS_LABEL[R.StatusShow]||R.StatusShow||'')+'</b>'+(R.StatusDate?' since '+v('StatusDate'):'')+'</div>'+phHtml()+'</div>';
   for(let n = 1; n <= 6; n++) h += '<h3>'+n+'. '+esc(D.meta.sections[n])+'</h3><table class="pt">'+rows(n)+'</table>';
   h += '<h3>Class history</h3><div style="font-size:11.5px;line-height:1.6">'+(R.ClassHistory ? R.ClassHistory.split('; ').map(esc).join(' · ') : '—')+'</div>';
   if((D.family||[]).length) h += '<h3>Brothers and sisters</h3><div style="font-size:11.5px">'+D.family.map(x=>esc(x.name)+' ('+esc(x.adm)+', '+esc(x.cls||'-')+')').join(' · ')+'</div>';
   return h + '<div class="foot">Printed '+new Date().toLocaleDateString('en-GB').replace(/\//g,'-')+' · Aadhaar is shown masked</div></div>';
+}
+/* S17: photo (Print waits until it is in) */
+var PH_URL = '';
+function phHtml(){ return '<div class="photo">' + (PH_URL ? '<img src="' + esc(PH_URL) + '" alt="">' : 'Photo') + '</div>'; }
+async function loadPhoto(){
+  let b = $('bPrint'), t = b.innerHTML; b.disabled = true; b.innerHTML = '⏳ Loading photo…';
+  try{
+    let r = await apiGet('photoget', {adms:ADM});
+    if(r.success) PH_URL = r.photos[ADM] || r.photos[String(ADM).toUpperCase()] || '';
+    draw();
+  }catch(e){}
+  b.disabled = false; b.innerHTML = t;
 }
 function draw(){
   $('bForm').classList.toggle('on', TYPE === 'form'); $('bProf').classList.toggle('on', TYPE === 'profile');

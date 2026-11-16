@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S11">
+<html lang="en"><head><meta name="app-version" content="2026.11.16-S17">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -118,6 +118,10 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 .frow .l{min-width:0}.frow .l b{color:var(--navy)}.frow .l small{display:block;color:var(--muted);font-weight:700;font-size:11.5px;margin-top:2px}
 .frow .r{text-align:right;white-space:nowrap}.frow .r b{display:block;color:var(--navy)}
 .fbig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}.fbig div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center}.fbig b{display:block;font-size:16px;color:var(--navy)}.fbig span{font-size:10.5px;color:var(--muted);font-weight:700}
+.rgbar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:8px 0 4px}.rgbar i{display:block;height:100%;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:999px}
+.rgnote{font-size:11.5px;font-weight:700;color:#9a3412;margin-top:4px}.rgref{font-size:12px;font-weight:700;color:#991b1b;margin-top:4px}
+.rgf input,.rgf select,.rgf textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff;box-sizing:border-box}
+.rgf textarea{min-height:80px}.rgf input:disabled,.rgf select:disabled{background:#f1f5f9;color:#334155}.rgf .req{color:var(--red)}
 .fhead{font-weight:900;color:var(--navy);font-size:13px;margin:12px 0 2px;border-bottom:2px solid var(--line);padding-bottom:3px}
 </style>
 <script src="config.js"></script><script src="ui.js"></script></head>
@@ -168,6 +172,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 
   <div class="scr" id="s_home">
     <div class="inst noprint" id="instHome" style="display:none"></div>
+    <div id="regCard"></div>
     <div id="dBody"></div>
     <div class="pwr"><span>Powered by</span><img src="icons/digit-logo.png" alt="DiGit Software Consultancy"></div>
   </div>
@@ -177,6 +182,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   <div class="scr" id="s_profile" style="display:none"><div id="pBody"></div></div>
   <div class="scr" id="s_performance" style="display:none"><div id="pfBody"></div></div>
   <div class="scr" id="s_fees" style="display:none"><div id="feeBody"></div></div>
+  <div class="scr" id="s_registration" style="display:none"><div id="regBody"></div></div>
 
   <div class="scr" id="s_result" style="display:none">
     <div id="resList"></div>
@@ -286,8 +292,11 @@ async function startApp(){
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
     HOME = r; hide($('gMsg'));
     if(r.school.session){ $('wPill').innerText = 'Session ' + r.school.session; $('wPill').style.display = ''; }
-    document.querySelectorAll('#tabsBar .tabBtn').forEach(b => { let i = tabInfo(b.dataset.t); b.style.opacity = i.open ? '' : '.55'; if(b.dataset.t === 'fees' && !i.open) b.style.display = 'none'; });
-    openTab('home');
+    document.querySelectorAll('#tabsBar .tabBtn').forEach(b => { let i = tabInfo(b.dataset.t); b.style.opacity = i.open ? '' : '.55'; if(b.dataset.t === 'fees' && !i.open) b.style.display = 'none';
+      if(r.limited && b.dataset.t !== 'fees' && b.dataset.t !== 'result') b.style.display = 'none'; });   // S14: a student who left: only Fees + Previous results
+    if(r.nextOnly){ $('tabsBar').style.display = 'none'; show($('gMsg'), 'Welcome! Your class starts in the next session. Please fill the registration form now.', 'info'); openTab('registration'); }   // S16
+    else if(r.limited){ show($('gMsg'), 'You have left the school. Only Fees and Previous results can be opened.', 'info'); openTab(tabInfo('pastresults').open ? 'result' : 'fees'); }
+    else { drawRegCard(); openTab('home'); }
   }catch(e){ if(e.message !== 'AUTH') show($('gMsg'), '❌ Network problem. Check the internet and reload.', 'err'); }
 }
 function tabInfo(k){ return (HOME && HOME.tabs || []).find(t => t.key === k) || {open:true}; }
@@ -297,7 +306,8 @@ function openTab(k){
   $('s_' + k).style.display = '';
   document.querySelectorAll('#tabsBar .tabBtn').forEach(b => b.classList.toggle('active', b.dataset.t === k));
   window.scrollTo({top:0});
-  hide($('gMsg'));
+  if(!(k === 'registration' && HOME && HOME.nextOnly)) hide($('gMsg'));
+  if(k === 'registration'){ loadReg(); return; }                                   // S16
   if(k === 'home') loadDaily(''); else if(k === 'events') loadCal(''); else if(k === 'timetable') loadTT(); else if(k === 'profile') loadProfile(); else if(k === 'performance') loadPerf(''); else if(k === 'result') loadResults(); else if(k === 'fees') loadFees();
 }
 function lockHtml(m){ return '<div class="lock"><b>🔒</b>' + esc(m || 'This section is not available right now. Please contact the school office.') + '</div>'; }
@@ -407,12 +417,16 @@ async function loadProfile(){
     if(!r.success){ $('pBody').innerHTML = '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>'; return; }
     if(r.closed){ $('pBody').innerHTML = lockHtml(r.message); return; }
     let s = r.student, sc = (HOME && HOME.school) || {};
-    $('pBody').innerHTML = '<div class="box pcard"><div class="avatar">' + esc(String(s.name || 'S').trim().charAt(0).toUpperCase()) + '</div><div class="title" style="margin-bottom:2px">' + esc(s.name) + '</div>' +
+    $('pBody').innerHTML = '<div class="box pcard"><div class="avatar" id="pAvatar">' + esc(String(s.name || 'S').trim().charAt(0).toUpperCase()) + '</div><div class="title" style="margin-bottom:2px">' + esc(s.name) + '</div>' +
       '<div class="meta">Adm ' + esc(s.admissionNo) + ' · Class ' + esc(s.className) + (s.rollNo ? ' · Roll ' + esc(s.rollNo) : '') + '</div><div style="margin-top:8px"><span class="pbadge">Active Student</span></div></div>' +
       '<div class="box"><div class="title">👨‍👩‍👦 Details</div>' + (r.details.map(d => '<div class="drow"><span>' + esc(d.label) + '</span><b>' + esc(d.value) + '</b></div>').join('') || '<div class="meta">No details on record.</div>') +
       '<div class="meta" style="margin-top:10px">Something wrong here? Please tell the school office.</div></div>' +
       '<div class="box"><div class="title">🔑 Password</div><div class="meta">Change the password you use to login.</div><div id="pwOk" class="msg"></div><div class="btnrow"><button class="btn b-purple" onclick="showSetPw(false)">Change password</button></div></div>' +
       '<div class="box"><div class="school">' + (sc.logo ? '<img src="' + esc(sc.logo) + '" alt="">' : '') + '<div><b>' + esc(sc.name || '') + '</b><div class="meta">' + (sc.session ? 'Session ' + esc(sc.session) : '') + '</div></div></div></div>';
+    if(r.hasPhoto) api('studentphoto', {}).then(x => {           // S17: the photo taken by the school
+      let a = $('pAvatar'); if(!a || !x || !x.success || !x.photo) return;
+      a.outerHTML = '<img id="pPhoto" src="' + esc(x.photo) + '" alt="My photo" style="width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:2px solid #e3f2fd;display:block;margin:0 auto 8px">';
+    }).catch(() => {});
   }catch(e){ if(e.message !== 'AUTH') $('pBody').innerHTML = failHtml('loadProfile()'); }
 }
 
@@ -449,13 +463,24 @@ async function loadResults(){
   backToList(true);
   $('resList').innerHTML = '<div class="msg show load">Loading...</div>';
   try{
-    let r = await api('studentresults');
-    if(!r.success){ $('resList').innerHTML = '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>'; return; }
-    if(r.closed){ $('resList').innerHTML = lockHtml(r.message); return; }
-    if(!r.reports.length){ $('resList').innerHTML = '<div class="empty-note">' + esc(r.message) + '</div>'; return; }
-    $('resList').innerHTML = '<div class="box"><div class="title">🎓 My Report Cards</div>' + r.reports.map(x => x.available
-      ? '<div class="btnrow"><button class="btn b-navy" onclick="openCard(\'' + esc(x.reportId) + '\')">📄 ' + esc(x.name) + '</button></div>'
-      : '<div class="lock" style="margin-top:10px;padding:12px"><b style="font-size:20px">🔒</b>' + esc(x.name) + '<br><span style="font-weight:600">' + esc(x.message) + '</span></div>').join('') + '</div>';
+    let lim = HOME && HOME.limited;
+    let [r, pr] = await Promise.all([lim ? Promise.resolve(null) : api('studentresults'), api('studentpastresults')]);
+    let h = '';
+    if(r){
+      if(!r.success) h += '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>';
+      else if(r.closed) h += lockHtml(r.message);
+      else if(!r.reports.length) h += '<div class="empty-note">' + esc(r.message) + '</div>';
+      else h += '<div class="box"><div class="title">🎓 My Report Cards</div>' + r.reports.map(x => x.available
+        ? '<div class="btnrow"><button class="btn b-navy" onclick="openCard(\'' + esc(x.reportId) + '\')">📄 ' + esc(x.name) + '</button></div>'
+        : '<div class="lock" style="margin-top:10px;padding:12px"><b style="font-size:20px">🔒</b>' + esc(x.name) + '<br><span style="font-weight:600">' + esc(x.message) + '</span></div>').join('') + '</div>';
+    }
+    // S14: results of past years (filled at every promotion)
+    if(pr && pr.success && !pr.closed){
+      h += '<div class="box"><div class="title">📜 Previous results</div>' + (pr.results.length
+        ? pr.results.map(x => '<div class="pline" style="border-top:1px solid #e5e7eb;padding:8px 0"><b>' + esc(x.session) + ' · Class ' + esc(x.cls) + '</b><br>' + esc(x.report || 'Result') + ': <b>' + esc(x.result || '-') + '</b>' + (x.percent !== '' ? ' · ' + esc(x.percent) + '%' : '') + (x.grade ? ' · Grade ' + esc(x.grade) : '') + '</div>').join('')
+        : '<div class="meta">' + esc(pr.message) + '</div>') + '</div>';
+    } else if(pr && pr.closed && lim) h += lockHtml(pr.message);
+    $('resList').innerHTML = h || '<div class="empty-note">Nothing to show yet.</div>';
   }catch(e){ if(e.message !== 'AUTH') $('resList').innerHTML = failHtml('loadResults()'); }
 }
 async function openCard(id){
@@ -467,6 +492,7 @@ async function openCard(id){
     hide($('resMsg')); $('resList').style.display = 'none'; $('cardBar').style.display = '';
     $('fit').innerHTML = rcCardsHtml(r, r.students); rcFit($('fit'));
     window.scrollTo({top:0});
+    rcPhotos($('fit'), () => api('studentphoto', {}).then(x => { let o = {}; if(x && x.success && x.photo) o[r.students[0].admissionNo] = x.photo; return {photos:o}; }));   // S17: own photo
   }catch(e){ if(e.message !== 'AUTH') show($('resMsg'), '❌ Network problem. Please try again.', 'err'); }
 }
 function backToList(quiet){ $('fit').innerHTML = ''; $('cardBar').style.display = 'none'; $('resList').style.display = ''; if(!quiet) hide($('resMsg')); }
@@ -518,6 +544,106 @@ function openReceipt(no){ window.open('fees-receipt.html?stu=1&no=' + encodeURIC
 
 /* ---------- install help ---------- */
 var DEFER = null;
+/* ---------- S16: registration form (parents) ---------- */
+var REG = null, REGP = 1;
+function drawRegCard(){
+  let i = tabInfo('registration');
+  $('regCard').innerHTML = i.open && !(HOME && HOME.limited) ? '<div class="box" style="border-left-color:var(--purple)"><div class="title">📝 Registration form</div><div class="meta">The school asks parents to fill in or check the student\'s details.</div><div class="btnrow"><button class="btn b-purple" onclick="openTab(\'registration\')">Open the registration form</button></div></div>' : '';
+}
+async function loadReg(msg){
+  $('regBody').innerHTML = '<div class="msg show load">Loading the form...</div>';
+  try{
+    let r = await api('regget');
+    if(!r.success){ $('regBody').innerHTML = '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>'; return; }
+    if(r.closed){ $('regBody').innerHTML = lockHtml(r.message) + regBack(); return; }
+    REG = r; REGP = r.editable ? (r.step >= 4 && r.status === 'DRAFT' ? 5 : Math.min((r.step || 0) + 1, 4)) : 0;
+    drawReg(msg);
+  }catch(e){ if(e.message !== 'AUTH') $('regBody').innerHTML = failHtml('loadReg()'); }
+}
+function regBack(){ return HOME && HOME.nextOnly ? '' : '<div class="btnrow noprint"><button class="btn b-grey" onclick="openTab(\'home\')">⬅️ Back to Home</button></div>'; }
+function regOpts(list, cur){
+  let a = ((REG.lists || {})[list] || []).filter(o => !o.hidden || o.v === cur);
+  let h = '<option value="">Choose</option>' + a.map(o => '<option' + (o.v === cur ? ' selected' : '') + '>' + esc(o.v) + '</option>').join('');
+  if(cur && !a.some(o => o.v === cur)) h += '<option selected>' + esc(cur) + '</option>';
+  return h;
+}
+function regInput(f){
+  let id = 'r_' + f.key, v = f.value || '', dis = f.mode === 'VIEW' ? ' disabled' : '', h = '<div class="rgf"' + (f.key === 'CorrespondenceAddress' ? ' id="rgCorr"' : '') + '><label for="' + id + '">' + esc(f.label) + (f.req ? ' <span class="req">*</span>' : '') + '</label>';
+  switch(f.type){
+    case 'date': h += '<input id="' + id + '" data-date inputmode="numeric" maxlength="10" placeholder="DD-MM-YYYY" value="' + esc(v) + '"' + dis + '>'; break;
+    case 'mobile': h += '<input id="' + id + '" inputmode="numeric" maxlength="10" placeholder="10 digits" value="' + esc(v) + '"' + dis + ' oninput="this.value=this.value.replace(/\\D/g,\'\').substring(0,10)">'; break;
+    case 'email': h += '<input id="' + id + '" type="email" value="' + esc(v) + '"' + dis + '>'; break;
+    case 'area': h += '<textarea id="' + id + '" maxlength="' + (f.max || 300) + '"' + dis + '>' + esc(v) + '</textarea>'; break;
+    case 'list': h += '<select id="' + id + '"' + dis + '>' + regOpts(f.list, v) + '</select>'; break;
+    case 'yesno': h += '<select id="' + id + '"' + dis + (f.key === 'SameAddress' ? ' onchange="regSame()"' : '') + '><option value="">Choose</option><option value="YES"' + (v === 'YES' ? ' selected' : '') + '>Yes</option><option value="NO"' + (v === 'NO' ? ' selected' : '') + '>No</option></select>'; break;
+    case 'aadhaar': h += '<input id="' + id + '" inputmode="numeric" maxlength="14" autocomplete="off" placeholder="' + (f.has ? esc(f.masked) + ' (given) – type 12 digits only to change it' : '12 digits (optional)') + '"' + dis + ' oninput="this.value=this.value.replace(/[^0-9 ]/g,\'\')"><div class="meta">Kept safely by the school. Shown only as the last 4 digits.</div>'; break;
+    default: h += '<input id="' + id + '" maxlength="' + (f.max || 100) + '" value="' + esc(v) + '"' + dis + '>';
+  }
+  if(f.mode === 'REQUEST') h += '<div class="rgnote">A change here is checked by the school with the birth certificate / documents.</div>';
+  if(f.mode === 'VIEW') h += '<div class="meta">Only the school can change this.</div>';
+  if(f.refused !== undefined) h += '<div class="rgref">Not accepted last time' + (f.refused ? ': ' + esc(f.refused) : '') + '</div>';
+  return h + '</div>';
+}
+function regSame(){ let e = $('r_SameAddress'), c = $('rgCorr'); if(e && c) c.style.display = e.value === 'YES' ? 'none' : ''; }
+function regSummary(){
+  return REG.parts.map(p => '<div class="box"><div class="title" style="font-size:15px">' + p.n + '. ' + esc(p.name) + '</div>' +
+    p.fields.map(f => '<div class="drow"><span>' + esc(f.label) + '</span><b>' + esc(f.key === 'Aadhaar' ? (f.masked || '—') : (f.value || '—')) + '</b></div>').join('') + '</div>').join('') +
+    (REG.note ? '<div class="box"><div class="title" style="font-size:15px">💬 Note to the office</div><div class="meta">' + esc(REG.note) + '</div></div>' : '');
+}
+function drawReg(msg){
+  let r = REG, done = Math.min(r.step || 0, 4), st = r.status;
+  let h = '<div class="box" style="border-left-color:var(--purple)"><div class="title">📝 Registration form</div><div class="meta">' + esc(r.student.name) + ' · Class ' + esc(r.student.className) + ' · Adm No ' + esc(r.student.admissionNo) + '</div>' +
+    '<div class="rgbar"><i style="width:' + (st === 'SUBMITTED' || st === 'ACCEPTED' || st === 'PARTLY' ? 100 : done * 25) + '%"></i></div><div class="meta"><b>' + esc(r.statusText) + '</b>' + (r.editable ? ' · ' + done + ' of 4 parts saved' : '') + (r.lastDate ? ' · Last date ' + esc(r.lastDate) : '') + '</div></div>';
+  if(msg) h += '<div class="msg show ok">✅ ' + esc(msg) + '</div>';
+  if(st === 'SUBMITTED') h += '<div class="msg show info">⏳ Waiting for the school to check. Sent on ' + esc(r.submittedAt) + '. The form is locked now.</div>' + regSummary();
+  else if(st === 'ACCEPTED' || st === 'PARTLY'){
+    h += '<div class="msg show ok">✅ ' + (st === 'PARTLY' ? 'Partly accepted' : 'Accepted') + ' by the school on ' + esc(r.decidedAt) + '.</div>';
+    if(r.notAccepted.length) h += '<div class="msg show warn">Not accepted:\n' + r.notAccepted.map(x => '• ' + x.label + (x.why ? ' – ' + x.why : '')).join('\n') + '</div>';
+    h += '<div class="meta" style="margin:0 4px 10px">If you find a mistake, please ask the school office to open the form again.</div>' + regSummary();
+  }
+  else if(!r.editable) h += '<div class="msg show warn">Registration closed' + (r.lastDate ? ' on ' + esc(r.lastDate) : '') + '. Please contact the school office.</div>' + regSummary();
+  else {
+    if(st === 'REJECTED') h += '<div class="msg show err">The school returned the form: ' + esc(r.reason) + '\nPlease correct it and send it again.</div>';
+    if(st === 'REOPENED') h += '<div class="msg show info">The school opened the form again. Please check every part and send it again.</div>';
+    if(st === '' ) h += '<div class="msg show info">Please check what the school already has, fill in what is missing, and tap "Save and continue" on each part. Fields with <b style="color:var(--red)">*</b> are compulsory. Nothing changes in the school record until the school accepts it.</div>';
+    h += '<div class="chips">' + [1, 2, 3, 4, 5].map(n => { let ok = n <= done + 1 && (n < 5 || done >= 4);
+      return '<button class="chip' + (REGP === n ? ' on' : '') + '"' + (ok ? ' onclick="REGP=' + n + ';drawReg()"' : ' disabled style="opacity:.45"') + '>' + (n < 5 ? (n <= done ? '✓ ' : '') + 'Part ' + n : 'Check + Send') + '</button>'; }).join('') + '</div>';
+    if(REGP <= 4){
+      let p = r.parts[REGP - 1];
+      h += '<div class="box"><div class="title">Part ' + p.n + ' of 4 · ' + esc(p.name) + '</div>' + (p.fields.length ? p.fields.map(regInput).join('') : '<div class="meta">Nothing to fill in this part.</div>') +
+        (REGP === 4 ? '<div class="rgf"><label for="r_note">Note to the office (optional)</label><textarea id="r_note" maxlength="500" placeholder="For example: please correct the spelling of the name">' + esc(r.note || '') + '</textarea></div>' : '') +
+        '<div class="btnrow"><button class="btn b-green" id="rgSave" onclick="regSave()">💾 Save and continue</button></div><div class="msg" id="regMsg"></div></div>';
+    } else {
+      h += '<div class="msg show info">Please check everything once more. After "Send to the school" the form is locked until the school has checked it.</div>' + regSummary() +
+        '<div class="box"><div class="btnrow"><button class="btn b-green" id="rgSend" onclick="regSubmit()">✅ Send to the school</button></div><div class="msg" id="regMsg"></div></div>';
+    }
+  }
+  $('regBody').innerHTML = h + regBack();
+  regSame();
+  if(window.UI && UI.enhanceDates) UI.enhanceDates($('regBody'));
+  window.scrollTo({top:0});
+}
+async function regSave(){
+  let p = REG.parts[REGP - 1], d = {}, b = $('rgSave'), m = $('regMsg');
+  p.fields.forEach(f => { if(f.mode === 'VIEW') return; let e = $('r_' + f.key); if(e) d[f.key] = e.value.trim(); });
+  let params = {part:p.n, data:JSON.stringify(d)};
+  if(REGP === 4) params.note = $('r_note').value.trim();
+  b.disabled = true; show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await api('regsave', params, true);
+    if(!r.success || r.closed){ show(m, '❌ ' + (r.error || r.message || 'Could not save.'), 'err'); b.disabled = false; return; }
+    REG = r; REGP = p.n < 4 ? p.n + 1 : 5; drawReg(r.message);
+  }catch(e){ if(e.message !== 'AUTH'){ show(m, '❌ Network problem. Nothing was saved. Try again.', 'err'); b.disabled = false; } }
+}
+async function regSubmit(){
+  if(window.UI && UI.ask && !(await UI.ask('Send the form to the school now? You cannot change it after sending.', 'Yes, send it'))) return;
+  let b = $('rgSend'), m = $('regMsg'); b.disabled = true; show(m, 'Sending... please wait', 'load');
+  try{
+    let r = await api('regsubmit', {}, true);
+    if(!r.success || r.closed){ show(m, '❌ ' + (r.error || r.message || 'Could not send.'), 'err'); b.disabled = false; return; }
+    REG = r; REGP = 0; drawReg(r.message);
+  }catch(e){ if(e.message !== 'AUTH'){ show(m, '❌ Network problem. Nothing was sent. Try again.', 'err'); b.disabled = false; } }
+}
 function isStandalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); DEFER = e; drawInstall(); });
