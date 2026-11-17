@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admission Register</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:860px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:140px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-line}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}.msg.info{background:#e0f2fe;color:#075985}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.big div{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center}.big b{display:block;font-size:19px;color:var(--navy)}.big span{font-size:11px;color:var(--muted);font-weight:700}
+.yt{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}.yt th,.yt td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:right}.yt th{background:#eef2f7;color:var(--navy);font-size:11.5px}.yt td:first-child,.yt th:first-child{text-align:left;font-weight:800}
+.chk{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:14px;font-weight:700;color:var(--navy)}.chk input{width:22px;height:22px;min-height:0}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.srow{background:#fff;border-radius:14px;padding:12px;border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:8px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.srow.st-LEFT,.srow.st-DROPOUT{border-left-color:#94a3b8}.srow.st-PASSEDOUT{border-left-color:var(--purple)}.srow.st-NEXT{border-left-color:var(--orange)}
+.srow .h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.srow .h b{color:var(--navy);font-size:15px}.srow .h small{color:var(--muted);font-weight:800;font-size:12px;white-space:nowrap}
+.srow .l{font-size:12.5px;line-height:1.45;margin-top:3px;white-space:pre-line}.srow .l span{color:var(--muted);font-weight:700}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#166534;white-space:nowrap}
+.pill.LEFT,.pill.DROPOUT{background:#e5e7eb;color:#374151}.pill.PASSEDOUT{background:#ede9fe;color:#5b21b6}.pill.NEXT{background:#fff3e0;color:#9a3412}.pill.notin{background:#f1f5f9;color:#64748b;border:1px dashed #94a3b8}
+.gaps{font-size:12.5px;line-height:1.5;color:#9a3412;background:#fff7ed;border:1px solid #ffcc80;border-radius:12px;padding:10px;margin-top:8px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+#print{display:none}
+@media print{
+  body{background:#fff;padding:0}
+  body>*:not(#print){display:none!important}
+  #print{display:block}
+}
+#print{font-family:Arial,Helvetica,sans-serif;color:#000}
+#print .ph{text-align:center;margin-bottom:4px}
+#print .ph img{display:block;width:100%;max-height:30mm;object-fit:contain}
+#print .phs b{font-size:15pt}#print .phs div{font-size:9pt}
+#print h1{font-size:13pt;text-align:center;margin:3px 0 1px;letter-spacing:1px}
+#print .fl{text-align:center;font-size:8pt;margin-bottom:4px}
+#print table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:7.5pt;line-height:1.25}
+#print th,#print td{border:0.6pt solid #444;padding:1.2mm 1mm;vertical-align:top;text-align:left;white-space:pre-line;overflow-wrap:break-word}
+#print .nw{white-space:nowrap}
+#print th{background:#e8edf5;font-size:7pt}
+#print thead{display:table-header-group}
+#print tr{break-inside:avoid;page-break-inside:avoid}
+#print tr.yr td{background:#f3f4f6;font-weight:800;font-size:8pt}
+#print .newpage{break-before:page;page-break-before:always}
+#print td img{width:11mm;height:14.5mm;object-fit:cover;display:block}
+#print .sign{margin-top:10mm;display:flex;justify-content:flex-end;font-size:9pt}
+#print .sign div{border-top:0.6pt solid #000;padding-top:1mm;min-width:45mm;text-align:center}
+</style><script src="config.js"></script><script src="ui.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="box"><div class="title">📒 Admission Register</div><div class="meta">Every student the school ever admitted, in admission-number order: current students, students who left, dropped out, passed out, and children joining next session. It reads the master record; nothing can be changed here. Tap a student to open the full record.</div></div>
+  <div class="msg" id="gMsg"></div>
+  <div id="main" style="display:none">
+    <div class="box" id="sumBox" style="border-left-color:var(--purple)"></div>
+    <div class="box" style="border-left-color:var(--blue)"><div class="title">Find students</div>
+      <div class="g2"><div><label for="fY1">Admitted from year</label><select id="fY1" onchange="apply()"></select></div><div><label for="fY2">until year</label><select id="fY2" onchange="apply()"></select></div></div>
+      <div class="g2"><div><label for="fSt">Status</label><select id="fSt" onchange="apply()"></select></div><div><label for="fCls">Class</label><select id="fCls" onchange="apply()"></select></div></div>
+      <div class="g2"><div><label for="fCm">The class means</label><select id="fCm" onchange="apply()"><option value="NOW">Present class (or class at leaving)</option><option value="ADM">Class admitted to</option></select></div><div><label for="fG">Gender</label><select id="fG" onchange="apply()"></select></div></div>
+      <div class="g2"><div><label for="fCat">Category</label><select id="fCat" onchange="apply()"></select></div><div><label for="fSort">Order</label><select id="fSort" onchange="apply()"><option value="ADM">Admission no</option><option value="NAME">Name</option><option value="DATE">Admission date</option><option value="CLS">Present class</option></select></div></div>
+      <label for="fQ">Search (name, admission no or mobile)</label><input id="fQ" placeholder="Type to search" oninput="debounce()">
+      <div class="btnrow"><button class="btn b-grey" type="button" onclick="clearF()">↺ Clear filters</button></div>
+    </div>
+    <div class="box" style="border-left-color:var(--green)"><div class="title">Print / download</div>
+      <div class="meta" id="pCount"></div>
+      <label class="chk"><input type="checkbox" id="pYear"> New page for each admission year</label>
+      <div class="btnrow"><button class="btn b-navy" id="bPrint" onclick="doPrint()">🖨️ Print (A4 landscape)</button></div>
+      <div id="xBox" style="display:none"><label class="chk"><input type="checkbox" id="xAll"> All fields (not only the register columns; Aadhaar is never included)</label>
+        <div class="btnrow"><button class="btn b-green" id="bXlsx" onclick="doExcel()">⬇️ Download Excel</button></div></div>
+      <div class="msg" id="pMsg"></div>
+      <div class="meta">Printing: in the print window choose paper A4, landscape, margins Default, scale 100%. Columns are set by the admin in Settings → Student record → box 5.</div>
+    </div>
+    <div class="meta" id="listInfo" style="margin:4px 2px 8px;font-weight:700"></div>
+    <div id="list"></div>
+    <div class="btnrow" id="moreRow" style="display:none"><button class="btn b-blue" type="button" onclick="more()">Show 50 more</button></div>
+  </div>
+</div>
+<div id="print"></div>
+<div class="tabs" id="tabsBar">
+  <button class="tabBtn active"><span class="tabIco">📒</span>Register</button>
+  <button class="tabBtn" onclick="window.location.href='students.html'"><span class="tabIco">🎓</span>Current list</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username || USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+
+/* ---------- S20 Admission Register ---------- */
+const ST_ORDER = ['ACTIVE', 'LEFT', 'DROPOUT', 'PASSEDOUT', 'NEXT'];
+let D = null, VIEW = [], SHOWN = 0, PICS = {};
+function stWord(s){ return (D.statuses && D.statuses[s]) || s; }
+function head(c){ return c.head || c.k; }
+function val(r, k){ return k === 'NAME' ? (r.c.NAME || r.n) : (r.c[k] || ''); }
+function opt(v, t, sel){ return '<option value="' + esc(v) + '"' + (sel ? ' selected' : '') + '>' + esc(t) + '</option>'; }
+function natKey(a){ return String(a || '').toUpperCase().replace(/\d+/g, d => ('0000000000000000' + d).slice(-16)); }
+function dateKey(d){ let m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(d || ''); return m ? m[3] + m[2] + m[1] : '99999999'; }
+
+async function boot(){
+  show($('gMsg'), 'Loading the register... please wait', 'load');
+  try{
+    let r = await apiGet('arget', {});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
+    D = r; hide($('gMsg')); UI.printDates(r.school && r.school.dateStyle);   // S22
+    drawSummary(); fillFilters();
+    $('xBox').style.display = D.canExcel ? 'block' : 'none';
+    $('main').style.display = 'block';
+    apply();
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and reload the page.', 'err'); }
+}
+function counts(rows){ let c = {}; rows.forEach(r => { c[r.st] = (c[r.st] || 0) + 1; }); return c; }
+function drawSummary(){
+  let c = counts(D.rows), notIn = D.rows.filter(r => r.notIn).length;
+  let h = '<div class="title">Summary</div><div class="big"><div><b>' + D.rows.length + '</b><span>students ever</span></div>' +
+    ST_ORDER.map(s => '<div><b>' + (c[s] || 0) + '</b><span>' + esc(stWord(s)) + '</span></div>').join('') + '</div>';
+  let years = {}; D.rows.forEach(r => { let y = r.y || '—'; (years[y] = years[y] || {t:0}); years[y].t++; years[y][r.st] = (years[y][r.st] || 0) + 1; });
+  let ys = Object.keys(years).sort((a, b) => a === '—' ? 1 : (b === '—' ? -1 : (a < b ? 1 : -1)));
+  if(ys.length){
+    h += '<details><summary style="font-weight:800;color:#0b2a5c;cursor:pointer;min-height:40px;display:flex;align-items:center">Admissions per year (' + ys.length + ')</summary><div style="overflow-x:auto"><table class="yt"><tr><th>Year</th><th>Admitted</th>' + ST_ORDER.map(s => '<th>' + esc(stWord(s)) + '</th>').join('') + '</tr>' +
+      ys.map(y => '<tr><td>' + esc(y === '—' ? 'Year not known' : y) + '</td><td>' + years[y].t + '</td>' + ST_ORDER.map(s => '<td>' + (years[y][s] || 0) + '</td>').join('') + '</tr>').join('') + '</table></div></details>';
+  }
+  if(notIn) h += '<div class="msg show warn">' + notIn + ' student' + (notIn === 1 ? ' is' : 's are') + ' only in the current student list, not in the master record yet (grey tag). Their register lines show only what that list holds. The admin can fill the master record in Settings → Student record → Advanced.</div>';
+  let g = D.gaps && D.gaps.years || [];
+  if(g.length) h += '<div class="gaps" id="gapNote"><b>Admission numbers never used</b> (pattern ' + esc(D.gaps.pattern) + ', shown here only, not printed):<br>' +
+    g.map(y => esc((y.year ? y.year + ': ' : '') + y.numbers.join(', ') + (y.count > y.numbers.length ? ' … (' + y.count + ' in all)' : ''))).join('<br>') + '</div>';
+  $('sumBox').innerHTML = h;
+}
+function fillFilters(){
+  let ys = Array.from(new Set(D.rows.map(r => r.y).filter(Boolean))).sort();
+  $('fY1').innerHTML = opt('', 'Any year') + ys.map(y => opt(y, y)).join('');
+  $('fY2').innerHTML = opt('', 'Any year') + ys.map(y => opt(y, y)).join('');
+  $('fSt').innerHTML = opt('', 'All') + ST_ORDER.map(s => opt(s, stWord(s))).join('') + opt('GONE', 'Left + drop out + passed out') + opt('NOTIN', 'Not in the master record yet');
+  let cls = D.classes.slice(); D.rows.forEach(r => { [r.cls, r.ac].forEach(c => { if(c && cls.indexOf(c) < 0) cls.push(c); }); });
+  $('fCls').innerHTML = opt('', 'All classes') + cls.map(c => opt(c, c)).join('');
+  $('fG').innerHTML = opt('', 'All') + (D.lists.Gender || []).map(g => opt(g, g)).join('');
+  $('fCat').innerHTML = opt('', 'All') + (D.lists.Category || []).map(g => opt(g, g)).join('');
+}
+function clearF(){ ['fY1', 'fY2', 'fSt', 'fCls', 'fG', 'fCat', 'fQ'].forEach(id => { $(id).value = ''; }); $('fCm').value = 'NOW'; $('fSort').value = 'ADM'; apply(); }
+let qT = null; function debounce(){ clearTimeout(qT); qT = setTimeout(apply, 250); }
+function filterText(){
+  let p = [];
+  if($('fY1').value || $('fY2').value) p.push('Admitted ' + ($('fY1').value && $('fY2').value ? ($('fY1').value === $('fY2').value ? 'in ' + $('fY1').value : $('fY1').value + ' – ' + $('fY2').value) : ($('fY1').value ? 'from ' + $('fY1').value : 'until ' + $('fY2').value)));
+  if($('fSt').value) p.push($('fSt').selectedOptions[0].text);
+  if($('fCls').value) p.push(($('fCm').value === 'ADM' ? 'Admitted to ' : 'Class ') + $('fCls').value);
+  if($('fG').value) p.push($('fG').value);
+  if($('fCat').value) p.push('Category ' + $('fCat').value);
+  if($('fQ').value.trim()) p.push('Search "' + $('fQ').value.trim() + '"');
+  return p.length ? p.join(' · ') : 'All students';
+}
+function apply(){
+  let y1 = $('fY1').value, y2 = $('fY2').value, st = $('fSt').value, cl = $('fCls').value, cm = $('fCm').value, g = $('fG').value, cat = $('fCat').value;
+  let q = $('fQ').value.trim().toLowerCase(), qd = q.replace(/\D/g, '');
+  VIEW = D.rows.filter(r => {
+    if(y1 && !(r.y && r.y >= y1)) return false;
+    if(y2 && !(r.y && r.y <= y2)) return false;
+    if(st === 'NOTIN'){ if(!r.notIn) return false; }
+    else if(st === 'GONE'){ if(['LEFT', 'DROPOUT', 'PASSEDOUT'].indexOf(r.st) < 0) return false; }
+    else if(st && r.st !== st) return false;
+    if(cl && (cm === 'ADM' ? r.ac : r.cls) !== cl) return false;
+    if(g && r.g !== g) return false;
+    if(cat && r.cat !== cat) return false;
+    if(q && !(r.n.toLowerCase().indexOf(q) > -1 || r.adm.toLowerCase().indexOf(q) > -1 || (qd.length >= 4 && r.mob.replace(/\D/g, ' ').indexOf(qd) > -1))) return false;
+    return true;
+  });
+  let s = $('fSort').value, ci = c => { let i = D.classes.indexOf(c); return i < 0 ? 9999 : i; };
+  if(s === 'NAME') VIEW.sort((a, b) => a.n.localeCompare(b.n) || (natKey(a.adm) < natKey(b.adm) ? -1 : 1));
+  else if(s === 'DATE') VIEW.sort((a, b) => dateKey(a.ad).localeCompare(dateKey(b.ad)) || (natKey(a.adm) < natKey(b.adm) ? -1 : 1));
+  else if(s === 'CLS') VIEW.sort((a, b) => (ci(a.cls) - ci(b.cls)) || a.n.localeCompare(b.n));
+  else VIEW.sort((a, b) => natKey(a.adm) < natKey(b.adm) ? -1 : (natKey(a.adm) > natKey(b.adm) ? 1 : 0));
+  SHOWN = 0; $('list').innerHTML = ''; more();
+  $('listInfo').innerText = VIEW.length + ' of ' + D.rows.length + ' students · ' + filterText();
+  $('pCount').innerText = VIEW.length ? 'The print and the download take the ' + VIEW.length + ' student' + (VIEW.length === 1 ? '' : 's') + ' found above (' + filterText() + '), in this order. Columns: ' + D.cols.length + ' (' + D.width + ' of ' + D.maxWidth + ' mm).' : 'No students found with these filters.';
+  $('bPrint').disabled = !VIEW.length; if($('bXlsx')) $('bXlsx').disabled = !VIEW.length;
+}
+function card(r){
+  let lines = D.cols.filter(c => ['SL', 'ADM', 'NAME', 'PHOTO'].indexOf(c.k) < 0 && val(r, c.k)).map(c => '<div class="l"><span>' + esc(head(c)) + ':</span> ' + esc(val(r, c.k)) + '</div>').join('');
+  return '<div class="srow st-' + esc(r.st) + '" data-adm="' + esc(r.adm) + '" onclick="openRec(this.dataset.adm)"><div class="h"><b>' + esc(r.n || '(no name)') + '</b><small>' + esc(r.adm) + '</small></div>' +
+    '<div class="pills"><span class="pill ' + esc(r.st) + '">' + esc(stWord(r.st)) + (r.cls ? ' · ' + esc(r.cls) : '') + '</span>' + (r.notIn ? '<span class="pill notin">only in the current student list</span>' : '') + (r.y ? '<span class="pill" style="background:#e0f2fe;color:#075985">admitted ' + esc(r.y) + '</span>' : '') + '</div>' + lines + '</div>';
+}
+function more(){
+  let part = VIEW.slice(SHOWN, SHOWN + 50); SHOWN += part.length;
+  if(!VIEW.length){ $('list').innerHTML = '<div class="box empty-note">No students found. Change or clear the filters.</div>'; }
+  else $('list').insertAdjacentHTML('beforeend', part.map(card).join(''));
+  $('moreRow').style.display = SHOWN < VIEW.length ? 'flex' : 'none';
+}
+function openRec(adm){ window.location.href = 'student-record.html?adm=' + encodeURIComponent(adm); }
+
+/* ---------- print ---------- */
+async function loadPics(btn, label){
+  let need = VIEW.filter(r => r.ph && PICS[r.adm.toUpperCase()] === undefined).map(r => r.adm);
+  for(let i = 0; i < need.length; i += 10){
+    btn.innerText = 'Loading photos ' + Math.min(i + 10, need.length) + '/' + need.length + '…';
+    let part = need.slice(i, i + 10), r = null;
+    for(let t = 0; t < 2 && !r; t++){ try{ r = await apiGet('photoget', {adms:part.join(',')}); }catch(e){ r = null; } }
+    if(!r || !r.success) throw new Error((r && r.error) || 'Photos could not be loaded.');
+    part.forEach(a => { PICS[a.toUpperCase()] = (r.photos || {})[a.toUpperCase()] || ''; });
+  }
+  btn.innerText = label;
+}
+function schoolHead(){
+  let s = D.school || {}, txt = '<div class="phs"><b>' + esc(s.name || '') + '</b>' + (s.address ? '<div>' + esc(s.address) + '</div>' : '') + (s.affiliation ? '<div>' + esc(/^affil/i.test(s.affiliation) ? s.affiliation : 'Affiliation No: ' + s.affiliation) + '</div>' : '') + '</div>';
+  return '<div class="ph">' + (s.printHeader ? '<img src="' + esc(s.printHeader) + '" alt="" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'"><div style="display:none">' + txt + '</div>' : txt) + '</div>';
+}
+function buildPrint(){
+  let cols = D.cols, byYear = $('pYear').checked, n = 0, html = '';
+  let colg = '<colgroup>' + cols.map(c => '<col style="width:' + (c.w * 100 / D.width).toFixed(2) + '%">').join('') + '</colgroup>';
+  let thead = '<thead><tr>' + cols.map(c => '<th>' + esc(head(c)) + '</th>').join('') + '</tr></thead>';
+  let nw = t => t.replace(/\b(\d{2}-\d{2}-\d{4})\b/g, '<span class="nw">$1</span>');      // a date never breaks over two lines
+  let cell = (r, c) => c.k === 'SL' ? String(++n) : (c.k === 'PHOTO' ? (PICS[r.adm.toUpperCase()] ? '<img src="' + PICS[r.adm.toUpperCase()] + '" alt="">' : '') : nw(esc(val(r, c.k))) + (c.k === 'ADM' && r.notIn ? '\n<i>(not in master record)</i>' : ''));
+  let rowH = r => '<tr>' + cols.map(c => '<td>' + cell(r, c) + '</td>').join('') + '</tr>';
+  let top = schoolHead() + '<h1>ADMISSION REGISTER</h1><div class="fl">' + esc(filterText()) + ' · ' + VIEW.length + ' student' + (VIEW.length === 1 ? '' : 's') + ' · printed ' + esc(D.today) + ' by ' + esc(D.by) + '</div>';
+  if(byYear){
+    let groups = [], cur = null;
+    VIEW.forEach(r => { let y = r.y || 'Year not known'; if(!cur || cur.y !== y){ cur = {y:y, rows:[]}; groups.push(cur); } cur.rows.push(r); });
+    html = groups.map((g, i) => '<div' + (i ? ' class="newpage"' : '') + '>' + top.replace('<h1>ADMISSION REGISTER</h1>', '<h1>ADMISSION REGISTER – ' + esc(g.y) + '</h1>') + '<table>' + colg + thead + '<tbody>' + g.rows.map(rowH).join('') + '</tbody></table></div>').join('');
+  } else html = top + '<table>' + colg + thead + '<tbody>' + VIEW.map(rowH).join('') + '</tbody></table>';
+  html += '<div class="sign"><div>Principal</div></div>';
+  $('print').innerHTML = html;
+  let st = $('pgStyle') || document.head.appendChild(Object.assign(document.createElement('style'), {id:'pgStyle'}));
+  let foot = ('Admission Register · ' + (D.school && D.school.name || '') + ' · printed ' + D.today).replace(/["\\]/g, '');
+  st.textContent = '@page{size:A4 landscape;margin:8mm 8mm 11mm 8mm;@bottom-left{content:"' + foot + '";font:7pt Arial,Helvetica,sans-serif;color:#444}@bottom-right{content:"Page " counter(page) " of " counter(pages);font:7pt Arial,Helvetica,sans-serif;color:#444}}';
+}
+async function doPrint(){
+  let b = $('bPrint'), m = $('pMsg'), label = b.innerText;
+  if(!VIEW.length) return;
+  b.disabled = true; hide(m);
+  try{
+    if(D.cols.some(c => c.k === 'PHOTO')) await loadPics(b, label);
+    buildPrint();
+    let imgs = Array.from($('print').querySelectorAll('img'));
+    await Promise.all(imgs.map(i => i.complete ? 0 : new Promise(res => { i.onload = i.onerror = res; setTimeout(res, 4000); })));
+    b.disabled = false; b.innerText = label;
+    show(m, '✅ Print window opened (' + VIEW.length + ' student' + (VIEW.length === 1 ? '' : 's') + '). Choose A4 + landscape.', 'ok');
+    window.print();
+  }catch(e){ b.disabled = false; b.innerText = label; show(m, '❌ ' + (e.message || 'Could not prepare the print.') + ' Nothing was printed. Try again.', 'err'); }
+}
+
+/* ---------- Excel (.xlsx made in the page: no outside service) ---------- */
+const CRC = (() => { let t = new Uint32Array(256); for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u){ let c = 0xFFFFFFFF; for(let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zip(files){
+  let enc = new TextEncoder(), parts = [], central = [], off = 0;
+  const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+  files.forEach(f => {
+    let name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+    let common = [].concat(u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0));
+    let local = new Uint8Array([].concat(u32(0x04034b50), common));
+    parts.push(local, name, data);
+    central.push(new Uint8Array([].concat(u32(0x02014b50), u16(20), common, u16(0), u16(0), u16(0), u32(0), u32(off))), name);
+    off += local.length + name.length + data.length;
+  });
+  let cs = central.reduce((a, b) => a + b.length, 0);
+  let end = new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(cs), u32(off), u16(0)));
+  return new Blob(parts.concat(central, [end]), {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function xe(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''); }
+function colL(i){ let s = ''; i++; while(i){ let m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+function xlsx(heads, rows, widths){
+  const NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+  let sd = [heads].concat(rows).map((r, ri) => '<row r="' + (ri + 1) + '">' + r.map((v, ci) => {
+    let ref = colL(ci) + (ri + 1);
+    if(typeof v === 'number') return '<c r="' + ref + '"><v>' + v + '</v></c>';
+    return '<c r="' + ref + '" t="inlineStr" s="' + (ri ? 2 : 1) + '"><is><t xml:space="preserve">' + xe(v) + '</t></is></c>';
+  }).join('') + '</row>').join('');
+  let cols = '<cols>' + widths.map((w, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>').join('') + '</cols>';
+  return zip([
+    {name:'[Content_Types].xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'},
+    {name:'_rels/.rels', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+    {name:'xl/workbook.xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook ' + NS + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Admission Register" sheetId="1" r:id="rId1"/></sheets></workbook>'},
+    {name:'xl/_rels/workbook.xml.rels', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
+    {name:'xl/styles.xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet ' + NS + '><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="49" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyNumberFormat="1"/><xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1" applyNumberFormat="1"><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'},
+    {name:'xl/worksheets/sheet1.xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet ' + NS + '><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' + cols + '<sheetData>' + sd + '</sheetData></worksheet>'}
+  ]);
+}
+function fileName(){ return ('Admission_Register_' + ((D.school && D.school.name) || 'School') + '_' + D.today).replace(/[^A-Za-z0-9_-]+/g, '_') + '.xlsx'; }
+async function doExcel(){
+  let b = $('bXlsx'), m = $('pMsg'), label = b.innerText; if(!VIEW.length) return;
+  b.disabled = true; show(m, 'Making the Excel file... please wait', 'load');
+  try{
+    let heads, rows, widths;
+    if($('xAll').checked){
+      let r = await apiGet('arget', {all:1});
+      if(!r.success || !r.all) throw new Error(r.error || 'All fields could not be loaded.');
+      let want = {}; VIEW.forEach(v => { want[v.adm.toUpperCase()] = 1; });
+      let order = {}; VIEW.forEach((v, i) => { order[v.adm.toUpperCase()] = i; });
+      heads = r.all.heads; rows = r.all.rows.filter(x => want[String(x[0]).toUpperCase()]).sort((a, b) => order[String(a[0]).toUpperCase()] - order[String(b[0]).toUpperCase()]);
+      widths = heads.map(h => Math.max(10, Math.min(40, h.length + 4)));
+    } else {
+      let cols = D.cols.filter(c => c.k !== 'PHOTO'), n = 0;
+      heads = cols.map(head);
+      rows = VIEW.map(r => cols.map(c => c.k === 'SL' ? ++n : val(r, c.k)));
+      widths = cols.map(c => Math.max(6, Math.round(c.w * 1.25)));
+    }
+    let blob = xlsx(heads, rows, widths), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = fileName(); document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    b.disabled = false; show(m, '✅ Excel file ready: ' + fileName() + ' (' + rows.length + ' student' + (rows.length === 1 ? '' : 's') + '). The file holds personal data – keep it safe and do not share it.', 'ok');
+  }catch(e){ b.disabled = false; b.innerText = label; show(m, '❌ ' + (e.message || 'Could not make the file.') + ' Try again.', 'err'); }
+}
+boot();
+</script>
+</body></html>

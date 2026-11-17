@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S14">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S20">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Students</title>
@@ -188,7 +188,7 @@ function drawList(){
 function pills(s){
   let h = '';
   if(s.Status && s.Status !== 'ACTIVE') h += '<span class="pill o">'+esc(ST_LABEL[s.Status] || s.Status)+'</span>';
-  if(s.master === 'NONE') h += '<span class="pill d">not in master yet</span>';
+  if(s.master === 'NONE') h += '<span class="pill d">not in master record yet</span>';
   if(s.master === 'INCOMPLETE') h += '<span class="pill" style="background:#fff7ed;color:#9a3412">incomplete</span>';
   return h ? '<div class="l2">'+h+'</div>' : '';
 }

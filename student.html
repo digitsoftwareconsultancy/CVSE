@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S17">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S19">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -180,17 +180,21 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   <div class="scr" id="s_events" style="display:none"><div id="evBody"></div></div>
   <div class="scr" id="s_timetable" style="display:none"><div id="ttBody"></div></div>
   <div class="scr" id="s_profile" style="display:none"><div id="pBody"></div></div>
-  <div class="scr" id="s_performance" style="display:none"><div id="pfBody"></div></div>
   <div class="scr" id="s_fees" style="display:none"><div id="feeBody"></div></div>
   <div class="scr" id="s_registration" style="display:none"><div id="regBody"></div></div>
 
   <div class="scr" id="s_result" style="display:none">
+    <div class="chips noprint" id="resChips"></div>
+    <div id="rcPane">
     <div id="resList"></div>
     <div class="msg" id="resMsg"></div>
     <div id="cardBar" class="noprint" style="display:none">
       <div class="btnrow"><button class="btn b-green" onclick="window.print()">🖨️ Print / Save as PDF</button><button class="btn b-grey" onclick="backToList()">⬅️ Back to results</button></div>
     </div>
     <div id="fit"></div>
+    </div>
+    <div id="pfPane" style="display:none"><div id="pfBody"></div></div>
+    <div id="pastPane" style="display:none"></div>
   </div>
 </div>
 
@@ -200,7 +204,6 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   <button class="tabBtn" data-t="timetable" onclick="openTab('timetable')"><span class="tabIco">🗓️</span>Timetable</button>
   <button class="tabBtn" data-t="profile" onclick="openTab('profile')"><span class="tabIco">👤</span>Profile</button>
   <button class="tabBtn" data-t="result" onclick="openTab('result')"><span class="tabIco">🎓</span>Result</button>
-  <button class="tabBtn" data-t="performance" onclick="openTab('performance')"><span class="tabIco">📈</span>Progress</button>
   <button class="tabBtn" data-t="fees" onclick="openTab('fees')"><span class="tabIco">💰</span>Fees</button>
 </div>
 </div>
@@ -292,7 +295,7 @@ async function startApp(){
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
     HOME = r; hide($('gMsg'));
     if(r.school.session){ $('wPill').innerText = 'Session ' + r.school.session; $('wPill').style.display = ''; }
-    document.querySelectorAll('#tabsBar .tabBtn').forEach(b => { let i = tabInfo(b.dataset.t); b.style.opacity = i.open ? '' : '.55'; if(b.dataset.t === 'fees' && !i.open) b.style.display = 'none';
+    document.querySelectorAll('#tabsBar .tabBtn').forEach(b => { let i = b.dataset.t === 'result' ? {open:resParts().length > 0} : tabInfo(b.dataset.t); b.style.opacity = i.open ? '' : '.55'; if(b.dataset.t === 'fees' && !i.open) b.style.display = 'none';
       if(r.limited && b.dataset.t !== 'fees' && b.dataset.t !== 'result') b.style.display = 'none'; });   // S14: a student who left: only Fees + Previous results
     if(r.nextOnly){ $('tabsBar').style.display = 'none'; show($('gMsg'), 'Welcome! Your class starts in the next session. Please fill the registration form now.', 'info'); openTab('registration'); }   // S16
     else if(r.limited){ show($('gMsg'), 'You have left the school. Only Fees and Previous results can be opened.', 'info'); openTab(tabInfo('pastresults').open ? 'result' : 'fees'); }
@@ -301,6 +304,7 @@ async function startApp(){
 }
 function tabInfo(k){ return (HOME && HOME.tabs || []).find(t => t.key === k) || {open:true}; }
 function openTab(k){
+  if(k === 'performance'){ RES_CHIP = 'perf'; k = 'result'; }                     // S19: Progress lives inside Result
   CUR = k;
   document.querySelectorAll('.scr').forEach(s => s.style.display = 'none');
   $('s_' + k).style.display = '';
@@ -308,7 +312,7 @@ function openTab(k){
   window.scrollTo({top:0});
   if(!(k === 'registration' && HOME && HOME.nextOnly)) hide($('gMsg'));
   if(k === 'registration'){ loadReg(); return; }                                   // S16
-  if(k === 'home') loadDaily(''); else if(k === 'events') loadCal(''); else if(k === 'timetable') loadTT(); else if(k === 'profile') loadProfile(); else if(k === 'performance') loadPerf(''); else if(k === 'result') loadResults(); else if(k === 'fees') loadFees();
+  if(k === 'home') loadDaily(''); else if(k === 'events') loadCal(''); else if(k === 'timetable') loadTT(); else if(k === 'profile') loadProfile(); else if(k === 'result') loadResults(); else if(k === 'fees') loadFees();
 }
 function lockHtml(m){ return '<div class="lock"><b>🔒</b>' + esc(m || 'This section is not available right now. Please contact the school office.') + '</div>'; }
 function failHtml(retry){ return '<div class="msg show err">❌ Network problem. Please check the internet and <a href="#" onclick="' + retry + ';return false">try again</a>.</div>'; }
@@ -417,7 +421,8 @@ async function loadProfile(){
     if(!r.success){ $('pBody').innerHTML = '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>'; return; }
     if(r.closed){ $('pBody').innerHTML = lockHtml(r.message); return; }
     let s = r.student, sc = (HOME && HOME.school) || {};
-    $('pBody').innerHTML = '<div class="box pcard"><div class="avatar" id="pAvatar">' + esc(String(s.name || 'S').trim().charAt(0).toUpperCase()) + '</div><div class="title" style="margin-bottom:2px">' + esc(s.name) + '</div>' +
+    let ri = tabInfo('registration'), regBtn = ri.open && !(HOME && HOME.limited) ? '<div class="box" id="pRegBox" style="border-left-color:var(--purple)"><div class="title">📝 Registration form</div><div class="meta">The school asks you to fill in or check these details.</div><div class="btnrow"><button class="btn b-purple" onclick="openTab(\'registration\')">Open the registration form</button></div></div>' : '';   // S19
+    $('pBody').innerHTML = regBtn + '<div class="box pcard"><div class="avatar" id="pAvatar">' + esc(String(s.name || 'S').trim().charAt(0).toUpperCase()) + '</div><div class="title" style="margin-bottom:2px">' + esc(s.name) + '</div>' +
       '<div class="meta">Adm ' + esc(s.admissionNo) + ' · Class ' + esc(s.className) + (s.rollNo ? ' · Roll ' + esc(s.rollNo) : '') + '</div><div style="margin-top:8px"><span class="pbadge">Active Student</span></div></div>' +
       '<div class="box"><div class="title">👨‍👩‍👦 Details</div>' + (r.details.map(d => '<div class="drow"><span>' + esc(d.label) + '</span><b>' + esc(d.value) + '</b></div>').join('') || '<div class="meta">No details on record.</div>') +
       '<div class="meta" style="margin-top:10px">Something wrong here? Please tell the school office.</div></div>' +
@@ -459,29 +464,55 @@ async function loadPerf(month){
 }
 
 /* ---------- results ---------- */
-async function loadResults(){
+/* S19: Result = three parts: Report card | Monthly progress | Previous results. Each part keeps its own Student Access switch;
+   a part closed by the school is not shown. The unpaid-fees lock closes only the report card (it shows the lock message). */
+var RES_CHIP = '';
+function resParts(){
+  let lim = HOME && HOME.limited, out = [], rc = tabInfo('result');
+  if(!lim && (rc.open || rc.source === 'auto')) out.push(['cards', '🎓 Report card']);
+  if(!lim && tabInfo('performance').open) out.push(['perf', '📈 Monthly progress']);
+  if(tabInfo('pastresults').open) out.push(['past', '📜 Previous results']);
+  return out;
+}
+function loadResults(){
+  let parts = resParts();
+  if(!parts.length){ $('resChips').innerHTML = ''; showPane('cards'); backToList(true); $('resList').innerHTML = lockHtml(tabInfo('result').message || tabInfo('performance').message); return; }
+  if(!parts.some(x => x[0] === RES_CHIP)) RES_CHIP = parts[0][0];
+  $('resChips').innerHTML = parts.length > 1 ? parts.map(x => '<button class="chip' + (x[0] === RES_CHIP ? ' on' : '') + '" data-c="' + x[0] + '" onclick="resChip(\'' + x[0] + '\')">' + x[1] + '</button>').join('') : '';
+  resChip(RES_CHIP);
+}
+function showPane(c){ $('rcPane').style.display = c === 'cards' ? '' : 'none'; $('pfPane').style.display = c === 'perf' ? '' : 'none'; $('pastPane').style.display = c === 'past' ? '' : 'none'; }
+function resChip(c){
+  RES_CHIP = c; showPane(c);
+  document.querySelectorAll('#resChips .chip').forEach(b => b.classList.toggle('on', b.dataset.c === c));
+  if(c === 'cards') loadCards(); else if(c === 'perf') loadPerf(''); else loadPast();
+}
+async function loadCards(){
   backToList(true);
   $('resList').innerHTML = '<div class="msg show load">Loading...</div>';
   try{
-    let lim = HOME && HOME.limited;
-    let [r, pr] = await Promise.all([lim ? Promise.resolve(null) : api('studentresults'), api('studentpastresults')]);
-    let h = '';
-    if(r){
-      if(!r.success) h += '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>';
-      else if(r.closed) h += lockHtml(r.message);
-      else if(!r.reports.length) h += '<div class="empty-note">' + esc(r.message) + '</div>';
-      else h += '<div class="box"><div class="title">🎓 My Report Cards</div>' + r.reports.map(x => x.available
-        ? '<div class="btnrow"><button class="btn b-navy" onclick="openCard(\'' + esc(x.reportId) + '\')">📄 ' + esc(x.name) + '</button></div>'
-        : '<div class="lock" style="margin-top:10px;padding:12px"><b style="font-size:20px">🔒</b>' + esc(x.name) + '<br><span style="font-weight:600">' + esc(x.message) + '</span></div>').join('') + '</div>';
-    }
-    // S14: results of past years (filled at every promotion)
-    if(pr && pr.success && !pr.closed){
-      h += '<div class="box"><div class="title">📜 Previous results</div>' + (pr.results.length
+    let r = await api('studentresults'), h = '';
+    if(!r.success) h += '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>';
+    else if(r.closed) h += lockHtml(r.message);
+    else if(!r.reports.length) h += '<div class="empty-note">' + esc(r.message) + '</div>';
+    else h += '<div class="box"><div class="title">🎓 My Report Cards</div>' + r.reports.map(x => x.available
+      ? '<div class="btnrow"><button class="btn b-navy" onclick="openCard(\'' + esc(x.reportId) + '\')">📄 ' + esc(x.name) + '</button></div>'
+      : '<div class="lock" style="margin-top:10px;padding:12px"><b style="font-size:20px">🔒</b>' + esc(x.name) + '<br><span style="font-weight:600">' + esc(x.message) + '</span></div>').join('') + '</div>';
+    $('resList').innerHTML = h;
+  }catch(e){ if(e.message !== 'AUTH') $('resList').innerHTML = failHtml('loadCards()'); }
+}
+// S14: results of past years (filled at every promotion)
+async function loadPast(){
+  $('pastPane').innerHTML = '<div class="msg show load">Loading...</div>';
+  try{
+    let pr = await api('studentpastresults'), h = '';
+    if(!pr.success) h = '<div class="msg show err">❌ ' + esc(pr.error || 'Could not load.') + '</div>';
+    else if(pr.closed) h = lockHtml(pr.message);
+    else h = '<div class="box"><div class="title">📜 Previous results</div>' + (pr.results.length
         ? pr.results.map(x => '<div class="pline" style="border-top:1px solid #e5e7eb;padding:8px 0"><b>' + esc(x.session) + ' · Class ' + esc(x.cls) + '</b><br>' + esc(x.report || 'Result') + ': <b>' + esc(x.result || '-') + '</b>' + (x.percent !== '' ? ' · ' + esc(x.percent) + '%' : '') + (x.grade ? ' · Grade ' + esc(x.grade) : '') + '</div>').join('')
         : '<div class="meta">' + esc(pr.message) + '</div>') + '</div>';
-    } else if(pr && pr.closed && lim) h += lockHtml(pr.message);
-    $('resList').innerHTML = h || '<div class="empty-note">Nothing to show yet.</div>';
-  }catch(e){ if(e.message !== 'AUTH') $('resList').innerHTML = failHtml('loadResults()'); }
+    $('pastPane').innerHTML = h;
+  }catch(e){ if(e.message !== 'AUTH') $('pastPane').innerHTML = failHtml('loadPast()'); }
 }
 async function openCard(id){
   show($('resMsg'), 'Opening your report card...', 'load');

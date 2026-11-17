@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S20">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student record</title>
@@ -219,7 +219,7 @@ async function addStu(flags){
 function headBox(){
   let st = R.StatusShow, pill = st === 'ACTIVE' ? '<span class="pill ok">Active</span>' : '<span class="pill grey">'+esc(STATUS_LABEL[st] || st)+(st === 'NEXT' && R.JoinSession ? ' ' + esc(R.JoinSession) : '')+'</span>';
   let warn = '';
-  if(!D.inMaster) warn += '<div class="msg show warn">This student is not in the master record yet (shown from the Students tab). Saving any section adds the record.</div>';
+  if(!D.inMaster) warn += '<div class="msg show warn">This student is not in the master record yet (shown from the current student list). Saving any section adds the record.</div>';
   if(D.missing && D.missing.length) warn += '<div class="msg show warn">Incomplete: '+esc(D.missing.join(', '))+'</div>';
   if(!D.canEdit) warn += '<div class="msg show info">View only. Your login may see but not change student records.</div>';
   return '<div class="box"><div class="title">'+esc(R.Name || '(no name)')+'</div><div class="meta">Adm '+esc(R.AdmissionNo)+' · Class '+esc(R.Class || '-')+(R.RollNo?' · Roll '+esc(R.RollNo):'')+' &nbsp;'+pill+'</div>'+warn+

@@ -3,7 +3,7 @@
    IDCARD.html(design, fields, school, student, side, opt) → '<div class="idc">…</div>'   side 'F' | 'B'
    IDCARD.fit(cardElement) → true when everything fits (else the card gets class 'over' and false)
    IDCARD.qr(text) → SVG (own QR maker, byte mode, error level M, no outside website)
-   app-version 2026.11.16-S18 */
+   <meta name="app-version" content="2026.11.17-S19"> */
 (function(){
   var COL = {dark:'#111827', navy:'#0b2a5c', blue:'#1976d2', red:'#c62828', green:'#16a34a', purple:'#7c3aed', orange:'#ef6c00'};
   var ACC = {yellow:'#fbc02d', lightblue:'#bbdefb', lightgreen:'#c8e6c9', lightorange:'#ffe0b2', lightpurple:'#e1bee7', grey:'#e5e7eb'};

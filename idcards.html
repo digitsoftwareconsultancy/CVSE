@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Print ID cards</title>
@@ -167,7 +167,7 @@ async function loadClass(){
   }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); }
 }
 function start(r){
-  D = r; OFF = {}; FILTER = 'ALL'; MODE = r.design.printMode || 'CARD';
+  D = r; OFF = {}; FILTER = 'ALL'; MODE = r.design.printMode || 'CARD'; UI.printDates(r.school && r.school.dateStyle);   // S22
   designInfo(r);
   draw(); loadPics();
 }

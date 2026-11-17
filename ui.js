@@ -1,5 +1,5 @@
 /* ui.js - one shared helper for every page (button feedback, messages, confirm box, date fields).
-   <meta name="app-version" content="2026.11.15-S13">
+   <meta name="app-version" content="2026.11.17-S22">
    Load it with <script src="ui.js"></script> before the page's own script.
 
    1. BUTTON FEEDBACK: when a button is tapped and the page asks the server, the button changes at once
@@ -299,6 +299,33 @@
   UI.enhanceDates = function(root){
     try{ (root || doc).querySelectorAll(DATE_SEL).forEach(enhance); }catch(e){}
   };
+  /* S22: date style on PRINTS only. A print page calls UI.printDates(school.dateStyle) once it has its data; at the moment of
+     printing every DD-MM-YYYY on the page is written in the school's style, and put back right after (screens never change). */
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], DSTYLE = 'DMY-', DSAVED = null;
+  UI.fmtDate = function(t, style){
+    return String(t).replace(/\b(\d{2})-(\d{2})-(\d{4})\b/g, function(all, d, m, y){
+      var mi = +m; if(mi < 1 || mi > 12 || +d < 1 || +d > 31) return all;
+      style = style || DSTYLE;
+      return style === 'DMY/' ? d + '/' + m + '/' + y : style === 'DMY.' ? d + '.' + m + '.' + y : style === 'DMON' ? d + ' ' + MON[mi - 1] + ' ' + y : all;
+    });
+  };
+  UI.printDates = function(style){ DSTYLE = ['DMY/', 'DMY.', 'DMON'].indexOf(style) > -1 ? style : 'DMY-'; };
+  function dsOn(){
+    if(DSTYLE === 'DMY-' || DSAVED) return;
+    DSAVED = [];
+    try{
+      var w = doc.createTreeWalker(doc.body, 4, null), n;
+      while((n = w.nextNode())){
+        var pt = n.parentNode && n.parentNode.nodeName;
+        if(pt === 'SCRIPT' || pt === 'STYLE' || pt === 'TEXTAREA' || !/\d{2}-\d{2}-\d{4}/.test(n.nodeValue)) continue;
+        var nv = UI.fmtDate(n.nodeValue);
+        if(nv !== n.nodeValue){ DSAVED.push([n, n.nodeValue]); n.nodeValue = nv; }
+      }
+    }catch(e){}
+  }
+  function dsOff(){ if(!DSAVED) return; DSAVED.forEach(function(x){ try{ x[0].nodeValue = x[1]; }catch(e){} }); DSAVED = null; }
+  try{ window.addEventListener('beforeprint', dsOn); window.addEventListener('afterprint', dsOff); }catch(e){}
+  UI._dsOn = dsOn; UI._dsOff = dsOff;
   function boot(){
     showFlash();
     UI.enhanceDates();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S20">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Report Card Settings</title>
@@ -101,7 +101,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
     <label>Principal signature image link</label><input id="g_RC_Principal_Sign" placeholder="https://...">
     <label>Footer line (bottom bar of the card)</label><input id="g_RC_Footer" placeholder="e.g. Good Learners · Good Humans">
     <label>Student photo link pattern</label><input id="g_RC_Photo_Pattern" placeholder="https://.../photos/{AdmissionNo}.jpg">
-    <div class="hint">Write {AdmissionNo} where the admission number goes. If your Students tab has a Photo column, that link is used first.</div>
+    <div class="hint">Write {AdmissionNo} where the admission number goes. If your current student list (sheet tab "Students") has a Photo column, that link is used first.</div>
     <div class="card area" style="margin-top:12px"><div class="ch"><b>Decoration image 1</b></div>
       <label>Image link</label><input id="g_RC_Deco1_Image" placeholder="https://...">
       <div class="row"><div><label>Caption (optional)</label><input id="g_RC_Deco1_Caption"></div><div><label>Side</label><select id="g_RC_Deco1_Side"><option>Left</option><option>Right</option></select></div></div></div>
@@ -186,7 +186,7 @@ function drawReport(){
   let h = '<div class="meta" style="margin-top:8px">Layout: <b>' + esc(LAYOUT_NAME[r.layout] || r.layout) + '</b> (change it in Exam Settings) · ' + (r.published ? 'Published to students' : 'Not published') + '</div>';
   h += '<div class="card"><div class="ch"><b>Parts of the card</b></div><div class="chips">' + S.parts.map(p => `<label class="chip ${r.parts[p.key] ? 'on' : ''}"><input type="checkbox" ${r.parts[p.key] ? 'checked' : ''} onchange="setPart('${p.key}',this.checked)">${esc(p.label)}</label>`).join('') + '</div></div>';
   h += '<div class="card rep"><div class="ch"><b>Rank</b></div><label class="sw"><input type="checkbox" ' + (r.showRank ? 'checked' : '') + ' onchange="CUR.showRank=this.checked;mark()">Print position (rank) on the card</label><div class="hint">Off by default. Rank is only worked out for students whose marks are complete.</div></div>';
-  h += '<div class="card area"><div class="ch"><b>Student details</b></div><div class="hint" style="margin:0 0 8px">Name is always printed. Choose the others and their order. The list comes from the columns of your Students tab, so a school without House or Mother\'s name never sees them. A student with no value for a field simply does not print that line.</div>';
+  h += '<div class="card area"><div class="ch"><b>Student details</b></div><div class="hint" style="margin:0 0 8px">Name is always printed. Choose the others and their order. The list comes from the columns of your current student list (sheet tab "Students"), so a school without House or Mother\'s name never sees them. A student with no value for a field simply does not print that line.</div>';
   h += r.fields.map((f, i) => `<div class="frow"><span class="key">Column: ${esc(f.key)}</span><input value="${esc(f.label)}" maxlength="40" oninput="CUR.fields[${i}].label=this.value;mark()"><button class="mv" onclick="mvF(${i},-1)" ${i === 0 ? 'disabled' : ''}>↑</button><button class="mv" onclick="mvF(${i},1)" ${i === r.fields.length - 1 ? 'disabled' : ''}>↓</button><button class="xbtn" style="width:46px" onclick="rmF(${i})">✕</button></div>`).join('') || '<div class="hint">No extra fields chosen.</div>';
   h += '<div class="frow" style="margin-top:8px"><select id="addSel"><option value="">+ Add a field...</option>' + free.map(c => `<option value="${esc(c.key)}">${esc(c.label)}</option>`).join('') + '</select><button class="btn b-blue" style="min-width:90px" onclick="addF()">Add</button></div></div>';
   let d1 = !!(S.globals.RC_Deco1_Image), d2 = !!(S.globals.RC_Deco2_Image);

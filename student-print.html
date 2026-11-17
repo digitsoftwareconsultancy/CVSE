@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S17">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student print</title>
@@ -38,7 +38,7 @@ table.pt{width:100%;border-collapse:collapse;font-size:11.5px}table.pt td{border
   .page{margin:0;box-shadow:none;width:210mm;min-height:0;height:297mm;overflow:hidden;page-break-after:always}
   .page.ph2{height:auto;overflow:visible}
 }
-</style><script src="config.js"></script></head>
+</style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="bar" id="bar">
   <button class="btn g" id="bPrint" onclick="window.print()">🖨️ Print</button>
@@ -73,7 +73,7 @@ async function load(){
     let m = (s && (s.settings || s.map)) || {};
     S = {name:gv(m, 'School_Name', 'School Name', 'SCHOOL_NAME'), address:gv(m, 'School_Address', 'School Address', 'SCHOOL_ADDRESS'), phone:gv(m, 'School_Phone', 'School Phone', 'Phone'), logo:gv(m, 'Logo Path', 'Logo_Path', 'LogoPath'), printHeader:gv(m, 'Print Header Path')};     // S15: print header image
     if(!r.success){ $('msg').className = 'msg err'; $('msg').innerText = '❌ ' + (r.error || 'Could not load.'); return; }
-    D = r; R = BLANK ? {} : (r.record || {});
+    D = r; R = BLANK ? {} : (r.record || {}); UI.printDates(m.Date_Style);   // S22
     $('msg').style.display = 'none'; draw();
     if(!BLANK && r.photo && r.photo.has) loadPhoto();                      // S17: the student's photo in the photo box
   }catch(e){ $('msg').className = 'msg err'; $('msg').innerText = '❌ Could not connect. Check internet and try again.'; }

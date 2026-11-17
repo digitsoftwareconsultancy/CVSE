@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Office</title>
@@ -135,6 +135,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
   <div class="top-right">
     <div class="badge" id="roleBadge">ADMIN</div>
     <button class="btn-logout" onclick="doLogout()">Logout</button>
+    <button class="btn-logout" id="btnMyProfile" style="background:#1976d2" onclick="window.location.href='my-profile.html'">👤 My Profile</button>
   </div>
 </div>
 <div class="wrap">
@@ -149,6 +150,8 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
  <div id="paneMore" class="pane" style="display:none"><div class="box"><div class="title">⋯ More</div><div class="meta">School office pages you can use.</div></div><div class="big2" id="cardsMore"></div></div>
 </div>
 <div class="tabs" id="tabsBar" style="display:none"></div><script>
+// S21: staff birthdays (accepted date of birth, no year)
+function staffBd(h){ return (h.staffBirthdays||[]).map(x=>'<div class="hrow"><span class="ic">'+(x.days===0?'🎉':'🎂')+'</span><span><b>'+esc(x.name)+'</b> · Staff<br><span class="hmut">'+(x.days===0?'Today':(x.days===1?'Tomorrow':'In '+x.days+' days, '+esc(x.date)))+'</span></span></div>').join(''); }
 const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
@@ -186,12 +189,15 @@ var CARDS = [
  ['COLLECT','💵','Collect Fees','Take payment and print the receipt','fees-collect.html'],
  ['COLLECT','🧾','Receipts','Day book, reprint, cancel','fees-receipts.html'],
  ['STUDENTS','👨‍👩‍👧','Student Fee Setup','Concessions, bus, siblings, previous dues','fees-students.html'],
+ ['STUDENTS','🚌','Bus & Optional Fees','Give bus, day care, hostel to a whole class with start / stop month','fees-optional.html'],
  ['OPENING','✅','Already Paid','Start the app in the middle of a session','fees-opening.html'],
  ['SETTINGS','⚙️','Fees Settings','Heads, amounts, due dates, receipt look','fees-settings.html'],
  ['REPORTS','📊','Fee Reports','Daily, head-wise, dues, defaulters, ledger','fees-reports.html'],
  ['STUDENTDB','🎓','Students','Add and edit student details','students.html'],
  ['RECVIEW','📇','Student Records','Full student record and registration form print','students.html'],
+ ['RECVIEW','📒','Admission Register','Every student ever admitted: filters and A4 print','student-register.html'],
  ['RECVIEW','📝','Registration Requests','Forms filled by parents in the student app','registration-requests.html'],
+ ['EXAMREG','📒','Exam Register','Marks of a whole class for one term or exam: A4 print','exam-register.html'],   // S22
  ['PHOTOS','📷','Class Photo Day','Take student photos class by class (report card, ID card, prints)','photos.html'],
  ['PHOTOS','🪪','ID Cards','Print student ID cards for a class or one student','idcards.html'],
  ['STUDPW','🔑','Student Passwords','Reset a student\'s app password','student-access.html'],
@@ -232,8 +238,9 @@ async function loadHome(me){
       if(b.missingColumn) bh = '<div class="hrow"><span class="ic">ℹ️</span><span class="hmut">Add a DOB column in the Students sheet to see birthdays.</span></div>';
       else if(!list.length) bh = '<div class="hrow"><span class="ic">🎂</span><span class="hmut">No birthdays in the next '+(b.withinDays||7)+' days.</span></div>';
       else bh = list.map(x=>'<div class="hrow"><span class="ic">'+(x.days===0?'🎉':'🎂')+'</span><span><b>'+esc(x.name)+'</b> · Class '+esc(x.cls)+'<br><span class="hmut">'+(x.days===0?'Today':(x.days===1?'Tomorrow':'In '+x.days+' days, '+esc(x.date)))+' · turns '+x.turns+'</span></span></div>').join('')+(b.more?'<div class="hmut">and more...</div>':'');
-      out += '<div class="hcard"><h3>🎂 Birthdays</h3>'+bh+'</div>';
+      out += '<div class="hcard"><h3>🎂 Birthdays</h3>'+bh+staffBd(h)+'</div>';
     } else if(h.errors && h.errors.birthdays) out += '<div class="hcard"><h3>🎂 Birthdays</h3>'+hErr(h,'birthdays')+'</div>';
+    else if(staffBd(h)) out += '<div class="hcard"><h3>🎂 Birthdays</h3>'+staffBd(h)+'</div>';
     if(h.events){
       out += '<div class="hcard"><h3>📅 Coming up</h3>'+(h.events.length ? h.events.map(e=>'<div class="hrow"><span class="ic">📅</span><span><b>'+esc(e.title)+'</b><br><span class="hmut">'+(e.today?'On now · ':'')+esc(e.date)+(e.endDate&&e.endDate!==e.date?' to '+esc(e.endDate):'')+(e.time?' · '+esc(e.time):'')+(e.classes?' · '+esc(e.classes):'')+'</span></span></div>').join('') : '<div class="hrow"><span class="ic">📅</span><span class="hmut">Nothing in the next 14 days.</span></div>')+'</div>';
     } else if(h.errors && h.errors.eventsList) out += '<div class="hcard"><h3>📅 Coming up</h3>'+hErr(h,'eventsList')+'</div>';
@@ -280,7 +287,7 @@ async function init(){
     hide($('gMsg'));
     $('hi').innerText = (r.school || 'School') + ' — Office'; $('sub').innerText = 'Session ' + (r.session || '-');
     if(USER.role === 'admin') $('adminBack').style.display = 'block';
-    let mine = CARDS.filter(c=>r.privileges.indexOf(c[0]) > -1 && !(c[0]==='RECVIEW' && r.privileges.indexOf('STUDENTDB') > -1));   // S12: one Students card
+    let mine = CARDS.filter(c=>r.privileges.indexOf(c[0]) > -1 && !(c[2]==='Student Records' && r.privileges.indexOf('STUDENTDB') > -1));   // S12: one Students card (S20: only that card; Register + Requests stay)
     let feeCards = mine.filter(c=>String(c[4]||'').indexOf('fees-') === 0), moreCards = mine.filter(c=>String(c[4]||'').indexOf('fees-') !== 0);
     $('cardsFees').innerHTML = feeCards.map(cardHtml).join('');
     $('cardsMore').innerHTML = moreCards.map(cardHtml).join('');

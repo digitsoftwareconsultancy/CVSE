@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b2a5c">
+<link rel="manifest" href="manifest-staff.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-staff.png">
+<title>Teacher</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+label .req{color:var(--red)}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+textarea{min-height:70px}
+input:disabled,select:disabled,textarea:disabled,input[readonly]{background:#f1f5f9;color:#334155}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-orange{background:linear-gradient(135deg,#ef6c00,#fb8c00)}.b-grey{background:#e5e7eb;color:#475569}.b-red{background:var(--red)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-line}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}.msg.info{background:#e0f2fe;color:#075985}
+.msg.load::before{content:"";display:inline-block;width:14px;height:14px;border:3px solid #075985;border-top-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:spn 1s linear infinite}@keyframes spn{to{transform:rotate(360deg)}}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sec{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--blue);margin-bottom:10px;overflow:hidden}
+.sech{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px;cursor:pointer;min-height:56px;font-weight:800;color:var(--navy);font-size:15px}
+.sech small{font-weight:700;color:var(--muted);font-size:11.5px}
+.secb{padding:0 14px 14px;display:none}.sec.open .secb{display:block}.sec.open .arr{transform:rotate(90deg)}
+.arr{transition:transform .2s;font-size:14px;color:var(--muted)}
+h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#e0f2fe;color:#075985;white-space:nowrap;display:inline-block}
+.pill.ok{background:#dcfce7;color:#166534}.pill.warn{background:#fff7ed;color:#9a3412}.pill.bad{background:#fee2e2;color:#991b1b}.pill.grey{background:#e5e7eb;color:#374151}
+.chk{display:flex;align-items:center;gap:10px;margin:12px 0 4px;font-size:14px;font-weight:700;color:var(--navy);min-height:40px}.chk input{width:24px;height:24px;min-height:0;flex-shrink:0}
+.help{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+.fam{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13.5px}
+.res{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13.5px}
+.res .btn{width:auto;min-width:90px}
+.hist{font-size:13px;line-height:1.6;background:#f8fafc;border-radius:10px;padding:8px 10px;border:1px solid var(--line)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+@media print{body>.top,body>.tabs{display:none!important}}
+
+
+/* S21: teacher app */
+.view{display:none}.view.on{display:block}
+.hello{background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border-radius:18px;padding:16px;margin-bottom:12px}
+.hello h2{margin:0;font-size:19px}.hello .d{font-size:12.5px;opacity:.9;margin-top:4px}
+.hello .hol{margin-top:10px;background:rgba(255,255,255,.16);border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px}
+.todo{border-left-color:var(--orange)}.todo .title{color:#9a3412}
+.line{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px dashed #e5e7eb;font-size:14px}
+.line:last-child{border-bottom:none}.line b{font-weight:700}.line small{color:var(--muted);font-weight:700}
+.allok{background:#dcfce7;color:#166534;border-radius:12px;padding:10px 12px;font-weight:700;font-size:13.5px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:#fff;border:1px solid #eef0f3;border-radius:16px;padding:14px 12px;min-height:96px;text-align:left;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.05);font-family:inherit;display:flex;flex-direction:column;gap:4px;border-top:4px solid var(--blue)}
+.tile .ic{font-size:24px}.tile b{font-size:14.5px;color:var(--navy)}.tile span{font-size:11.5px;color:var(--muted);line-height:1.35}
+.tile.off{opacity:.55;cursor:not-allowed}
+.stu{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #eef0f3}
+.stu:last-child{border-bottom:none}.roll{width:38px;height:38px;border-radius:12px;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.stu .nm{font-weight:800;font-size:14.5px;color:var(--text)}.stu .mt{font-size:12px;color:var(--muted);line-height:1.45}
+.call{margin-left:auto;flex-shrink:0;text-decoration:none;background:#dcfce7;color:#166534;font-weight:800;border-radius:12px;padding:0 12px;min-height:46px;display:flex;align-items:center;font-size:13px}
+.search{margin-bottom:8px}
+@media(max-width:360px){.big{grid-template-columns:1fr}}
+</style><script src="config.js"></script><script src="ui.js"></script><script src="photo.js"></script><script src="profile.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">T</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">-</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">TEACHER</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="msg" id="gMsg"></div>
+
+  <div class="view" id="vHome"><div class="empty-note">⏳ Loading your day...</div></div>
+
+  <div class="view" id="vClass">
+    <div class="big" id="classTiles"></div>
+    <div class="box" style="margin-top:12px;border-left-color:var(--green)">
+      <div class="title">🎓 My class list</div>
+      <div class="meta">Read only. To correct a student's details, tell the office.</div>
+      <div class="chips" id="clsChips" style="margin-top:10px"></div>
+      <input class="search" id="stuSearch" placeholder="Search name or roll" oninput="drawClass()">
+      <div id="stuList"><div class="empty-note">⏳ Loading...</div></div>
+    </div>
+  </div>
+
+  <div class="view" id="vMarks">
+    <div class="big" id="markTiles"></div>
+    <div class="box" style="margin-top:12px;border-left-color:var(--purple)"><div class="title">🧪 Class test marks still to enter</div><div id="testsLeft"><div class="empty-note">⏳ Loading...</div></div></div>
+    <div class="box" style="margin-top:12px;border-left-color:var(--orange)"><div class="title">📝 Exam marks still to enter</div><div id="marksLeft"><div class="empty-note">⏳ Loading...</div></div></div>
+  </div>
+
+  <div class="view" id="vTT">
+    <div class="big" id="ttTiles"></div>
+    <div class="box" style="margin-top:12px;border-left-color:var(--purple)"><div class="title">📅 Day-wise timetable</div><div class="meta">All periods of every teacher on one day – useful to find free periods.</div>
+      <div class="chips" id="dayChips" style="margin-top:10px"></div></div>
+    <div class="box" id="todayBox" style="border-left-color:var(--blue)"><div class="title">🕘 My periods today</div><div id="ttToday"></div></div>
+  </div>
+
+  <div class="view" id="vProfile"></div>
+</div>
+<div class="tabs" id="tabs">
+  <button class="tabBtn" id="tHome" onclick="openTab('home')"><span class="tabIco">🏠</span>Home</button>
+  <button class="tabBtn" id="tClass" onclick="openTab('class')" style="display:none"><span class="tabIco">🏫</span>My Class</button>
+  <button class="tabBtn" id="tMarks" onclick="openTab('marks')"><span class="tabIco">📝</span>Marks</button>
+  <button class="tabBtn" id="tTT" onclick="openTab('tt')"><span class="tabIco">📅</span>Timetable</button>
+  <button class="tabBtn" id="tProfile" onclick="openTab('profile')"><span class="tabIco">👤</span>Profile</button>
+</div>
+<script src="tt-print.js"></script>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || "";
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+function setLs(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+if(USER.role === 'accountant'){ window.location.href = 'accountant.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} try{ sessionStorage.setItem('cvse_flash', JSON.stringify({m:'Session expired. Please login again.', t:Date.now()})); }catch(e){} window.location.href = 'index.html'; } return j; }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); return authCheck(await r.json());
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+var H = null, CL = null, CUR = '', PROF = false;
+var DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+function isCT(){ return !!(H && H.me && H.me.classes && H.me.classes.length); }
+function exOk(){ return USER.role === 'admin' || (H && H.me ? H.me.examAccess : String(ls('cvse_examAccess')).toUpperCase() === 'YES'); }
+function go(page, view){ if(view) setLs('cvse_view', view); window.location.href = page; }
+
+$('wName').innerText = 'Welcome, ' + (USER.name || USER.username || 'Teacher');
+$('avatarLetter').innerText = String(USER.name || USER.username || 'T').trim().charAt(0).toUpperCase();
+$('wSub').innerText = new Date().toLocaleDateString('en-GB', {weekday:'long'}) + ' · ' + (function(d){ return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear(); })(new Date());
+
+function openTab(t){
+  if(t === 'class' && H && !isCT()) t = 'home';
+  ['home', 'class', 'marks', 'tt', 'profile'].forEach(function(x){
+    var v = {home:'vHome', class:'vClass', marks:'vMarks', tt:'vTT', profile:'vProfile'}[x], b = {home:'tHome', class:'tClass', marks:'tMarks', tt:'tTT', profile:'tProfile'}[x];
+    $(v).classList.toggle('on', x === t); $(b).classList.toggle('active', x === t);
+  });
+  try{ sessionStorage.setItem('cvse_ttab', t); }catch(e){}
+  if(t === 'class' && !CL) loadClass();
+  if(t === 'profile' && !PROF){ PROF = true; PROFILE.mount($('vProfile')); }
+  window.scrollTo(0, 0);
+}
+function line(left, right){ return '<div class="line"><span>' + left + '</span><span>' + right + '</span></div>'; }
+function pill(t, k){ return '<span class="pill ' + (k || '') + '">' + t + '</span>'; }
+function whenTxt(d){ return d === 0 ? '🎉 Today' : (d === 1 ? 'Tomorrow' : 'in ' + d + ' days'); }
+
+async function loadHome(fresh){
+  var j;
+  try{ j = await apiGet('teacherhome', fresh ? {fresh:1} : {}); }catch(e){ $('vHome').innerHTML = '<div class="box"><div class="msg show err">❌ Could not connect. Check the internet.</div><div class="btnrow"><button class="btn b-blue" onclick="loadHome(1)">🔄 Try again</button></div></div>'; return; }
+  if(!j || !j.success){ $('vHome').innerHTML = '<div class="box"><div class="msg show err">❌ ' + esc((j && j.error) || 'Could not load.') + '</div></div>'; return; }
+  H = j;
+  $('tClass').style.display = isCT() ? '' : 'none';
+  $('roleBadge').innerText = isCT() ? 'CLASS TEACHER' : (USER.role === 'admin' ? 'ADMIN' : 'TEACHER');
+  $('wSub').innerText = (isCT() ? 'Class ' + H.me.classes.join(', ') + ' · ' : '') + H.day.charAt(0) + H.day.slice(1).toLowerCase() + ' ' + H.today;
+  drawHome(); drawMarks(); drawTT();
+  if(document.querySelector('.view.on') === null) openTab('home');
+  if(!isCT() && $('vClass').classList.contains('on')) openTab('home');
+}
+function drawHome(){
+  var h = '<div class="hello"><h2>' + greet() + ', ' + esc((USER.name || '').split(' ')[0] || 'Teacher') + '</h2><div class="d">' + esc(H.school || '') + (H.session ? ' · Session ' + esc(H.session) : '') + '</div>' +
+    (H.noSchool ? '<div class="hol">🏖 No school today: ' + esc(H.noSchool) + '</div>' : '') + '</div>';
+  if(H.paused) h += '<div class="msg show err">⏸ Saving is paused by the admin. You can look at pages, but nothing can be saved now.</div>';
+  // to do
+  var td = H.todo || {classes:[], marks:[]}, items = [], first = null;
+  (td.classes || []).forEach(function(c){
+    if(!c.attendance){ items.push(line('✅ Attendance <b>' + esc(c.cls) + '</b>', pill('Not done', 'bad'))); first = first || ['✅ Mark attendance', "go('daily.html?tab=att','class')", 'b-green']; }
+    if(c.daily === false){ items.push(line('📚 Daily update <b>' + esc(c.cls) + '</b>', pill('Not published', 'warn'))); first = first || ['📚 Open daily update', "go('daily.html?tab=class','class')", 'b-blue']; }
+  });
+  (td.tests || []).slice(0, 4).forEach(function(t){ items.push(line('🧪 Class test ' + esc(t.subject) + ' · ' + esc(t.name) + ' · <b>' + esc(t.cls) + '</b> <small>' + esc(t.date) + '</small>', pill(t.left + ' left', 'warn'))); });
+  if((td.tests || []).length){ first = first || ['🧪 Enter class test marks', "go('classtest.html','subject')", 'b-purple']; }
+  if((td.tests || []).length > 4) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.tests.length - 4) + ' more class tests in the Marks tab</div>');
+  (td.testsToday || []).filter(function(t){ return !t.left; }).forEach(function(t){ items.push(line('🧪 Class test today: ' + esc(t.subject) + ' · <b>' + esc(t.cls) + '</b>', pill('Marks done', 'ok'))); });
+  (td.homework || []).forEach(function(h){ items.push(line('📒 Homework due today: ' + esc(h.subject) + ' · <b>' + esc(h.cls) + '</b><br><small>' + esc(h.text) + '</small>', pill('Check', 'warn'))); });
+  (td.marks || []).slice(0, 6).forEach(function(m){ items.push(line('📝 ' + esc(m.subject) + ' · ' + esc(m.exam) + ' · <b>' + esc(m.cls) + '</b>', pill(m.left + ' left', 'warn'))); });
+  if((td.marks || []).length){ first = first || ['📝 Enter exam marks', "go('exam-marks.html','subject')", 'b-orange']; }
+  if((td.marks || []).length > 6) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.marks.length - 6) + ' more in the Marks tab</div>');
+  h += '<div class="box todo"><div class="title">🧾 To do today</div>' + (items.length ? items.join('') + (first ? '<div class="btnrow"><button class="btn ' + first[2] + '" data-nofb onclick="' + first[1] + '">' + first[0] + '</button></div>' : '') :
+    '<div class="allok">✔ Nothing pending' + (H.noSchool ? '' : ' – well done!') + '</div>') + '</div>';
+  if(H.errors && H.errors.todo) h += '<div class="msg show warn">Could not check: ' + esc(H.errors.todo) + '</div>';
+  // periods
+  var per = H.periods || [];
+  h += '<div class="box" style="border-left-color:var(--blue)"><div class="title">🕘 My periods today</div>' + (H.noSchool ? '<div class="empty-note">No school today.</div>' : (per.length ? per.map(function(p){
+    return line('<b>' + esc(p.label || ('P-' + p.no)) + '</b>' + (p.time ? ' <small>' + esc(p.time) + '</small>' : ''), esc(p.cls) + ' · ' + esc(p.subject)); }).join('') : '<div class="empty-note">No periods for you in the timetable today.</div>')) + '</div>';
+  // birthdays
+  var bd = H.birthdays || [];
+  if(bd.length) h += '<div class="box" style="border-left-color:var(--purple)"><div class="title">🎂 Birthdays</div>' + bd.map(function(b){
+    return line(esc(b.name) + ' <small>' + (b.staff ? '(staff)' : esc(b.cls)) + '</small>', '<span style="color:' + (b.days === 0 ? 'var(--purple);font-weight:800' : 'var(--muted)') + '">' + whenTxt(b.days) + ' · ' + esc(b.date) + '</span>'); }).join('') + '</div>';
+  // events
+  var ev = H.events || [];
+  h += '<div class="box" style="border-left-color:var(--navy)"><div class="title">📅 Coming up</div>' + (ev.length ? ev.map(function(e){
+    return line('<b>' + esc(e.date) + '</b> ' + esc(e.title) + (e.classes ? ' <small>' + esc(e.classes) + '</small>' : ''), e.today ? pill('Today', 'ok') : '<small>' + esc(e.type || '') + '</small>'); }).join('') : '<div class="empty-note">No events in the next two weeks.</div>') +
+    '<div class="btnrow"><button class="btn b-navy" data-nofb onclick="go(\'events.html\')">📅 School calendar</button></div></div>';
+  h += '<div class="btnrow"><button class="btn b-blue" onclick="loadHome(1)">🔄 Refresh</button></div>';
+  $('vHome').innerHTML = h;
+}
+function greet(){ var hr = new Date().getHours(); return hr < 12 ? 'Good morning' : (hr < 17 ? 'Good afternoon' : 'Good evening'); }
+function tile(ic, t, s, on, color){ return '<button class="tile' + (on === false ? ' off' : '') + '" type="button" data-nofb style="border-top-color:' + (color || 'var(--blue)') + '" onclick="' + on + '"><span class="ic">' + ic + '</span><b>' + t + '</b><span>' + s + '</span></button>'; }
+function examTile(page, view){ return exOk() ? "go('" + page + "','" + view + "')" : 'noExam()'; }
+function noExam(){ var m = $('gMsg'); m.className = 'msg show err'; m.innerText = '⛔ Your Exam Access is switched off. Please ask the admin.'; window.scrollTo(0, 0); }
+function drawMarks(){
+  $('markTiles').innerHTML = tile('📝', 'Class tests', 'Make a test, enter its marks', "go('classtest.html','subject')", 'var(--blue)') +
+    tile('🎓', 'Exam marks', exOk() ? 'Marks for the subjects given to you' : 'Exam Access is off – ask the admin', examTile('exam-marks.html', 'subject'), 'var(--orange)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"');
+  var ct = (H.todo && H.todo.tests) || [];
+  $('testsLeft').innerHTML = ct.length ? ct.map(function(x){ return line(esc(x.subject) + ' · ' + esc(x.name) + ' · <b>' + esc(x.cls) + '</b> <small>' + esc(x.date) + '</small>', pill(x.left + ' of ' + x.count + ' left', 'warn')); }).join('') +
+    '<div class="btnrow"><button class="btn b-purple" data-nofb onclick="go(\'classtest.html\',\'subject\')">🧪 Open class tests</button></div>' : '<div class="allok">✔ All your class tests up to today have marks.</div>';
+  var m = (H.todo && H.todo.marks) || [];
+  $('marksLeft').innerHTML = !exOk() ? '<div class="empty-note">Exam Access is off.</div>' : (m.length ? m.map(function(x){ return line(esc(x.subject) + ' · ' + esc(x.exam) + ' · <b>' + esc(x.cls) + '</b>', pill(x.left + ' of ' + x.count + ' left', 'warn')); }).join('') : '<div class="allok">✔ No marks waiting in the open exams.</div>');
+}
+function drawTT(){
+  var t = tile('👨‍🏫', 'My timetable', 'My week, day by day', 'TTP_printTeacher(USER.username, USER.name || USER.username)', 'var(--purple)');
+  if(isCT()) t += tile('🏫', 'Class timetable', 'Class ' + esc(H.me.classes[0]), "TTP_printClass('" + esc(H.me.classes[0]) + "')", 'var(--green)');
+  $('ttTiles').innerHTML = t;
+  var today = H.day;
+  $('dayChips').innerHTML = DAYS.map(function(d){ return '<button class="chip' + (d === today ? ' on' : '') + '" type="button" onclick="TTP_printDay(\'' + d + '\')">' + d.charAt(0) + d.slice(1, 3).toLowerCase() + '</button>'; }).join('');
+  var per = H.periods || [];
+  $('ttToday').innerHTML = H.noSchool ? '<div class="empty-note">No school today.</div>' : (per.length ? per.map(function(p){ return line('<b>' + esc(p.label || ('P-' + p.no)) + '</b>' + (p.time ? ' <small>' + esc(p.time) + '</small>' : ''), esc(p.cls) + ' · ' + esc(p.subject)); }).join('') : '<div class="empty-note">No periods for you today.</div>');
+}
+function drawClassTiles(){
+  $('classTiles').innerHTML = tile('✅', 'Attendance', 'Present / absent, late, uniform', "go('daily.html?tab=att','class')", 'var(--green)') +
+    tile('📚', 'Daily update', 'Periods, lessons, homework', "go('daily.html?tab=class','class')", 'var(--blue)') +
+    tile('📈', 'Monthly performance', 'Attendance % + class tests', "go('performance.html','class')", 'var(--purple)') +
+    tile('📊', 'Class report', exOk() ? 'Results, remarks, finalise' : 'Exam Access is off', examTile('class-report.html', 'class'), 'var(--orange)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"') +
+    tile('🖨️', 'Report cards', 'View / print', examTile('report-card.html', 'class'), 'var(--navy)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"') +
+    tile('📅', 'Class events', 'PTM, picnic, programme', "go('events.html','class')", 'var(--red)') +
+    tile('📒', 'Exam register', 'Whole class marks: print', "go('exam-register.html','class')", 'var(--green)');
+}
+async function loadClass(cls){
+  drawClassTiles();
+  $('stuList').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
+  var j;
+  try{ j = await apiGet('teacherclass', cls ? {cls:cls} : {}); }catch(e){ $('stuList').innerHTML = '<div class="msg show err">❌ Could not connect. Check the internet.</div>'; return; }
+  if(!j || !j.success){ $('stuList').innerHTML = '<div class="msg show err">❌ ' + esc((j && j.error) || 'Could not load.') + '</div>'; return; }
+  CL = j; CUR = j.cls;
+  $('clsChips').innerHTML = (j.classes || []).length > 1 ? j.classes.map(function(c){ return '<button class="chip' + (c === CUR ? ' on' : '') + '" type="button" onclick="loadClass(\'' + esc(c) + '\')">' + esc(c) + '</button>'; }).join('') : '';
+  drawClass();
+}
+function drawClass(){
+  if(!CL) return;
+  var s = $('stuSearch').value.trim().toLowerCase();
+  var list = CL.students.filter(function(x){ return !s || x.name.toLowerCase().indexOf(s) > -1 || String(x.roll) === s; });
+  $('stuList').innerHTML = '<div class="meta" style="margin-bottom:6px">Class ' + esc(CL.cls) + ' · ' + CL.count + ' students' + (s ? ' · ' + list.length + ' found' : '') + '</div>' +
+    (list.length ? list.map(function(x){
+      return '<div class="stu"><div class="roll">' + esc(x.roll || '–') + '</div><div style="min-width:0"><div class="nm">' + esc(x.name) + '</div><div class="mt">Adm ' + esc(x.adm) + (x.dob ? ' · DOB ' + esc(x.dob) : '') +
+        (x.father ? '<br>Father: ' + esc(x.father) : '') + (x.fatherMobile ? ' · ' + esc(x.fatherMobile) : '') + ' · ' + (x.photo ? '📷 photo' : '<span style="color:#9a3412">no photo</span>') + '</div></div>' +
+        (x.fatherMobile ? '<a class="call" href="tel:' + esc(x.fatherMobile) + '">📞 Call</a>' : '') + '</div>';
+    }).join('') : '<div class="empty-note">' + (s ? 'No student found.' : 'No students in this class.') + '</div>');
+}
+
+var want = new URLSearchParams(location.search).get('tab') || (function(){ try{ return sessionStorage.getItem('cvse_ttab'); }catch(e){ return ''; } })() || 'home';
+openTab(want === 'class' ? 'home' : want);
+loadHome().then(function(){ if(want === 'class' && isCT()) openTab('class'); });
+</script>
+</body>
+</html>

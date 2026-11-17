@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S19">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Fees</title>
@@ -121,6 +121,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 <div class="wrap">
  <div id="vList">
   <div class="box"><div class="title">Student Fee Setup</div><div class="meta">Choose a class, tap a student to set new/old, admission date, brother/sister link, bus route, optional fees, concessions and previous dues. The calculated fees are shown below the form.</div>
+   <div class="btnrow"><button class="btn b-blue" type="button" id="btnOptAll" onclick="window.location.href='fees-optional.html'+(typeof CLS!=='undefined'&&CLS?'?class='+encodeURIComponent(CLS):'')">🚌 Bus &amp; optional fees – whole class</button></div>
    <label>Session</label><select id="sess" onchange="loadList()"></select>
    <label>Search (name or admission no)</label><div class="row2" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input id="q" type="search" enterkeyhint="search" oninput="drawList()" placeholder="Type to filter"><button class="btn b-grey" type="button" id="q_clear" style="width:auto;min-width:56px;display:none" onclick="$('q').value='';drawList();$('q').focus()" aria-label="Clear">✖</button></div><div class="meta" id="q_count"></div>
   </div>
@@ -222,7 +223,7 @@ async function openStu(adm){
   try{
     let r = await apiGet('feestudentget',{adm:adm,session:$('sess').value});
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); return; }
-    hide($('gMsg')); ST = r; ED = {concessions:r.concessions.map(c=>Object.assign({},c))}; $('vList').style.display = 'none'; $('vEdit').style.display = 'block'; drawEdit(); window.scrollTo(0,0);
+    hide($('gMsg')); ST = r; ED = edOf(r); $('vList').style.display = 'none'; $('vEdit').style.display = 'block'; drawEdit(); window.scrollTo(0,0);
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
 }
 function closeStu(){ $('vEdit').style.display = 'none'; $('vList').style.display = 'block'; loadList(); }
@@ -234,6 +235,58 @@ function concRow(c, i){
 function readConc(){ return [...document.querySelectorAll('#concs .card2')].map(c=>({mode:c.querySelector('.c_m').value,value:c.querySelector('.c_v').value,reason:c.querySelector('.c_r').value,headIds:[...c.querySelectorAll('.c_h input:checked')].map(i=>i.value).join(',')||'ALL'})); }
 function addConc(){ ED.concessions = readConc(); ED.concessions.push({mode:'PERCENT',headIds:'ALL'}); $('concs').innerHTML = ED.concessions.map(concRow).join(''); }
 function rmConc(i){ ED.concessions = readConc(); ED.concessions.splice(i,1); $('concs').innerHTML = ED.concessions.map(concRow).join(''); }
+/* ---------- S19: bus route periods + from / until months ---------- */
+const MN = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function edOf(g){ return {concessions:g.concessions.map(c=>Object.assign({},c)), periods:(g.setup.routePeriods||[]).map(p=>Object.assign({},p))}; }
+function mSel(id, v, empty){ return '<select id="'+id+'"><option value="">'+empty+'</option>'+(ST.months||[]).map(m=>'<option value="'+m+'"'+(String(m)===String(v)?' selected':'')+'>'+MN[m]+'</option>').join('')+'</select>'; }
+function paidNote(headId){
+  let ms = Object.keys(ST.paidKeys||{}).filter(k=>k.split('|')[0]===headId).map(k=>k.split('|')[1]).filter(m=>MN[+m]);
+  return ms.length ? ' <b>Paid: '+ms.map(m=>MN[+m]).join(', ')+'.</b>' : '';
+}
+function busRows(){
+  let ps = ED.periods || [];
+  if(!ps.length) return '<div class="meta" id="noBus">No bus.</div>';
+  return ps.map((p,i)=>'<div class="per" data-i="'+i+'" style="border:1px solid #e2e8f0;border-radius:12px;padding:8px;margin:6px 0">'+
+    '<label>Route'+(ps.length>1?' '+(i+1):'')+'</label><select id="per_r_'+i+'">'+ST.routes.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===p.r?' selected':'')+'>'+esc(x.name)+' — '+rs(x.monthly)+'/month'+(x.oneWay!==null&&x.oneWay!==''?' (one-way '+rs(x.oneWay)+')':'')+'</option>').join('')+'</select>'+
+    '<label>Trip</label><select id="per_m_'+i+'"><option value="BOTH"'+(p.m!=='ONE_WAY'?' selected':'')+'>Both ways</option><option value="ONE_WAY"'+(p.m==='ONE_WAY'?' selected':'')+'>One way (if the route has a one-way amount)</option></select>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label>From</label>'+mSel('per_f_'+i,p.f,'Start of session')+'</div><div><label>Until</label>'+mSel('per_u_'+i,p.u,'End of session')+'</div></div>'+
+    '<div class="btnrow"><button class="btn b-navy" type="button" onclick="rmPer('+i+')">✕ Remove this route</button></div></div>').join('');
+}
+function readPer(){
+  return [...document.querySelectorAll('#e_bus .per')].map(el=>{ let i = el.dataset.i; return {r:$('per_r_'+i).value, m:$('per_m_'+i).value, f:$('per_f_'+i).value, u:$('per_u_'+i).value}; });
+}
+function nowMonth(){ return new Date().getMonth()+1; }
+function addPer(){
+  let ps = readPer();
+  if(!ST.routes.length){ show($('sMsg'),'❌ No bus routes in this session (Fees Settings → Routes).','err'); return; }
+  if(!ps.length) ps.push({r:ST.routes[0].id, m:'BOTH', f:'', u:''});
+  else{
+    let months = ST.months||[], last = ps[ps.length-1], lf = last.f ? months.indexOf(Number(last.f)) : 0;
+    let i = Math.max(months.indexOf(nowMonth()), lf + 1);                    // the change starts this month, after the last route's start
+    if(i > 11 || i < 1){ show($('sMsg'),'❌ The last route already starts in the last month of the session.','err'); return; }
+    let lu = last.u;
+    last.u = String(months[i-1]);
+    ps.push({r:last.r, m:last.m, f:String(months[i]), u:lu || ''});
+  }
+  ED.periods = ps; $('e_bus').innerHTML = busRows(); $('perAdd').textContent = '🔁 Change the route from a month';
+}
+function rmPer(i){
+  let ps = readPer(), gone = ps[i];
+  ps.splice(i,1);
+  if(i > 0 && i === ps.length && ps[i-1]) ps[i-1].u = gone.u || '';        // the route before it runs on to where the removed one ended
+  ED.periods = ps; $('e_bus').innerHTML = busRows(); if(!ps.length) $('perAdd').textContent = '🚌 Give the bus';
+}
+function optRow(x, on){
+  let om = (ST.setup.optMonths||{})[x.id] || ['',''], monthly = x.type === 'MONTHLY';
+  return '<div class="oh-row" style="border-bottom:1px solid #eef0f3;padding:6px 0"><label class="chk"><input type="checkbox" class="oh" value="'+esc(x.id)+'"'+(on?' checked':'')+'> '+esc(x.name)+'</label>'+
+    (monthly?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label>From</label>'+mSel('om_f_'+x.id,om[0],'Start of session')+'</div><div><label>Until</label>'+mSel('om_u_'+x.id,om[1],'End of session')+'</div></div>':'')+
+    (paidNote(x.id)?'<div class="help">'+paidNote(x.id)+'</div>':'')+'</div>';
+}
+function readOm(){
+  let o = {};
+  document.querySelectorAll('#e_opt input.oh').forEach(c=>{ let f = $('om_f_'+c.value), u = $('om_u_'+c.value); if(c.checked && f && (f.value || u.value)) o[c.value] = [f.value, u.value]; });
+  return o;
+}
 function drawEdit(){
   let r = ST, s = r.student, u = r.setup, opt = String(u.optionalHeads||'').split(',');
   let optHeads = r.heads.filter(h=>h.scope==='OPTIONAL' && h.id!==r.transportHeadId);
@@ -244,10 +297,10 @@ function drawEdit(){
    '<h3 class="g">Brother / sister</h3>'+(r.siblings.length?'<div class="meta">This student is child no. <b>'+s.childNo+'</b> in the family. Others: '+r.siblings.map(x=>esc(x.name)+' ('+esc(x.cls)+', child '+x.childNo+')').join(', ')+'</div><label class="chk"><input type="checkbox" id="e_unlink"> Remove from this family</label>':'<div class="meta">Not linked to any brother or sister.</div>')+
    '<label>Link with a brother/sister</label><div class="row2" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input id="e_link" placeholder="Admission no, or search by name" onkeydown="if(event.key===\'Enter\'){event.preventDefault();sibSearch();}"><button class="btn b-blue" type="button" id="sib_btn" style="width:auto;min-width:96px" onclick="sibSearch()">🔍 Search</button></div><div id="sib_res"></div><div id="sib_pick"></div>'+
    '<label class="chk"><input type="checkbox" id="e_sibOff"'+(u.siblingOff?' checked':'')+'> No sibling discount for this student</label>'+
-   '<h3 class="g">Bus</h3><select id="e_route"><option value="">No bus</option>'+r.routes.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===u.routeId?' selected':'')+'>'+esc(x.name)+' — '+rs(x.monthly)+'/month'+(x.oneWay!==null&&x.oneWay!==''?' (one-way '+rs(x.oneWay)+')':'')+'</option>').join('')+'</select>'+
-   '<label>Trip</label><select id="e_mode"><option value="BOTH"'+(u.routeMode!=='ONE_WAY'?' selected':'')+'>Both ways</option><option value="ONE_WAY"'+(u.routeMode==='ONE_WAY'?' selected':'')+'>One way (if the route has a one-way amount)</option></select>'+
+   '<h3 class="g">Bus</h3><div id="e_bus">'+busRows()+'</div><div class="btnrow"><button class="btn b-blue" type="button" id="perAdd" onclick="addPer()">'+(ED.periods.length?'🔁 Change the route from a month':'🚌 Give the bus')+'</button></div>'+
+   '<div class="help">One route for each month. Empty "from" = start of the session, empty "until" = end of the session. A month already paid cannot change.'+paidNote(r.transportHeadId)+'</div>'+
    (r.transportHeadId?'':'<div class="help">⚠ No bus fee head is chosen in Fees Settings → Receipt &amp; Rules, so the bus is not charged.</div>')+
-   '<h3 class="g">Optional fees</h3>'+(optHeads.length?'<div class="cl" id="e_opt">'+optHeads.map(x=>'<label><input type="checkbox" value="'+esc(x.id)+'"'+(opt.indexOf(x.id)>-1?' checked':'')+'>'+esc(x.name)+'</label>').join('')+'</div>':'<div class="meta">No optional fee heads are set.</div>')+
+   '<h3 class="g">Optional fees</h3>'+(optHeads.length?'<div id="e_opt">'+optHeads.map(x=>optRow(x, opt.indexOf(x.id)>-1)).join('')+'</div>':'<div class="meta">No optional fee heads are set.</div>')+
    '<h3 class="g">Concessions</h3><div id="concs">'+ED.concessions.map(concRow).join('')+'</div><div class="btnrow"><button class="btn b-blue" onclick="addConc()">+ Add concession</button></div>'+
    '<h3 class="g">Previous dues (before this session or before the app)</h3><input id="e_ob" inputmode="decimal" value="'+esc(u.openingBalance||'')+'" placeholder="0">'+
    (r.locked?'<label>Reason for changing (the opening position is locked)</label><input id="e_reason" placeholder="Why is it being changed?">':'')+
@@ -290,11 +343,11 @@ async function saveStu(){
   if(window.UI && !UI.checkDates(['e_date'])){ show($('sMsg'),'❌ Please correct the admission date first.','err'); return; }
   let b = $('saveBtn'), m = $('sMsg'); b.disabled = true; show(m,'Saving...','load');
   let d = {type:$('e_type').value,admissionDate:$('e_date').value.trim(),linkTo:$('e_link').value.trim(),unlink:!!($('e_unlink')&&$('e_unlink').checked),siblingOff:$('e_sibOff').checked,
-    routeId:$('e_route').value,routeMode:$('e_mode').value,optionalHeads:$('e_opt')?[...$('e_opt').querySelectorAll('input:checked')].map(i=>i.value):[],
+    routePeriods:readPer(),optionalHeads:$('e_opt')?[...$('e_opt').querySelectorAll('input.oh:checked')].map(i=>i.value):[],optMonths:readOm(),
     openingBalance:$('e_ob').value,note:$('e_note').value,concessions:readConc(),reason:$('e_reason')?$('e_reason').value:''};
   try{
     let r = await apiPost('feestudentsave',{adm:ST.student.adm,session:ST.session,data:JSON.stringify(d)});
-    if(r.success){ let g = await apiGet('feestudentget',{adm:ST.student.adm,session:ST.session}); if(g.success){ ST = g; ED = {concessions:g.concessions.map(c=>Object.assign({},c))}; drawEdit(); } show($('sMsg'),'✅ Saved.','ok'); return; }
+    if(r.success){ let g = await apiGet('feestudentget',{adm:ST.student.adm,session:ST.session}); if(g.success){ ST = g; ED = edOf(g); drawEdit(); } show($('sMsg'),'✅ Saved.','ok'); return; }
     show(m,'❌ '+(r.error||'Could not save.'),'err'); m.scrollIntoView({block:'center'});
   }catch(e){ show(m,'❌ Could not connect. Nothing was saved. Try again.','err'); }
   b.disabled = false;

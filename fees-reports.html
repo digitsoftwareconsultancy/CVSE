@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S15">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fee Reports</title>
@@ -155,7 +155,7 @@ $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText 
 $('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
-var M = null, DEF = null, OUT = null, BUSY = false, ICON = {DAILY:'💵', RECEIPTS:'🧾', HEADWISE:'🧩', CLASSDUES:'🏫', DEFAULTERS:'⏰', CONCESSIONS:'🎁', LEDGER:'📒', ALLDATA:'📦', LEFTDUES:'🚪'};
+var M = null, DEF = null, OUT = null, BUSY = false, ICON = {DAILY:'💵', RECEIPTS:'🧾', HEADWISE:'🧩', CLASSDUES:'🏫', DEFAULTERS:'⏰', CONCESSIONS:'🎁', LEDGER:'📒', ALLDATA:'📦', LEFTDUES:'🚪', BUSLIST:'🚌'};
 function pad2(n){ return String(n).padStart(2, '0'); }
 function ddmm(d){ return pad2(d.getDate()) + '-' + pad2(d.getMonth() + 1) + '-' + d.getFullYear(); }
 function todayDate(){ let a = M.today.split('-'); return new Date(+a[2], +a[1] - 1, +a[0]); }
@@ -167,7 +167,7 @@ async function init(){
   try{
     let r = await apiGet('feereports', {});
     if(!r.success){ show($('gMsg'), r.code === 'ROLE' ? '❌ You do not have permission to open fee reports. Ask the admin to tick "Fee reports" for you in Users.' : '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
-    M = r; hide($('gMsg'));
+    M = r; hide($('gMsg')); UI.printDates(r.school && r.school.dateStyle);   // S22
     $('cards').innerHTML = r.reports.map(x => '<div class="go" onclick="openReport(\'' + x.key + '\')"><div class="ic">' + (ICON[x.key] || '📄') + '</div>' + esc(x.title) + '<small>' + esc(x.desc) + '</small></div>').join('');
   }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); }
 }

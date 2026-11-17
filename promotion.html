@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S14">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S19">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Promotion / new session</title>
@@ -91,7 +91,7 @@ function money(n){ n = Number(n) || 0; return '₹' + n.toLocaleString('en-IN', 
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
-var D = null, P1 = null, P2 = null, CARRY = {}, EDITS = {}, ELEC = {}, PICK = {}, FIN = {}, TICK = {}, OPEN = {map:false};
+var D = null, P1 = null, P2 = null, COPYOFF = {}, CARRY = {}, EDITS = {}, ELEC = {}, PICK = {}, FIN = {}, TICK = {}, OPEN = {map:false};
 var CH = {PROMOTE:'Promote', REPEAT:'Repeat', LEFT:'Left (TC)', DROPOUT:'Drop out', PASSEDOUT:'Passed out'};
 
 async function load(keep){
@@ -129,7 +129,7 @@ async function runSteps(){
       if(r.state){ D.state = r.state; }
       if(!r.success){ drawRun(); show($('runMsg'), '❌ ' + (r.error || 'The step did not finish.') + '\nTap Continue to try again.', 'err'); return; }
       drawRun(); show($('runMsg'), '✅ ' + (r.label || '') + (r.details ? ': ' + r.details : '') + (r.done ? '' : '\nNext: ' + (r.nextLabel || '')), r.done ? 'ok' : 'load');
-      if(r.done){ $('runMsg').className = 'msg show ok'; $('runMsg').innerText = '✅ Finished. ' + (r.details || '') + '\nSaving works again for everyone.'; P1 = null; P2 = null; CARRY = {}; EDITS = {}; ELEC = {}; setTimeout(()=>load(true), 1500); return; }
+      if(r.done){ $('runMsg').className = 'msg show ok'; $('runMsg').innerText = '✅ Finished. ' + (r.details || '') + '\nSaving works again for everyone.'; P1 = null; P2 = null; CARRY = {}; COPYOFF = {}; EDITS = {}; ELEC = {}; setTimeout(()=>load(true), 1500); return; }
     }
   }catch(e){ show($('runMsg'), '❌ Connection lost. Nothing is lost: tap Continue when the internet is back.', 'err'); drawRunBtn(); }
 }
@@ -201,10 +201,31 @@ function p1Html(){
     return '<div class="card"><div class="h"><span>'+esc(x.name)+'</span><span>'+money(x.amount)+'</span></div><div class="small">Adm '+esc(x.adm)+' · Class '+esc(x.cls)+(x.roll?' · Roll '+esc(x.roll):'')+(x.left?' · <span class="pill grey">'+esc(x.warn.split(';')[0])+'</span>':'')+'<br>'+x.breakdown.map(b=>esc(b.head)+' '+money(b.amount)).join(', ')+(x.warn && !x.left?'<br>⚠️ '+esc(x.warn):'')+'</div>'+
       '<div class="row2 noprint"><div><label>Carry this amount</label><input inputmode="decimal" class="c_amt" data-a="'+esc(x.adm)+'" value="'+esc(e.amount !== undefined ? e.amount : x.amount)+'" onchange="carryEdit(this)"></div><div><label>Reason (if changed)</label><input class="c_rs" data-a="'+esc(x.adm)+'" maxlength="120" value="'+esc(e.reason||'')+'" onchange="carryEdit(this)"></div></div></div>';
   }).join('') : '<div class="meta">Nobody owes money. Nothing is carried.</div>';
+  h += copyHtml();
   h += '<div class="btnrow noprint"><button class="btn b-grey" onclick="window.print()">🖨 Print the preview</button></div>';
   if(!r.problems.length) h += '<div class="box noprint" style="border-left-color:var(--red);margin-top:12px"><div class="title">Start Part 1</div><div class="meta">Do this in a holiday. All saving stops for everyone until the last step is finished (a few minutes). Type the new session name to confirm.</div>'+
     '<label>Type <b>'+esc(r.newSession)+'</b></label><input id="c1" autocomplete="off" placeholder="'+esc(r.newSession)+'"><div class="btnrow"><button class="btn b-red" id="bS1" onclick="start1()">Start Part 1 now</button></div><div class="msg" id="mS1"></div></div>';
   return h;
+}
+/* S19: bus, optional fees, 'no sibling discount' and concessions copied into the new session */
+function copyHtml(){
+  let c = P1.copy || [], nb = 0, no = 0;
+  c.forEach(x=>{ if(!x.kept) x.items.forEach(it=>{ if(!it.missing && !(COPYOFF[x.adm]||[]).includes(it.k)){ if(it.k==='BUS') nb++; else no++; } }); });
+  let h = '<div class="box" id="copyBox" style="margin-top:12px;border-left-color:var(--orange)"><div class="title">🚌 Bus &amp; optional fees for '+esc(P1.newSession)+'</div>'+
+    '<div class="meta">Copied for every student who still has them in the last month of '+esc(P1.oldSession)+'. Untick what should NOT continue. Students who already have a setup typed for '+esc(P1.newSession)+' keep it.</div>';
+  if(!c.length) return h + '<div class="meta" style="margin-top:6px">Nobody has a bus, optional fee, concession or "no sibling discount" in the last month. Nothing to copy.</div></div>';
+  h += '<div class="big"><div><b>'+nb+'</b><span>bus copied</span></div><div><b>'+no+'</b><span>other items copied</span></div></div>';
+  h += c.map(x=>'<div class="card"><div class="h"><span>'+esc(x.name)+'</span><span class="small">'+esc(x.cls)+(x.roll?' · '+esc(x.roll):'')+'</span></div>'+
+    (x.kept?'<div class="small">✔ Already set up for '+esc(P1.newSession)+' by the office – kept as it is: '+x.items.map(it=>esc(it.label)).join(', ')+'</div>':
+     '<div class="small">'+x.items.map(it=>it.missing?'<div>⚠️ '+esc(it.label)+' – route not in '+esc(P1.newSession)+', not copied</div>':
+       '<label class="chk noprint-chk" style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="checkbox" class="cp" data-a="'+esc(x.adm)+'" data-k="'+esc(it.k)+'"'+((COPYOFF[x.adm]||[]).includes(it.k)?'':' checked')+' onchange="copyTick(this)" style="width:22px;height:22px;min-height:0"> '+esc(it.label)+'</label>').join('')+'</div>')+
+    '</div>').join('');
+  return h + '</div>';
+}
+function copyTick(el){
+  let a = el.dataset.a, k = el.dataset.k, l = COPYOFF[a] || [];
+  if(el.checked) l = l.filter(x=>x!==k); else if(!l.includes(k)) l.push(k);
+  if(l.length) COPYOFF[a] = l; else delete COPYOFF[a];
 }
 function carryEdit(el){
   let a = el.dataset.a, amt = document.querySelector('.c_amt[data-a="'+CSS.escape(a)+'"]').value.trim(), rs = document.querySelector('.c_rs[data-a="'+CSS.escape(a)+'"]').value.trim();
@@ -219,7 +240,7 @@ async function start1(){
   if(!(await UI.ask('Start Part 1 now? A backup is made first. Saving stops for everyone until it is finished.', 'Start Part 1', false))) return;
   show(m, 'Starting... please wait', 'load');
   try{
-    let r = await apiPost('promostart', {part:1, confirm:c, carry:JSON.stringify(CARRY)});
+    let r = await apiPost('promostart', {part:1, confirm:c, carry:JSON.stringify(CARRY), copyOff:JSON.stringify(COPYOFF)});
     if(!r.success){ show(m, '❌ ' + (r.error || 'Could not start.'), 'err'); return; }
     D.state = r.state; drawRun(); window.scrollTo({top:0}); runSteps();
   }catch(e){ show(m, '❌ Could not connect. Nothing was started. Try again.', 'err'); }

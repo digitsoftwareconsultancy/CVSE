@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S16">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S20">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Settings – Student record</title>
@@ -50,6 +50,10 @@ h4.g{margin:14px 0 2px;color:var(--purple);font-size:13.5px;border-bottom:2px so
 details.adv{margin-top:14px;border:2px dashed #94a3b8;border-radius:12px;padding:10px;background:#f8fafc}
 details.adv>summary{font-weight:800;cursor:pointer;min-height:30px;padding:4px 0}
 .advInfo{font-weight:600;color:#555}
+.arMeter{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:10px 0 4px}.arBar{height:100%;background:linear-gradient(90deg,#16a34a,#1976d2);border-radius:999px}.arBar.over{background:#c62828}
+.arRow{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;border:1px solid #e5e7eb;border-radius:12px;padding:8px;margin:6px 0;background:#f8fafc}
+.arN{font-weight:900;color:#0b2a5c;text-align:center}.arM b{color:#0b2a5c;font-size:14px}.arM small{color:#64748b;font-weight:700;font-size:11px;margin-left:6px}.arM input{margin-top:6px;min-height:40px;padding:8px;font-size:15px}
+.arB{display:flex;flex-direction:column;gap:4px}.arB button{min-width:46px;min-height:36px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font-weight:900;cursor:pointer}.arB button.d{background:#fee2e2;color:#991b1b;border-color:#fecaca}.arB button:disabled{opacity:.35}
 </style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
@@ -57,7 +61,7 @@ details.adv>summary{font-weight:800;cursor:pointer;min-height:30px;padding:4px 0
   <div class="top-right"><div class="badge">ADMIN</div><button class="btn-logout" onclick="doLogout()">Logout</button></div>
 </div>
 <div class="wrap">
-  <div class="box"><div class="title">⚙️ Settings – Student record</div><div class="meta">Admission number, compulsory fields, the columns kept in the Students tab, the drop-down lists, the parent registration form, and filling the master record from today's students.</div></div>
+  <div class="box"><div class="title">⚙️ Settings – Student record</div><div class="meta">Admission number, compulsory fields, the columns kept in the current student list, the drop-down lists, the parent registration form, the Admission Register columns, and filling the master record from today's students.</div></div>
   <div class="msg" id="gMsg"></div>
   <div id="main"></div>
 </div>
@@ -119,23 +123,76 @@ function draw(){
   });
   h += '<div class="msg" id="m4"></div></div>';
   h += '<div id="regBox"></div>';                                   // S16: 4. Parent registration (drawn by loadReg)
+  h += '<div id="arBox"></div>';                                    // S20: 5. Admission register columns (drawn by loadAr)
   // S15: rarely changed settings + one-time tools in a closed 'Advanced' fold
   h += '<details class="adv" id="advStu"><summary>⚙️ Advanced (rarely changed) <span class="advInfo">– daily student fields, one-time tools</span></summary>';
   // 3. daily fields
-  h += '<div class="box" style="border-left-color:var(--green)"><div class="title">Daily student fields (Students tab)</div><div class="meta">The Students tab is read many times a day, so it keeps only what pages need. Everything stays in the master record.</div>'+
+  h += '<div class="box" style="border-left-color:var(--green)"><div class="title">Daily student fields (current student list)</div><div class="meta">The current student list (sheet tab "Students") is read many times a day, so it keeps only what pages need. Everything stays in the master record.</div>'+
     '<h4 class="g">Always kept</h4>' + D.fixedStudents.concat(D.feeStudents).map(k=>'<label class="chk dis"><input type="checkbox" checked disabled><span>'+esc(k)+'<small>'+(D.feeStudents.indexOf(k)>-1?'needed by fees (new/old student, admission month, sibling discount)':'needed everywhere')+'</small></span></label>').join('')+
     '<h4 class="g">The school chooses</h4>' + D.dailyOptions.map(o=>'<label class="chk"><input type="checkbox" class="dl" value="'+o.key+'"'+(D.daily.indexOf(o.key)>-1?' checked':'')+'><span>'+esc(o.label)+'<small>Used by: '+esc(o.usedBy)+'</small></span></label>').join('')+
-    '<div class="meta">Switching one OFF empties that column in the Students tab (the data stays in the master). Switching it ON fills it again from the master.</div>'+
+    '<div class="meta">Switching one OFF empties that column in the current student list (the data stays in the master record). Switching it ON fills it again from the master record.</div>'+
     '<div class="btnrow"><button class="btn b-green" id="b3" onclick="saveDaily()">Save daily student fields</button></div><div class="msg" id="m3"></div></div>';
   h += '<h4 class="g" style="margin:14px 4px 6px">One-time tools</h4>';
   // 5. fill master
-  h += '<div class="box" style="border-left-color:var(--red)"><div class="title">Fill master from current students</div><div class="meta">Copies every student of the Students tab who is not in the master record yet. Students already in the master are never doubled or overwritten, so it is safe to run again. An automatic backup is made just before copying.</div>'+
-    '<div class="big"><div><b>'+D.masterCount+'</b><span>in the master</span></div><div><b>'+D.notInMaster+'</b><span>not in the master yet</span></div><div><b>'+(D.masterCount+D.notInMaster)+'</b><span>together</span></div></div>'+
+  h += '<div class="box" style="border-left-color:var(--red)"><div class="title">Fill the master record from the current student list</div><div class="meta">Copies every student of the current student list who is not in the master record yet. Students already in the master are never doubled or overwritten, so it is safe to run again. An automatic backup is made just before copying.</div>'+
+    '<div class="big"><div><b>'+D.masterCount+'</b><span>in the master record</span></div><div><b>'+D.notInMaster+'</b><span>not in the master record yet</span></div><div><b>'+(D.masterCount+D.notInMaster)+'</b><span>together</span></div></div>'+
     '<div class="btnrow"><button class="btn b-navy" id="b5" onclick="fillCheck()">Check first (nothing is copied)</button></div><div class="msg" id="m5"></div><div id="fillOut"></div></div>';
   h += '</details>';
   $('main').innerHTML = h;
   if(advOpen && $('advStu')) $('advStu').open = true;
   loadReg();
+  loadAr();
+}
+/* ---------- S20: 5. Admission register columns ---------- */
+var AR = null, ARC = [];
+async function loadAr(){
+  let box = $('arBox'); if(!box) return;
+  if(!AR) box.innerHTML = '<div class="box" style="border-left-color:var(--navy)"><div class="msg show load">Loading the Admission Register columns…</div></div>';
+  try{
+    let r = await apiGet('arcolsget', {});
+    if(!r.success){ box.innerHTML = '<div class="box"><div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div></div>'; return; }
+    AR = r; ARC = r.cols.map(c=>({k:c.k, l:c.l})); drawAr();
+  }catch(e){ box.innerHTML = '<div class="box"><div class="msg show err">❌ Could not connect. Check internet and reload.</div></div>'; }
+}
+function arDef(k){ return AR.offered.find(o=>o.k===k); }
+function arWidth(){ return ARC.reduce((a,c)=>a + (arDef(c.k) ? arDef(c.k).w : 0), 0); }
+function arSame(){ return JSON.stringify(ARC) === JSON.stringify(AR.cols.map(c=>({k:c.k, l:c.l}))); }
+function drawAr(msg, kind){
+  let w = arWidth(), max = AR.maxWidth, pc = Math.min(100, Math.round(w * 100 / max)), over = w > max;
+  let h = '<div class="box" style="border-left-color:var(--navy)"><div class="title">5. Admission Register columns</div>'+
+    '<div class="meta">The columns of the Admission Register (screen, A4 landscape print and Excel). Sl. no and Admission no are always first. ▲▼ = order. The heading box changes the words printed at the top of a column (empty = the normal words). Aadhaar is never offered.</div>'+
+    '<div class="arMeter"><div class="arBar'+(over?' over':'')+'" style="width:'+pc+'%"></div></div>'+
+    '<div class="meta" id="arW" style="font-weight:800;color:'+(over?'#c62828':'#0b2a5c')+'">'+(over ? '🔴 Too many columns for A4 landscape ('+w+' of '+max+' mm) – remove a column' : 'Width on A4 landscape: '+w+' of '+max+' mm')+'</div>';
+  h += ARC.map((c,i)=>{ let d = arDef(c.k), fixed = AR.fixed.indexOf(c.k) > -1;
+    return '<div class="arRow"><div class="arN">'+(i+1)+'</div><div class="arM"><b>'+esc(d ? d.head : c.k)+'</b><small>'+(d?d.w:0)+' mm'+(fixed?' · always first':'')+'</small>'+
+      '<input class="arL" data-i="'+i+'" maxlength="30" placeholder="Heading: '+esc(d ? d.head : '')+'" value="'+esc(c.l)+'" oninput="ARC['+i+'].l=this.value;arDirty()"></div>'+
+      (fixed ? '' : '<div class="arB"><button type="button" onclick="arMove('+i+',-1)"'+(i<=AR.fixed.length?' disabled':'')+'>▲</button><button type="button" onclick="arMove('+i+',1)"'+(i>=ARC.length-1?' disabled':'')+'>▼</button><button type="button" class="d" onclick="arDel('+i+')">✕</button></div>')+'</div>'; }).join('');
+  let left = AR.offered.filter(o=>!ARC.some(c=>c.k===o.k)), groups = [];
+  left.forEach(o=>{ if(groups.indexOf(o.group) < 0) groups.push(o.group); });
+  h += '<label for="arAdd">Add a column</label><div style="display:flex;gap:8px"><select id="arAdd" style="flex:1;min-width:0"><option value="">Choose…</option>'+
+    groups.map(g=>'<optgroup label="'+esc(g)+'">'+left.filter(o=>o.group===g).map(o=>'<option value="'+o.k+'">'+esc(o.head)+' ('+o.w+' mm)</option>').join('')+'</optgroup>').join('')+
+    '</select><button class="btn b-blue" type="button" style="width:auto;min-width:90px" onclick="arAdd()">+ Add</button></div>'+
+    '<div class="btnrow"><button class="btn b-green" id="b8" onclick="arSave()"'+(over?' disabled':'')+'>Save register columns</button><button class="btn b-grey" type="button" onclick="arNormal()">↺ Normal columns</button></div>'+
+    '<div class="msg" id="m8"></div><div class="meta">'+(arSame() ? '' : '<b style="color:#ef6c00">Not saved yet.</b> ')+'Open the register: <a href="student-register.html">📒 Admission Register</a></div></div>';
+  $('arBox').innerHTML = h;
+  if(msg) show($('m8'), msg, kind || 'ok');
+}
+let arT = null;
+function arDirty(){ clearTimeout(arT); arT = setTimeout(()=>{ let f = document.activeElement, i = f && f.dataset ? f.dataset.i : null, pos = f && f.selectionStart; drawAr(); if(i !== null && i !== undefined){ let e = document.querySelector('.arL[data-i="'+i+'"]'); if(e){ e.focus(); try{ e.setSelectionRange(pos,pos); }catch(x){} } } }, 600); }
+function arMove(i, d){ let j = i + d; if(j < AR.fixed.length || j >= ARC.length) return; let t = ARC[i]; ARC[i] = ARC[j]; ARC[j] = t; drawAr(); }
+function arDel(i){ ARC.splice(i, 1); drawAr(); }
+function arAdd(){ let k = $('arAdd').value; if(!k){ show($('m8'), 'Choose a column first.', 'err'); return; } ARC.push({k:k, l:''}); drawAr(); }
+async function arNormal(){
+  if(!(await UI.ask('Put back the normal 14 columns? Your own headings are removed. Nothing is saved before you tap Save.', 'Yes, normal columns', false))) return;
+  ARC = AR.normal.map(k=>({k:k, l:''})); drawAr('Normal columns put back – tap "Save register columns" to keep them.', 'info');
+}
+async function arSave(){
+  let b = $('b8'), m = $('m8'); b.disabled = true; show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await apiPost('arcolssave', {cols:JSON.stringify(ARC.map(c=>({k:c.k, l:String(c.l||'').trim()})))});
+    if(!r.success){ b.disabled = false; show(m, '❌ ' + (r.error || 'Not saved.'), 'err'); return; }
+    AR.cols = r.cols; AR.width = r.width; ARC = r.cols.map(c=>({k:c.k, l:c.l})); drawAr(r.message || '✅ Saved.');
+  }catch(e){ b.disabled = false; show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); }
 }
 /* ---------- S16: 4. Parent registration (student app) ---------- */
 var RS = null, RMODE = {FILL:'Parent fills', REQUEST:'Request only (office checks)', VIEW:'View only', HIDDEN:'Hidden'};
@@ -221,7 +278,7 @@ async function fillCheck(){
     let r = await apiGet('mrfillpreview', {});
     if(!r.success){ show(m, '❌ ' + (r.error || 'Could not check.'), 'err'); b.disabled = false; return; }
     hide(m);
-    let h = '<div class="big"><div><b>'+r.total+'</b><span>in the Students tab</span></div><div><b>'+r.already+'</b><span>already in the master</span></div><div><b>'+r.toCopy+'</b><span>will be copied</span></div></div>';
+    let h = '<div class="big"><div><b>'+r.total+'</b><span>in the current student list</span></div><div><b>'+r.already+'</b><span>already in the master record</span></div><div><b>'+r.toCopy+'</b><span>will be copied</span></div></div>';
     if(r.problems.length) h += '<div class="meta"><b>Problems found ('+r.problems.length+(r.more?'+':'')+'). Nothing is guessed: the school corrects them.</b></div>' + r.problems.map(p=>'<div class="prob">Row '+p.row+(p.adm?' · Adm '+esc(p.adm):'')+(p.name?' · '+esc(p.name):'')+'<br>'+esc(p.issue)+'</div>').join('');
     else h += '<div class="msg show ok">No problems found.</div>';
     if(r.toCopy) h += '<div class="btnrow"><button class="btn b-orange" id="b5b" onclick="fillNow('+r.toCopy+')">Copy '+r.toCopy+' student'+(r.toCopy===1?'':'s')+' now (backup first)</button></div><div class="msg" id="m5b"></div>';

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S17">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Report Cards</title>
@@ -179,7 +179,7 @@ async function loadCards(){
   try{
     let r = await apiGet('getreportcards', {reportId:$('selReport').value, className:$('selClass').value});
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
-    DATA = r; hide($('gMsg')); $('viewBox').style.display = '';
+    DATA = r; hide($('gMsg')); $('viewBox').style.display = ''; UI.printDates(r.school && r.school.dateStyle);   // S22
     $('selStu').innerHTML = '<option value="">All students (' + r.students.length + ')</option>' + r.students.map(s => `<option value="${esc(s.admissionNo)}">${esc((s.rollNo || '-') + ' - ' + s.name)}</option>`).join('');
     if(!r.students.length) show($('vMsg'), 'No students found in this class.', 'warn');
     else if(r.draft) show($('vMsg'), '⚠️ This class is not finalised yet. The cards show a DRAFT mark and should not be given out.', 'warn');

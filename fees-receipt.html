@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S15">
+<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Money Receipt</title>
@@ -261,7 +261,7 @@ async function init(){
     }
     let r = await apiGet(STU ? 'studentfeereceipt' : 'feereceipt',{no:QS.get('no')||'',session:QS.get('s')||''});
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load the receipt.'),'err'); $('sub').innerText = 'Receipt not available.'; return; }
-    R = r; hide($('gMsg')); render();
+    R = r; hide($('gMsg')); UI.printDates(r.school && r.school.dateStyle); render();   // S22
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
 }
 init();
