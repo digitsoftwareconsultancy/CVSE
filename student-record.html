@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S20">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student record</title>
@@ -53,6 +53,7 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
 .tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
 .tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
 @media print{body>.top,body>.tabs{display:none!important}}
+.gdChips{margin:12px 0 4px}.gdT{font-size:12px;font-weight:800;color:#0b2a5c;margin-bottom:6px}.gdRow{display:flex;gap:6px;flex-wrap:wrap}.gdC{flex:1;min-width:90px;min-height:46px;border:1.5px solid #cbd5e1;background:#fff;border-radius:12px;font-weight:800;color:#334155;cursor:pointer;font-size:13.5px}.gdC.on{background:#1976d2;border-color:#1976d2;color:#fff}.gdLock{background:#f1f5f9!important;color:#475569}
 </style><script src="config.js"></script><script src="ui.js"></script><script src="photo.js"></script></head>
 <body>
 <div class="top">
@@ -160,8 +161,8 @@ function val(k){ let e = $('f_' + k); return e ? e.value.trim() : undefined; }
 /* ---------- Add a new student ---------- */
 function drawNew(){
   let c = Q.get('class') || '';
-  let keys = ['Name','DOB','Gender','Class','RollNo','AdmissionDate','StudentType','FatherName','MotherName','Phone'];
-  let h = '<div class="box" style="border-left-color:var(--green)"><div class="title">➕ Add a new student</div><div class="meta">Fill the basic details now. The rest of the record (parents, address, previous school…) can be completed later. Fields with <span style="color:var(--red)">*</span> are compulsory.</div>'+
+  let keys = addKeys();          // S23 (L9): follows Settings → Student record (daily fields + compulsory fields)
+  let h = '<div class="box" style="border-left-color:var(--green)"><div class="title">➕ Add a new student</div><div class="meta">Fill these details now: the basic ones, the ones the daily pages use, and every compulsory field (<span style="color:var(--red)">*</span>). The rest of the record opens after Add.</div>'+
    '<h4 class="g">Admission number</h4>'+
    '<label class="chk"><input type="radio" name="am" id="amAuto" checked onchange="admMode()"> Automatic number (recommended)</label>'+
    '<label class="chk"><input type="radio" name="am" id="amMan" onchange="admMode()"> Type the number myself (for example a higher class in the middle of the year)</label>'+
@@ -175,6 +176,13 @@ function drawNew(){
    '<div class="btnrow"><button class="btn b-green" id="addBtn" onclick="addStu()">Add student</button><button class="btn b-navy" onclick="goBack()">Cancel</button></div><div class="msg" id="addMsg"></div></div>';
   $('main').innerHTML = h; R = {Class:c}; clsChange(); nextNo();
   $('tPrint').querySelector('.tabIco').nextSibling.textContent = 'Blank form';
+}
+// S23 (L9): always Name, DOB, Class, Roll no, Admission date, Student type + every ticked daily field + every compulsory field
+function addKeys(){
+  let ok = k => D.meta.fields.some(f => f.key === k && ['family','history'].indexOf(f.type) < 0);
+  let keys = ['Name','DOB','Class','RollNo','AdmissionDate','StudentType'];
+  (D.daily || []).concat(D.meta.required || []).forEach(k => { if(keys.indexOf(k) < 0 && ok(k)) keys.push(k); });
+  return keys.filter(ok);
 }
 function admMode(){ let man = $('amMan').checked; $('amAutoBox').style.display = man ? 'none' : ''; $('amManBox').style.display = man ? '' : 'none'; }
 // S14: admitted now for the next session: no roll number, admission year = the next session's year
@@ -191,13 +199,13 @@ async function nextNo(){
 }
 function elHtml(cls, chosen, ro){
   let g = (D.allGroups || {})[cls] || {}, ks = Object.keys(g); if(!ks.length) return '';
-  return '<h4 class="g">Elective subjects</h4>' + ks.map(k=>{ let c = (chosen||[]).find(x=>x.group===k); return '<label>'+esc(k)+' <span class="req">*</span></label><select class="el" data-g="'+esc(k)+'"'+(ro?' disabled':'')+'><option value="">Choose</option>'+g[k].map(s=>'<option'+(c&&c.subject===s?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'; }).join('');
+  return '<h4 class="g">Elective subjects</h4><div class="help">You can choose later (also for the whole class in 📚 Elective subjects).</div>' + ks.map(k=>{ let c = (chosen||[]).find(x=>x.group===k); return '<label>'+esc(k)+(c||g[k].length<2?'':' <span class="pill" style="background:#fff7ed;color:#c2410c">Elective not chosen</span>')+'</label><select class="el" data-g="'+esc(k)+'"'+(ro?' disabled':'')+'><option value="">Not chosen yet</option>'+g[k].map(s=>'<option'+(c&&c.subject===s?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'; }).join('');   // S23 (L11): optional
 }
 function clsChange(){ let b = $('elBox'); if(b) b.innerHTML = elHtml(val('Class'), D.electives, !D.canEdit); }
 function electives(){ return [...document.querySelectorAll('.el')].map(x=>({group:x.dataset.g, subject:x.value})); }
 async function addStu(flags){
   if(window.UI && !UI.checkDates(['f_DOB','f_AdmissionDate'])){ show($('addMsg'), '❌ Please correct the dates first.', 'err'); return; }
-  let st = {}; ['Name','DOB','Gender','Class','RollNo','AdmissionDate','StudentType','FatherName','MotherName','Phone'].forEach(k=>{ st[k] = val(k); });
+  let st = {}; addKeys().forEach(k=>{ let v = val(k); if(v !== undefined) st[k] = v; });
   st.AdmissionYear = $('am_year').value.trim();
   let man = $('amMan').checked, b = $('addBtn'), m = $('addMsg');
   b.disabled = true; show(m, 'Saving... please wait', 'load');
@@ -222,6 +230,8 @@ function headBox(){
   if(!D.inMaster) warn += '<div class="msg show warn">This student is not in the master record yet (shown from the current student list). Saving any section adds the record.</div>';
   if(D.missing && D.missing.length) warn += '<div class="msg show warn">Incomplete: '+esc(D.missing.join(', '))+'</div>';
   if(!D.canEdit) warn += '<div class="msg show info">View only. Your login may see but not change student records.</div>';
+  let eg = (D.allGroups || {})[R.Class] || {}, noEl = Object.keys(eg).filter(k=>eg[k].length > 1 && !(D.electives||[]).some(x=>x.group===k));
+  if(noEl.length && R.StatusShow === 'ACTIVE') warn += '<div class="msg show warn">📚 Elective not chosen: '+esc(noEl.join(', '))+'. Choose it in section 4 (Class) or in 📚 Elective subjects.</div>';   // S23 (L11)
   return '<div class="box"><div class="title">'+esc(R.Name || '(no name)')+'</div><div class="meta">Adm '+esc(R.AdmissionNo)+' · Class '+esc(R.Class || '-')+(R.RollNo?' · Roll '+esc(R.RollNo):'')+' &nbsp;'+pill+'</div>'+warn+
    '<div id="phArea">'+photoArea()+'</div>'+
    '<div class="btnrow"><button class="btn b-purple" onclick="printIt(\'form\')">🖨️ Registration form</button><button class="btn b-navy" onclick="printIt(\'profile\')">🖨️ Student profile</button></div></div>';
@@ -279,11 +289,28 @@ async function regReopen(){
     D.reg = {status:r.status, statusText:'Reopened for the parent'}; drawRecord(); show($('regMsg'), '✅ ' + r.message, 'ok');
   }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); b.disabled = false; }
 }
+function delBox(){          // S23 (L6): admin only, for a record made by mistake
+  if(USER.role !== 'admin' || !D.canEdit) return '';
+  return '<details class="box" style="border-left-color:var(--red)"><summary style="font-weight:800;color:var(--red);cursor:pointer;min-height:40px;display:flex;align-items:center">🗑 Delete this record (only for a mistake)</summary>'+
+    '<div class="help" style="margin-top:6px">Only for a record added by mistake (for example a student added twice). A student who already has a fee payment, marks or attendance cannot be deleted: use Status "Left (TC)" or "Drop out" instead.</div>'+
+    '<div class="btnrow"><button class="btn b-red" id="delBtn" onclick="delRec()">🗑 Delete '+esc(R.Name || R.AdmissionNo)+'</button></div><div class="msg" id="delMsg"></div></details>';
+}
+async function delRec(){
+  if(!(await UI.ask('Delete the record of '+(R.Name || R.AdmissionNo)+' ('+R.AdmissionNo+') for good? Use this only for a record made by mistake.', 'Yes, delete', true))) return;
+  let b = $('delBtn'), m = $('delMsg'); b.disabled = true; show(m, 'Deleting... please wait', 'load');
+  try{
+    let r = await apiPost('mrdelete', {adm:R.AdmissionNo});
+    if(r.success){ show(m, '✅ ' + (r.message || 'Deleted.'), 'ok'); setTimeout(goBack, 1500); return; }
+    show(m, '❌ ' + (r.error || 'Could not delete.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was deleted. Try again.', 'err'); }
+  b.disabled = false;
+}
 function drawRecord(){
   let h = headBox() + regBox(); for(let n = 1; n <= 6; n++) h += secHtml(n);
+  h += delBox();
   $('main').innerHTML = h;
   clsChange();
-  sameAddr(true);
+  sameAddr(true); gdInit('f_');
   photoLoad();
 }
 /* ---------- S17: the student's photo (one photo, used everywhere) ---------- */
@@ -412,5 +439,36 @@ async function reload(openSec){
   if(r.success){ D = r; R = r.record; if(openSec) OPEN[openSec] = true; drawRecord(); }
 }
 load();
+
+/* S23 (L14): "Guardian is: Father · Mother · Other person" – Father / Mother copies their details into the guardian fields */
+var GD = {}, GD_K = ['Name','Education','Occupation','Department','Mobile'];
+function gdInit(px){
+  var gn = document.getElementById(px + 'GuardianName'); if(!gn || gn.disabled || document.getElementById(px + 'gdChips')) return;
+  var lab = document.querySelector('label[for="' + px + 'GuardianName"]'); if(!lab) return;
+  var d = document.createElement('div'); d.id = px + 'gdChips'; d.className = 'gdChips';
+  d.innerHTML = '<div class="gdT">Guardian is</div><div class="gdRow">' + [['F','👨 Father'],['M','👩 Mother'],['O','🧑 Other person']].map(function(x){ return '<button type="button" data-nofb class="gdC" data-m="' + x[0] + '" onclick="gdPick(\'' + px + '\',\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') + '</div>';
+  lab.parentNode.insertBefore(d, lab);
+  var g = function(id){ var e = document.getElementById(px + id); return e ? e.value.trim() : ''; };
+  var rel = g('GuardianRelation').toUpperCase(), nm = g('GuardianName').toUpperCase(), m = '';
+  if(rel === 'FATHER' && (!nm || nm === g('FatherName').toUpperCase())) m = 'F';
+  else if(rel === 'MOTHER' && (!nm || nm === g('MotherName').toUpperCase())) m = 'M';
+  else if(nm) m = 'O';
+  ['Father','Mother'].forEach(function(w){ GD_K.forEach(function(k){ var e = document.getElementById(px + w + k); if(e) e.addEventListener('input', function(){ gdCopy(px); }); }); });
+  gdPick(px, m, true);
+}
+function gdPick(px, m, first){
+  var was = GD[px]; GD[px] = m;
+  document.querySelectorAll('#' + px + 'gdChips .gdC').forEach(function(b){ b.classList.toggle('on', b.dataset.m === m); });
+  var lock = m === 'F' || m === 'M';
+  GD_K.concat(['Relation']).forEach(function(k){ var e = document.getElementById(px + 'Guardian' + k); if(e){ e.readOnly = lock; e.classList.toggle('gdLock', lock); } });
+  if(lock) gdCopy(px);
+  else if(!first && m === 'O' && (was === 'F' || was === 'M')) GD_K.concat(['Relation']).forEach(function(k){ var e = document.getElementById(px + 'Guardian' + k); if(e) e.value = ''; });
+}
+function gdCopy(px){
+  var m = GD[px]; if(m !== 'F' && m !== 'M') return;
+  var w = m === 'F' ? 'Father' : 'Mother';
+  GD_K.forEach(function(k){ var s = document.getElementById(px + w + k), e = document.getElementById(px + 'Guardian' + k); if(s && e) e.value = s.value; });
+  var r = document.getElementById(px + 'GuardianRelation'); if(r) r.value = w;
+}
 </script>
 </body></html>

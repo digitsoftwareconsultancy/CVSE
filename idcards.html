@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Print ID cards</title>
@@ -198,6 +198,7 @@ function draw(){
     '<div class="msg" id="ov_' + esc(s.adm) + '"></div></div>').join('');
   $('main').innerHTML = h;
   requestAnimationFrame(fitAll);
+  if(window.UI && UI.fillSigns) UI.fillSigns($('main'), '');   // S23 (L4): principal's camera signature
   printBtn();
 }
 function fitAll(){

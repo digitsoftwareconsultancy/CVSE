@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S20">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Settings – Student record</title>
@@ -100,7 +100,7 @@ function draw(){
     '<div class="row2"><div><label for="a_year">Year in the number</label><select id="a_year"><option value="YES"'+(a.useYear==='YES'?' selected':'')+'>Yes (YYYY)</option><option value="NO"'+(a.useYear==='NO'?' selected':'')+'>No</option></select></div>'+
     '<div><label for="a_dig">Digits of the serial</label><input id="a_dig" inputmode="numeric" maxlength="1" value="'+esc(a.digits)+'"></div></div>'+
     '<label for="a_rs">Serial starts again at 1 every year</label><select id="a_rs"><option value="YES"'+(a.restart==='YES'?' selected':'')+'>Yes</option><option value="NO"'+(a.restart==='NO'?' selected':'')+'>No, keeps counting</option></select>'+
-    '<div class="msg show info">Pattern now: <b>'+esc(a.pattern)+'</b> · next automatic number for '+esc(a.year)+': <b>'+esc(a.next || '—')+'</b>'+(a.nextError?'\n⚠️ '+esc(a.nextError):'')+'\nExamples: Carey 202601 = year + 2 digits. Mount Calvary MCS20260001 = text MCS + year + 4 digits.</div>'+
+    '<div class="msg show info">Pattern now: <b>'+esc(a.pattern)+'</b> · next automatic number for '+esc(a.year)+': <b>'+esc(a.next || '—')+'</b>'+(a.nextError?'\n⚠️ '+esc(a.nextError):'')+'\nExample: 202601 = year + 2 digits · ABC202601 = letters + year + 2 digits.</div>'+
     '<div class="btnrow"><button class="btn b-green" id="b1" onclick="saveAdm()">Save admission number pattern</button></div><div class="msg" id="m1"></div></div>';
   // 2. compulsory fields
   h += '<div class="box" style="border-left-color:var(--orange)"><div class="title">2. Compulsory fields</div><div class="meta">A form is not saved while a ticked field is empty. Old records with empty compulsory fields are only marked "incomplete", never blocked.</div>';

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Admission Register</title>
@@ -170,12 +170,16 @@ function drawSummary(){
   }
   if(notIn) h += '<div class="msg show warn">' + notIn + ' student' + (notIn === 1 ? ' is' : 's are') + ' only in the current student list, not in the master record yet (grey tag). Their register lines show only what that list holds. The admin can fill the master record in Settings → Student record → Advanced.</div>';
   let g = D.gaps && D.gaps.years || [];
-  if(g.length) h += '<div class="gaps" id="gapNote"><b>Admission numbers never used</b> (pattern ' + esc(D.gaps.pattern) + ', shown here only, not printed):<br>' +
-    g.map(y => esc((y.year ? y.year + ': ' : '') + y.numbers.join(', ') + (y.count > y.numbers.length ? ' … (' + y.count + ' in all)' : ''))).join('<br>') + '</div>';
+  if(g.length) h += '<div class="gaps" id="gapNote"><b>Missing numbers in your series:</b> these admission numbers were never given to any student.<br>' +       // S23 (L12)
+    g.map(y => esc((y.year ? y.year + ': ' : '') + y.numbers.join(', ') + (y.count > y.numbers.length ? ' … (' + y.count + ' in all)' : ''))).join('<br>') +
+    '<br>Check whether a student is missing or a number was typed wrong. (Shown on screen only, not printed.)</div>';
   $('sumBox').innerHTML = h;
 }
 function fillFilters(){
   let ys = Array.from(new Set(D.rows.map(r => r.y).filter(Boolean))).sort();
+  // S23 (L12): every year from the first admission year up to this year (also years with no admission)
+  let nums = ys.map(Number).filter(n => n > 1900 && n < 3000), now = new Date().getFullYear();
+  if(nums.length){ ys = []; for(let y = Math.min.apply(null, nums); y <= Math.max(now, Math.max.apply(null, nums)); y++) ys.push(String(y)); }
   $('fY1').innerHTML = opt('', 'Any year') + ys.map(y => opt(y, y)).join('');
   $('fY2').innerHTML = opt('', 'Any year') + ys.map(y => opt(y, y)).join('');
   $('fSt').innerHTML = opt('', 'All') + ST_ORDER.map(s => opt(s, stWord(s))).join('') + opt('GONE', 'Left + drop out + passed out') + opt('NOTIN', 'Not in the master record yet');

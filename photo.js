@@ -1,13 +1,13 @@
 /* photo.js - S17 student photos: pick (phone camera or gallery), crop 3:4 like a passport photo, shrink to ONE JPEG of
    at most about 150 KB (600 x 800), then hand it to the page, which sends it with 'photosave'.
-   <meta name="app-version" content="2026.11.16-S17">
+   <meta name="app-version" content="2026.11.21-S23">
    Used by student-record.html (photo box) and photos.html (Class photo day). Nothing here talks to the server.
 
    PHOTO.choose(camera) ............ opens the camera (camera = true) or the gallery; returns the chosen file (or null)
    PHOTO.open({file, title, sub, onSave}) ... the crop screen; onSave(base64Jpeg, kb) must return {ok:true} or {ok:false, msg}
    PHOTO.box(dataUrl, cls) ......... an <img> for a 3:4 photo box ('' = the empty 'No photo' box) */
 var PHOTO = (function(){
-  var W = 600, H = 800, MAX = 150 * 1024, SRC_MAX = 1800;
+  var W = 600, H = 800, MAX = 150 * 1024, SRC_MAX = 1800, SIGN = false;     // S23 (L4): open({sign:true}) = signature 3:1, 600 x 200, ≤ 50 KB, cleaned
   var css = '.phm{position:fixed;inset:0;z-index:300;background:rgba(15,23,42,.88);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:12px 10px 30px}' +
     '.phm .pp{background:#fff;border-radius:16px;width:100%;max-width:420px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.35)}' +
     '.phm h3{margin:0 0 2px;color:#0b2a5c;font-size:16px}.phm .ps{font-size:12px;color:#64748b;margin-bottom:10px}' +
@@ -18,7 +18,8 @@ var PHOTO = (function(){
     '.phm .zr{display:flex;align-items:center;gap:10px;margin:8px 0}.phm .zr input{flex:1;min-height:30px}.phm .zr span{font-size:18px}' +
     '.phm .pbr{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.phm .pbr .btn{flex:1;min-width:110px}' +
     '.phbox{width:90px;aspect-ratio:3/4;border-radius:10px;border:1.5px solid #cbd5e1;background:#f1f5f9;color:#64748b;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;flex-shrink:0}' +
-    '.phbox img{width:100%;height:100%;object-fit:cover;display:block}';
+    '.phbox img{width:100%;height:100%;object-fit:cover;display:block}' +
+    '.phm .stage.sg{aspect-ratio:3/1;max-width:100%;background:#fff;border:1.5px solid #cbd5e1}.phm .sgline{position:absolute;left:8%;right:8%;bottom:22%;border-bottom:2px dashed #94a3b8;pointer-events:none}';
   function style(){ if(document.getElementById('phStyle')) return; var s = document.createElement('style'); s.id = 'phStyle'; s.textContent = css; document.head.appendChild(s); }
   function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
@@ -50,7 +51,7 @@ var PHOTO = (function(){
   }
   // one JPEG ≤ MAX: lower the quality step by step; if still too big, a smaller picture
   function jpeg(canvas){
-    var sizes = [[W, H], [480, 640]];
+    var sizes = [[W, H], [Math.round(W * 0.75), Math.round(H * 0.75)]];
     for(var s = 0; s < sizes.length; s++){
       var c = canvas;
       if(s > 0){ c = document.createElement('canvas'); c.width = sizes[s][0]; c.height = sizes[s][1]; c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height); }
@@ -62,15 +63,28 @@ var PHOTO = (function(){
     return {data:b64, url:url, kb:Math.round(bytes / 1024)};
   }
 
+  // S23 (L4): white paper, dark ink – everything lighter than the ink becomes pure white
+  function clean(c){
+    var g = c.getContext('2d'), im = g.getImageData(0, 0, c.width, c.height), d = im.data, n = d.length / 4, sum = 0, min = 255, i, l;
+    for(i = 0; i < d.length; i += 4){ l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; sum += l; if(l < min) min = l; }
+    var avg = sum / n, cut = min + (avg - min) * 0.6;               // the paper is the average, the ink the darkest part
+    for(i = 0; i < d.length; i += 4){
+      l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      var v = l >= cut ? 255 : Math.max(0, Math.min(255, Math.round((l - min) / Math.max(1, cut - min) * 90)));   // ink: dark grey to black
+      d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
+    }
+    g.putImageData(im, 0, 0);
+  }
   function open(o){
     style();
+    SIGN = !!(o && o.sign); W = 600; H = SIGN ? 200 : 800; MAX = (SIGN ? 50 : 150) * 1024;
     var m = document.createElement('div'); m.className = 'phm'; m.id = 'phModal';
     m.innerHTML = '<div class="pp"><h3>' + esc(o.title || 'Student photo') + '</h3><div class="ps">' + esc(o.sub || '') + '</div>' +
-      '<div class="stage" id="phStage"><canvas id="phCan" width="' + W + '" height="' + H + '"></canvas><div class="guide"></div></div>' +
-      '<div class="hint">Drag the photo so the face sits inside the oval. Use the slider (or two fingers) to zoom.</div>' +
+      '<div class="stage' + (SIGN ? ' sg' : '') + '" id="phStage"><canvas id="phCan" width="' + W + '" height="' + H + '"></canvas><div class="' + (SIGN ? 'sgline' : 'guide') + '"></div></div>' +
+      '<div class="hint">' + (SIGN ? 'Sign on white paper with a dark pen. Drag and zoom so the signature fills the frame, sitting on the dotted line. The paper is cleaned to white automatically.' : 'Drag the photo so the face sits inside the oval. Use the slider (or two fingers) to zoom.') + '</div>' +
       '<div class="zr"><span>➖</span><input type="range" id="phZoom" min="100" max="300" value="100"><span>➕</span></div>' +
       '<div class="pbr"><button class="btn b-grey" type="button" id="phRot">↻ Turn</button><button class="btn b-grey" type="button" id="phCancel">Cancel</button></div>' +
-      '<div class="pbr"><button class="btn b-green" type="button" id="phSave" data-nofb>✅ Save this photo</button></div>' +
+      '<div class="pbr"><button class="btn b-green" type="button" id="phSave" data-nofb>✅ Save this ' + (SIGN ? 'signature' : 'photo') + '</button></div>' +
       '<div class="msg" id="phMsg"></div></div>';
     document.body.appendChild(m);
     var can = m.querySelector('#phCan'), g = can.getContext('2d'), msg = m.querySelector('#phMsg'), zoom = m.querySelector('#phZoom');
@@ -82,11 +96,12 @@ var PHOTO = (function(){
       var w = src.width * base * z, h = src.height * base * z;
       x = Math.min(0, Math.max(W - w, x)); y = Math.min(0, Math.max(H - h, y));
     }
-    function draw(){ if(!src) return; clamp(); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.drawImage(src, x, y, src.width * base * z, src.height * base * z); }
+    function draw(){ if(!src) return; clamp(); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.drawImage(src, x, y, src.width * base * z, src.height * base * z); if(SIGN) clean(can); }
     function zoomTo(nz, cx, cy){                                        // keep the point (cx, cy) of the frame still
-      nz = Math.max(1, Math.min(3, nz)); if(cx === undefined){ cx = W / 2; cy = H / 2; }
+      nz = Math.max(1, Math.min(SIGN ? 6 : 3, nz)); if(cx === undefined){ cx = W / 2; cy = H / 2; }
       var k = nz / z; x = cx - (cx - x) * k; y = cy - (cy - y) * k; z = nz; zoom.value = Math.round(z * 100); draw();
     }
+    if(SIGN) zoom.max = 600;
     zoom.oninput = function(){ zoomTo(Number(zoom.value) / 100); };
     // drag with one finger / mouse, pinch with two fingers
     var stage = m.querySelector('#phStage'), pts = {}, last = null, pinch = null;
@@ -112,7 +127,7 @@ var PHOTO = (function(){
     m.querySelector('#phSave').onclick = async function(){
       if(!src || busy) return;
       var btn = this, html = btn.innerHTML, j = jpeg(can); busy = true; btn.disabled = true; btn.innerHTML = '⏳ Saving...';
-      say('Saving the photo (' + j.kb + ' KB)... please wait', 'load');
+      say('Saving the ' + (SIGN ? 'signature' : 'photo') + ' (' + j.kb + ' KB)... please wait', 'load');
       var r;
       try{ r = await o.onSave(j.data, j.kb, j.url); }catch(err){ r = {ok:false, msg:'❌ Could not connect. Check internet and tap Save again. Nothing was saved.'}; }
       busy = false;

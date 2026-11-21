@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Report Cards</title>
@@ -196,6 +196,7 @@ function drawCards(){
   $('fit').innerHTML = rcCardsHtml(DATA, list);
   fit();
   loadPhotos();
+  if(window.UI && UI.fillSigns) UI.fillSigns($('fit'), $('selClass').value);   // S23 (L4)
 }
 // S17: photos come after the cards; Print waits until they are in
 var PRINT_LABEL = '🖨️ Print';

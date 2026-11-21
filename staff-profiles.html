@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S21">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Staff profiles</title>
@@ -69,6 +69,7 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
 .dec{display:flex;gap:6px;margin-top:8px}.dec label{flex:1;margin:0;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #cbd5e1;border-radius:10px;min-height:44px;font-size:13px;cursor:pointer;background:#fff}
 .dec input{width:20px;height:20px;min-height:0}.dec label.ok{border-color:#16a34a;background:#dcfce7}.dec label.no{border-color:#c62828;background:#fee2e2}
 .lk{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:#075985;margin:6px 0 0;min-height:36px}.lk input{width:20px;height:20px;min-height:0}
+.sgv{min-height:50px;border:1.5px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#fff;color:#64748b;font-weight:700;font-size:12px;padding:4px;margin:4px 0}.sgv img{max-width:100%;max-height:80px}
 </style><script src="config.js"></script><script src="ui.js"></script><script src="photo.js"></script></head>
 <body>
 <div class="top">
@@ -144,6 +145,7 @@ function drawOne(){
     w.forEach(function(f){
       h += '<div class="fl" data-k="' + f.k + '"><div class="h"><span>' + esc(f.label) + '</span></div>' +
         (f.k === 'Photo' ? '<div style="display:flex;gap:10px"><div><div class="meta">Now</div><div class="pf-ph" id="phAcc">' + (f.value ? '⏳' : 'No<br>photo') + '</div></div><div><div class="meta">New</div><div class="pf-ph" id="phWait">⏳</div></div></div>' :
+         f.k === 'Signature' ? '<div class="meta">Now</div><div class="sgv" id="sgAcc">' + (f.value ? '⏳' : 'No signature') + '</div><div class="meta">New</div><div class="sgv" id="sgWait">⏳</div>' :
           '<div class="meta">Now</div><div class="cur' + (f.value ? '' : ' none') + '">' + esc(f.value || '—') + '</div><div class="new"><b>New:</b> ' + esc(f.wait) + '</div>') +
         '<div class="dec"><label id="okL_' + f.k + '"><input type="radio" name="d_' + f.k + '" value="ok" onchange="mark(\'' + f.k + '\')"> ✔ Accept</label><label id="noL_' + f.k + '"><input type="radio" name="d_' + f.k + '" value="no" onchange="mark(\'' + f.k + '\')"> ✖ Do not accept</label></div>' +
         '<input id="why_' + f.k + '" placeholder="Reason for the teacher" maxlength="200" style="display:none;margin-top:6px"></div>';
@@ -152,6 +154,12 @@ function drawOne(){
   }
   h += '<div class="box"><div class="title">✏️ All details</div><div class="meta">What you type here is accepted and locked at once. Tick "Unlock" to let the teacher change an accepted detail.</div>';
   fs.forEach(function(f){
+    if(f.k === 'Signature'){          // S23 (L4)
+      h += '<div class="fl"><div class="h"><span>✍️ Signature</span>' + stTxt(f) + '</div>' + (f.state !== 'WAITING' ? '<div class="sgv" id="sgAcc2">' + (f.value ? '⏳' : 'No signature') + '</div>' : '<div class="meta">See "Waiting for you" above.</div>') +
+        '<div class="btnrow"><button class="btn b-blue" type="button" data-nofb onclick="pickSign(true)">📷 Take photo</button><button class="btn b-navy" type="button" data-nofb onclick="pickSign(false)">🖼 Gallery</button></div>' +
+        (f.value ? '<label class="lk"><input type="checkbox" id="ul_Signature"' + (f.open ? ' checked' : '') + '> 🔓 Unlock (teacher may send a new signature)</label>' : '') + '</div>';
+      return;
+    }
     if(f.k === 'Photo'){
       h += '<div class="fl"><div class="h"><span>Photo</span>' + stTxt(f) + '</div>' + (f.state !== 'WAITING' ? '<div class="pf-ph" id="phAcc2">' + (f.value ? '⏳' : 'No<br>photo') + '</div>' : '<div class="meta">See "Waiting for you" above.</div>') +
         '<div class="btnrow"><button class="btn b-blue" type="button" data-nofb onclick="pick(true)">📷 Take photo</button><button class="btn b-navy" type="button" data-nofb onclick="pick(false)">🖼 Gallery</button></div>' +
@@ -174,6 +182,10 @@ async function photos(){
   async function put(id, which){ var el = $(id); if(!el) return; try{ var j = await apiGet('staffphotoget', {username:ONE.user.username, which:which}); el.innerHTML = j && j.photo ? '<img src="' + j.photo + '" alt="Photo">' : 'No<br>photo'; }catch(e){ el.innerHTML = '–'; } }
   if(f.value){ put('phAcc', 'acc'); put('phAcc2', 'acc'); }
   if(f.wait) put('phWait', 'wait');
+  var g = ONE.fields.filter(function(x){ return x.k === 'Signature'; })[0];          // S23 (L4)
+  async function putS(id, which){ var el = $(id); if(!el) return; try{ var j = await apiGet('staffphotoget', {username:ONE.user.username, which:which, field:'Signature'}); el.innerHTML = j && j.photo ? '<img src="' + j.photo + '" alt="Signature">' : 'No signature'; }catch(e){ el.innerHTML = '–'; } }
+  if(g && g.value){ putS('sgAcc', 'acc'); putS('sgAcc2', 'acc'); }
+  if(g && g.wait) putS('sgWait', 'wait');
 }
 function mark(k){
   var v = (document.querySelector('input[name="d_' + k + '"]:checked') || {}).value;
@@ -201,7 +213,7 @@ async function adminSave(){
   var data = {}, unlock = [], lock = [], bad = [];
   ONE.fields.forEach(function(f){
     var u = $('ul_' + f.k); if(u){ if(u.checked && !f.open) unlock.push(f.k); if(!u.checked && f.open) lock.push(f.k); }
-    if(f.k === 'Photo') return;
+    if(f.k === 'Photo' || f.k === 'Signature') return;
     var el = $('a_' + f.k); if(!el) return;
     var v = el.value.trim(); if(v === f.value) return;
     if(f.kind === 'date' && v && window.UI && !UI.checkDate(el)) bad.push(f.label);
@@ -218,6 +230,14 @@ async function pick(camera){
   PHOTO.open({file:file, title:'Photo of ' + ONE.user.name, sub:'Saved and locked at once', onSave:async function(data){
     var j = await apiPost('staffadminphoto', {username:ONE.user.username, data:data});
     if(!j || !j.success) return {ok:false, msg:'❌ ' + ((j && j.error) || 'The photo was not saved.')};
+    ONE = j; drawOne(); photos(); say('gMsg', j.message, 'ok'); return {ok:true};
+  }});
+}
+async function pickSign(camera){     // S23 (L4)
+  var file = await PHOTO.choose(camera); if(!file) return;
+  PHOTO.open({file:file, sign:true, title:'Signature of ' + ONE.user.name, sub:'Saved and locked at once', onSave:async function(data){
+    var j = await apiPost('staffadminphoto', {username:ONE.user.username, data:data, field:'Signature'});
+    if(!j || !j.success) return {ok:false, msg:'❌ ' + ((j && j.error) || 'The signature was not saved.')};
     ONE = j; drawOne(); photos(); say('gMsg', j.message, 'ok'); return {ok:true};
   }});
 }

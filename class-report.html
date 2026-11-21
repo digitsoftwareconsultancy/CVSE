@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Class Report</title>
@@ -242,7 +242,10 @@ function draw(){
   $('btnReopen').style.display = (d.isAdmin && d.finalised && !d.report.locked) ? '' : 'none';
   if(!d.students.length){ $('list').innerHTML = '<div class="empty-note">No students found in class ' + esc(d.className) + '.</div>'; return; }
   let dis = d.canEdit ? '' : 'disabled';
-  $('list').innerHTML = d.students.map((s, i) => {
+  // S23 (F2): no final result choices for this report -> say so and show the way (admin gets a button)
+  let noRes = !(d.resultOptions || []).length ? '<div class="msg show warn" style="display:block">⚠ No final result choices for this report. Add them in Exam Settings → Results.' +
+    (d.isAdmin ? '<div class="btnrow" style="margin-top:8px"><a class="btn b-orange" data-nofb href="exam-settings.html?sec=results" style="text-decoration:none;text-align:center">✅ Open Exam Settings → Results</a></div>' : ' Ask the admin.') + '</div>' : '';
+  $('list').innerHTML = noRes + d.students.map((s, i) => {
     let tag = s.suggested === 'PASS' ? '<span class="tag pass">Pass</span>' : s.suggested === 'FAIL' ? '<span class="tag fail">Fail: ' + esc(s.failedSubjects.join(', ')) + '</span>' : '<span class="tag inc">Marks incomplete</span>';
     let score = s.pct === null ? '' : '<span class="tag">' + s.pct + '%' + (s.grade ? ' · ' + esc(s.grade) : '') + (s.rank ? ' · Rank ' + s.rank : '') + '</span>';
     let resOpts = '<option value="">- Select result -</option>' + d.resultOptions.map(o => `<option${o.text === s.final.result ? ' selected' : ''}>${esc(o.text)}</option>`).join('');

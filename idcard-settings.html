@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S18">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ID card design</title>
@@ -239,6 +239,7 @@ function preview(){
   let h = IDCARD.html(d, R.fields, R.school, s, 'F', {photo:PIC});
   if(d.sides === '2') h += IDCARD.html(d, R.fields, R.school, s, 'B', {photo:PIC});
   $('pvc').innerHTML = h;
+  if(window.UI && UI.fillSigns) UI.fillSigns($('pvc'), '');   // S23 (L4)
   requestAnimationFrame(() => {
     let ok = true; $('pvc').querySelectorAll('.idc').forEach(c => { if(!IDCARD.fit(c)) ok = false; });
     if(ok) hide($('pvMsg')); else show($('pvMsg'), '⚠️ Too many details – some lines do not fit on the card (red border). Switch a detail off, move it to the back, or shorten a label.', 'err');
@@ -256,7 +257,7 @@ function move(k, dir){
 }
 function keepScroll(fn){ let y = window.scrollY; fn(); window.scrollTo(0, y); }
 async function normal(){
-  if(!(await UI.ask('Go back to the ready-made design (Carey style: landscape, one side)? Your own choices are replaced on the screen; nothing is saved until you press Save design.', 'Yes, ready-made', false))) return;
+  if(!(await UI.ask('Go back to the ready-made Classic design (landscape, one side)? Your own choices are replaced on the screen; nothing is saved until you press Save design.', 'Yes, ready-made', false))) return;
   DS = JSON.parse(JSON.stringify(R.normal)); keepScroll(drawAll);
 }
 async function pvStudent(){

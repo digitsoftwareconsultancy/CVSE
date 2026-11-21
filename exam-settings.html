@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S14">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Settings</title>
@@ -84,6 +84,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
   <div id="secReports" style="display:none"></div>
   <div id="secGrades" style="display:none"></div>
   <div id="secAreas" style="display:none"></div>
+  <div id="secResults" style="display:none"></div>
   <div id="secAssign" style="display:none"></div>
 </div>
 
@@ -92,6 +93,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
   <button class="tabBtn" id="tab_reports" onclick="showSec('reports')"><span class="dot"></span><span class="tabIco">📄</span>Reports</button>
   <button class="tabBtn" id="tab_grades" onclick="showSec('grades')"><span class="dot"></span><span class="tabIco">🎯</span>Grades</button>
   <button class="tabBtn" id="tab_areas" onclick="showSec('areas')"><span class="dot"></span><span class="tabIco">🎨</span>Extras</button>
+  <button class="tabBtn" id="tab_results" onclick="showSec('results')"><span class="dot"></span><span class="tabIco">✅</span>Results</button>
   <button class="tabBtn" id="tab_assign" onclick="showSec('assign')"><span class="dot"></span><span class="tabIco">👩‍🏫</span>Access</button>
   <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
 </div>
@@ -131,7 +133,7 @@ function csv(v){ return String(v || '').split(',').map(x => x.trim()).filter(Boo
 function dirty(sec){ return JSON.stringify(ROWS[sec]) !== SAVED[sec]; }
 function markDirty(){
   SECS.forEach(s => {
-    let tb = $('tab_' + s); if(tb) tb.classList.toggle('dirty', s === 'areas' ? (dirty('areas') || dirty('letters') || dirty('results')) : dirty(s));
+    let tb = $('tab_' + s); if(tb) tb.classList.toggle('dirty', s === 'areas' ? (dirty('areas') || dirty('letters')) : dirty(s));
     let p = $('pill_' + s); if(p){ p.className = 'pill ' + (dirty(s) ? 'p-dirty' : 'p-ok'); p.innerText = dirty(s) ? 'Unsaved changes' : 'Saved'; }
   });
 }
@@ -151,7 +153,7 @@ async function init(){
   }catch(e){ show($('gMsg'), '❌ Network problem. Check internet and reload.', 'err'); return; }
   hide($('gMsg'));
   if(r.finishing && r.finishing.length) show($('gMsg'), '⚠️ Classes still finishing the old session: ' + r.finishing.join(', ') + '. A change to the grade scale, the exam list or the report layouts also changes THEIR report cards. Print or save their report cards first if you change these now.', 'warn');   // S14
-  showSec('exams');
+  showSec((function(){ let q = new URLSearchParams(location.search).get('sec'); return SECS.indexOf(q) > -1 && $('tab_' + q) ? q : 'exams'; })());   // S23: ?sec=results
   loadProblems();
 }
 // the slow problem check runs after the page is already usable
@@ -182,8 +184,9 @@ function showSec(sec){
   $('secReports').style.display = sec === 'reports' ? '' : 'none';
   $('secGrades').style.display = sec === 'grades' ? '' : 'none';
   $('secAreas').style.display = sec === 'areas' ? '' : 'none';
+  $('secResults').style.display = sec === 'results' ? '' : 'none';     // S23 (L7): own bottom tab
   $('secAssign').style.display = sec === 'assign' ? '' : 'none';
-  ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, letters:drawAreas, results:drawAreas, assign:drawAssign})[sec]();
+  ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, letters:drawAreas, results:drawResults, assign:drawAssign})[sec]();
   window.scrollTo(0, 0);
 }
 
@@ -223,7 +226,7 @@ function toggleChip(sec, i, field, val, on){
 }
 function setF(sec, i, f, v){ ROWS[sec][i][f] = v; markDirty(); if(sec === 'reports' || sec === 'exams') refreshPreview(sec, i); }
 function setYN(sec, i, f, on){ ROWS[sec][i][f] = on ? 'YES' : 'NO'; markDirty(); }
-function redraw(sec){ let y = window.scrollY; ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, letters:drawAreas, results:drawAreas, assign:drawAssign})[sec](); window.scrollTo(0, y); }
+function redraw(sec){ let y = window.scrollY; ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, letters:drawAreas, results:drawResults, assign:drawAssign})[sec](); window.scrollTo(0, y); }
 async function delRow(sec, i){
   if(!(await UI.ask('Remove this row? It is only removed for good when you press Save.'))) return;
   ROWS[sec].splice(i, 1); redraw(sec);
@@ -255,9 +258,11 @@ function drawExams(){
       '<div style="flex:2"><label>Exam name</label><input value="' + esc(e.ExamName) + '" placeholder="e.g. Periodic Test 1" oninput="setF(\'exams\',' + i + ',\'ExamName\',this.value)"></div></div>' +
       '<div class="row"><div><label>Short name (on report)</label><input maxlength="12" value="' + esc(e.ShortName) + '" placeholder="e.g. PT-1" oninput="setF(\'exams\',' + i + ',\'ShortName\',this.value)"></div>' +
       '<div><label>Type</label><select onchange="setF(\'exams\',' + i + ',\'ExamType\',this.value)"><option value="PT"' + (String(e.ExamType).toUpperCase() === 'PT' ? ' selected' : '') + '>PT (periodic test)</option><option value="TERM"' + (String(e.ExamType).toUpperCase() === 'TERM' ? ' selected' : '') + '>TERM (half yearly / annual)</option></select></div></div>' +
+      '<div class="meta" style="margin:4px 0 6px">Type PT uses each subject\'s <b>Periodic test</b> marks, TERM uses its <b>Term exam</b> marks (Subject Master).</div>' +
       '<label>Classes</label>' + chipsHtml('exams', i, 'Classes', clsOpts(), e.Classes, 'None ticked = all classes') +
       '<div class="row"><label class="sw"><input type="checkbox" ' + (yn(e.EntryOpen) ? 'checked' : '') + ' onchange="setYN(\'exams\',' + i + ',\'EntryOpen\',this.checked)">Marks entry open for teachers</label>' +
       '<label class="sw"><input type="checkbox" ' + (yn(e.Locked) ? 'checked' : '') + ' onchange="setYN(\'exams\',' + i + ',\'Locked\',this.checked);redraw(\'exams\')">Locked (no more changes)</label></div>' +
+      '<div class="meta" style="margin:2px 0 6px">Teachers can enter marks only while \'Marks entry open\' is on.</div>' +
       '<div class="btnrow"><button class="btn b-grey" onclick="moveRow(\'exams\',' + i + ',-1)">⬆ Up</button><button class="btn b-grey" onclick="moveRow(\'exams\',' + i + ',1)">⬇ Down</button><button class="btn b-red" onclick="delRow(\'exams\',' + i + ')">🗑 Remove</button></div></div>';
   });
   h += saveBar('exams', '➕ Add Exam', 'addExam()');
@@ -357,9 +362,9 @@ function drawAreas(){
   });
   h += saveBar('areas', '➕ Add Area', 'addArea()');
   h += lettersHtml();
-  h += resultsHtml();
   $('secAreas').innerHTML = h; markDirty();
 }
+function drawResults(){ $('secResults').innerHTML = resultsHtml(); markDirty(); }     // S23 (L7)
 function lettersHtml(){
   let h = secHead('🔤 Letter grades for co-scholastic subjects', 'The letters a <b>subject teacher</b> can give in co-scholastic subjects such as Art, GK or Karbi. Best grade first.', 'letters');
   h += '<div class="box"><div class="grow" style="grid-template-columns:70px 1fr 46px;font-size:11px;font-weight:800;color:var(--muted)"><span>Letter</span><span>Meaning</span><span></span></div>';
@@ -371,7 +376,7 @@ function lettersHtml(){
 }
 function addLetter(){ ROWS.letters.push({LetterID:'', Letter:'', Remark:''}); redraw('letters'); }
 function resultsHtml(){
-  let h = secHead('✅ Final result choices & class teacher', '<b>The class teacher finalises each report card</b> for their own class: they give the grades for the extra areas above, confirm attendance, write the remark and pick the final result from this list. A report reaches students only after the class teacher has finalised it (and you have published it). <b>Counts as</b> tells the system whether the student passed, failed or is withheld (withheld results are hidden from the student and parent). Leave Reports empty if a choice is for every report.', 'results');
+  let h = secHead('✅ Final result choices & class teacher', 'Usual choices: <i>Promoted to the next class</i> (PASS), <i>Not promoted</i> (FAIL), <i>Result withheld</i> (WITHHELD). <b>The class teacher finalises each report card</b> for their own class: they give the grades for the extra areas (Extras tab), confirm attendance, write the remark and pick the final result from this list. A report reaches students only after the class teacher has finalised it (and you have published it). <b>Counts as</b> tells the system whether the student passed, failed or is withheld (withheld results are hidden from the student and parent). Leave Reports empty if a choice is for every report.', 'results');
   if(!ROWS.results.length) h += '<div class="box"><div class="empty-note">No choice yet. Press "Add Choice".</div></div>';
   let repOpts = ROWS.reports.filter(r => r.ReportID).map(r => ({value:r.ReportID, label:r.ReportName || r.ReportID}));
   ROWS.results.forEach((o, i) => {

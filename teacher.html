@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b2a5c">
@@ -115,7 +115,7 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
     <div class="big" id="ttTiles"></div>
     <div class="box" style="margin-top:12px;border-left-color:var(--purple)"><div class="title">📅 Day-wise timetable</div><div class="meta">All periods of every teacher on one day – useful to find free periods.</div>
       <div class="chips" id="dayChips" style="margin-top:10px"></div></div>
-    <div class="box" id="todayBox" style="border-left-color:var(--blue)"><div class="title">🕘 My periods today</div><div id="ttToday"></div></div>
+    <div class="box" id="todayBox" style="border-left-color:var(--blue)"><div class="title">🕘 My Schedule Today</div><div id="ttToday"></div></div>
   </div>
 
   <div class="view" id="vProfile"></div>
@@ -196,6 +196,7 @@ function drawHome(){
   if((td.tests || []).length > 4) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.tests.length - 4) + ' more class tests in the Marks tab</div>');
   (td.testsToday || []).filter(function(t){ return !t.left; }).forEach(function(t){ items.push(line('🧪 Class test today: ' + esc(t.subject) + ' · <b>' + esc(t.cls) + '</b>', pill('Marks done', 'ok'))); });
   (td.homework || []).forEach(function(h){ items.push(line('📒 Homework due today: ' + esc(h.subject) + ' · <b>' + esc(h.cls) + '</b><br><small>' + esc(h.text) + '</small>', pill('Check', 'warn'))); });
+  (H.elMissing || []).forEach(function(e){ items.push(line('📚 <b>' + e.n + '</b> student' + (e.n > 1 ? 's' : '') + ' of <b>' + esc(e.cls) + '</b> ha' + (e.n > 1 ? 've' : 's') + ' no elective chosen yet', pill('Choose', 'warn'))); first = first || ['📚 Give elective subjects', "go('electives.html','class')", 'b-purple']; });   // S23 (L11)
   (td.marks || []).slice(0, 6).forEach(function(m){ items.push(line('📝 ' + esc(m.subject) + ' · ' + esc(m.exam) + ' · <b>' + esc(m.cls) + '</b>', pill(m.left + ' left', 'warn'))); });
   if((td.marks || []).length){ first = first || ['📝 Enter exam marks', "go('exam-marks.html','subject')", 'b-orange']; }
   if((td.marks || []).length > 6) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.marks.length - 6) + ' more in the Marks tab</div>');
@@ -204,7 +205,7 @@ function drawHome(){
   if(H.errors && H.errors.todo) h += '<div class="msg show warn">Could not check: ' + esc(H.errors.todo) + '</div>';
   // periods
   var per = H.periods || [];
-  h += '<div class="box" style="border-left-color:var(--blue)"><div class="title">🕘 My periods today</div>' + (H.noSchool ? '<div class="empty-note">No school today.</div>' : (per.length ? per.map(function(p){
+  h += '<div class="box" style="border-left-color:var(--blue)"><div class="title">🕘 My Schedule Today</div>' + (H.noSchool ? '<div class="empty-note">No school today.</div>' : (per.length ? per.map(function(p){
     return line('<b>' + esc(p.label || ('P-' + p.no)) + '</b>' + (p.time ? ' <small>' + esc(p.time) + '</small>' : ''), esc(p.cls) + ' · ' + esc(p.subject)); }).join('') : '<div class="empty-note">No periods for you in the timetable today.</div>')) + '</div>';
   // birthdays
   var bd = H.birthdays || [];
@@ -247,7 +248,8 @@ function drawClassTiles(){
     tile('📊', 'Class report', exOk() ? 'Results, remarks, finalise' : 'Exam Access is off', examTile('class-report.html', 'class'), 'var(--orange)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"') +
     tile('🖨️', 'Report cards', 'View / print', examTile('report-card.html', 'class'), 'var(--navy)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"') +
     tile('📅', 'Class events', 'PTM, picnic, programme', "go('events.html','class')", 'var(--red)') +
-    tile('📒', 'Exam register', 'Whole class marks: print', "go('exam-register.html','class')", 'var(--green)');
+    tile('📒', 'Exam register', 'Whole class marks: print', "go('exam-register.html','class')", 'var(--green)') +
+    tile('📚', 'Elective subjects', 'Who takes which elective', "go('electives.html','class')", 'var(--purple)');     // S23 (L11)
 }
 async function loadClass(cls){
   drawClassTiles();

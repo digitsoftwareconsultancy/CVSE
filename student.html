@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S19">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -83,6 +83,11 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 .tw2{overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:10px}
 .ttab{border-collapse:collapse;width:100%;min-width:480px}.ttab th,.ttab td{padding:9px 8px;border-bottom:1px solid #eef0f3;border-right:1px solid #f1f5f9;text-align:center;font-size:12.5px}
 .ttab th{background:#f8fafc;font-size:11px;text-transform:uppercase;color:#475569}.ttab td:first-child,.ttab th:first-child{text-align:left;position:sticky;left:0;background:#f8fafc;font-weight:800;min-width:78px}
+.ttsmall{min-width:0}.ttab.ttsmall th,.ttab.ttsmall td{padding:5px 4px;font-size:11px;white-space:normal;word-break:break-word;overflow-wrap:anywhere;min-width:58px}.ttab.ttsmall td:first-child,.ttab.ttsmall th:first-child{min-width:62px}
+.ttchips{display:flex;gap:6px;overflow-x:auto;margin:10px 0 6px;padding-bottom:2px}.ttchip{flex:1;min-width:46px;min-height:46px;border:1px solid var(--line);background:#fff;border-radius:12px;font-weight:800;color:#475569;cursor:pointer;font-size:13px}.ttchip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.ttday{display:flex;flex-direction:column;gap:8px;margin-top:6px}.ttcard{border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;padding:9px 12px;background:#fff}.ttcard.free{border-left-color:#cbd5e1;background:#f8fafc}
+.ttcard .pn{font-size:11.5px;color:var(--muted);font-weight:700}.ttcard .sb{font-size:17px;font-weight:800;color:var(--navy);margin-top:2px;word-break:break-word}.ttcard.free .sb{color:#94a3b8;font-size:15px}.ttcard .tc{font-size:12px;color:#475569;margin-top:2px}
+.ttbrk{border-top:3px solid var(--orange);color:#9a3412;font-size:11.5px;font-weight:700;padding-top:3px}.ttprint{display:none}
 .ttab .tdy{background:#e3f2fd}.ttab .brk{background:#fff3cd;color:#7c2d12;font-weight:700}.ttab small{display:block;color:var(--muted);font-weight:600;font-size:10px}
 .bar{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:5px 0 2px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#1976d2,#22c55e);border-radius:999px}
 .brow{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--navy);margin-top:10px}
@@ -106,6 +111,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   .wrap{margin:0;padding:0;max-width:none}
   body:not(.ptt) #screens>.scr:not(#s_result){display:none!important}
   body.ptt #screens>.scr:not(#s_timetable){display:none!important}
+  body.ptt .ttprint{display:block!important}body.ptt .ttday,body.ptt .ttchips{display:none!important}
   #resList,#resMsg,#cardBar{display:none!important}
   .ttab td:first-child,.ttab th:first-child{position:static}
 }
@@ -123,6 +129,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 .rgf input,.rgf select,.rgf textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff;box-sizing:border-box}
 .rgf textarea{min-height:80px}.rgf input:disabled,.rgf select:disabled{background:#f1f5f9;color:#334155}.rgf .req{color:var(--red)}
 .fhead{font-weight:900;color:var(--navy);font-size:13px;margin:12px 0 2px;border-bottom:2px solid var(--line);padding-bottom:3px}
+.gdChips{margin:12px 0 4px}.gdT{font-size:12px;font-weight:800;color:#0b2a5c;margin-bottom:6px}.gdRow{display:flex;gap:6px;flex-wrap:wrap}.gdC{flex:1;min-width:90px;min-height:46px;border:1.5px solid #cbd5e1;background:#fff;border-radius:12px;font-weight:800;color:#334155;cursor:pointer;font-size:13.5px}.gdC.on{background:#1976d2;border-color:#1976d2;color:#fff}.gdLock{background:#f1f5f9!important;color:#475569}
 </style>
 <script src="config.js"></script><script src="ui.js"></script></head>
 <body>
@@ -202,9 +209,9 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
   <button class="tabBtn active" data-t="home" onclick="openTab('home')"><span class="tabIco">🏠</span>Home</button>
   <button class="tabBtn" data-t="events" onclick="openTab('events')"><span class="tabIco">📅</span>Calendar</button>
   <button class="tabBtn" data-t="timetable" onclick="openTab('timetable')"><span class="tabIco">🗓️</span>Timetable</button>
-  <button class="tabBtn" data-t="profile" onclick="openTab('profile')"><span class="tabIco">👤</span>Profile</button>
-  <button class="tabBtn" data-t="result" onclick="openTab('result')"><span class="tabIco">🎓</span>Result</button>
   <button class="tabBtn" data-t="fees" onclick="openTab('fees')"><span class="tabIco">💰</span>Fees</button>
+  <button class="tabBtn" data-t="result" onclick="openTab('result')"><span class="tabIco">🎓</span>Result</button>
+  <button class="tabBtn" data-t="profile" onclick="openTab('profile')"><span class="tabIco">👤</span>Profile</button>
 </div>
 </div>
 
@@ -392,6 +399,8 @@ function evCard(x){
 }
 
 /* ---------- timetable ---------- */
+// S23 (L3): mobile view = day chips + one card per period; "Whole week" = the full table (small text, names wrap); print = full week
+let TTD = null, TTSEL = '', TTWEEK = false;
 async function loadTT(){
   $('ttBody').innerHTML = '<div class="msg show load">Loading...</div>';
   try{
@@ -399,17 +408,45 @@ async function loadTT(){
     if(!r.success){ $('ttBody').innerHTML = '<div class="msg show err">❌ ' + esc(r.error || 'Could not load.') + '</div>'; return; }
     if(r.closed){ $('ttBody').innerHTML = lockHtml(r.message); return; }
     if(!r.days.length){ $('ttBody').innerHTML = '<div class="empty-note">The timetable of your class is not ready yet.</div>'; return; }
-    let sh = d => d.charAt(0) + d.slice(1, 3).toLowerCase();
-    let h = '<div class="box"><div class="title">🗓️ My Timetable — Class ' + esc(r.className) + '</div><div class="meta">' + esc((HOME && HOME.school.name) || '') + '</div><div class="tw2"><table class="ttab" style="min-width:' + (90 + r.days.length * 80) + 'px"><tr><th>Period</th>' +
-      r.days.map(d => '<th class="' + (d === r.today ? 'tdy' : '') + '">' + sh(d) + '</th>').join('') + '</tr>';
-    r.periods.forEach(p => {
-      let lab = '<td>' + esc(p.label) + (p.time ? '<small>' + esc(p.time) + '</small>' : '') + '</td>';
-      if(!p.teaching){ h += '<tr>' + lab + '<td class="brk" colspan="' + r.days.length + '">🍽️ Break</td></tr>'; return; }
-      h += '<tr>' + lab + r.days.map(d => { let c = (r.cells[d] || {})[p.no]; return '<td class="' + (d === r.today ? 'tdy' : '') + '">' + (c ? esc(c.subject) + (c.teacher ? '<small>' + esc(c.teacher) + '</small>' : '') : '-') + '</td>'; }).join('') + '</tr>';
-    });
-    h += '</table></div><div class="btnrow noprint"><button class="btn b-navy" onclick="printTT()">🖨️ Print Timetable</button></div></div>';
-    $('ttBody').innerHTML = h;
+    TTD = r; TTSEL = ttStartDay(r); drawTT();
   }catch(e){ if(e.message !== 'AUTH') $('ttBody').innerHTML = failHtml('loadTT()'); }
+}
+const TT_ALL = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
+function ttSh(d){ return d.charAt(0) + d.slice(1, 3).toLowerCase(); }
+function ttStartDay(r){      // today; Sunday / holiday / no lessons today -> the next school day
+  if(r.today && r.days.indexOf(r.today) > -1 && !r.holiday) return r.today;
+  let i = TT_ALL.indexOf(r.today);
+  for(let k = 1; k <= 7; k++){ let d = TT_ALL[(i + k + 7) % 7]; if(r.days.indexOf(d) > -1) return d; }
+  return r.days[0];
+}
+function ttDay(d){ TTSEL = d; TTWEEK = false; drawTT(); }
+function ttWeek(on){ TTWEEK = on; drawTT(); }
+function ttWeekTable(r){
+  let h = '<div class="tw2"><table class="ttab ttsmall"><tr><th>Period</th>' + r.days.map(d => '<th>' + ttSh(d) + '</th>').join('') + '</tr>';
+  r.periods.forEach(p => {
+    let lab = '<td>' + esc(p.label) + (p.time ? '<small>' + esc(p.time) + '</small>' : '') + '</td>';
+    if(!p.teaching){ h += '<tr>' + lab + '<td class="brk" colspan="' + r.days.length + '">🍽️ Break</td></tr>'; return; }
+    h += '<tr>' + lab + r.days.map(d => { let c = (r.cells[d] || {})[p.no]; return '<td>' + (c ? esc(c.subject) + (c.teacher ? '<small>' + esc(c.teacher) + '</small>' : '') : '-') + '</td>'; }).join('') + '</tr>';
+  });
+  return h + '</table></div>';
+}
+function drawTT(){
+  let r = TTD, d = TTSEL;
+  let h = '<div class="box"><div class="title">🗓️ My Timetable — Class ' + esc(r.className) + '</div><div class="meta">' + esc((HOME && HOME.school.name) || '') + '</div>';
+  if(!TTWEEK){
+    if(d !== r.today && r.today) h += '<div class="meta noprint" style="margin-top:6px">Today: ' + esc(r.holiday ? r.holiday : ttSh(r.today) + (r.days.indexOf(r.today) < 0 ? ' (no school)' : '')) + ' · showing ' + ttSh(d) + '</div>';
+    h += '<div class="ttchips noprint">' + r.days.map(x => '<button class="ttchip' + (x === d ? ' on' : '') + '" data-nofb onclick="ttDay(\'' + x + '\')">' + ttSh(x) + '</button>').join('') + '</div><div class="ttday noprint">';
+    r.periods.forEach(p => {
+      if(!p.teaching){ h += '<div class="ttbrk">🍽️ ' + esc(p.label || 'Break') + (p.time ? ' · ' + esc(p.time) : '') + '</div>'; return; }
+      let c = (r.cells[d] || {})[p.no];
+      h += '<div class="ttcard' + (c ? '' : ' free') + '"><div class="pn">Period ' + p.no + (p.time ? ' · ' + esc(p.time) : '') + '</div><div class="sb">' + (c ? esc(c.subject) : 'Free') + '</div>' + (c && c.teacher ? '<div class="tc">' + esc(c.teacher) + '</div>' : '') + '</div>';
+    });
+    h += '</div><div class="btnrow noprint"><button class="btn b-grey" data-nofb onclick="ttWeek(true)">📋 Whole week</button><button class="btn b-navy" data-nofb onclick="printTT()">🖨️ Print Timetable</button></div>';
+    h += '<div class="ttprint">' + ttWeekTable(r) + '</div>';
+  }else{
+    h += ttWeekTable(r) + '<div class="btnrow noprint"><button class="btn b-grey" data-nofb onclick="ttWeek(false)">📱 Day view</button><button class="btn b-navy" data-nofb onclick="printTT()">🖨️ Print Timetable</button></div>';
+  }
+  $('ttBody').innerHTML = h + '</div>';
 }
 function printTT(){ document.body.classList.add('ptt'); window.print(); setTimeout(() => document.body.classList.remove('ptt'), 500); }
 
@@ -522,6 +559,7 @@ async function openCard(id){
     if(!r.success){ show($('resMsg'), '❌ ' + (r.error || 'Could not open.'), 'err'); return; }
     hide($('resMsg')); $('resList').style.display = 'none'; $('cardBar').style.display = '';
     $('fit').innerHTML = rcCardsHtml(r, r.students); rcFit($('fit'));
+    if(window.UI && UI.fillSigns) UI.fillSigns($('fit'), '', 'student');   // S23 (L4)
     window.scrollTo({top:0});
     rcPhotos($('fit'), () => api('studentphoto', {}).then(x => { let o = {}; if(x && x.success && x.photo) o[r.students[0].admissionNo] = x.photo; return {photos:o}; }));   // S17: own photo
   }catch(e){ if(e.message !== 'AUTH') show($('resMsg'), '❌ Network problem. Please try again.', 'err'); }
@@ -615,10 +653,16 @@ function regInput(f){
   if(f.refused !== undefined) h += '<div class="rgref">Not accepted last time' + (f.refused ? ': ' + esc(f.refused) : '') + '</div>';
   return h + '</div>';
 }
+// S23 (L15): school bus wish (only a request; the office gives the bus)
+function regBus(){
+  let b = REG.bus; if(!b) return '';
+  return '<div class="rgf"><label for="r__Bus">🚌 School bus</label><select id="r__Bus"><option value="">Choose</option><option value="NO"' + (b.value === 'NO' ? ' selected' : '') + '>Not needed</option>' +
+    b.routes.map(r => '<option value="' + esc(r) + '"' + (b.value === r ? ' selected' : '') + '>Needed – ' + esc(r) + '</option>').join('') + '</select><div class="meta">Choose your area / stop. The school confirms the bus and the bus fee.</div></div>';
+}
 function regSame(){ let e = $('r_SameAddress'), c = $('rgCorr'); if(e && c) c.style.display = e.value === 'YES' ? 'none' : ''; }
 function regSummary(){
   return REG.parts.map(p => '<div class="box"><div class="title" style="font-size:15px">' + p.n + '. ' + esc(p.name) + '</div>' +
-    p.fields.map(f => '<div class="drow"><span>' + esc(f.label) + '</span><b>' + esc(f.key === 'Aadhaar' ? (f.masked || '—') : (f.value || '—')) + '</b></div>').join('') + '</div>').join('') +
+    p.fields.map(f => '<div class="drow"><span>' + esc(f.label) + '</span><b>' + esc(f.key === 'Aadhaar' ? (f.masked || '—') : (f.value || '—')) + '</b></div>').join('') + (p.n === 3 && REG.bus ? '<div class="drow"><span>🚌 School bus</span><b>' + esc(REG.bus.value === 'NO' ? 'Not needed' : (REG.bus.value || '—')) + '</b></div>' : '') + '</div>').join('') +
     (REG.note ? '<div class="box"><div class="title" style="font-size:15px">💬 Note to the office</div><div class="meta">' + esc(REG.note) + '</div></div>' : '');
 }
 function drawReg(msg){
@@ -641,7 +685,7 @@ function drawReg(msg){
       return '<button class="chip' + (REGP === n ? ' on' : '') + '"' + (ok ? ' onclick="REGP=' + n + ';drawReg()"' : ' disabled style="opacity:.45"') + '>' + (n < 5 ? (n <= done ? '✓ ' : '') + 'Part ' + n : 'Check + Send') + '</button>'; }).join('') + '</div>';
     if(REGP <= 4){
       let p = r.parts[REGP - 1];
-      h += '<div class="box"><div class="title">Part ' + p.n + ' of 4 · ' + esc(p.name) + '</div>' + (p.fields.length ? p.fields.map(regInput).join('') : '<div class="meta">Nothing to fill in this part.</div>') +
+      h += '<div class="box"><div class="title">Part ' + p.n + ' of 4 · ' + esc(p.name) + '</div>' + (p.fields.length ? p.fields.map(regInput).join('') : '<div class="meta">Nothing to fill in this part.</div>') + (p.n === 3 ? regBus() : '') +
         (REGP === 4 ? '<div class="rgf"><label for="r_note">Note to the office (optional)</label><textarea id="r_note" maxlength="500" placeholder="For example: please correct the spelling of the name">' + esc(r.note || '') + '</textarea></div>' : '') +
         '<div class="btnrow"><button class="btn b-green" id="rgSave" onclick="regSave()">💾 Save and continue</button></div><div class="msg" id="regMsg"></div></div>';
     } else {
@@ -650,13 +694,14 @@ function drawReg(msg){
     }
   }
   $('regBody').innerHTML = h + regBack();
-  regSame();
+  regSame(); gdInit('r_');
   if(window.UI && UI.enhanceDates) UI.enhanceDates($('regBody'));
   window.scrollTo({top:0});
 }
 async function regSave(){
   let p = REG.parts[REGP - 1], d = {}, b = $('rgSave'), m = $('regMsg');
   p.fields.forEach(f => { if(f.mode === 'VIEW') return; let e = $('r_' + f.key); if(e) d[f.key] = e.value.trim(); });
+  if(p.n === 3 && $('r__Bus')) d._Bus = $('r__Bus').value;          // S23 (L15)
   let params = {part:p.n, data:JSON.stringify(d)};
   if(REGP === 4) params.note = $('r_note').value.trim();
   b.disabled = true; show(m, 'Saving... please wait', 'load');
@@ -701,5 +746,36 @@ if('serviceWorker' in navigator && location.protocol === 'https:'){ navigator.se
 
 drawInstall();
 if(ls('cvse_stoken') && ls('cvse_sadm')) startApp(); else showLogin('');
+
+/* S23 (L14): "Guardian is: Father · Mother · Other person" – Father / Mother copies their details into the guardian fields */
+var GD = {}, GD_K = ['Name','Education','Occupation','Department','Mobile'];
+function gdInit(px){
+  var gn = document.getElementById(px + 'GuardianName'); if(!gn || gn.disabled || document.getElementById(px + 'gdChips')) return;
+  var lab = document.querySelector('label[for="' + px + 'GuardianName"]'); if(!lab) return;
+  var d = document.createElement('div'); d.id = px + 'gdChips'; d.className = 'gdChips';
+  d.innerHTML = '<div class="gdT">Guardian is</div><div class="gdRow">' + [['F','👨 Father'],['M','👩 Mother'],['O','🧑 Other person']].map(function(x){ return '<button type="button" data-nofb class="gdC" data-m="' + x[0] + '" onclick="gdPick(\'' + px + '\',\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') + '</div>';
+  lab.parentNode.insertBefore(d, lab);
+  var g = function(id){ var e = document.getElementById(px + id); return e ? e.value.trim() : ''; };
+  var rel = g('GuardianRelation').toUpperCase(), nm = g('GuardianName').toUpperCase(), m = '';
+  if(rel === 'FATHER' && (!nm || nm === g('FatherName').toUpperCase())) m = 'F';
+  else if(rel === 'MOTHER' && (!nm || nm === g('MotherName').toUpperCase())) m = 'M';
+  else if(nm) m = 'O';
+  ['Father','Mother'].forEach(function(w){ GD_K.forEach(function(k){ var e = document.getElementById(px + w + k); if(e) e.addEventListener('input', function(){ gdCopy(px); }); }); });
+  gdPick(px, m, true);
+}
+function gdPick(px, m, first){
+  var was = GD[px]; GD[px] = m;
+  document.querySelectorAll('#' + px + 'gdChips .gdC').forEach(function(b){ b.classList.toggle('on', b.dataset.m === m); });
+  var lock = m === 'F' || m === 'M';
+  GD_K.concat(['Relation']).forEach(function(k){ var e = document.getElementById(px + 'Guardian' + k); if(e){ e.readOnly = lock; e.classList.toggle('gdLock', lock); } });
+  if(lock) gdCopy(px);
+  else if(!first && m === 'O' && (was === 'F' || was === 'M')) GD_K.concat(['Relation']).forEach(function(k){ var e = document.getElementById(px + 'Guardian' + k); if(e) e.value = ''; });
+}
+function gdCopy(px){
+  var m = GD[px]; if(m !== 'F' && m !== 'M') return;
+  var w = m === 'F' ? 'Father' : 'Mother';
+  GD_K.forEach(function(k){ var s = document.getElementById(px + w + k), e = document.getElementById(px + 'Guardian' + k); if(s && e) e.value = s.value; });
+  var r = document.getElementById(px + 'GuardianRelation'); if(r) r.value = w;
+}
 </script>
 </body></html>

@@ -1,5 +1,5 @@
 /* profile.js - S21 shared "Profile" screen for every staff user (teacher app, admin Profile tab, accountant My Profile).
-   <meta name="app-version" content="2026.11.17-S21">
+   <meta name="app-version" content="2026.11.21-S23">
    Needs on the page: config.js, ui.js, photo.js. Use: PROFILE.mount(document.getElementById('box'), {back:function(){...}})
    Teachers / accountant: only EMPTY fields can be typed; 'Send to office' → the admin accepts each field; accepted = locked.
    Admin: his own values are saved at once (he is the one who accepts). Password change for everybody. */
@@ -56,7 +56,8 @@ var PROFILE = (function(){
     return h + '</div>';
   }
   function draw(){
-    var d = S.data, me = d.me, fields = d.fields.filter(function(f){ return f.k !== 'Photo'; }), ph = d.fields.filter(function(f){ return f.k === 'Photo'; })[0];
+    var d = S.data, me = d.me, fields = d.fields.filter(function(f){ return f.k !== 'Photo' && f.k !== 'Signature'; }), ph = d.fields.filter(function(f){ return f.k === 'Photo'; })[0];
+    var sg = d.fields.filter(function(f){ return f.k === 'Signature'; })[0], sgOn = sg && me.role !== 'accountant', sgSt = sg ? (isAdmin() ? (sg.value ? 'LOCKED' : 'EMPTY') : sg.state) : '';
     var open = isAdmin() ? fields : fields.filter(function(f){ return f.canType; });
     var phSt = isAdmin() ? (ph.value ? 'LOCKED' : 'EMPTY') : ph.state;
     var h = '<div class="box" style="border-left-color:#1976d2"><div class="pf-head"><div class="pf-ph" id="pfPh">No<br>photo</div><div style="min-width:0">' +
@@ -68,6 +69,13 @@ var PROFILE = (function(){
       (ph.note && phSt !== 'LOCKED' ? '<div class="pf-note">The office wrote: ' + esc(ph.note) + '</div>' : '') +
       ((isAdmin() || ph.canType) ? '<div class="btnrow"><button class="btn b-blue" type="button" data-nofb onclick="PROFILE.pick(true)">📷 Take photo</button><button class="btn b-navy" type="button" data-nofb onclick="PROFILE.pick(false)">🖼 Gallery</button></div>' : '') +
       '</div>';
+    if(sgOn) h += '<div class="box" style="border-left-color:#7c3aed"><div class="title">✍️ My signature</div><div class="meta">Sign on white paper with a dark pen and take a photo. The paper is cleaned to white automatically.' +
+      (me.role === 'classTeacher' ? ' It is printed on the report cards of your class.' : ' It is kept for later use.') + (isAdmin() ? ' Saved at once.' : ' The admin checks it first.') + '</div>' +
+      '<div id="pfSg" style="margin:8px 0;min-height:56px;border:1.5px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#fff;color:#64748b;font-weight:700;font-size:12.5px;padding:6px">No signature yet</div>' +
+      '<div class="pf-l"><span>Signature</span><span class="pf-st ' + sgSt + '">' + (isAdmin() && sgSt === 'LOCKED' ? '✔ Saved' : W[sgSt]) + '</span></div>' +
+      (sg.note && sgSt !== 'LOCKED' ? '<div class="pf-note">The office wrote: ' + esc(sg.note) + '</div>' : '') +
+      ((isAdmin() || sg.canType) ? '<div class="btnrow"><button class="btn b-blue" type="button" data-nofb onclick="PROFILE.sign(true)">📷 Take photo</button><button class="btn b-navy" type="button" data-nofb onclick="PROFILE.sign(false)">🖼 Gallery</button></div>' : '') +
+      '<div class="msg" id="pfSgMsg"></div></div>';     // S23 (L4)
     h += '<div class="box"><div class="title">👤 About me</div><div class="meta">' + (isAdmin() ? 'Your own details are saved at once.' :
       (open.length ? 'Fill the empty boxes and tap <b>Send to office</b>. The admin checks each one; once accepted it is locked (ask the admin to change it later).' : 'Every detail is filled. To change an accepted detail, ask the admin.')) + '</div>' +
       fields.map(fieldHtml).join('') +
@@ -82,11 +90,28 @@ var PROFILE = (function(){
       '<button class="btn" type="button" data-nofb style="background:#c62828" onclick="PROFILE.logout()">🚪 Logout</button></div></div>';
     S.el.innerHTML = h;
     if(window.UI && UI.enhanceDates) UI.enhanceDates(S.el);
+    if(sgOn) signPic();
   }
   async function photo(){
     var ph = S.data.fields.filter(function(f){ return f.k === 'Photo'; })[0], which = ph.wait ? 'wait' : (ph.value ? 'acc' : '');
     if(!which) return;
     try{ var j = await get('staffphotoget', {which:which}); var b = q('pfPh'); if(j && j.photo && b) b.innerHTML = '<img src="' + j.photo + '" alt="Your photo">'; }catch(e){}
+  }
+  async function signPic(){         // S23 (L4)
+    var sg = S.data.fields.filter(function(f){ return f.k === 'Signature'; })[0], which = sg && sg.wait ? 'wait' : (sg && sg.value ? 'acc' : '');
+    if(!which) return;
+    try{ var j = await get('staffphotoget', {which:which, field:'Signature'}); var b = q('pfSg'); if(j && j.photo && b) b.innerHTML = '<img src="' + j.photo + '" alt="Your signature" style="max-width:100%;max-height:90px">'; }catch(e){}
+  }
+  async function sign(camera){
+    if(!window.PHOTO) return;
+    var file = await PHOTO.choose(camera); if(!file) return;
+    PHOTO.open({file:file, sign:true, title:'My signature', sub:isAdmin() ? 'Saved at once' : 'The admin will check it', onSave:async function(data){
+      var j = isAdmin() ? await post('staffadminphoto', {username:S.data.me.username, data:data, field:'Signature'}) : await post('staffphoto', {data:data, field:'Signature'});
+      if(!j || !j.success) return {ok:false, msg:'❌ ' + ((j && j.error) || 'The signature was not saved.')};
+      S.data.fields = j.fields; S.data.done = j.done; S.data.waiting = j.waiting; draw(); photo();
+      setTimeout(function(){ say('pfSgMsg', j.message || '✅ Saved.', 'ok'); }, 50);
+      return {ok:true};
+    }});
   }
   async function pick(camera){
     if(!window.PHOTO){ return; }
@@ -102,7 +127,7 @@ var PROFILE = (function(){
   async function send(){
     var d = S.data, data = {}, any = false, bad = [];
     d.fields.forEach(function(f){
-      if(f.k === 'Photo') return;
+      if(f.k === 'Photo' || f.k === 'Signature') return;
       var el = q('pf_' + f.k); if(!el) return;
       var v = el.value.trim(), was = f.state === 'WAITING' ? f.wait : (f.state === 'OPEN' || isAdmin() ? f.value : '');
       if(v === was) return;
@@ -131,5 +156,5 @@ var PROFILE = (function(){
   }
   function showPw(on){ ['pfCur', 'pfNew', 'pfNew2'].forEach(function(id){ q(id).type = on ? 'text' : 'password'; }); }
   function logout(){ try{ localStorage.clear(); }catch(e){} location.href = 'index.html'; }
-  return {mount:mount, pick:pick, send:send, password:password, showPw:showPw, logout:logout};
+  return {mount:mount, pick:pick, sign:sign, send:send, password:password, showPw:showPw, logout:logout};
 })();

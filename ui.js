@@ -1,5 +1,5 @@
 /* ui.js - one shared helper for every page (button feedback, messages, confirm box, date fields).
-   <meta name="app-version" content="2026.11.17-S22">
+   <meta name="app-version" content="2026.11.21-S23">
    Load it with <script src="ui.js"></script> before the page's own script.
 
    1. BUTTON FEEDBACK: when a button is tapped and the page asks the server, the button changes at once
@@ -45,6 +45,20 @@
     var r = el.getBoundingClientRect(), h = window.innerHeight || doc.documentElement.clientHeight;
     return r.top >= 60 && r.bottom <= h - 90;
   }
+  // S23 (F6): the page's own message box right after the button row (class "msg"). When it exists the page shows the
+  // result itself, so ui.js shows no second message (the button still shows ✔ / ✖).
+  function pageMsg(btn){
+    var row = rowOf(btn), n = row.nextElementSibling, k = 0;
+    while(n && k < 3){
+      if(n.classList && n.classList.contains('msg') && !n.classList.contains('ui-msg')) return n;
+      if(!(n.classList && n.classList.contains('ui-msg'))) k++;
+      n = n.nextElementSibling;
+    }
+    var pv = row.previousElementSibling;           // some pages put their message box just above the buttons
+    if(pv && pv.classList && pv.classList.contains('msg') && !pv.classList.contains('ui-msg') && pv.id) return pv;
+    return null;
+  }
+  UI.pageMsg = pageMsg;
   UI.msgAt = function(btn, text, kind, keepMs){
     if(!btn || !btn.isConnected || !rowOf(btn).parentNode) return UI.toast(text, kind);
     var row = rowOf(btn);
@@ -95,7 +109,8 @@
     btn.__uiBusy = true; if(job.own) btn.disabled = true; btn.classList.add('ui-busy');
     if(btn.tagName === 'INPUT') btn.value = job.busy; else btn.innerHTML = job.busy;
     job.busyHtml = btn.tagName === 'INPUT' ? null : btn.innerHTML;
-    job.msg = UI.msgAt(btn, 'Working... please wait', 'load');
+    job.page = pageMsg(btn);
+    job.msg = job.page ? null : UI.msgAt(btn, 'Working... please wait', 'load');
     return job;
   }
   function restore(job){
@@ -123,7 +138,7 @@
       if(m && m.isConnected){
         if(ok){ m.style.display = 'none'; }
         else { m.className = 'ui-msg err'; m.textContent = '✖ ' + ((j && (j.error || j.message)) || 'Could not finish. Please try again.'); m.style.display = 'block'; }
-      }else if(!ok) UI.toast('✖ ' + ((j && (j.error || j.message)) || 'Could not finish. Please try again.'), 'err');
+      }else if(!ok && !job.page) UI.toast('✖ ' + ((j && (j.error || j.message)) || 'Could not finish. Please try again.'), 'err');
       return;
     }
     if(b.isConnected){
@@ -131,6 +146,11 @@
       if(job.own) b.disabled = false;
       if(b.tagName === 'INPUT') b.value = text; else b.innerHTML = text;
       job.shown = b.tagName === 'INPUT' ? text : b.innerHTML;
+    }
+    if(job.page){                                   // S23 (F6): the page shows its own message
+      if(job.msg && job.msg.isConnected) job.msg.style.display = 'none';
+      setTimeout(function(){ restore(job); }, ok ? (job.load ? 700 : 2000) : 2200);
+      return;
     }
     if(ok){
       if(job.load) UI.msgAt(b, 'Done', 'ok', 600);
@@ -166,6 +186,26 @@
       });
     };
   }
+
+  /* ---------- S23 (L4): camera signatures on report cards / ID cards ---------- */
+  // pictures <img data-sign="principal|ct"> get the real signature (one request per class; student app: own class)
+  var SIGNS = {};
+  UI.fillSigns = async function(box, cls, who){
+    try{
+      if(!box || !box.querySelector('img[data-sign]')) return;
+      var w = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || '', ls = function(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } };
+      var stu = who === 'student' || (!ls('cvse_token') && !!ls('cvse_stoken')), key = (stu ? 'S|' : 'T|') + (cls || '');
+      if(!SIGNS[key]){
+        var url = w + '?action=' + (stu ? 'studentsigns' : 'signget') + '&token=' + encodeURIComponent(stu ? ls('cvse_stoken') : ls('cvse_token')) + (cls && !stu ? '&cls=' + encodeURIComponent(cls) : '');
+        SIGNS[key] = origFetch ? origFetch(url).then(function(r){ return r.json(); }).catch(function(){ return {}; }) : Promise.resolve({});
+      }
+      var j = await SIGNS[key];
+      Array.prototype.forEach.call(box.querySelectorAll('img[data-sign]'), function(im){
+        var src = im.getAttribute('data-sign') === 'principal' ? j.principal : j.teacher;
+        if(src){ im.src = src; im.style.visibility = ''; } else im.remove();
+      });
+    }catch(e){}
+  };
 
   /* ---------- no pop-ups ---------- */
   var BADWORDS = /\b(not|no|error|fail|failed|could|cannot|can't|invalid|wrong|enter|choose|select|required|expired|refused|stopped|missing|first|add at least|nothing)\b/i;

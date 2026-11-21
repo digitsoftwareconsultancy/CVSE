@@ -72,7 +72,7 @@ function cardHtml(d, s){
   d.decos.filter(x => x.side === 'RIGHT').forEach(x => right += decoBox(x));
   if(P.signs){
     let ct = d.classTeacher || {};
-    right += '<div class="signs"><div class="sign">' + (ct.sign ? '<img src="' + rcEsc(ct.sign) + '" alt="">' : '') + rcEsc(ct.name || 'Class Teacher') + '<br>Class Teacher</div><div class="sign">Parent / Guardian</div><div class="sign">' + (sc.principalSign ? '<img src="' + rcEsc(sc.principalSign) + '" alt="">' : '') + rcEsc(sc.principalName) + '</div></div>';
+    right += '<div class="signs"><div class="sign">' + rcSignImg(ct.sign) + rcEsc(ct.name || 'Class Teacher') + '<br>Class Teacher</div><div class="sign">Parent / Guardian</div><div class="sign">' + rcSignImg(sc.principalSign) + rcEsc(sc.principalName) + '</div></div>';
   }
   h += '<div class="bottom"><div class="bl">' + left + '</div><div class="br">' + right + '</div></div></div>';
   if(sc.footer) h += '<div class="foot">' + rcEsc(sc.footer) + '</div>';
@@ -92,6 +92,12 @@ function rcFit(container, pad){
 }
 function rcCardsHtml(model, list){ return list.map(function(s){ return '<div class="cw"><div class="scaler">' + cardHtml(model, s) + '</div></div>'; }).join(''); }
 
+/* S23 (L4): a camera signature ('cam:ct' / 'cam:principal') is an empty picture first; UI.fillSigns() puts the real one in */
+function rcSignImg(v){
+  v = String(v || '');
+  if(v.indexOf('cam:') === 0) return '<img data-sign="' + rcEsc(v.substring(4)) + '" alt="" style="visibility:hidden">';
+  return '';
+}
 /* ================= S17: student photos from the school's Drive =================
    The cards are drawn first; the photos come a few at a time (10 per request) and fill the photo boxes.
    rcPhotos(container, fetchFn(adms) -> Promise<{photos:{adm:dataUrl}}>, onProgress(done, total)) -> Promise

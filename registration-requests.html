@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.16-S16">
+<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Registration requests</title>
@@ -187,6 +187,7 @@ function drawReq(){
     (r.submittedAt ? '<div class="meta" style="margin-top:6px">Sent by the parent: ' + esc(r.submittedAt) + (r.decidedAt ? ' · Checked: ' + esc(r.decidedAt) + ' by ' + esc(r.decidedBy) : '') + '</div>' : '') +
     (r.reason && !wait ? '<div class="msg show warn">Reason given to the parent: ' + esc(r.reason) + '</div>' : '') +
     (r.note ? '<div class="msg show info">💬 Note from the parent: ' + esc(r.note) + '</div>' : '') +
+    (r.bus ? '<div class="msg show ' + (r.bus === 'NO' ? 'info' : 'warn') + '">🚌 ' + (r.bus === 'NO' ? 'School bus: not needed.' : 'Parent asked for the school bus: <b>' + esc(r.bus) + '</b>. This is only a request: give the bus in Fees → Bus &amp; Optional Fees (or Student Fee Setup).') + '</div>' : '') +   // S23 (L15)
     '<div class="btnrow"><button class="btn b-navy" onclick="location.href=\'student-record.html?adm=' + encodeURIComponent(r.adm) + '\'">📇 Open the student record</button></div></div>';
   if(!r.fields.length){ h += '<div class="empty-note">The parent has not started the form yet.</div>'; $('main').innerHTML = h; return; }
   if(wait && r.dups && r.dups.length) h += '<div class="box" style="border-left-color:var(--orange)"><div class="title">⚠️ Please check</div>' + r.dups.map(d => '<div class="prob" style="border-left:4px solid var(--orange);background:#fff7ed;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:13px">' + esc(d.text) +
