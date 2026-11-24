@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S24">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Settings</title>
@@ -50,6 +50,8 @@ input[readonly]{background:#f1f5f9;color:#475569}
 .xbtn{border:1px solid #fecaca;background:#fff;color:var(--red);border-radius:10px;min-height:46px;font-weight:900;cursor:pointer}
 .prow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .prow .full{grid-column:1/-1}
+.aline{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}.ax{min-width:46px;min-height:46px;border:none;border-radius:12px;background:#fee2e2;color:#c62828;font-weight:900;font-size:16px;cursor:pointer}
+.apanel{margin-top:10px;padding:10px;border:1.5px solid #90caf9;border-radius:12px;background:#f5faff}.box.flash{box-shadow:0 0 0 3px #ef6c00}
 .empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
 @media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(720px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
@@ -394,25 +396,76 @@ function addArea(){ ROWS.areas.push({AreaID:'', AreaName:'', AreaType:'PSD', Cla
 
 /* ===== ACCESS (who may enter marks) ===== */
 function subjectsOf(cls){ let seen = {}, out = []; REF.subjects.forEach(s => { if(s.class === cls && !seen[s.subjectName.toUpperCase()]){ seen[s.subjectName.toUpperCase()] = 1; out.push(s.subjectName.toUpperCase()); } }); return out; }
+/* S24 (F23): grouped BY TEACHER – one card per teacher with his lines "VI · ENGLISH · All exams ✕".
+   The sheet stays the same (ExamAssign: one row per class + subject + exam), so the mark entry rules do not change. */
+var A_EXTRA = [], A_OPEN = '', A_ADD = {cls:'', subs:[], exam:''}, A_NOTE = {};
+function tName(u){ let t = REF.teachers.find(x => String(x.username).toUpperCase() === String(u).toUpperCase()); return t ? t.name : (u || '⚠ No teacher chosen'); }
+function aExam(id){ if(!id) return 'All exams'; let e = ROWS.exams.find(x => String(x.ExamID).toUpperCase() === String(id).toUpperCase()); return e ? (e.ShortName || e.ExamID) : id; }
+function aUsers(){
+  let seen = {}, out = [];
+  ROWS.assign.forEach(a => { let u = String(a.Username || '').toUpperCase(); if(!seen[u]){ seen[u] = 1; out.push(u); } });
+  A_EXTRA.forEach(u => { if(!seen[u]){ seen[u] = 1; out.push(u); } });
+  return out;
+}
 function drawAssign(){
-  let h = secHead('👩‍🏫 Who can enter marks', 'A teacher can enter marks only for the class + subject listed here. Choose a particular exam, or "All exams". Admin can always enter marks. This is for subject marks only: the class teacher of a class automatically fills the extra areas, attendance, remark and final result for that class, so no row is needed for that.', 'assign');
-  if(!REF.teachers.length) h += '<div class="box"><div class="empty-note">No teacher found. Add teachers in the Teacher tab of Admin first.</div></div>';
-  if(!ROWS.assign.length && REF.teachers.length) h += '<div class="box"><div class="empty-note">No permission yet. Press "Add Permission".</div></div>';
-  let tOpts = '<option value="">- Teacher -</option>' + REF.teachers.map(t => '<option value="' + esc(t.username) + '">' + esc(t.name) + ' (' + esc(t.username) + ')</option>').join('');
-  ROWS.assign.forEach((a, i) => {
-    let subs = subjectsOf(String(a.Class || '').toUpperCase());
-    h += '<div class="box"><div class="prow">' +
-      '<div class="full"><label>Teacher</label><select onchange="setF(\'assign\',' + i + ',\'Username\',this.value)">' + tOpts.replace('value="' + esc(a.Username) + '"', 'value="' + esc(a.Username) + '" selected') + '</select></div>' +
-      '<div><label>Class</label><select onchange="setClass(' + i + ',this.value)"><option value="">- Class -</option>' + REF.classes.map(c => '<option' + (String(a.Class).toUpperCase() === c ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></div>' +
-      '<div><label>Subject</label><select onchange="setF(\'assign\',' + i + ',\'SubjectName\',this.value)"><option value="">- Subject -</option>' + subs.map(s => '<option' + (String(a.SubjectName).toUpperCase() === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select></div>' +
-      '<div class="full"><label>Exam</label><select onchange="setF(\'assign\',' + i + ',\'ExamID\',this.value)"><option value="">All exams</option>' + ROWS.exams.filter(e => e.ExamID).map(e => '<option value="' + esc(e.ExamID) + '"' + (String(a.ExamID).toUpperCase() === String(e.ExamID).toUpperCase() ? ' selected' : '') + '>' + esc(e.ShortName || e.ExamID) + '</option>').join('') + '</select></div>' +
-      '<div class="full"><button class="btn b-red" style="width:100%" onclick="delRow(\'assign\',' + i + ')">🗑 Remove</button></div></div></div>';
+  let h = secHead('👩‍🏫 Who can enter marks', 'One card per teacher. A teacher can enter marks only for the class + subject listed on his card ("All exams" or one exam). Admin can always enter marks. This is for subject marks only: the class teacher of a class automatically fills the extra areas, attendance, remark and final result for that class.', 'assign');
+  if(!REF.teachers.length){ h += '<div class="box"><div class="empty-note">No teacher found. Add teachers in Admin → Users first.</div></div>'; $('secAssign').innerHTML = h + saveBar('assign', '', ''); markDirty(); return; }
+  let users = aUsers();
+  if(!users.length) h += '<div class="box"><div class="empty-note">No teacher can enter marks yet. Choose a teacher below.</div></div>';
+  users.forEach(u => {
+    let rows = ROWS.assign.map((a, i) => ({a, i})).filter(x => String(x.a.Username || '').toUpperCase() === u);
+    rows.sort((x, y) => (REF.classes.indexOf(String(x.a.Class).toUpperCase()) - REF.classes.indexOf(String(y.a.Class).toUpperCase())) || String(x.a.SubjectName).localeCompare(String(y.a.SubjectName)));
+    h += '<div class="box" id="tc_' + esc(u) + '"><div class="title" style="font-size:16px">👩‍🏫 ' + esc(tName(u)) + (u ? ' <small style="color:var(--muted);font-weight:700">' + esc(u) + '</small>' : '') + '</div>' +
+      (rows.length ? rows.map(x => '<div class="aline"><span><b>' + esc(x.a.Class || '?') + '</b> · ' + esc(x.a.SubjectName || '?') + ' · ' + esc(aExam(x.a.ExamID)) + '</span><button class="ax" data-nofb title="Remove" onclick="aDel(' + x.i + ')">✕</button></div>').join('') : '<div class="meta">No class yet.</div>') +
+      (A_NOTE[u] ? '<div class="msg show ' + A_NOTE[u][1] + '" style="display:block;margin-top:8px">' + esc(A_NOTE[u][0]) + '</div>' : '') +
+      (u && A_OPEN === u ? aPanel(u) : (u ? '<div class="btnrow"><button class="btn b-blue" data-nofb onclick="aOpen(\'' + esc(u) + '\')">➕ Add class &amp; subjects</button><button class="btn b-purple" onclick="aFillTT(\'' + esc(u) + '\',this)">📋 Fill from timetable</button></div>' : '')) + '</div>';
   });
-  h += saveBar('assign', '➕ Add Permission', REF.teachers.length ? 'addAssign()' : '');
+  let free = REF.teachers.filter(t => users.indexOf(String(t.username).toUpperCase()) < 0);
+  h += '<div class="box"><div class="title" style="font-size:15px">➕ Add teacher</div><select id="aNewT" onchange="aAddT(this.value)"><option value="">- Choose a teacher -</option>' +
+    REF.teachers.map(t => '<option value="' + esc(String(t.username).toUpperCase()) + '">' + esc(t.name) + ' (' + esc(t.username) + ')' + (free.indexOf(t) < 0 ? ' – already listed' : '') + '</option>').join('') + '</select></div>';
+  h += saveBar('assign', '', '');
   $('secAssign').innerHTML = h; markDirty();
 }
-function setClass(i, v){ ROWS.assign[i].Class = v; ROWS.assign[i].SubjectName = ''; redraw('assign'); }
-function addAssign(){ ROWS.assign.push({AssignID:'', Username:'', Class:'', SubjectName:'', ExamID:'', Note:''}); redraw('assign'); }
+function aPanel(u){
+  let subs = A_ADD.cls ? subjectsOf(A_ADD.cls) : [];
+  return '<div class="apanel"><label>Class</label><select onchange="A_ADD.cls=this.value;A_ADD.subs=[];redraw(\'assign\')"><option value="">- Class -</option>' + REF.classes.map(c => '<option' + (A_ADD.cls === c ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select>' +
+    (A_ADD.cls ? '<label>Subjects (tick one or more)</label>' + (subs.length ? '<div class="chips">' + subs.map(sb => '<label class="chip' + (A_ADD.subs.indexOf(sb) > -1 ? ' on' : '') + '"><input type="checkbox"' + (A_ADD.subs.indexOf(sb) > -1 ? ' checked' : '') + ' onchange="aTick(\'' + esc(sb) + '\',this.checked)">' + esc(sb) + '</label>').join('') + '</div>' : '<div class="meta">Class ' + esc(A_ADD.cls) + ' has no subjects in Subject Master.</div>') : '') +
+    '<label>Exam</label><select onchange="A_ADD.exam=this.value"><option value="">All exams</option>' + ROWS.exams.filter(e => e.ExamID).map(e => '<option value="' + esc(e.ExamID) + '"' + (A_ADD.exam === e.ExamID ? ' selected' : '') + '>' + esc(e.ShortName || e.ExamID) + '</option>').join('') + '</select>' +
+    '<div class="btnrow"><button class="btn b-green" data-nofb onclick="aAdd(\'' + esc(u) + '\')">➕ Add</button><button class="btn b-grey" data-nofb onclick="A_OPEN=\'\';redraw(\'assign\')">Cancel</button></div></div>';
+}
+function aOpen(u){ A_OPEN = u; A_ADD = {cls:'', subs:[], exam:''}; delete A_NOTE[u]; redraw('assign'); }
+function aTick(sb, on){ let i = A_ADD.subs.indexOf(sb); if(on && i < 0) A_ADD.subs.push(sb); if(!on && i > -1) A_ADD.subs.splice(i, 1); redraw('assign'); }
+function aHas(u, cls, sub, ex){ return ROWS.assign.some(a => String(a.Username).toUpperCase() === u && String(a.Class).toUpperCase() === cls && String(a.SubjectName).toUpperCase() === sub && String(a.ExamID || '').toUpperCase() === String(ex || '').toUpperCase()); }
+function aAdd(u){
+  if(!A_ADD.cls){ A_NOTE[u] = ['Choose the class first.', 'err']; redraw('assign'); return; }
+  if(!A_ADD.subs.length){ A_NOTE[u] = ['Tick at least one subject.', 'err']; redraw('assign'); return; }
+  let added = 0, dup = [];
+  A_ADD.subs.forEach(sb => { if(aHas(u, A_ADD.cls, sb, A_ADD.exam)){ dup.push(sb); return; } ROWS.assign.push({AssignID:'', Username:u, Class:A_ADD.cls, SubjectName:sb, ExamID:A_ADD.exam, Note:''}); added++; });
+  A_NOTE[u] = [(added ? '✅ ' + added + ' line' + (added > 1 ? 's' : '') + ' added. ' : '') + (dup.length ? 'Already there (skipped): ' + dup.join(', ') + '. ' : '') + (added ? 'Tap 💾 Save Access.' : ''), added ? 'ok' : 'warn'];
+  A_OPEN = ''; redraw('assign');
+}
+function aDel(i){ let u = String(ROWS.assign[i].Username || '').toUpperCase(); ROWS.assign.splice(i, 1); if(!ROWS.assign.some(a => String(a.Username || '').toUpperCase() === u) && u && A_EXTRA.indexOf(u) < 0) A_EXTRA.push(u); A_NOTE[u] = ['Line removed. Tap 💾 Save Access to keep it so.', 'warn']; redraw('assign'); }
+function aAddT(u){
+  if(!u) return;
+  if(aUsers().indexOf(u) < 0) A_EXTRA.push(u);
+  A_OPEN = u; A_ADD = {cls:'', subs:[], exam:''}; redraw('assign');
+  let c = $('tc_' + u); if(c){ c.scrollIntoView({block:'center', behavior:'smooth'}); c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 1500); }
+}
+async function aFillTT(u, btn){
+  let r;
+  try{ r = await apiGet('gettimetableforteacher', {username:u}); }catch(e){ A_NOTE[u] = ['❌ Could not connect. Try again.', 'err']; redraw('assign'); return; }
+  if(!r || !r.success){ A_NOTE[u] = ['❌ ' + ((r && r.error) || 'Could not read the timetable.'), 'err']; redraw('assign'); return; }
+  let seen = {}, added = 0, dup = 0, skip = [];
+  (r.timetable || []).forEach(e => {
+    let cls = String(e.className || e.grade || '').toUpperCase(), sb = String(e.subject || '').toUpperCase(), k = cls + '|' + sb;
+    if(!cls || !sb || seen[k]) return; seen[k] = 1;
+    if(subjectsOf(cls).indexOf(sb) < 0){ skip.push(cls + ' ' + sb); return; }
+    if(aHas(u, cls, sb, '') ){ dup++; return; }
+    ROWS.assign.push({AssignID:'', Username:u, Class:cls, SubjectName:sb, ExamID:'', Note:''}); added++;
+  });
+  A_NOTE[u] = [!Object.keys(seen).length ? 'This teacher has no periods in the timetable.' : (added ? '✅ ' + added + ' line' + (added > 1 ? 's' : '') + ' added from the timetable (All exams). Check them, then tap 💾 Save Access.' : 'Nothing new from the timetable.') + (dup ? ' Already there: ' + dup + '.' : '') + (skip.length ? ' Not in Subject Master (skipped): ' + skip.join(', ') + '.' : ''), added ? 'ok' : 'warn'];
+  redraw('assign');
+}
 
 window.addEventListener('beforeunload', function(e){ if(SECS.some(dirty)){ e.preventDefault(); e.returnValue = ''; } });
 init();

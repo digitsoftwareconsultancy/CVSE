@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.21-S23"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.24-S26"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -72,6 +72,7 @@ tbody tr:nth-child(even){background:#fbfcfd}
 #loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#e3f2fd,#eef2f7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
 .loginCard{background:white;padding:24px;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.14);width:360px;max-width:100%;text-align:center}
 .loginCard h2{margin:0 0 4px;font-size:20px}
+.loginCard input,.loginCard button{min-height:46px}   /* S25 (F21): 46 px like every other button */
 .loginSub{color:var(--muted);font-size:13px;margin:0 0 16px}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:flex-end;justify-content:center;padding:0}
 @media(min-width:640px){.modal{align-items:center;padding:12px}}
@@ -89,9 +90,20 @@ tbody tr:nth-child(even){background:#fbfcfd}
 .smG2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.smG3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.smPart{background:#f8fafc;border-radius:12px;padding:8px;margin-top:8px}.smPh{font-weight:800;color:#0b2a5c;font-size:13px}.smPh small{color:#64748b;font-weight:600}
 .smRow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.smB{flex:1;min-width:70px;min-height:46px;border:none;border-radius:12px;font-weight:800;background:#e5e7eb;color:#334155;cursor:pointer}.smB.red{background:#c62828;color:#fff}.smB.blue{background:#1976d2;color:#fff}.smB:disabled{opacity:.4}
 .smSave{position:sticky;bottom:84px;z-index:20;background:#fff;border:2px solid #16a34a;border-radius:14px;padding:8px;margin-top:10px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
-#smBox .msg{display:none;padding:10px;border-radius:12px;font-weight:700;font-size:13px;margin-top:8px;white-space:pre-wrap}#smBox .msg.show{display:block}#smBox .msg.ok{background:#dcfce7;color:#166534}#smBox .msg.err{background:#fee2e2;color:#991b1b}#smBox .msg.load{background:#e0f2fe;color:#075985}
+#smBox .msg{display:none;padding:10px;border-radius:12px;font-weight:700;font-size:13px;margin-top:8px;white-space:pre-wrap}#smBox .msg.show{display:block}#smBox .msg.ok{background:#dcfce7;color:#166534}#smBox .msg.err{background:#fee2e2;color:#991b1b}#smBox .msg.load{background:#e0f2fe;color:#075985}#smBox .msg.warn{background:#fff7ed;color:#9a3412;border:1px solid #fdba74}
 .setBar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;margin-bottom:2px;-webkit-overflow-scrolling:touch}
-.setBar button{flex:0 0 auto;margin:0;padding:9px 14px;border-radius:999px;background:#fff;color:#334155;border:1.5px solid #dbe2ea;font-size:13px;min-height:42px;white-space:nowrap}
+.setBar button{flex:0 0 auto;margin:0;padding:9px 14px;border-radius:999px;background:#fff;color:#334155;border:1.5px solid #dbe2ea;font-size:13px;min-height:46px;white-space:nowrap}
+/* S24 (F19): one card style for every button list (icon, name, one grey line) + grey ⚙️ Setup box */
+.tabHead{margin:2px 2px 10px}.tabHead h3{margin:0;font-size:19px;color:#0b2a5c}.tabHead p{margin:3px 0 0;color:var(--muted);font-size:12.5px}
+.cardList{display:grid;grid-template-columns:1fr;gap:8px}@media(min-width:760px){.cardList{grid-template-columns:1fr 1fr}}
+button.cbtn{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;margin:0;padding:10px 12px;background:#fff;color:#0b2a5c;border:1px solid #e5e7eb;border-left:5px solid var(--c,#1976d2);border-radius:14px;text-align:left;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+button.cbtn .ci{font-size:24px;width:32px;text-align:center;flex-shrink:0}button.cbtn b{display:block;font-size:15px;line-height:1.2}button.cbtn small{display:block;color:#64748b;font-size:12.5px;font-weight:600;margin-top:3px;line-height:1.3}
+button.cbtn.flash{box-shadow:0 0 0 3px #ef6c00}
+.setupBox{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:16px;padding:12px;margin:14px 0 6px}.setupBox h4{margin:0 0 8px;color:#475569;font-size:14px}
+.setupBox button.cbtn{background:#f8fafc;--c:#94a3b8}
+.pCircle{width:42px;height:42px;min-height:42px!important;border-radius:50%!important;padding:0!important;margin:0 6px 0 0!important;background:#e3f2fd!important;color:#0d47a1!important;font-weight:900!important;font-size:17px!important;flex-shrink:0;border:2px solid #bbdefb!important}
+.pCircle.on{border-color:#1976d2!important;background:#1976d2!important;color:#fff!important}
+.hlink{cursor:pointer}
 .setBar button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 .hHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 10px}
 .hHead b{font-size:15px}.hHead small{color:var(--muted);font-weight:600}
@@ -113,27 +125,27 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </style><script src="config.js"></script><script src="ui.js"></script><script src="photo.js"></script><script src="profile.js"></script></head><body>
 <div id="loginScreen"><div class="loginCard"><div style="font-size:42px">🏫</div><h2>🔐 <span id="loginSchoolName">School</span><br>Admin Login</h2><p class="loginSub" id="loginSessionLabel">School Management System</p><input id="l_user" placeholder="Username" style="width:100%"><br><input id="l_pass" type="password" placeholder="Password" style="width:100%"><br><br><button onclick="doLogin()" style="width:100%;padding:13px;font-weight:bold;">Login</button><p id="loginMsg" style="color:red;font-size:13px;min-height:18px;"></p></div></div>
 <div id="adminContent" style="display:none;">
-<div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div style="min-width:0"><h2>Admin Panel — <span id="schoolName">School</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><button onclick="logout()" class="btnLogout">Logout</button></div></div>
+<div class="topbar"><div class="topbar-in"><div class="brand"><div class="brandIcon">🏫</div><div style="min-width:0"><h2>Admin Panel — <span id="schoolName">School</span></h2><p>Manage teachers, students, fees & results in one place</p><span class="pillSession" id="sessionLabel">Session • Loading…</span></div></div><div style="display:flex;align-items:center;flex-shrink:0"><button class="pCircle" id="bProfile" title="My profile" aria-label="My profile" onclick="openTab('profileTab')">P</button><button onclick="logout()" class="btnLogout">Logout</button></div></div></div>
 <div class="wrap">
-<div id="setBar" class="setBar" style="display:none"><button id="sc1" onclick="openTab('resultControlTab'); loadAllSettings();">⚙️ School</button><button id="sc2" onclick="openTab('tabUsers')">👥 Users</button><button id="sc3" onclick="openTab('subjectMasterTab'); loadSM();">📚 Subjects &amp; Exams</button><button id="sc6" onclick="openTab('timetableTab')">🗓️ Timetable</button><button id="sc4" onclick="openTab('backupTab'); loadBackupInfo();">📦 Backup &amp; Check</button><button id="sc5" style="display:none" onclick="openTab('homeTab'); loadHome();">🏠 Home</button></div>
+<div id="setBar" class="setBar" style="display:none"><button id="sc1" onclick="openTab('resultControlTab'); loadAllSettings();">⚙️ School</button><button id="sc2" onclick="openTab('tabUsers')">👥 Users</button><button id="sc3" style="display:none" onclick="openTab('subjectMasterTab'); loadSM();">📚 Subjects &amp; Exams</button><button id="sc6" onclick="openTab('timetableTab')">🗓️ Timetable</button><button id="sc4" onclick="openTab('backupTab'); loadBackupInfo();">📦 Backup &amp; Check</button><button id="sc5" style="display:none" onclick="openTab('homeTab'); loadHome();">🏠 Home</button></div>
 <div id="homeTab" class="tab"><div id="homeBody"><div class="box">Loading home... please wait</div></div></div>
 <div id="timetableTab" class="tab" style="display:none;"><div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>🗓️ Timetable</h3><p class="sub">The timetable drives daily updates, attendance, teacher work and what students see. Build it here and print it for classes and teachers.</p><button class="btn" style="background:linear-gradient(135deg,#6d4c41,#8d6e63);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;" onclick="openTimetableBuilder()">Open Timetable Builder</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="openTab('resultControlTab'); loadAllSettings(); setTimeout(function(){ var e=document.getElementById('periodInputs'); if(e) e.scrollIntoView({behavior:'smooth',block:'center'}); },600);">Periods and timings (in Settings)</button></div></div>
 <div id="tabUsers" class="tab" style="display:none;"><div class="box" style="background:#eff6ff;border:2px solid #1976d2"><h3>👤 Staff profiles</h3><p class="sub">Details teachers send from their Profile (name, date of birth, mobile, email, qualification, joining date, address, photo). Accept each one, or fill / correct them yourself.</p><button class="btn" id="btnStaffProfiles" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="window.location.href='staff-profiles.html'">Open Staff profiles</button></div><div class="box"><h3>Create Teacher / Admin</h3><p class="sub">Add login, role and exam access. Which class and subject a teacher can enter marks for is set later in Exam Settings.</p>
 <div class="formGrid">
 <div class="field"><label>Username</label><input id="uname" placeholder="e.g. niraj"></div>
 <div class="field"><label>Password</label><input id="pass" placeholder="Password"></div>
-<div class="field"><label>Role</label><select id="role" onchange="onRoleChange()"><option value="classTeacher">Class Teacher</option><option value="subjectTeacher">Subject Teacher</option><option value="accountant">Accountant (fees office)</option><option value="admin">Admin</option></select></div>
+<div class="field"><label>Role</label><select id="role" onchange="onRoleChange()"><option value="classTeacher">Class Teacher</option><option value="subjectTeacher">Subject Teacher</option><option value="accountant">Office Staff</option><option value="admin">Admin</option></select></div>
 <div class="field"><label>Classes</label><select id="classes"><option value="">Select Class</option></select></div>
 <div class="field" style="display:none"><label>Subjects</label><input id="subjects" placeholder="Subjects e.g. English,Mathematics"></div>
 <div class="field"><label>Full Name</label><input id="fname" placeholder="Full Name"></div>
-</div><div id="c_fees" style="display:none;margin:8px 0;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px"><b style="color:#166534">Pages this accountant may use</b><div style="font-size:12px;color:#475569;margin:4px 0 6px">Tick only what is needed. Admin always has everything.</div>
+</div><div id="c_fees" style="display:none;margin:8px 0;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px"><b style="color:#166534">Pages this Office Staff user may use</b><div style="font-size:12px;color:#475569;margin:4px 0 6px">Tick only what is needed. Admin always has everything.</div>
 <label class="fp"><input type="checkbox" class="c_fp" value="COLLECT" checked> Collect fees, print and see receipts</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="CANCEL"> Cancel a receipt</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDENTS"> Student Fee Setup (concessions, bus, previous dues)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="OPENING"> Already Paid grid (start mid-session)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="SETTINGS"> Fees Settings (heads, amounts, due dates, receipt look)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="REPORTS"> Fee reports</label>
-<div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
+<div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the Office Staff user works like the admin:</div>
 <label class="fp"><input type="checkbox" class="c_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="RECVIEW" onchange="recTick(this,'c')"> Student records: VIEW the full record (Aadhaar "Show" is logged)</label>
 <label class="fp"><input type="checkbox" class="c_fp" value="RECEDIT" onchange="recTick(this,'c')"> Student records: EDIT the full record (includes view)</label>
@@ -159,50 +171,24 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 </div><div class="box"><h3>All Users - Login & Exam Control</h3><p class="sub">Green = Active / YES • Red = Inactive / NO</p><button onclick="loadUsers()" style="width:100%">🔄 Refresh</button><p id="userMsg" style="font-weight:700;margin:8px 0"></p><div id="ulist">Click Refresh...</div></div></div>
 <div id="tabStudents" class="tab" style="display:none;">
-<div class="box" style="background:#f5f3ff;border:2px solid #7c3aed"><h3>📇 Student records (master record)</h3><p class="sub">The full record of every student (current, left, passed out): 6 sections, registration form and profile print, brothers / sisters. Search a student in the Current student list.</p>
-<button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="location.href='students.html'">🎓 Current student list – open a full record</button>
-<button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnRegister" onclick="location.href='student-register.html'">📒 Admission Register (every student ever, print)</button>
-<button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='registration-requests.html'">📝 Registration requests (forms filled by parents)</button>
-<button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnPhotoDay" onclick="location.href='photos.html'">📷 Class photo day (student photos)</button>
-<button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnIdCards" onclick="location.href='idcards.html'">🪪 Print ID cards (a class or one student)</button>
-<button class="btn" style="background:#e5e7eb;color:#475569;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnIdDesign" onclick="location.href='idcard-settings.html'">🎨 ID card design (sides, shape, fields, colours)</button>
-<button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='student-record.html?new=1'">➕ Add student (full record, automatic number)</button>
-<button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnElectives" onclick="location.href='electives.html'">📚 Elective subjects (whole class)</button>
-<button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="location.href='student-settings.html'">⚙️ Settings – Student record (number, lists, register columns, fill master record)</button>
-<button class="btn" style="background:#e5e7eb;color:#475569;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.open('student-print.html?blank=1','_blank')">🖨️ Print a blank registration form</button></div>
-<div class="box" style="background:#fff7ed;border:2px solid #ef6c00"><h3>🎓 Promotion / new session</h3><p class="sub">Once a year: Part 1 starts the new session (backup, archive copy, fees carried forward). Part 2 promotes the classes (in batches; classes still in exams can finish later). Everything is shown first as a preview. Practise on a copy of the sheet first and run it in a holiday.</p>
-<button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer" onclick="location.href='promotion.html'">🎓 Open Promotion / new session</button></div>
-<div class="box" style="display:none" data-old="S23 L6"><h3>Add New Student</h3>
-<div class="formGrid">
-<div class="field"><label>Admission No</label><input id="adno" placeholder="Adm No"></div>
-<div class="field"><label>Student Name</label><input id="sname" placeholder="Student Name"></div>
-<div class="field"><label>Roll</label><input id="roll" placeholder="Roll"></div>
-<div class="field"><label>Class</label><select id="sclass"><option value="">Loading classes...</option></select></div>
-<div class="field"><label>DOB</label><input id="dob" placeholder="DOB DD-MM-YYYY" title="DD-MM-YYYY e.g. 03-10-2019"></div>
-<div class="field"><label>Father Name</label><input id="father" placeholder="Father Name"></div>
-<div class="field"><label>Mother Name (optional)</label><input id="mother" placeholder="Mother Name"></div>
-<div class="field"><label>House (optional)</label><input id="house" placeholder="House"></div>
+<div class="tabHead"><h3>🧑‍🎓 Students</h3><p>Everyday work with students. Setup is at the bottom.</p></div>
+<div class="cardList" id="cl_students"></div>
+<div class="setupBox"><h4>⚙️ Setup</h4><div class="cardList" id="cl_studentsSetup"></div></div>
 </div>
-<div id="s_electives"></div>
-<div id="addMsg" style="margin-top:8px;font-weight:700"></div>
-<br><button onclick="addStu()" id="btnAddStu" class="btn-green" style="width:100%;padding:13px">Add Student</button>
+<div id="feesTab" class="tab" style="display:none;">
+<div class="tabHead"><h3>💰 Fees</h3><p>Collect fees, receipts, reports and fee setup of students.</p></div>
+<div class="cardList" id="cl_fees"></div>
+<div class="setupBox"><h4>⚙️ Setup</h4><div class="cardList" id="cl_feesSetup"></div></div>
 </div>
-<div class="box" style="display:none" data-old="S23 L6"><h3>🎓 Search & Edit</h3><div style="display:flex;gap:8px"><input id="searchAd" placeholder="Enter Admission No" style="flex:1;min-width:0" onkeyup="if(event.key==='Enter')searchStudent()"><button onclick="searchStudent()" class="btn-orange">🔍 Search</button></div>
-<div id="slist" style="margin-top:15px; display:none; background:#fffbe6; padding:15px; border-radius:12px; border:1px solid #ffe082;">
-<div class="formGrid">
-<div class="field"><label>Adm No</label><input id="e_ad" readonly title="Adm No"></div>
-<div class="field"><label>Name</label><input id="e_name" placeholder="Name"></div>
-<div class="field"><label>Roll</label><input id="e_roll" placeholder="Roll"></div>
-<div class="field"><label>Class</label><select id="e_class" onchange="loadEditElective()"><option value="">Loading classes...</option></select></div>
-<div class="field"><label>DOB</label><input id="e_dob" placeholder="DD-MM-YYYY" title="DD-MM-YYYY"></div>
-<div class="field"><label>Father</label><input id="e_father" placeholder="Father"></div>
-<div class="field"><label>Mother</label><input id="e_mother" placeholder="Mother"></div>
-<div class="field"><label>House</label><input id="e_house" placeholder="House"></div>
+<div id="dailyTab" class="tab" style="display:none;">
+<div class="tabHead"><h3>📝 Daily</h3><p>Attendance, daily updates, class tests and the calendar.</p></div>
+<div class="cardList" id="cl_daily"></div>
 </div>
-<div id="e_electives"></div>
-<br><br><div style="display:flex;gap:8px"><button onclick="saveEdit()" id="btnSaveStu" class="btn-green" style="flex:1">Save</button><button onclick="delStu2()" id="btnDelStu" class="btn-del" style="flex:1">Delete</button></div><p id="editMsg" style="font-weight:700"></p></div><div id="stuNotFound" style="color:red;"></div></div></div>
-<div id="feesTab" class="tab" style="display:none;"><div class="box" style="background:#ecfdf5;border:2px solid #16a34a"><h3>💰 Fees</h3><p class="sub">Collect fees, see receipts, set up students and open the reports.</p><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#fb923c);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;" onclick="window.location.href='fees-collect.html'">Collect Fees</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-receipts.html'">Receipts (day book)</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-reports.html'">Fee Reports</button><button class="btn" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-students.html'">Student Fee Setup</button><button class="btn" id="btnFeeOpt" style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-optional.html'">🚌 Bus &amp; Optional Fees (whole class)</button><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-opening.html'">Already Paid (start mid-session)</button><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='fees-settings.html'">Fees Settings</button></div>
-<details class="box" style="display:none" data-old="S23 L6"><summary style="font-weight:800;cursor:pointer">Old fee list (earlier version)</summary><div style="margin-top:10px"><div class="box"><h3>💰 Fee Management</h3><div style="display:flex;gap:8px"><input id="feeSearch" placeholder="Search by Adm / Name / Class..." onkeyup="filterFees()" style="flex:1;min-width:0"><button onclick="loadFees()">Load</button></div><div id="feeListDiv"></div></div></div></details></div>
+<div id="examsTab" class="tab" style="display:none;">
+<div class="tabHead"><h3>🎓 Exams</h3><p>Marks, class reports, report cards and the exam register. Setup is at the bottom.</p></div>
+<div class="cardList" id="cl_exams"></div>
+<div class="setupBox"><h4>⚙️ Setup</h4><div class="cardList" id="cl_examsSetup"></div></div>
+</div>
 <div id="backupTab" class="tab" style="display:none;">
 <div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>🔍 System check</h3><p class="sub">After you upload new files, press this. It shows if every Apps Script file and every page is the latest version.</p><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" id="sysBtn" data-nofb onclick="runSysCheck()">Run system check</button><div id="sysOut" style="margin-top:10px;font-size:13px;line-height:1.6"></div></div>
 <div class="box" style="background:#fef2f2;border:2px solid #c62828"><h3>⏸️ Pause all saves</h3><p class="sub">For a short maintenance (for example while the developer corrects the sheet by hand). While paused, nobody can save anything: staff see "Saving is paused", the student app shows "School data is being updated". Pages can still be opened, people can still log in and Backup Now still works. Tap Resume when you are finished.</p>
@@ -275,28 +261,30 @@ tbody tr:nth-child(even){background:#fbfcfd}
 </div>
 </div>
 <div id="subjectMasterTab" class="tab" style="display:none;">
-<div class="box" style="background:#f3e8ff;border:2px solid #7c3aed"><h3>📝 Exams</h3><p class="sub">Exam names and types, report cards, grade scale, extra areas, final result choices and who can enter marks.</p><button class="btn" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="window.location.href='exam-settings.html'">1 · Exam Settings</button></div>
+<div class="btnrow" style="margin:0 0 8px"><button type="button" data-nofb style="background:#fff;color:#0b2a5c;border:1.5px solid #cbd5e1;width:100%;min-height:46px" onclick="openTab('examsTab')">⬅️ Back to Exams</button></div>
 <div class="box" style="background:#fff3e0;border:2px solid #ff9800" id="smBox">
 <h3>📚 2 · Subject Master</h3><p class="sub">Choose a class, then tap a subject to change it. Subject names come from the SubjectList tab.</p>
 <label style="font-weight:800">Class</label>
 <select id="smClassFilter" onchange="smPick()" style="width:100%;min-height:50px;font-size:16px;font-weight:800;border:2px solid #ff9800;border-radius:12px"><option value="ALL">All classes (overview)</option><option value="">Loading classes...</option></select>
+<div id="smMissing" class="msg" style="margin-top:10px"></div>
 <div id="smCards" style="margin-top:10px"><div class="sub">Loading...</div></div>
 <div class="btnrow" id="smTools" style="display:none;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" data-nofb style="flex:1;min-width:140px;background:#ff9800;color:#fff;border:none;border-radius:12px;font-weight:800;min-height:46px" onclick="addSMRow()">+ Add subject</button><button class="btn" data-nofb style="flex:1;min-width:140px;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-weight:800;min-height:46px" onclick="smCopyOpen()">📋 Copy to other sections</button></div>
 <div id="smCopyBox" style="display:none;background:#f3e8ff;border:1.5px solid #7c3aed;border-radius:12px;padding:10px;margin-top:8px"></div>
 <div id="smSaveBar" class="smSave" style="display:none"><div class="btnrow" style="margin:0"><button class="btn" id="smSaveBtn" style="width:100%;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;border-radius:12px;font-weight:800;min-height:48px" onclick="saveSM()">💾 Save changes</button></div><div class="msg" id="smMsg"></div></div>
 <div style="display:none"><table id="smTable"><tbody id="smTbody"></tbody></table></div>
 </div>
-<div class="box" style="background:#f8fafc;border:2px solid #0b2a5c"><h3>📄 Report cards &amp; registers</h3><p class="sub">After the marks are entered.</p><button class="btn" style="background:linear-gradient(135deg,#ef6c00,#ff9800);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:0" onclick="window.location.href='report-card-settings.html'">3 · Report Card Settings</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='class-report.html'">4 · Class Report (finalise / reopen)</button><button class="btn" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" onclick="window.location.href='report-card.html'">5 · View / Print Report Cards</button><button class="btn" style="background:linear-gradient(135deg,#0b2a5c,#1e4a8f);color:#fff;border:none;padding:12px 16px;border-radius:12px;font-weight:800;min-height:46px;width:100%;cursor:pointer;margin-top:8px" id="btnExamReg" onclick="window.location.href='exam-register.html'">6 · 📒 Exam Register</button></div>
+
 </div>
 </div>
 <div class="tabs">
 <button class="tabBtn active" id="bHome" onclick="openTab('homeTab'); loadHome();"><span class="tabIco">🏠</span>Home</button>
-<button class="tabBtn" id="b2" onclick="openTab('tabStudents')"><span class="tabIco">🎓</span>Students</button>
+<button class="tabBtn" id="b2" onclick="openTab('tabStudents')"><span class="tabIco">🧑‍🎓</span>Students</button>
 <button class="tabBtn" id="b3" onclick="openTab('feesTab')"><span class="tabIco">💰</span>Fees</button>
-<button class="tabBtn" id="bTT" onclick="openTab('timetableTab')" style="display:none"><span class="tabIco">🗓️</span>Timetable</button>
-<button class="tabBtn" id="b7" onclick="try{sessionStorage.setItem('cvse_admintab','homeTab');}catch(e){} window.location.href='daily.html'"><span class="tabIco">📝</span>Daily</button>
+<button class="tabBtn" id="b7" onclick="openTab('dailyTab')"><span class="tabIco">📝</span>Daily</button>
+<button class="tabBtn" id="bEx" onclick="openTab('examsTab')"><span class="tabIco">🎓</span>Exams</button>
 <button class="tabBtn" id="b5" onclick="openTab('resultControlTab'); loadAllSettings();"><span class="tabIco">⚙️</span>Settings</button>
-<button class="tabBtn" id="bPro" onclick="openTab('profileTab')"><span class="tabIco">👤</span>Profile</button>
+<button class="tabBtn" id="bTT" onclick="openTab('timetableTab')" style="display:none"><span class="tabIco">🗓️</span>Timetable</button>
+<button class="tabBtn" id="bPro" onclick="openTab('profileTab')" style="display:none"><span class="tabIco">👤</span>Profile</button>
 <button class="tabBtn" id="b1" onclick="openTab('tabUsers')" style="display:none"><span class="tabIco">👥</span>Teachers</button>
 <button class="tabBtn" id="b4" onclick="openTab('backupTab'); loadBackupInfo();" style="display:none"><span class="tabIco">📦</span>Backup</button>
 <button class="tabBtn" id="b6" onclick="openTab('subjectMasterTab'); loadSM();" style="display:none"><span class="tabIco">📚</span>Subjects</button>
@@ -305,18 +293,18 @@ tbody tr:nth-child(even){background:#fbfcfd}
 <div id="editModal" class="modal"><div class="modalBox"><h3>Edit Teacher - Login & Exam</h3>
 <label>Username</label><input id="edit_uname" style="width:100%" placeholder="username">
 <label>Password</label><input id="edit_pass" placeholder="Set new password (leave blank to keep old)" style="width:100%">
-<label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="accountant">Accountant (fees office)</option><option value="admin">Admin</option></select>
+<label>Role</label><select id="edit_role" style="width:100%" onchange="onEditRoleChange()"><option value="subjectTeacher">Subject Teacher</option><option value="classTeacher">Class Teacher</option><option value="accountant">Office Staff</option><option value="admin">Admin</option></select>
 <label>Classes</label><select id="edit_classes" style="width:100%"><option value="">Select Class</option></select>
 <label style="display:none">Subjects</label><input id="edit_subjects" style="display:none;width:100%" placeholder="Subjects">
 <div id="editBuilder" style="display:none"><select id="ebClass"><option value="">Loading classes...</option></select><select id="ebSub"><option value="">Loading subjects...</option></select><div style="display:flex;gap:8px"><button onclick="addEditMap()" class="btn-green" style="flex:1">+ Add</button><button onclick="clearEditMap()" class="btn-gray" style="flex:1">Clear</button></div><div id="editMapPreview"></div></div>
-<div id="e_fees" style="display:none;margin:8px 0;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px"><b style="color:#166534">Pages this accountant may use</b><div style="font-size:12px;color:#475569;margin:4px 0 6px">Tick only what is needed. Admin always has everything.</div>
+<div id="e_fees" style="display:none;margin:8px 0;padding:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px"><b style="color:#166534">Pages this Office Staff user may use</b><div style="font-size:12px;color:#475569;margin:4px 0 6px">Tick only what is needed. Admin always has everything.</div>
 <label class="fp"><input type="checkbox" class="e_fp" value="COLLECT" checked> Collect fees, print and see receipts</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="CANCEL"> Cancel a receipt</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDENTS"> Student Fee Setup (concessions, bus, previous dues)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="OPENING"> Already Paid grid (start mid-session)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="SETTINGS"> Fees Settings (heads, amounts, due dates, receipt look)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="REPORTS"> Fee reports</label>
-<div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the accountant works like the admin:</div>
+<div style="font-size:12px;color:#475569;margin:8px 0 2px"><b>School office pages</b> — inside these pages the Office Staff user works like the admin:</div>
 <label class="fp"><input type="checkbox" class="e_fp" value="STUDENTDB"> Students (add and edit student details)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="RECVIEW" onchange="recTick(this,'e')"> Student records: VIEW the full record (Aadhaar "Show" is logged)</label>
 <label class="fp"><input type="checkbox" class="e_fp" value="RECEDIT" onchange="recTick(this,'e')"> Student records: EDIT the full record (includes view)</label>
@@ -449,7 +437,7 @@ function fillAllSubjectDropdowns(){
   fillSubjectSelect(document.getElementById('ebSub'));
 }
 function isAdminLoggedIn(){ return localStorage.getItem('cvse_role')=='admin' && localStorage.getItem('cvse_username') && localStorage.getItem('cvse_token'); }
-function openTimetableBuilder(){ window.open('timetable-builder.html','_blank'); }
+function openTimetableBuilder(){ window.location.href='timetable-builder.html'; }     // S24 (F21): same tab, Back returns here
 function onRoleChange(){ document.getElementById('builder').style.display='none'; document.getElementById('c_fees').style.display = role.value=='accountant' ? 'block' : 'none'; }   // class-wise subject builder retired: marks permission moves to Exam Settings
 function addMap(){ var c=bClass.value.toUpperCase(); var s=bSub.value; if(!mapStore[c]) mapStore[c]=[]; if(mapStore[c].indexOf(s)==-1) mapStore[c].push(s); updateMapPreview(); }
 function clearMap(){ mapStore={}; updateMapPreview(); }
@@ -538,7 +526,7 @@ function smNormType(v){ var s=String(v||'SCHOLASTIC').toUpperCase().trim(); if(s
 async function loadSM(){
   if(smChangedCount() && !(await UI.ask('You have subject changes that are not saved. Load again and lose them?'))) return;
   if(!SM_DATA.length) document.getElementById('smCards').innerHTML='<div class="sub">Loading...</div>';
-  let smPromise = apiGet('getsubjectmaster');
+  let smPromise = apiGet('getsubjectmaster', {missing:1});     // S24 (F12)
   await loadAllDynamic();
   try{
     let list = await smPromise;
@@ -553,6 +541,7 @@ async function loadSM(){
     if(subjNames.length>0) DYNAMIC_SUBJECTS=subjNames;
     var smKeep=smClassFilter.value; fillAllClassDropdowns(); fillAllSubjectDropdowns(); if(smKeep && [...smClassFilter.options].some(o=>o.value===smKeep)) smClassFilter.value=smKeep;
     SM_ORIG=null; SM_OPEN=-1; renderSMTable();
+    smMissingNote(list.missingText);     // S24 (F12): warn in orange at once, before any change
     if(DYNAMIC_CLASSES.length===0) document.getElementById('smCards').innerHTML='<span style="color:red">No classes found - check Classes sheet + deploy backend. Test ?action=getallclasses</span>';
   }catch(e){ document.getElementById('smCards').innerHTML='<span style="color:red">❌ Could not load the subjects. '+esc(e.message)+'</span>'; }
 }
@@ -594,6 +583,7 @@ function smCopyGo(){
   renderSMTable();
   msg.innerHTML='<span style="color:#16a34a">✅ '+added+' subject rows added to '+to.map(esc).join(', ')+'.'+(kept.length?' Already there (left as they are): '+kept.length+'.':'')+' Now tap Save changes.</span>';
 }
+function smMissingNote(t){ var e=document.getElementById('smMissing'); if(!e) return; if(t){ e.className='msg show warn'; e.innerText='⚠️ '+t; } else { e.className='msg'; e.innerText=''; } }
 async function saveSM(){        // S23 (L5): one save for all classes; the page shows the result under the button
   var btn=document.getElementById('smSaveBtn'), m=document.getElementById('smMsg');
   var empty=SM_DATA.filter(r=>!String(r.subjectName||'').trim());
@@ -718,9 +708,63 @@ function smCheckAll(){
 function logout(){ localStorage.clear(); window.location.href='index.html'; }
 async function doLogin(){ var u=l_user.value.trim(); var p=l_pass.value.trim(); if(!u||!p){ loginMsg.innerText='Enter username & password'; return; } loginMsg.innerText='Checking...'; let res=await apiPost('login', {username:u, password:p}); if(res.success && res.user.role=='admin'){ localStorage.setItem('cvse_token', res.token); localStorage.setItem('cvse_username', res.user.username); localStorage.setItem('cvse_role', 'admin'); localStorage.setItem('cvse_name', res.user.name); loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); startTab(); } else { loginMsg.innerText = res.success ? '❌ Not Admin' : '❌ '+(res.error||'Login failed'); } }
 window.onload=function(){ if(isAdminLoggedIn()){ loginScreen.style.display='none'; adminContent.style.display='block'; loadUsers(); loadAllSettings(); loadAllDynamic(); startTab(); } else { fillAllClassDropdowns(); fillAllSubjectDropdowns(); } }
-var TAB_NAMES={profile:'profileTab',home:'homeTab',students:'tabStudents',fees:'feesTab',timetable:'timetableTab',settings:'resultControlTab',users:'tabUsers',classes:'subjectMasterTab',backup:'backupTab'};
+/* ---------- S24 (F19): every tab = everyday work at the top + its ⚙️ Setup at the bottom; one card style ----------
+   [id, icon, name, grey line, action, colour]. The same names are used in the accountant and teacher apps (F20). */
+var CARDS = {
+  students:[['btnStuList','🎓','Current student list','Open a full record, search, edit','go:students.html','#7c3aed'],
+    ['btnAddStu2','➕','Add student','Full record, automatic number','go:student-record.html?new=1','#16a34a'],
+    ['btnRegReq','📝','Registration requests','Forms filled by parents','go:registration-requests.html','#1976d2'],
+    ['btnElectives','📚','Elective subjects','Who takes which elective (whole class)','go:electives.html','#7c3aed'],
+    ['btnPhotoDay','📷','Class photo day','Take the student photos','go:photos.html','#16a34a'],
+    ['btnIdCards','🪪','Print ID cards','A class or one student','go:idcards.html','#0b2a5c'],
+    ['btnRegister','📒','Admission Register','Every student ever, print','go:student-register.html','#0b2a5c'],
+    ['btnBlankForm','🖨️','Blank registration form','Print an empty form','open:student-print.html?blank=1','#64748b'],
+    ['btnPromo','🎓','Promotion / new session','Once a year: start the new session, promote classes','go:promotion.html','#ef6c00']],
+  studentsSetup:[['btnIdDesign','🎨','ID card design','Sides, shape, fields, colours','go:idcard-settings.html'],
+    ['btnStuSettings','⚙️','Student record settings','Admission number, compulsory fields, lists, register columns','go:student-settings.html']],
+  fees:[['btnCollect','💵','Collect Fees','Take a payment, print the receipt','go:fees-collect.html','#ef6c00'],
+    ['btnReceipts','🧾','Receipts','Day book, reprint or cancel a receipt','go:fees-receipts.html','#0b2a5c'],
+    ['btnFeeReports','📊','Fee Reports','Dues, collection, student ledger, bus list','go:fees-reports.html','#0b2a5c'],
+    ['btnFeeStu','👤','Student Fee Setup','Concessions, bus route, optional fees of one student','go:fees-students.html','#1976d2'],
+    ['btnFeeOpt','🚌','Bus & Optional Fees','Give bus / day care to a whole class','go:fees-optional.html','#1976d2'],
+    ['btnFeeOpen','📥','Already Paid','Fees paid before the app (start mid-session)','go:fees-opening.html','#7c3aed']],
+  feesSetup:[['btnFeeSettings','⚙️','Fees Settings','Fee heads, amounts, bus routes, receipt, late fine','go:fees-settings.html']],
+  daily:[['btnAtt','✅','Attendance','Present / absent of every class','go:daily.html?tab=att','#16a34a'],
+    ['btnDailyUpd','📚','Daily update','Periods, lessons and homework of every class','go:daily.html?tab=all','#1976d2'],
+    ['btnClassTests','🧪','Class tests','Book a test, enter its marks','go:classtest.html','#7c3aed'],
+    ['btnPerf','📈','Monthly performance','Attendance % + class tests of a class','go:performance.html','#0b2a5c'],
+    ['btnEvents','📅','Calendar & events','Holidays, exams, programmes, meetings','go:events.html','#ef6c00']],
+  exams:[['btnEnterMarks','✏️','Enter Exam Marks','Any class and subject (admin)','go:exam-marks.html','#ef6c00'],
+    ['btnClassReport','📋','Class Report','Attendance, remarks, results; finalise / reopen','go:class-report.html','#0b2a5c'],
+    ['btnReportCards','🖨️','View / Print Report Cards','One class or one student','go:report-card.html','#16a34a'],
+    ['btnExamReg','📒','Exam Register','Whole class marks: print, Excel','go:exam-register.html','#0b2a5c']],
+  examsSetup:[['btnExamSettings','📝','Exam Settings','Exams, reports, grades, results, who can enter marks','go:exam-settings.html'],
+    ['btnSubjMaster','📚','Subject Master','Subjects of each class, marks, elective groups','tab:subjectMasterTab'],
+    ['btnRcSettings','🎨','Report Card Settings','Look of the report card, signatures','go:report-card-settings.html']]
+};
+function cardGo(a){
+  var k = a.split(':')[0], v = a.slice(k.length + 1);
+  if(k === 'go') window.location.href = v;
+  else if(k === 'open') window.open(v, '_blank');
+  else if(k === 'tab'){ openTab(v); if(v === 'subjectMasterTab'){ try{ loadSM(); }catch(e){} } }
+}
+function drawCards(){
+  Object.keys(CARDS).forEach(function(k){
+    var box = document.getElementById('cl_' + k); if(!box) return;
+    box.innerHTML = CARDS[k].map(function(c){ return '<button type="button" class="cbtn" data-nofb id="' + c[0] + '" style="--c:' + (c[5] || '#94a3b8') + '" onclick="cardGo(\'' + c[4] + '\')"><span class="ci">' + c[1] + '</span><span><b>' + c[2] + '</b><small>' + c[3] + '</small></span></button>'; }).join('');
+  });
+}
+/* Home only shows; a tap leads into the right tab (the card it is about flashes) */
+function goTab(id, card){
+  openTab(id);
+  if(id === 'resultControlTab'){ try{ loadAllSettings(); }catch(e){} }
+  if(card){ setTimeout(function(){ var c = document.getElementById(card); if(c){ c.scrollIntoView({block:'center', behavior:'smooth'}); c.classList.add('flash'); setTimeout(function(){ c.classList.remove('flash'); }, 1800); } }, 150); }
+}
+drawCards();
+var TAB_NAMES={profile:'profileTab',home:'homeTab',students:'tabStudents',fees:'feesTab',daily:'dailyTab',exams:'examsTab',timetable:'timetableTab',settings:'resultControlTab',users:'tabUsers',classes:'subjectMasterTab',subjects:'subjectMasterTab',backup:'backupTab'};
 /* which tab to open: ?tab=fees (or students, timetable, settings, users, classes, backup, home); ?tab=last = the tab you were on before you opened a page (this is what the Back buttons use) */
 function startTab(){
+  try{ var pn = String(localStorage.getItem('cvse_name') || localStorage.getItem('cvse_username') || 'P').trim(); document.getElementById('bProfile').textContent = (pn.charAt(0) || 'P').toUpperCase(); }catch(e){}
   var id = 'homeTab';
   try{
     var q = new URLSearchParams(location.search).get('tab'), mem = sessionStorage.getItem('cvse_admintab') || 'homeTab';
@@ -736,9 +780,9 @@ function startTab(){
 }
 // S21: staff birthdays (accepted date of birth, no year)
 function hStaffBd(r){ var l=r.staffBirthdays||[]; return l.map(function(x){ return '<div class="hrow"><span class="ic">'+(x.days===0?'🎉':'🎂')+'</span><span><b>'+esc(x.name)+'</b> · Staff<br><span class="hmut">'+(x.days===0?'Today':(x.days===1?'Tomorrow':'In '+x.days+' days, '+esc(x.date)))+'</span></span></div>'; }).join(''); }
-var TAB_BTN={homeTab:'bHome',tabStudents:'b2',feesTab:'b3',timetableTab:'b5',profileTab:'bPro',tabUsers:'b5',backupTab:'b5',resultControlTab:'b5',subjectMasterTab:'b5'};
-var SET_CHIP={resultControlTab:'sc1',tabUsers:'sc2',subjectMasterTab:'sc3',backupTab:'sc4',timetableTab:'sc6'};
-function openTab(id){ try{ sessionStorage.setItem('cvse_admintab', id); }catch(e){} var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); var bb=document.getElementById(TAB_BTN[id]); if(bb) bb.classList.add('active'); var sb=document.getElementById('setBar'); if(sb){ sb.style.display=SET_CHIP[id]?'flex':'none'; ['sc1','sc2','sc3','sc4','sc6'].forEach(function(c){ var e=document.getElementById(c); if(e) e.classList.toggle('on', SET_CHIP[id]===c); }); } window.scrollTo({top:0,behavior:'smooth'}); }
+var TAB_BTN={homeTab:'bHome',tabStudents:'b2',feesTab:'b3',dailyTab:'b7',examsTab:'bEx',timetableTab:'b5',profileTab:'bProfile',tabUsers:'b5',backupTab:'b5',resultControlTab:'b5',subjectMasterTab:'bEx'};
+var SET_CHIP={resultControlTab:'sc1',tabUsers:'sc2',backupTab:'sc4',timetableTab:'sc6'};     // S24 (F19): Subjects & Exams chip gone (Exams tab)
+function openTab(id){ try{ sessionStorage.setItem('cvse_admintab', id); }catch(e){} var t=document.getElementsByClassName('tab'); for(var i=0;i<t.length;i++) t[i].style.display='none'; document.getElementById(id).style.display='block'; var b=document.getElementsByClassName('tabBtn'); for(var i=0;i<b.length;i++) b[i].classList.remove('active'); var pc=document.getElementById('bProfile'); if(pc) pc.classList.toggle('on', id==='profileTab'); var bb=document.getElementById(TAB_BTN[id]); if(bb && bb!==pc) bb.classList.add('active'); if(id==='profileTab' && !window._pfDone){ window._pfDone=true; try{ PROFILE.mount(document.getElementById('pfBox')); }catch(e){} } var sb=document.getElementById('setBar'); if(sb){ sb.style.display=SET_CHIP[id]?'flex':'none'; ['sc1','sc2','sc3','sc4','sc6'].forEach(function(c){ var e=document.getElementById(c); if(e) e.classList.toggle('on', SET_CHIP[id]===c); }); } window.scrollTo({top:0,behavior:'smooth'}); }
 // S12: Student records = None / View / Edit (Edit includes View)
 function recTick(el,pfx){ var v=document.querySelector('.'+pfx+'_fp[value=RECVIEW]'), e=document.querySelector('.'+pfx+'_fp[value=RECEDIT]'); if(el.value==='RECEDIT'&&el.checked) v.checked=true; if(el.value==='RECVIEW'&&!el.checked) e.checked=false; }
 function getFp(pfx){ return [...document.querySelectorAll('.'+pfx+'_fp:checked')].map(function(i){return i.value;}).join(','); }
@@ -822,7 +866,7 @@ async function loadUsers(){
     let d=await apiGet('getteachers'); if(d && d.success===false){ ulist.innerHTML='<span style="color:red">'+(d.error||'Error')+'</span>'; return; } let teachers=d.teachers||d.users||d||[];
     if(!Array.isArray(teachers)) teachers=[];
     if(teachers.length==0){ ulist.innerHTML='<div style="padding:20px;text-align:center;color:#64748b">No users found — check Users sheet</div>'; return; }
-    function prettyRole(r){ if(r=='accountant') return 'Accountant'; if(r=='subjectTeacher') return 'Subject Teacher'; if(r=='classTeacher') return 'Class Teacher'; if(r=='admin') return 'Admin'; return r||''; }
+    function prettyRole(r){ if(r=='accountant') return 'Office Staff';   /* S25 (F22): role value stays 'accountant' */ if(r=='subjectTeacher') return 'Subject Teacher'; if(r=='classTeacher') return 'Class Teacher'; if(r=='admin') return 'Admin'; return r||''; }
     function roleClass(r){ if(r=='accountant') return 'rolePill-Accountant'; if(r=='subjectTeacher') return 'rolePill-SubjectTeacher'; if(r=='classTeacher') return 'rolePill-ClassTeacher'; if(r=='admin') return 'rolePill-Admin'; return ''; }
     var h='<div class="teacherGrid">';
     teachers.forEach(function(r){ var st=r.status||'Active'; var ex=r.examAccess||'NO'; var loginBadge=st.toLowerCase()=='active' ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'; var examBadge=ex.toUpperCase()=='YES' ? '<span class="badge badge-green">Exam YES</span>' : '<span class="badge badge-red">Exam NO</span>'; var initial=String(r.name||r.username||'?').trim().charAt(0).toUpperCase(); var safeUser=String(r.username||'').replace(/'/g,"\\'"); h+='<div class="teacherCard">'+'<div class="teacherAvatar">'+initial+'</div>'+'<div class="teacherMain">'+'<p class="teacherName">'+(r.name||r.username||'')+'</p>'+'<p class="teacherUser">@'+(r.username||'')+'</p>'+'<div class="teacherMeta">'+'<span class="metaPill '+roleClass(r.role)+'">'+prettyRole(r.role)+'</span>'+'<span class="metaPill">'+(r.role=='accountant' ? 'Pages: '+(r.feeAccess||'none').toLowerCase().replace(/,/g,', ') : 'Class: '+(r.classes||'—'))+'</span>'+'</div>'+'<div style="display:flex;gap:6px;flex-wrap:wrap">'+loginBadge+examBadge+'</div>'+'</div>'+'<div class="teacherActions"><button onclick="openEdit(\''+safeUser+'\')">Edit</button><button class="btn-del" onclick="delUser(\''+safeUser+'\')">Del</button></div>'+'</div>'; });
@@ -1082,15 +1126,15 @@ function drawHome(r){
   var h='<div class="hHead"><div><b>'+esc(r.day.charAt(0)+r.day.slice(1).toLowerCase())+', '+esc(r.today)+'</b><br><small>Session '+esc(r.session||'-')+'</small></div><button onclick="HOME_AT=0; loadHome(1);" style="margin:0;padding:8px 14px;min-height:40px;background:#fff;color:var(--blue);border:1.5px solid #bbdefb">🔄 Refresh</button></div>';
   if(r.noSchool) h+='<div class="box" style="background:#fff7ed;border:1.5px solid #fdba74;font-weight:700">🏖️ No school today: '+esc(r.noSchool)+'</div>';
   if(r.paused) h+='<div class="box" style="background:#fef2f2;border:2px solid #c62828;font-weight:800;color:#c62828">⏸ '+(r.paused.kind==='PROMOTION'?'Promotion is running: saving is stopped until it is finished. <a href="promotion.html">Continue the promotion</a>':'All saves are PAUSED since '+esc(r.paused.at||'')+'. Nobody can save anything. <a href="#" onclick="openTab(\'backupTab\'); loadPause(); return false;">Resume in Backup &amp; Check</a>')+'</div>';
-  if(r.staffWait && r.staffWait.people) h+='<div class="box" id="homeStaffWait" style="background:#eff6ff;border:2px solid #1976d2;font-weight:800;color:#0b2a5c">👤 Staff profiles waiting: '+r.staffWait.people+' ('+r.staffWait.fields+' detail'+(r.staffWait.fields>1?'s':'')+'). <a href="staff-profiles.html">Check now</a></div>';   // S21
-  if(r.elMissing){ var ek=Object.keys(r.elMissing); h+='<div class="box" style="background:#f5f3ff;border:2px solid #7c3aed;font-weight:800;color:#4c1d95">📚 No elective chosen yet: '+ek.map(function(c){ return r.elMissing[c]+' student'+(r.elMissing[c]>1?'s':'')+' of '+esc(c); }).join(', ')+'. <a href="electives.html">Give elective subjects</a></div>'; }   // S23 (L11)
-  if(r.reg && r.reg.waiting) h+='<div class="box" style="background:#eff6ff;border:2px solid #1976d2;font-weight:800;color:#0b2a5c">📝 '+r.reg.waiting+' parent registration form'+(r.reg.waiting>1?'s wait':' waits')+' for checking. <a href="registration-requests.html">Check now</a></div>';   // S16
+  if(r.staffWait && r.staffWait.people) h+='<div class="box" id="homeStaffWait" style="background:#eff6ff;border:2px solid #1976d2;font-weight:800;color:#0b2a5c">👤 Staff profiles waiting: '+r.staffWait.people+' ('+r.staffWait.fields+' detail'+(r.staffWait.fields>1?'s':'')+'). <a href="#" onclick="goTab(\'tabUsers\',\'btnStaffProfiles\');return false;">Check now</a></div>';   // S21
+  if(r.elMissing){ var ek=Object.keys(r.elMissing); h+='<div class="box" style="background:#f5f3ff;border:2px solid #7c3aed;font-weight:800;color:#4c1d95">📚 No elective chosen yet: '+ek.map(function(c){ return r.elMissing[c]+' student'+(r.elMissing[c]>1?'s':'')+' of '+esc(c); }).join(', ')+'. <a href="#" onclick="goTab(\'tabStudents\',\'btnElectives\');return false;">Give elective subjects</a></div>'; }   // S23 (L11)
+  if(r.reg && r.reg.waiting) h+='<div class="box" style="background:#eff6ff;border:2px solid #1976d2;font-weight:800;color:#0b2a5c">📝 '+r.reg.waiting+' parent registration form'+(r.reg.waiting>1?'s wait':' waits')+' for checking. <a href="#" onclick="goTab(\'tabStudents\',\'btnRegReq\');return false;">Check now</a></div>';   // S16
   if(r.promo && r.promo.finishing && r.promo.finishing.length) h+='<div class="box" style="background:#f5f3ff;border:2px solid #7c3aed;font-weight:700;color:#4c1d95">🎓 Not yet promoted (still finishing the old session): '+esc(r.promo.finishing.join(', '))+'. They pay only previous dues until promoted. <a href="promotion.html">Promote them when ready</a></div>';
   h+='<div class="hGrid">';
   var a=r.attention, rows='';
   if(a){
-    if(a.attendance){ rows+= a.attendance.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Attendance: not needed ('+esc(a.attendance.skipped)+')</span></div>' : (a.attendance.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Attendance not marked:</b> '+a.attendance.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Attendance marked for all '+a.attendance.total+' classes</span></div>'); }
-    if(a.daily){ rows+= a.daily.skipped ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">Daily update: not needed ('+esc(a.daily.skipped)+')</span></div>' : (a.daily.missing.length ? '<div class="hrow"><span class="ic">⚠️</span><span class="hwarn"><b>Daily update not published:</b> '+a.daily.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow"><span class="ic">✅</span><span class="hgood">Daily update published for all '+a.daily.total+' classes</span></div>'); }
+    if(a.attendance){ rows+= a.attendance.skipped ? '<div class="hrow hlink" onclick="goTab(\'dailyTab\',\'btnAtt\')"><span class="ic">✅</span><span class="hmut">Attendance: not needed ('+esc(a.attendance.skipped)+')</span></div>' : (a.attendance.missing.length ? '<div class="hrow hlink" onclick="goTab(\'dailyTab\',\'btnAtt\')"><span class="ic">⚠️</span><span class="hwarn"><b>Attendance not marked:</b> '+a.attendance.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow hlink" onclick="goTab(\'dailyTab\',\'btnAtt\')"><span class="ic">✅</span><span class="hgood">Attendance marked for all '+a.attendance.total+' classes</span></div>'); }
+    if(a.daily){ rows+= a.daily.skipped ? '<div class="hrow hlink" onclick="goTab(\'dailyTab\',\'btnDailyUpd\')"><span class="ic">✅</span><span class="hmut">Daily update: not needed ('+esc(a.daily.skipped)+')</span></div>' : (a.daily.missing.length ? '<div class="hrow hlink" onclick="goTab(\'dailyTab\',\'btnDailyUpd\')"><span class="ic">⚠️</span><span class="hwarn"><b>Daily update not published:</b> '+a.daily.missing.map(esc).join(', ')+'</span></div>' : '<div class="hrow hlink" onclick="goTab(\'dailyTab\',\'btnDailyUpd\')"><span class="ic">✅</span><span class="hgood">Daily update published for all '+a.daily.total+' classes</span></div>'); }
     if(a.locked && a.locked.on) rows+='<div class="hrow" id="homeLockRow"><span class="ic">🔒</span><span class="hmut">Checking students locked for unpaid fees...</span></div>';
     if(a.system) rows+= a.system.allOk ? '<div class="hrow"><span class="ic">✅</span><span class="hmut">All script files are the latest ('+esc(a.system.version)+')</span></div>' : '<div class="hrow"><span class="ic">❌</span><span class="herr">Old script files: '+a.system.old.map(esc).join(', ')+' · <a href="#" onclick="openTab(\'backupTab\'); loadBackupInfo(); return false;">open System check</a></span></div>';
   }
@@ -1098,7 +1142,7 @@ function drawHome(r){
   if(rows) h+='<div class="hcard"><h3>📌 Needs attention</h3>'+rows+'</div>';
   if(r.collection){
     var c=r.collection, d=c.decimals||0, modes=Object.keys(c.byMode||{}).map(function(k){ return '<span class="hchip">'+esc(k)+' '+hMoney(c.byMode[k],d)+'</span>'; }).join('');
-    h+='<div class="hcard"><h3>💵 Today\'s collection</h3><div class="hbig">'+hMoney(c.total,d)+'</div><div class="hmut">'+c.count+' receipt'+(c.count===1?'':'s')+(c.cancelled?' · '+c.cancelled+' cancelled':'')+'</div>'+(modes?'<div>'+modes+'</div>':'')+'<div class="hbtns"><button onclick="window.location.href=\'fees-collect.html\'" style="background:linear-gradient(135deg,#ef6c00,#fb923c)">Collect Fees</button><button onclick="window.location.href=\'fees-receipts.html\'" style="background:#0b2a5c">Receipts</button></div></div>';
+    h+='<div class="hcard"><h3>💵 Today\'s collection</h3><div class="hbig">'+hMoney(c.total,d)+'</div><div class="hmut">'+c.count+' receipt'+(c.count===1?'':'s')+(c.cancelled?' · '+c.cancelled+' cancelled':'')+'</div>'+(modes?'<div>'+modes+'</div>':'')+'<div class="hbtns"><button onclick="goTab(\'feesTab\',\'btnCollect\')" style="background:linear-gradient(135deg,#ef6c00,#fb923c)">Collect Fees</button><button onclick="goTab(\'feesTab\',\'btnReceipts\')" style="background:#0b2a5c">Receipts</button></div></div>';
   } else if(r.errors && r.errors.collection) h+='<div class="hcard"><h3>💵 Today\'s collection</h3>'+hErr(r,'collection')+'</div>';
   if(r.birthdays){
     var b=r.birthdays, list=b.list||[], bh='';
@@ -1110,7 +1154,7 @@ function drawHome(r){
   else if(hStaffBd(r)) h+='<div class="hcard"><h3>🎂 Birthdays</h3>'+hStaffBd(r)+'</div>';
   if(r.events){
     var eh=r.events.length ? r.events.map(function(e){ return '<div class="hrow"><span class="ic">📅</span><span><b>'+esc(e.title)+'</b><br><span class="hmut">'+(e.today?'On now · ':'')+esc(e.date)+(e.endDate&&e.endDate!==e.date?' to '+esc(e.endDate):'')+(e.time?' · '+esc(e.time):'')+(e.classes?' · '+esc(e.classes):'')+'</span></span></div>'; }).join('') : '<div class="hrow"><span class="ic">📅</span><span class="hmut">Nothing in the next 14 days.</span></div>';
-    h+='<div class="hcard"><h3>📅 Coming up</h3>'+eh+'<div class="hbtns"><button onclick="window.location.href=\'events.html\'" style="background:#1976d2">Open Calendar</button></div></div>';
+    h+='<div class="hcard"><h3>📅 Coming up</h3>'+eh+'<div class="hbtns"><button onclick="goTab(\'dailyTab\',\'btnEvents\')" style="background:#1976d2">Open Calendar</button></div></div>';
   } else if(r.errors && r.errors.eventsList) h+='<div class="hcard"><h3>📅 Coming up</h3>'+hErr(r,'eventsList')+'</div>';
   h+='</div>';
   document.getElementById('homeBody').innerHTML=h;

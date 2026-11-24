@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S24">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -448,7 +448,16 @@ function drawTT(){
   }
   $('ttBody').innerHTML = h + '</div>';
 }
-function printTT(){ document.body.classList.add('ptt'); window.print(); setTimeout(() => document.body.classList.remove('ptt'), 500); }
+/* S24 (F10): keep 'ptt' until printing is really over – on a phone window.print() returns at once and the preview re-renders when the phone turns,
+   so a timer emptied the page. Remove it on 'afterprint' (fallback: the print media query turning off). */
+function printTT(){
+  document.body.classList.add('ptt');
+  let done = false, mq = window.matchMedia ? window.matchMedia('print') : null;
+  const off = () => { if(done) return; done = true; document.body.classList.remove('ptt'); window.removeEventListener('afterprint', off); if(mq && mq.removeEventListener) mq.removeEventListener('change', mqf); };
+  const mqf = e => { if(!e.matches) setTimeout(off, 300); };
+  window.addEventListener('afterprint', off); if(mq && mq.addEventListener) mq.addEventListener('change', mqf);
+  window.print();
+}
 
 /* ---------- profile ---------- */
 async function loadProfile(){

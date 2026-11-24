@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -191,7 +191,7 @@ var SETF = [
  ['Receipt_Style','Receipt layout','sel',[['FORM','Form (boxes like the paper receipt)'],['LIST','Simple list']]],
  ['Receipt_Copies','Receipt copies when printing','sel',[['ONE_PAGE','Parent copy + office copy on one page'],['TWO_PAGES','Two pages'],['ONE_COPY','One copy only']]],
  ['Receipt_ShowWords','Show amount in words','yn'],
- ['Receipt_BackDays','How many days back can a receipt be dated?','num','','0 = today only (safest). 3 = today or up to 3 days back. Older dates: only the admin, or an accountant with the Users permission "Back-date receipts beyond the limit", and a reason is asked.'],
+ ['Receipt_BackDays','How many days back can a receipt be dated?','num','','0 = today only (safest). 3 = today or up to 3 days back. Older dates: only the admin, or an Office Staff user with the Users permission "Back-date receipts beyond the limit", and a reason is asked.'],
  ['Payment',null],
  ['Pay_Modes','Payment modes (comma separated)','text','','Example: Cash, UPI, Cheque, Bank transfer'],
  ['Fee_Decimals','Show paise','sel',[['0','No (whole rupees)'],['2','Yes (2 decimals)']]],
@@ -206,7 +206,7 @@ var SETF = [
  ['Fine_From','Late fine counts from (DD-MM-YYYY)','date','','Filled with today when you switch the late fine on. Months fully paid before this day never get a fine, so parents get no surprise fines for months already settled. Unpaid months still get their fine from their due date.'],
  ['__waive','Waive late fines for a class or the whole school','waivebox'],
  ['Who can collect',null],
- ['Role_ClassTeacherCollects','Class teachers may collect fees for their own class','yn','','Accountants are given their permissions in Admin → Users.'],
+ ['Role_ClassTeacherCollects','Class teachers may collect fees for their own class','yn','','Office Staff are given their permissions in Admin → Users.'],
  ['Unpaid fees (Result tab lock)',null],
  ['Dues_Rule','Close the Result tab and report card when fees are overdue','sel',[['OFF','No, keep Result always open'],['RESULT','Yes, close it while fees are overdue']],'Before you switch this on, please check your board rules and the Right to Education Act. Holding back a child\'s result for unpaid fees is a contested matter, and this software only follows the school\'s decision. The office can unlock one student for some days (Admin → Users → permission "Unlock").'],
  ['Dues_Grace_Days','Close it when the oldest unpaid fee is overdue by more than this many days','num','','0 = from the day after the due date. Change it whenever results are declared (for example 4 days if results come on the 5th, 10 days if on the 15th). Closes and opens by itself as fees are paid.'],
@@ -214,7 +214,6 @@ var SETF = [
  ['Dues_IncludePrevious','Count previous-session dues as overdue','yn'],
  ['Dues_Message','Message shown to the parent','text','','The overdue amount is added to this message automatically.'],
  ['Rules',null],
- ['Transport_HeadID','Monthly head used for bus fee','headsel','','The bus amount comes from the route chosen for each student. This head decides the months and due day: the route amount is charged in each ticked month (all 12 = monthly, 4 = quarterly, 2 = half-yearly, 1 = once a year). Only Monthly heads are listed: if your bus head is "Instalments", change it to Monthly in Fee Heads first.'],
  ['Discount_Combine','Sibling + other concession','sel',[['ADD','Add both (never more than the fee)'],['BEST','Give only the bigger one']]],
  ['Pay_InOrder','Fees must be paid in order','yn','','Yes (recommended): each fee head is paid month by month (February waits for January; an instalment waits for the one before), and previous-session dues come first. Accessories and a typed fine are never blocked. Only the admin can take fees out of order, with a reason. While this is Yes, a part amount always goes to the oldest dues first.'],
  ['Pay_Order','When a parent pays a part amount','sel',[['OLDEST_FIRST','Oldest dues first'],['CURRENT_FIRST','Current fees first']]],
@@ -350,34 +349,56 @@ function addGroup(){ $('list').insertAdjacentHTML('beforeend', grp({column:1}));
 function rGroups(){ return [...document.querySelectorAll('#list .card2')].map(c=>({id:c.dataset.id,name:c.querySelector('.f_name').value,column:c.querySelector('.f_col').value})); }
 /* ---- heads ---- */
 function gOpts(v){ return D.groups.map(g=>'<option value="'+esc(g.id)+'"'+(g.id===v?' selected':'')+'>'+esc(g.name)+'</option>').join(''); }
-function busHead(){ return String((D.settings||{}).Transport_HeadID||''); }      // S23 (F5)
+function busHead(){ return String((D.settings||{}).Transport_HeadID||''); }      // S23 (F5); S24 (F9): chosen by the tick on a head card
+var BUS_NOTE = 'Tick the months the bus fee is collected: all 12 for monthly, 4 for quarterly, 2 for half-yearly, 1 for once a year. The route amount is charged in each ticked month.';
 function head(h){
   let ms = String(h.months||'').split(',').filter(x=>x).map(Number), cl = String(h.classes||'').split(',').filter(x=>x), bus = !!h.id && h.id===busHead();
   return '<div class="card2" data-id="'+esc(h.id||'')+'"><button class="x" onclick="this.closest(\'.card2\').remove()">✕</button>'+
-  (bus ? '<div style="display:inline-block;background:#e0f2fe;color:#075985;font-weight:800;font-size:12px;border-radius:999px;padding:3px 10px;margin-bottom:6px">🚌 Bus fee head – stays Monthly</div>' : '')+
+  '<label class="busTick" style="display:flex;gap:8px;align-items:center;background:'+(bus?'#e0f2fe':'#f8fafc')+';border:1px solid '+(bus?'#7dd3fc':'#e2e8f0')+';border-radius:12px;padding:10px 12px;margin:0 46px 8px 0;font-weight:800;color:#075985;min-height:46px;box-sizing:border-box"><input type="checkbox" class="f_bus" style="width:22px;height:22px;margin:0"'+(bus?' checked':'')+' onchange="busTick(this)">🚌 This is the bus fee (the amount comes from Bus Routes)</label>'+
   '<label>Name</label><input class="f_name" style="width:calc(100% - 46px)" value="'+esc(h.name||'')+'">'+
   '<div class="row2"><div><label>Group</label><select class="f_group">'+gOpts(h.groupId)+'</select></div>'+
   '<div><label>Type</label><select class="f_type" onchange="typeCh(this)"><option value="INSTALMENTS"'+(h.type!=='MONTHLY'?' selected':'')+(bus?' disabled':'')+'>Instalments / one-time</option><option value="MONTHLY"'+(h.type==='MONTHLY'?' selected':'')+'>Monthly</option></select></div></div>'+
   '<div class="row2"><div><label>Applies to</label><select class="f_app">'+[['ALL','All students'],['NEW','New students only'],['OLD','Old students only']].map(o=>'<option value="'+o[0]+'"'+(h.applies===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>'+
   '<div><label>Given to</label><select class="f_scope"><option value="COMPULSORY"'+(h.scope!=='OPTIONAL'?' selected':'')+'>Everyone (compulsory)</option><option value="OPTIONAL"'+(h.scope==='OPTIONAL'?' selected':'')+'>Chosen students (optional)</option></select></div></div>'+
   '<label>Classes (none ticked = all classes)</label><div class="cl f_cls">'+(D.levels||[]).map(l=>'<label style="background:#f3e8ff"><input type="checkbox" value="'+esc(l)+'"'+(cl.indexOf(l)>-1?' checked':'')+'>'+esc(l)+' (all sections)</label>').join('')+D.classes.map(c=>'<label><input type="checkbox" value="'+esc(c)+'"'+(cl.indexOf(c)>-1?' checked':'')+'>'+esc(c)+'</label>').join('')+'</div>'+
-  '<div class="mon" style="display:'+(h.type==='MONTHLY'?'block':'none')+'"><label>Months charged</label>'+(bus?'<div class="help" style="margin:2px 0 6px">Tick the months the bus fee is collected: all 12 for monthly, 4 for quarterly, 2 for half-yearly, 1 for once a year. The route amount is charged in each ticked month.</div>':'')+'<div class="mo f_mon">'+MORDER.map(m=>'<label><input type="checkbox" value="'+m+'"'+(ms.indexOf(m)>-1?' checked':'')+'>'+MN[m]+'</label>').join('')+'</div>'+
+  '<div class="mon" style="display:'+(h.type==='MONTHLY'?'block':'none')+'"><label>Months charged</label>'+'<div class="help busMo" style="margin:2px 0 6px;display:'+(bus?'block':'none')+'">'+BUS_NOTE+'</div>'+'<div class="mo f_mon">'+MORDER.map(m=>'<label><input type="checkbox" value="'+m+'"'+(ms.indexOf(m)>-1?' checked':'')+'>'+MN[m]+'</label>').join('')+'</div>'+
   '<div class="row2"><div><label>Due day of month</label><input class="f_day" type="number" value="'+esc(h.dueDay||10)+'"></div><div><label>Starts</label><select class="f_start"><option value="FROM_ADMISSION_MONTH"'+(h.startRule!=='ALWAYS'?' selected':'')+'>From admission month</option><option value="ALWAYS"'+(h.startRule==='ALWAYS'?' selected':'')+'>Always from first month</option></select></div></div></div>'+
   '<label>Status</label><select class="f_stat"><option value="ACTIVE">Active</option><option value="INACTIVE"'+(h.status==='INACTIVE'?' selected':'')+'>Inactive (hidden, kept for old receipts)</option></select></div>';
 }
 function typeCh(el){ el.closest('.card2').querySelector('.mon').style.display = el.value==='MONTHLY'?'block':'none'; }
+/* S24 (F9): only ONE head is the bus fee; ticking another one moves it (in-page confirm). Ticked = Monthly forced, Instalments greyed. */
+function busLook(card, on){
+  let t = card.querySelector('.f_type'), lb = card.querySelector('.busTick');
+  if(on){ t.value = 'MONTHLY'; typeCh(t); }
+  t.querySelector('option[value="INSTALMENTS"]').disabled = on;
+  card.querySelector('.busMo').style.display = on ? 'block' : 'none';
+  lb.style.background = on ? '#e0f2fe' : '#f8fafc'; lb.style.borderColor = on ? '#7dd3fc' : '#e2e8f0';
+}
+async function busTick(cb){
+  let card = cb.closest('.card2');
+  if(cb.checked){
+    let other = [...document.querySelectorAll('#list .f_bus')].filter(x=>x!==cb && x.checked);
+    if(other.length){
+      let on = other[0].closest('.card2').querySelector('.f_name').value || 'the other head', me = card.querySelector('.f_name').value || 'this head';
+      if(!(await UI.ask('"'+on+'" is the bus fee now. Make "'+me+'" the bus fee instead?'))){ cb.checked = false; return; }
+      other.forEach(x=>{ x.checked = false; busLook(x.closest('.card2'), false); });
+    }
+  }
+  busLook(card, cb.checked);
+}
 function dHeads(){
   if(!D.groups.length) return '<div class="empty-note">Add the Groups first.</div>';
   return '<div id="list">'+D.heads.map(head).join('')+'</div><div class="btnrow"><button class="btn b-blue" onclick="addHead()">+ Add fee head</button></div>';
 }
 function addHead(){ $('list').insertAdjacentHTML('beforeend', head({type:'INSTALMENTS',applies:'ALL',scope:'COMPULSORY',dueDay:10,groupId:D.groups[0].id})); }
-function rHeads(){ return [...document.querySelectorAll('#list .card2')].map(c=>({id:c.dataset.id,name:c.querySelector('.f_name').value,groupId:c.querySelector('.f_group').value,type:c.querySelector('.f_type').value,applies:c.querySelector('.f_app').value,scope:c.querySelector('.f_scope').value,
+function rHeads(){ return [...document.querySelectorAll('#list .card2')].map(c=>({id:c.dataset.id,bus:c.querySelector('.f_bus').checked?'1':'',name:c.querySelector('.f_name').value,groupId:c.querySelector('.f_group').value,type:c.querySelector('.f_type').value,applies:c.querySelector('.f_app').value,scope:c.querySelector('.f_scope').value,
   classes:[...c.querySelectorAll('.f_cls input:checked')].map(i=>i.value).join(','),months:[...c.querySelectorAll('.f_mon input:checked')].map(i=>i.value).join(','),dueDay:c.querySelector('.f_day').value,startRule:c.querySelector('.f_start').value,status:c.querySelector('.f_stat').value})); }
 /* ---- amounts grid ---- */
 function activeHeads(type){ return D.heads.filter(h=>h.status==='ACTIVE' && (!type || h.type===type)); }
 function amtOf(hid,c){ let r = D.structure.find(x=>x.headId===hid && x.className===c.toUpperCase()); return r ? r.amount : ''; }
 function dStructure(){
-  let hs = activeHeads(); if(!hs.length) return '<div class="empty-note">Add the Fee Heads first.</div>';
+  let bh = D.heads.find(x=>x.id===busHead() && x.status==='ACTIVE');
+  let hs = activeHeads().filter(x=>x.id!==busHead()); if(!hs.length) return '<div class="empty-note">Add the Fee Heads first.</div>'+busAmtNote(bh);
   if(!D.classes.length) return '<div class="empty-note">No classes found. Add classes in the Classes tab first.</div>';
   let h = '<div class="scroll"><table class="amt"><tr><th>Class</th>'+hs.map(x=>'<th>'+esc(x.name)+'<br><small>'+(x.type==='MONTHLY'?'per month':'total')+'</small></th>').join('')+'</tr>';
   // S13: a row 'X (all sections)' before the sections of X; a section left blank uses the X amount, its own amount wins (0 = not charged)
@@ -389,13 +410,15 @@ function dStructure(){
     let useLv = l && lv.indexOf(l)>-1;
     h += '<tr><td>'+esc(c)+'</td>'+hs.map(x=>'<td><input inputmode="decimal" data-h="'+esc(x.id)+'" data-c="'+esc(c)+'" value="'+esc(amtOf(x.id,c))+'"'+(useLv&&amtOf(x.id,l)!==''?' placeholder="'+esc(amtOf(x.id,l))+' (as '+esc(l)+')"':'')+'></td>').join('')+'</tr>';
   });
-  return (lv.length?'<div class="help">Purple row = enter once for all sections of that class. A section left blank pays the purple amount; type an amount in a section only when it is different (0 = not charged).</div>':'') + h + '</table></div>';
+  return busAmtNote(bh) + (lv.length?'<div class="help">Purple row = enter once for all sections of that class. A section left blank pays the purple amount; type an amount in a section only when it is different (0 = not charged).</div>':'') + h + '</table></div>';
 }
+/* S24 (F8): the bus head has no column – its amount comes from Bus Routes; old saved amounts stay in the sheet, unused */
+function busAmtNote(bh){ return bh ? '<div class="help" style="background:#e0f2fe;color:#075985;border:1px solid #7dd3fc;border-radius:12px;padding:10px;margin-bottom:10px;font-weight:700">🚌 '+esc(bh.name)+': the amount comes from Bus Routes (each student\'s route).</div>' : ''; }
 function rStructure(){
   let rows = [], seen = {};
   document.querySelectorAll('.amt input').forEach(i=>rows.push({headId:i.dataset.h,className:i.dataset.c,amount:i.value}));
-  // keep amounts of inactive heads untouched
-  D.structure.forEach(s=>{ let h = D.heads.find(x=>x.id===s.headId); if(h && h.status!=='ACTIVE') rows.push({headId:s.headId,className:s.className,amount:s.amount}); });
+  // keep amounts of inactive heads (and of the bus head, S24) untouched
+  D.structure.forEach(s=>{ let h = D.heads.find(x=>x.id===s.headId); if(h && (h.status!=='ACTIVE' || h.id===busHead())) rows.push({headId:s.headId,className:s.className,amount:s.amount}); });
   return rows;
 }
 /* ---- instalments ---- */
@@ -423,7 +446,7 @@ function routeAmtLabel(){      // S23 (F5): amount charged in each ticked month 
   ms.sort((a,b)=>MORDER.indexOf(a)-MORDER.indexOf(b));
   return 'Amount each time it falls due' + (ms.length && ms.length < 12 ? ' ('+ms.map(m=>MN[m]).join(', ')+')' : ms.length===12 ? ' (every month)' : '');
 }
-function dRoutes(){ return (busHead() ? '' : '<div class="help" style="background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:12px;padding:10px;margin-bottom:10px;font-weight:700">⚠ Bus routes are set, but no fee head is chosen for the bus fee, so no bus fee is charged. Choose it in Receipt &amp; Rules → Monthly head used for bus fee.</div>') + '<div id="list">'+D.routes.map(routeRow).join('')+'</div><div class="btnrow"><button class="btn b-blue" onclick="$(\'list\').insertAdjacentHTML(\'beforeend\',routeRow({}))">+ Add route</button></div>'; }
+function dRoutes(){ return (busHead() || !D.routes.length ? '' : '<div class="help" style="background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:12px;padding:10px;margin-bottom:10px;font-weight:700">⚠ Bus routes are set, but no fee head is ticked as the bus fee, so no bus fee is charged. Tick it in Fee Heads → "🚌 This is the bus fee".</div>') + '<div id="list">'+D.routes.map(routeRow).join('')+'</div><div class="btnrow"><button class="btn b-blue" onclick="$(\'list\').insertAdjacentHTML(\'beforeend\',routeRow({}))">+ Add route</button></div>'; }
 function rRoutes(){ return [...document.querySelectorAll('#list .card2')].map(c=>({routeId:c.dataset.id,name:c.querySelector('.f_n').value,monthly:c.querySelector('.f_m').value,oneWay:c.querySelector('.f_o').value,status:c.querySelector('.f_t').value})); }
 /* ---- slabs ---- */
 function slabRow(s){ let hs=activeHeads('INSTALMENTS'); return '<div class="card2"><button class="x" onclick="this.closest(\'.card2\').remove()">✕</button><label>Fee head</label><select class="f_h" style="width:calc(100% - 46px)">'+hs.map(h=>'<option value="'+esc(h.id)+'"'+(h.id===s.headId?' selected':'')+'>'+esc(h.name)+'</option>').join('')+'</select>'+
@@ -455,7 +478,8 @@ var READ = {settings:rSettings,groups:rGroups,heads:rHeads,structure:rStructure,
 async function save(){
   let b = $('saveBtn'), m = $('sMsg'), sec = TAB; b.disabled = true; show(m,'Saving...','load');
   try{
-    let r = await apiPost('savefeesetup',{section:sec,session:D.session,rows:JSON.stringify(READ[sec]())});
+    let pl = {section:sec,session:D.session,rows:JSON.stringify(READ[sec]())}; if(sec==='heads') pl.busSet = '1';     // S24 (F9)
+    let r = await apiPost('savefeesetup',pl);
     if(r.success){ await load(D.session); TAB = sec; chips(); draw(); show($('sMsg'),'✅ '+r.message,'ok'); return; }
     show(m,'❌ '+(r.error||'Could not save.'),'err'); m.scrollIntoView({block:'center'});
   }catch(e){ show(m,'❌ Could not connect. Nothing was saved. Try again.','err'); }

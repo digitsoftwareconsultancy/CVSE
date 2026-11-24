@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Class Report</title>
@@ -82,6 +82,7 @@ details.ps summary{min-height:46px;display:flex;align-items:center;font-weight:8
 .arow{padding:8px 0;border-top:1px solid var(--line)}.arow b{font-size:13px;color:var(--navy)}
 .arow .ex{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.arow .ex div{flex:1;min-width:90px}
 .arow .ex span{font-size:10px;font-weight:800;color:var(--muted);display:block}
+.sbox{padding:0 0 8px}.srow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}.srow span:last-child{font-weight:800;white-space:nowrap}
 #sStats .stat{min-width:70px;padding:8px 4px}.miss{font-size:12.5px;line-height:1.6}.miss div{padding:2px 0}
 .bar{height:10px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:var(--green)}
 .cnt{font-size:11px;color:var(--muted);text-align:right}
@@ -125,6 +126,10 @@ details.ps summary{min-height:46px;display:flex;align-items:center;font-weight:8
     <div class="box" id="bulkBox">
       <div class="title" style="font-size:15px">Working days (whole class)</div>
       <div class="row"><div><input id="bulkWd" inputmode="decimal" placeholder="e.g. 220"></div><div><button class="btn b-purple" style="width:100%" onclick="applyWd()">Apply to all</button></div></div>
+      <div class="title" style="font-size:15px;margin-top:12px">Final result (whole class)</div>
+      <div class="btnrow"><button class="btn b-green" id="btnFill" data-nofb onclick="fillResults()">✨ Fill results from marks</button></div>
+      <div class="meta" style="margin-top:4px">Pass → the first Pass choice, Fail → the first Fail choice, marks incomplete → left as it is. You can change any of them. Nothing is saved until Save All.</div>
+      <div class="msg" id="fillMsg"></div>
     </div>
 
     <div id="list"></div>
@@ -169,7 +174,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-async function goBack(){ if(DIRTY.size && !(await UI.ask('You have unsaved changes. Leave them?'))) return; window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'class-dashboard.html'; }
+async function goBack(){ if(DIRTY.size && !(await UI.ask('You have unsaved changes. Leave them?'))) return; window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html'; }   // S25: straight to the teacher app (it opens the tab you came from)
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 var OPTS = [], DATA = null, DIRTY = new Set();
@@ -214,7 +219,7 @@ async function loadClass(){
   try{
     let r = await apiGet('getclassfinal', {reportId:$('selReport').value, className:$('selClass').value});
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
-    DATA = r; DIRTY.clear(); hide($('gMsg')); hide($('fMsg')); $('fWarn').innerHTML = ''; draw();
+    DATA = r; DIRTY.clear(); hide($('gMsg')); hide($('fMsg')); hide($('fillMsg')); hide($('fillMsg')); $('fWarn').innerHTML = ''; draw();
   }catch(e){ show($('gMsg'), '❌ Network problem. Please try again.', 'err'); }
   finally{ b.disabled = false; }
 }
@@ -260,10 +265,39 @@ function draw(){
       '<div class="sum">' + score + tag + '</div>' +
       '<label>Final result</label><select id="res' + i + '" ' + dis + ' onchange="mark(' + i + ')">' + resOpts + '</select>' +
       '<div class="two"><div><label>Working days</label><input id="wd' + i + '" inputmode="decimal" value="' + esc(s.final.workingDays) + '" ' + dis + ' oninput="mark(' + i + ')"></div><div><label>Present days</label><input id="pd' + i + '" inputmode="decimal" value="' + esc(s.final.presentDays) + '" ' + dis + ' oninput="mark(' + i + ')"></div></div>' +
-      '<label>Remark</label><textarea id="rm' + i + '" maxlength="300" ' + dis + ' oninput="mark(' + i + ')">' + esc(s.final.remark) + '</textarea>' + areas + '</div>';
+      '<label>Remark</label><textarea id="rm' + i + '" maxlength="300" ' + dis + ' oninput="mark(' + i + ')">' + esc(s.final.remark) + '</textarea>' + subjFold(s) + areas + '</div>';
   }).join('');
 }
 function mark(i){ DIRTY.add(i); $('sc' + i).classList.add('dirty'); }
+/* S24 (F16): each subject's marks obtained / full (or grade); failed subjects red, missing '–' */
+function subjFold(s){
+  let rows = (s.subjects || []).map(x => {
+    let any = (x.exams || []).some(e => e.entered), v, cls = '';
+    if(!any) v = '–';
+    else if(x.max) v = (x.total === null || x.total === undefined ? '–' : x.total) + ' / ' + x.max + (x.complete ? '' : ' <small>(not all entered)</small>');
+    else v = esc(x.grade || '–');
+    if(any && x.complete && x.passed === false){ cls = ' style="color:#c62828;font-weight:800"'; v += ' ✖'; }
+    return '<div class="srow"' + cls + '><span>' + esc(x.name) + '</span><span>' + v + '</span></div>';
+  });
+  (s.co || []).forEach(c => { let vals = (c.perExam || []).map(e => e.value).filter(v => v); rows.push('<div class="srow"><span>' + esc(c.name) + '</span><span>' + (vals.length ? esc(vals.join(' · ')) : '–') + '</span></div>'); });
+  return rows.length ? '<details class="ps"><summary>📊 Subject marks</summary><div class="sbox">' + rows.join('') + '</div></details>' : '';
+}
+/* S24 (F16): fill the final result from the marks (only on the page; Save All saves) */
+function fillResults(){
+  let m = $('fillMsg'), opts = DATA.resultOptions || [];
+  let pass = opts.find(o => o.counts === 'PASS'), fail = opts.find(o => o.counts === 'FAIL');
+  if(!pass && !fail){ show(m, '❌ This report has no Pass / Fail result choices. Add them in Exam Settings → Results.', 'err'); return; }
+  let np = 0, nf = 0, ni = 0, nx = 0;
+  DATA.students.forEach((s, i) => {
+    let sel = $('res' + i); if(!sel || sel.disabled) return;
+    let o = s.suggested === 'PASS' ? pass : s.suggested === 'FAIL' ? fail : null;
+    if(s.suggested !== 'PASS' && s.suggested !== 'FAIL'){ ni++; return; }
+    if(!o){ nx++; return; }
+    if(sel.value !== o.text){ sel.value = o.text; mark(i); }
+    s.suggested === 'PASS' ? np++ : nf++;
+  });
+  show(m, '✅ Filled: ' + np + ' Pass, ' + nf + ' Fail.' + (ni ? ' ' + ni + ' with marks incomplete were left as they are.' : '') + (nx ? ' ' + nx + ' had no matching choice.' : '') + ' Check them, then tap 💾 Save All.', 'ok');
+}
 async function openCards(){
   if(DIRTY.size && !(await UI.ask('You have unsaved changes. Leave them?'))) return;
   window.location.href = 'report-card.html?report=' + encodeURIComponent(DATA.report.id) + '&class=' + encodeURIComponent(DATA.className);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S24">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bus &amp; Optional Fees</title>
@@ -226,7 +226,7 @@ async function loadCls(){
     $('aR').innerHTML = D.routes.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+' — '+rs(x.monthly)+(x.oneWay!==null&&x.oneWay!==''?' / one-way '+rs(x.oneWay):'')+'</option>').join('');
     $('aF').innerHTML = mOpt('Start of session'); $('aU').innerHTML = mOpt('End of session');
     $('main').style.display = 'block'; drawApply(); drawList();
-    if(!D.transportHeadId && D.routes.length && !D.closed) show($('gMsg'),'⚠ Bus routes are set, but no fee head is chosen for the bus fee, so no bus fee is charged. Choose it in Fees Settings → Receipt & Rules → Monthly head used for bus fee.','warn');   // S23 (F5)
+    if(!D.transportHeadId && D.routes.length && !D.closed) show($('gMsg'),'⚠ Bus routes are set, but no fee head is chosen for the bus fee, so no bus fee is charged. Tick it in Fees Settings → Fee Heads → "🚌 This is the bus fee".','warn');   // S23 (F5), S24 (F9)
   }catch(e){ show($('gMsg'),'❌ Could not connect. Try again.','err'); }
 }
 function headName(id){ if(id==='BUS') return 'Bus'; let h = D.heads.find(x=>x.id===id); return h ? h.name : id; }

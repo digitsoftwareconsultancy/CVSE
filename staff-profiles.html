@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Staff profiles</title>
@@ -108,7 +108,7 @@ $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText 
 $('avatarLetter').innerText = String(USER.name || USER.username || 'U').trim().charAt(0).toUpperCase();
 if(!ls('cvse_token') || USER.role !== 'admin'){ window.location.href = 'index.html'; }
 $('roleBadge').innerText = 'ADMIN';
-var ROLE = {admin:'Admin', accountant:'Accountant', classTeacher:'Class teacher', subjectTeacher:'Subject teacher'};
+var ROLE = {admin:'Admin', accountant:'Office Staff', classTeacher:'Class teacher', subjectTeacher:'Subject teacher'};
 var LIST = null, ONE = null, FILTER = 'wait';
 function goBack(){ window.location.href = 'admin.html?tab=last'; }
 function toList(){ ONE = null; loadList(); }

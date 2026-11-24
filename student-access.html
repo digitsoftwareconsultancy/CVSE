@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Access</title>
@@ -145,7 +145,7 @@ function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText =
 function hide(el){ el.className = 'msg'; }
 function goBack(){ window.location.href = IS_ACC ? 'accountant.html' : 'admin.html?tab=last'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
-if(IS_ACC) $('roleBadge').innerText = 'ACCOUNTANT';
+if(IS_ACC) $('roleBadge').innerText = 'OFFICE STAFF';
 $('wName').innerText = 'Welcome, ' + (USER.name || 'Admin'); $('wSub').innerText = 'Username: ' + USER.username;
 $('avatarLetter').innerText = String(USER.name || 'A').trim().charAt(0).toUpperCase();
 

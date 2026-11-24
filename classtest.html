@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Class Test</title>
@@ -16,7 +16,7 @@ body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;
 .top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
 .badge{background:#fff3e0;color:#7c2d12;border:1px solid #ffcc80;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
 .badge-exam{color:#fff;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;min-width:90px;text-align:center}
-.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
 .wrap{max-width:1000px;margin:12px auto;padding:0 12px}
 .box{background:#fff;border-radius:16px;border-left:4px solid var(--navy);padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
 .title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 10px}
@@ -206,7 +206,7 @@ function fillSubjects(){
 
 function goBack(){
   let v = ls('cvse_view');
-  window.location.href = IS_ADMIN ? 'admin.html?tab=last' : (IS_CT && v === 'class' ? 'class-dashboard.html' : 'subject-dashboard.html');
+  window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html';   // S25: straight to the teacher app (last tab)
 }
 function goDaily(){ window.location.href = 'daily.html?tab=' + (IS_ADMIN ? 'all' : (IS_CT && ls('cvse_view') === 'class' ? 'class' : 'mine')); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }

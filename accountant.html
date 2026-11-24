@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Office</title>
@@ -125,17 +125,24 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .ok-box b{display:block;font-size:22px;color:#166534;margin:4px 0}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:300;padding:16px}.modal.on{display:flex}
 .modal .mb{background:#fff;border-radius:16px;padding:16px;max-width:380px;width:100%}
+/* S25 (F20): the same card style and grey ⚙️ Setup box as the admin app; Profile = round letter circle in the header */
+.tabHead{margin:2px 2px 10px}.tabHead h3{margin:0;font-size:19px;color:#0b2a5c}.tabHead p{margin:3px 0 0;color:var(--muted);font-size:12.5px}
+.cardList{display:grid;grid-template-columns:1fr;gap:8px}@media(min-width:760px){.cardList{grid-template-columns:1fr 1fr}}
+button.cbtn{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;margin:0;padding:10px 12px;background:#fff;color:#0b2a5c;border:1px solid #e5e7eb;border-left:5px solid var(--c,#1976d2);border-radius:14px;text-align:left;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.05);cursor:pointer;font-family:inherit}
+button.cbtn .ci{font-size:24px;width:32px;text-align:center;flex-shrink:0}button.cbtn b{display:block;font-size:15px;line-height:1.2}button.cbtn small{display:block;color:#64748b;font-size:12.5px;font-weight:600;margin-top:3px;line-height:1.3}
+.setupBox{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:16px;padding:12px;margin:14px 0 6px}.setupBox h4{margin:0 0 8px;color:#475569;font-size:14px}
+.setupBox button.cbtn{background:#f8fafc;--c:#94a3b8}
+button.pCircle{border:2px solid #bbdefb;cursor:pointer;padding:0;font-family:inherit}button.pCircle:active{background:#1976d2;color:#fff}
 </style><script src="config.js"></script><script src="ui.js"></script></head>
 <body>
 <div class="top">
   <div class="top-left">
-    <div class="avatar" id="avatarLetter">A</div>
+    <button type="button" class="avatar pCircle" id="btnMyProfile" data-nofb title="My Profile" aria-label="My Profile" onclick="window.location.href='my-profile.html'"><span id="avatarLetter">A</span></button>
     <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
   </div>
   <div class="top-right">
     <div class="badge" id="roleBadge">ADMIN</div>
     <button class="btn-logout" onclick="doLogout()">Logout</button>
-    <button class="btn-logout" id="btnMyProfile" style="background:#1976d2" onclick="window.location.href='my-profile.html'">👤 My Profile</button>
   </div>
 </div>
 <div class="wrap">
@@ -146,8 +153,11 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
   <div id="homeCards"></div>
   <div id="homeEmpty"></div>
  </div>
- <div id="paneFees" class="pane" style="display:none"><div class="box"><div class="title">💰 Fees</div><div class="meta">Collect fees and manage fee records.</div></div><div class="big2" id="cardsFees"></div></div>
- <div id="paneMore" class="pane" style="display:none"><div class="box"><div class="title">⋯ More</div><div class="meta">School office pages you can use.</div></div><div class="big2" id="cardsMore"></div></div>
+ <div id="paneStudents" class="pane" style="display:none"><div class="tabHead"><h3>🧑‍🎓 Students</h3><p>Everyday work with students.</p></div><div class="cardList" id="cardsStudents"></div></div>
+ <div id="paneFees" class="pane" style="display:none"><div class="tabHead"><h3>💰 Fees</h3><p>Collect fees, receipts, reports and fee setup of students. Setup is at the bottom.</p></div><div class="cardList" id="cardsFees"></div><div class="setupBox" id="feesSetupBox" style="display:none"><h4>⚙️ Setup</h4><div class="cardList" id="cardsFeesSetup"></div></div></div>
+ <div id="paneDaily" class="pane" style="display:none"><div class="tabHead"><h3>📝 Daily</h3><p>Attendance, daily updates and the calendar.</p></div><div class="cardList" id="cardsDaily"></div></div>
+ <div id="paneExams" class="pane" style="display:none"><div class="tabHead"><h3>🎓 Exams</h3><p>The exam register of a class.</p></div><div class="cardList" id="cardsExams"></div></div>
+ <div id="paneMore" class="pane" style="display:none"><div class="tabHead"><h3>⋯ More</h3><p>Timetable and student app passwords.</p></div><div class="cardList" id="cardsMore"></div></div>
 </div>
 <div class="tabs" id="tabsBar" style="display:none"></div><script>
 // S21: staff birthdays (accepted date of birth, no year)
@@ -179,34 +189,37 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';   // S25 (F22): role value stays 'accountant', screen says Office Staff
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 
 
 var FEEKEYS = 'fees-';
+/* S25 (F20): the SAME names, grey lines, colours and order as the admin app (admin.html CARDS).
+   [tick, icon, name, grey line, page, tab, colour]. A card shows only when the user has its tick; a tab only when it has cards.
+   (Office Staff = role value 'accountant' = this page accountant.html – on purpose, see the developer guide.) */
 var CARDS = [
- ['COLLECT','💵','Collect Fees','Take payment and print the receipt','fees-collect.html'],
- ['COLLECT','🧾','Receipts','Day book, reprint, cancel','fees-receipts.html'],
- ['STUDENTS','👨‍👩‍👧','Student Fee Setup','Concessions, bus, siblings, previous dues','fees-students.html'],
- ['STUDENTS','🚌','Bus & Optional Fees','Give bus, day care, hostel to a whole class with start / stop month','fees-optional.html'],
- ['OPENING','✅','Already Paid','Start the app in the middle of a session','fees-opening.html'],
- ['SETTINGS','⚙️','Fees Settings','Heads, amounts, due dates, receipt look','fees-settings.html'],
- ['REPORTS','📊','Fee Reports','Daily, head-wise, dues, defaulters, ledger','fees-reports.html'],
- ['STUDENTDB','🎓','Students','Add and edit student details','students.html'],
- ['RECVIEW','📇','Student Records','Full student record and registration form print','students.html'],
- ['RECVIEW','📒','Admission Register','Every student ever admitted: filters and A4 print','student-register.html'],
- ['RECVIEW','📝','Registration Requests','Forms filled by parents in the student app','registration-requests.html'],
- ['RECEDIT','📚','Elective Subjects','Give elective subjects to a whole class','electives.html'],      // S23 (L11)
- ['EXAMREG','📒','Exam Register','Marks of a whole class for one term or exam: A4 print','exam-register.html'],   // S22
- ['PHOTOS','📷','Class Photo Day','Take student photos class by class (report card, ID card, prints)','photos.html'],
- ['PHOTOS','🪪','ID Cards','Print student ID cards for a class or one student','idcards.html'],
- ['STUDPW','🔑','Student Passwords','Reset a student\'s app password','student-access.html'],
- ['ATTENDANCE','✅','Attendance','Mark and see attendance','daily.html?tab=att'],
- ['ATTENDANCE','📈','Monthly Performance','Attendance and test report of a class','performance.html'],
- ['DAILY','🗂️','Daily Updates','Lessons, homework and notices','daily.html'],
- ['TIMETABLE','🗓️','Timetable','Build and print the timetable','timetable-builder.html'],
- ['CALENDAR','📅','School Calendar','Holidays, exams, programs, meetings','events.html'] ];
+ ['STUDENTDB|RECVIEW','🎓','Current student list','Open a full record, search, edit','students.html','students','#7c3aed'],
+ ['RECEDIT','➕','Add student','Full record, automatic number','student-record.html?new=1','students','#16a34a'],
+ ['RECVIEW','📝','Registration requests','Forms filled by parents','registration-requests.html','students','#1976d2'],
+ ['RECEDIT','📚','Elective subjects','Who takes which elective (whole class)','electives.html','students','#7c3aed'],      // S23 (L11)
+ ['PHOTOS','📷','Class photo day','Take the student photos','photos.html','students','#16a34a'],
+ ['PHOTOS','🪪','Print ID cards','A class or one student','idcards.html','students','#0b2a5c'],
+ ['RECVIEW','📒','Admission Register','Every student ever, print','student-register.html','students','#0b2a5c'],
+ ['COLLECT','💵','Collect Fees','Take a payment, print the receipt','fees-collect.html','fees','#ef6c00'],
+ ['COLLECT','🧾','Receipts','Day book, reprint or cancel a receipt','fees-receipts.html','fees','#0b2a5c'],
+ ['REPORTS','📊','Fee Reports','Dues, collection, student ledger, bus list','fees-reports.html','fees','#0b2a5c'],
+ ['STUDENTS','👤','Student Fee Setup','Concessions, bus route, optional fees of one student','fees-students.html','fees','#1976d2'],
+ ['STUDENTS','🚌','Bus & Optional Fees','Give bus / day care to a whole class','fees-optional.html','fees','#1976d2'],
+ ['OPENING','📥','Already Paid','Fees paid before the app (start mid-session)','fees-opening.html','fees','#7c3aed'],
+ ['SETTINGS','⚙️','Fees Settings','Fee heads, amounts, bus routes, receipt, late fine','fees-settings.html','feesSetup',''],
+ ['ATTENDANCE','✅','Attendance','Present / absent of every class','daily.html?tab=att','daily','#16a34a'],
+ ['DAILY','📚','Daily update','Periods, lessons and homework of every class','daily.html','daily','#1976d2'],
+ ['ATTENDANCE','📈','Monthly performance','Attendance % + class tests of a class','performance.html','daily','#0b2a5c'],
+ ['CALENDAR','📅','Calendar & events','Holidays, exams, programmes, meetings','events.html','daily','#ef6c00'],
+ ['EXAMREG','📒','Exam Register','Whole class marks: print','exam-register.html','exams','#0b2a5c'],   // S22
+ ['TIMETABLE','🗓️','Timetable','Build and print the timetable','timetable-builder.html','more','#7c3aed'],
+ ['STUDPW','🔑','Student passwords','Reset a student\'s app password','student-access.html','more','#c62828'] ];
 function rs(n){ return '₹' + (Math.round((Number(n)||0) * 100) / 100).toLocaleString('en-IN'); }
 
 function hMoney(n,d){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
@@ -261,23 +274,24 @@ async function fillLocked(){
 var TABS_SHOWN = [];
 function ssGet(){ try{ return sessionStorage.getItem('acc_tab') || ''; }catch(e){ return ''; } }
 function ssSet(v){ try{ sessionStorage.setItem('acc_tab', v); }catch(e){} }
-function cardHtml(c){ return '<div class="go'+(c[4]?'':' closed')+'" onclick="'+(c[4]?'window.location.href=\''+c[4]+'\'':'')+'"><span class="ic">'+c[1]+'</span>'+esc(c[2])+'<small>'+esc(c[3])+'</small></div>'; }
+function cardHtml(c){ return '<button type="button" class="cbtn" data-nofb style="--c:'+(c[6]||'#94a3b8')+'" onclick="window.location.href=\''+c[4]+'\'"><span class="ci">'+c[1]+'</span><span><b>'+esc(c[2])+'</b><small>'+esc(c[3])+'</small></span></button>'; }
+var PANES = ['home','students','fees','daily','exams','more'];
 function openPane(k){
   if(TABS_SHOWN.indexOf(k) < 0) k = 'home';
-  ['home','fees','more'].forEach(function(n){
+  PANES.forEach(function(n){
     var p = $('pane'+n.charAt(0).toUpperCase()+n.slice(1)); if(p) p.style.display = (n===k ? 'block' : 'none');
     var b = $('tab_'+n); if(b) b.classList.toggle('active', n===k);
   });
   ssSet(k); window.scrollTo(0,0);
 }
-function buildTabs(feeCards, moreCards){
+/* S25 (F20): the same tabs as the admin app (Home · Students · Fees · Daily · 🎓 Exams) + ⋯ More (Timetable, Student passwords) – a tab only when it has cards */
+function buildTabs(by){
   TABS_SHOWN = ['home'];
-  var defs = {home:['🏠','Home'], fees:['💰','Fees'], more:['⋯','More']};
-  if(feeCards.length) TABS_SHOWN.push('fees');
-  if(moreCards.length) TABS_SHOWN.push('more');
+  var defs = {home:['🏠','Home'], students:['🧑‍🎓','Students'], fees:['💰','Fees'], daily:['📝','Daily'], exams:['🎓','Exams'], more:['⋯','More']};
+  PANES.slice(1).forEach(function(n){ if(by[n].length || (n === 'fees' && by.feesSetup.length)) TABS_SHOWN.push(n); });
   var bar = $('tabsBar');
   if(TABS_SHOWN.length < 2){ bar.style.display = 'none'; document.body.style.paddingBottom = '24px'; return; }
-  bar.innerHTML = TABS_SHOWN.map(function(n){ return '<button class="tabBtn" id="tab_'+n+'" onclick="openPane(\''+n+'\')"><span class="tabIco">'+defs[n][0]+'</span>'+defs[n][1]+'</button>'; }).join('');
+  bar.innerHTML = TABS_SHOWN.map(function(n){ return '<button class="tabBtn" id="tab_'+n+'" data-nofb onclick="openPane(\''+n+'\')"><span class="tabIco">'+defs[n][0]+'</span>'+defs[n][1]+'</button>'; }).join('');
   bar.style.display = 'flex'; document.body.style.paddingBottom = '96px';
 }
 async function init(){
@@ -288,12 +302,13 @@ async function init(){
     hide($('gMsg'));
     $('hi').innerText = (r.school || 'School') + ' — Office'; $('sub').innerText = 'Session ' + (r.session || '-');
     if(USER.role === 'admin') $('adminBack').style.display = 'block';
-    let mine = CARDS.filter(c=>r.privileges.indexOf(c[0]) > -1 && !(c[2]==='Student Records' && r.privileges.indexOf('STUDENTDB') > -1));   // S12: one Students card (S20: only that card; Register + Requests stay)
-    let feeCards = mine.filter(c=>String(c[4]||'').indexOf('fees-') === 0), moreCards = mine.filter(c=>String(c[4]||'').indexOf('fees-') !== 0);
-    $('cardsFees').innerHTML = feeCards.map(cardHtml).join('');
-    $('cardsMore').innerHTML = moreCards.map(cardHtml).join('');
+    let mine = CARDS.filter(c=>c[0].split('|').some(t=>r.privileges.indexOf(t) > -1));   // one 'Current student list' card for Students OR Student records view
+    let by = {students:[], fees:[], feesSetup:[], daily:[], exams:[], more:[]};
+    mine.forEach(c=>by[c[5]].push(c));
+    ['students','fees','daily','exams','more'].forEach(n=>{ $('cards'+n.charAt(0).toUpperCase()+n.slice(1)).innerHTML = by[n].map(cardHtml).join(''); });
+    $('cardsFeesSetup').innerHTML = by.feesSetup.map(cardHtml).join(''); $('feesSetupBox').style.display = by.feesSetup.length ? 'block' : 'none';
     if(!mine.length) $('homeEmpty').innerHTML = '<div class="box empty-note">No pages are allowed for you yet. Please ask the admin.</div>';
-    buildTabs(feeCards, moreCards);
+    buildTabs(by);
     openPane(ssGet() || 'home');
     loadHome(r);
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }

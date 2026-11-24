@@ -1,157 +1,327 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.13-S7"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Timetable Builder</title>
 <style>
- body{font-family:Arial;padding:10px;background:#fafafa}
- table{border-collapse:collapse;width:100%;border:2px solid #8b4513}
- th{border:1px solid #8b4513;padding:6px;text-align:center;font-size:11px;background:#0a1931;color:#fff;line-height:1.2}
- th small{font-weight:400;font-size:9px;display:block}
- td{border:1px solid #8b4513;padding:4px;text-align:center;font-size:11px;vertical-align:top}
- td.builder-cell{height:1.8cm;background:#fff}
- td.leisure-cell{background:#fff3cd !important;font-weight:900;color:#8b4513}
- td.elective-cell{background:#f0f7ff !important;border:2px solid #0a1931 !important;padding:4px !important}
- .ele-header{background:#0a1931;color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:10px;display:inline-block;margin-bottom:4px}
- .ele-item{display:flex;align-items:center;gap:4px;padding:4px 2px;margin:3px 0;background:#fff;border-radius:6px;border-left:4px solid #0a1931;box-shadow:0 1px 2px rgba(0,0,0,0.1)}
- .ele-sub-badge{min-width:65px;font-weight:900;font-size:10px;background:#fff3cd;padding:3px 5px;border-radius:4px;text-align:center;border:1px solid #d4a017}
- .ele-room{font-size:8px;background:#e8e8e8;padding:2px 4px;border-radius:3px;white-space:nowrap}
- select{width:100%;font-size:11px;padding:2px;margin:1px 0;height:0.7cm}
- select.sub{font-weight:700;background:#fff9e6}
- select.teach{background:#e6f7ff}
- select.elective-teach{flex:1;height:0.65cm;font-size:10px}
- .controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
- button{padding:8px 12px;font-weight:800;background:#0a1931;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px}
- #status{font-weight:700;color:green}
- #schoolHeaderPreview{border:1px solid #ddd;padding:8px;background:#fff;border-radius:8px;text-align:center;margin-bottom:10px}
- .ele-create-row{display:flex;gap:5px;margin:4px 0;align-items:center;background:#f9f9f9;padding:4px;border-radius:4px}
- .mini-btn{padding:2px 6px !important;font-size:9px !important;background:#0a1931 !important;margin-top:2px}
- .mini-btn2{padding:2px 6px !important;font-size:9px !important;background:#888 !important;margin-top:2px}
-</style><script src="config.js"></script><script src="ui.js"></script></head><body>
-<div id="schoolHeaderPreview">Loading School Info...</div>
-<div class="controls">
-  <select id="gradeSel"><option>Loading...</option></select>
-  <button onclick="loadBuilder()">🔄 Load Builder</button>
-  <button onclick="saveAll()" style="background:green">💾 Save Timetable</button>
-  <button onclick="printClassReport()" style="background:#d32f2f">📄 Class Print</button>
-  <span id="status"></span>
-</div>
-<div style="border:2px solid #0a1931;padding:10px;background:#fff;border-radius:8px;margin:10px 0">
-  <b style="font-size:13px">🔷 Create Elective Group (Any Period can be Elective)</b>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">
-    <select id="eleGrade" style="width:90px"></select>
-        <input id="eleGroup" placeholder="Elective-1" style="width:120px;padding:5px" value="Elective-1">
-    <button onclick="addEleRow()" style="background:#0a1931">+ Subject</button>
-    <button onclick="saveElectiveGroup()" style="background:green">💾 Save Elective</button>
-    <button onclick="deleteElectiveGroup()" style="background:red">🗑 Delete</button>
-    <button onclick="loadEleForGrade()" style="background:#555">Load Existing</button>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-orange{background:linear-gradient(135deg,#ef6c00,#fb923c)}.b-red{background:linear-gradient(135deg,#c62828,#ef4444)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45;white-space:pre-wrap}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.empty-note{text-align:center;color:var(--muted);padding:18px 10px;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:4px 0 10px}
+.chip{flex-shrink:0;border:1px solid #cbd5e1;border-radius:999px;padding:0 16px;min-height:46px;font-weight:800;font-size:14px;color:var(--navy);background:#fff;cursor:pointer}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.per{background:#fff;border-radius:14px;padding:12px;border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.per h4{margin:0 0 6px;display:flex;justify-content:space-between;gap:8px;color:var(--navy);font-size:15px}
+.per h4 small{color:var(--muted);font-weight:700;font-size:12px;white-space:nowrap}
+.per.ele{border-left-color:var(--purple);background:#faf7ff}
+.brk{display:flex;align-items:center;gap:8px;margin:4px 2px 12px;color:var(--orange);font-weight:800;font-size:12px}.brk::before,.brk::after{content:"";flex:1;height:2px;background:#fdba74;border-radius:2px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:14px}
+.opt b{color:var(--navy)}.opt small{color:var(--muted);font-weight:700}.opt small.nt{color:#c2410c}
+.ax{min-width:46px;min-height:46px;border:none;border-radius:12px;background:#fee2e2;color:#c62828;font-weight:900;font-size:16px;cursor:pointer}
+.mini{margin-top:8px;padding:10px 14px;min-height:46px;border:1px solid #c4b5fd;border-radius:12px;background:#f5f3ff;color:var(--purple);font-weight:800;font-size:13px;cursor:pointer;width:100%}
+.mini.n{border-color:#cbd5e1;background:#f8fafc;color:#475569}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#ede9fe;color:#5b21b6;white-space:nowrap}
+.rest{margin-top:8px;padding-top:6px;border-top:1px dashed #c4b5fd}
+.eg{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px}
+.eg h5{margin:0 0 6px;color:var(--purple);font-size:14px}
+.erow{display:grid;grid-template-columns:1fr 1.4fr .8fr;gap:6px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.erow b{color:var(--navy);font-size:13.5px}
+.dirty{border-left-color:var(--orange)!important}
+.wk{overflow-x:auto}.wk table{border-collapse:collapse;width:100%;font-size:11.5px}.wk th,.wk td{border:1px solid var(--line);padding:4px;text-align:center;vertical-align:top}.wk th{background:#eef2f7;color:var(--navy)}.wk td.b{background:#fff7ed;color:var(--orange);font-weight:800}.wk td.e{background:#f5f3ff}
+details.fold summary{min-height:46px;display:flex;align-items:center;font-weight:800;color:var(--navy);cursor:pointer}
+.savebar{position:sticky;bottom:80px;z-index:40}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1;min-height:46px}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+@media print{body>.top,body>.tabs,.wrap{display:none!important}}
+</style><script src="config.js"></script><script src="ui.js"></script></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Timetable Builder</div></div>
   </div>
-  <div id="eleRows"></div>
-  <small>Select Grade → Period (any) → Group → Add subjects + teachers → Save. That period becomes elective for that grade only.</small>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
 </div>
-<div class="controls">
-  <select id="teacherPrintSel"><option>-- Teacher --</option></select>
-  <button onclick="printTeacherReport()" style="background:#7c3aed">Teacher Print</button>
-  <select id="dayPrintSel"><option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option><option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option></select>
-  <button onclick="printDayReport()" style="background:#059669">Day Print</button>
+
+<div class="wrap">
+  <div class="box">
+    <div class="title">🗓️ Timetable Builder</div>
+    <div class="meta" id="schoolHeaderPreview">Loading the periods…</div>
+    <label for="gradeSel">Class</label>
+    <select id="gradeSel" onchange="classChanged()"><option value="">Loading…</option></select>
+    <div class="msg" id="gMsg"></div>
+  </div>
+
+  <div class="box" style="border-left-color:var(--purple)" id="eleBox">
+    <div class="title" style="font-size:16px">🔷 Elective teachers</div>
+    <div class="meta">Groups and subjects are made in Subject Master. Here you only choose the teacher (and room) of each elective subject, then use ⚡ Make Elective on a period below.</div>
+    <input type="hidden" id="eleGrade">
+    <div id="eleRows"><div class="empty-note">Choose a class first.</div></div>
+    <div id="eleGroupBox" style="display:none"><label for="eleGroup">Group used by ⚡ Make Elective</label><select id="eleGroup"></select></div>
+  </div>
+
+  <div id="builderBox" style="display:none">
+    <div class="chips" id="dayChips"></div>
+    <div id="builder"></div>
+    <details class="box fold" id="weekFold" ontoggle="if(this.open) drawWeek()"><summary>📋 Whole week (check)</summary><div class="wk" id="weekTable"></div></details>
+    <div class="box savebar" id="saveBox">
+      <div class="msg" id="status"></div>
+      <div class="btnrow" style="margin-top:0"><button class="btn b-green" id="saveBtn" onclick="saveAll()">💾 Save Timetable</button></div>
+    </div>
+  </div>
+
+  <div class="box" style="border-left-color:var(--green)">
+    <div class="title" style="font-size:16px">🖨️ Print</div>
+    <div class="btnrow" style="margin-top:4px"><button class="btn b-navy" data-nofb onclick="printClassReport()">📄 Class timetable</button></div>
+    <div class="g2" style="margin-top:8px"><div><label for="teacherPrintSel">Teacher</label><select id="teacherPrintSel"><option value="">- Teacher -</option></select></div><div><label>&nbsp;</label><button class="btn b-purple" data-nofb onclick="printTeacherReport()">Teacher print</button></div></div>
+    <div class="g2"><div><label for="dayPrintSel">Day</label><select id="dayPrintSel"><option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option><option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option></select></div><div><label>&nbsp;</label><button class="btn b-green" data-nofb onclick="printDayReport()">Day print</button></div></div>
+    <div class="msg" id="pMsg"></div>
+  </div>
 </div>
-<div id="builder">Select class and Load...</div>
+
+<div class="tabs">
+  <button class="tabBtn active"><span class="tabIco">🗓️</span>Timetable</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+
 <script src="tt-print.js"></script>
 <script>
 const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+/* S24 (F17 + F21): Timetable Builder in the app design. Same data and same save as before (savetimetable / getelectivemap),
+   one day at a time as period cards. Elective groups come from Subject Master; the 🔷 box only sets their teachers. */
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token')){ window.location.href = 'index.html'; }
 let cfg={list:[]}, subjects=[], teachers=[], existingData=[], occupiedMap={}, schoolInfo={name:"",address:"",logo:""}, electiveByPeriod={}, electiveLookup={}, electiveGroups={};
+var DAYS = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'], DAY = 'MONDAY', DIRTY = false, LOADED = '';
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function show(el, t, k){ el.className = 'msg show ' + k; el.innerText = t; }
+function hide(el){ el.className = 'msg'; el.innerText = ''; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+async function goBack(){ if(DIRTY && !(await UI.ask('You have timetable changes that are not saved. Leave them?'))) return; DIRTY = false; window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+window.addEventListener('beforeunload', function(e){ if(DIRTY){ e.preventDefault(); e.returnValue = ''; } });
 function toArray(x){if(Array.isArray(x))return x;if(!x)return[];if(typeof x==='string'){try{let j=JSON.parse(x);if(Array.isArray(j))return j;}catch(e){}return[x];}if(typeof x==='object'){if(x.teachers)return toArray(x.teachers);if(x.users)return toArray(x.users);if(x.list)return toArray(x.list);if(x.data)return toArray(x.data);if(x.subjects)return toArray(x.subjects);if(x.timetable)return toArray(x.timetable);if(x.electives)return toArray(x.electives);if(x.groups)return toArray(x.groups);return Object.values(x);}return[];}
-function authCheck(j){if(j&&j.code==='AUTH'){localStorage.clear();alert('Session expired. Please login again.');location.href='index.html';}return j;}
-async function apiGet(a,p={}){let url=WEB_URL+"?action="+a;let tk=localStorage.getItem('cvse_token');if(tk)url+="&token="+encodeURIComponent(tk);for(let k in p)url+="&"+k+"="+encodeURIComponent(p[k]);let r=await fetch(url);let t=await r.text();try{let j=JSON.parse(t);authCheck(j);if(typeof j==='string'){try{j=JSON.parse(j)}catch(e){}}if(j&&typeof j==='object'&&j.raw&&typeof j.raw==='string'){try{let inner=JSON.parse(j.raw);if(inner.teachers||inner.users)j=inner;}catch(e){}}if(Array.isArray(j)&&j.length>0&&typeof j[0]==='string'){try{let inner=JSON.parse(j[0]);if(inner.teachers)j=inner;}catch(e){}}return j;}catch(e){return{raw:t,list:[]}}}
-async function apiPost(a,pl={}){let r=await fetch(WEB_URL,{method:'POST',body:JSON.stringify({action:a,token:localStorage.getItem('cvse_token')||'',...pl})});let t=await r.text();try{let j=JSON.parse(t);authCheck(j);if(typeof j==='string'){try{j=JSON.parse(j)}catch(e){}}return j;}catch(e){return{raw:t}}}
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; } return j; }
+async function apiGet(a, p){ let url = WEB_URL + '?action=' + a + '&token=' + encodeURIComponent(ls('cvse_token')); for(let k in (p || {})) url += '&' + k + '=' + encodeURIComponent(p[k]); let r = await fetch(url); return authCheck(await r.json()); }
+async function apiPost(a, pl){ let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:a, token:ls('cvse_token')}, pl || {}))}); return authCheck(await r.json()); }
 function normalizePeriod(p){let no=p.no||p.period||1;let label=p.label||p.display||('P-'+no);let time=p.time||'';let type=(p.type||'Teaching');let isTeaching=true;if(String(type).toLowerCase()==='break'||String(type).toLowerCase()==='leisure'||String(label).toUpperCase()==='BREAK'||String(label).toUpperCase()==='LEISURE')isTeaching=false;return{no:String(no),label:String(label),display:String(label),time:String(time),type:type,isTeaching:isTeaching};}
-async function loadSchoolAndPeriods(){try{let res=await apiGet('getfullsettings');let m=res.settings||res||{};schoolInfo.name=m['School_Name']||"";schoolInfo.address=m['School_Address']||"";schoolInfo.logo=m['Logo Path']||"";let total=parseInt(m['Total_Periods']||8)||8;let list=[];for(let i=1;i<=total;i++){let t=m['Period_'+i]||'';let tp=m['Period_'+i+'_Type']||'Teaching';let lb=m['Period_'+i+'_Label']||('P-'+i);list.push(normalizePeriod({no:i,time:t,type:tp,label:lb}));}cfg.list=list;if(cfg.list.length==0){let pRes=await apiGet('getperiodconfig');cfg.list=toArray(pRes.list||[]).map(normalizePeriod);}document.getElementById('schoolHeaderPreview').innerHTML=getSchoolHeaderHTML()+`<div style="margin-top:6px;font-size:11px"><b>Total: ${total}</b> | ${cfg.list.map(p=>`${p.no}:${p.label}(${p.type})`).join(' | ')}</div>`;}catch(e){let pRes=await apiGet('getperiodconfig');cfg.list=toArray(pRes.list||[]).map(normalizePeriod);}}
-async function loadClasses(){await loadSchoolAndPeriods();try{let res=await apiGet('getallclasses');let cls=res.classes||[];document.getElementById('gradeSel').innerHTML=cls.map(c=>`<option value="${c}">${c}</option>`).join('');document.getElementById('eleGrade').innerHTML=cls.map(c=>`<option value="${c}">${c}</option>`).join('');}catch(e){}}
-loadClasses();
-async function loadTeachersRobust(){let tRes=await apiGet('getallteachers');let raw=[];if(Array.isArray(tRes)){if(tRes.length>0&&tRes[0].teachers)raw=tRes[0].teachers;else raw=tRes;}else{raw=tRes.teachers||tRes.users||tRes.list||tRes.data||[];if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch(e){}}}if(!Array.isArray(raw)||raw.length==0){let uRes=await apiGet('getusers');raw=uRes.users||uRes.teachers||uRes.list||[];}if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch(e){}}teachers=toArray(raw).filter(t=>String(t.status||'Active').toLowerCase()!=='inactive').map(t=>{let uname=String(t.username||t.user||'').trim().toUpperCase();let name=String(t.name||t.Name||uname).trim();return{username:uname,name:name,nameU:name.toUpperCase()};}).filter(t=>t.username);let seen={};teachers=teachers.filter(t=>{if(seen[t.username])return false;seen[t.username]=1;return true;});return teachers;}
 function normalizeSubjects(arr){return toArray(arr).map(s=>{if(typeof s==='string')return s.trim();return String(s.subjectName||s.SubjectName||s.subject||s.Subject||s.name||'').trim();}).filter(s=>s&&s.toUpperCase()!=='SUBJECTNAME');}
 var electiveSubjects=[];
-async function loadSubjectsForGrade(grade){let sRes=await apiGet('getsubjectsforclass',{grade:grade});electiveSubjects=toArray(sRes.electiveSubjects||[]);let s=normalizeSubjects(sRes.subjects||sRes.subjectList||sRes.list||[]);if(s.length==0){let sm=await apiGet('getsubjectmaster');let all=toArray(sm.subjects||sm.subjectMaster||sm.data||[]);s=normalizeSubjects(all.filter(x=>String(x.class||x.Class||x.className||'').toUpperCase().trim()==grade.toUpperCase().trim()));}subjects=s;return s;}
-async function loadBuilder(){let grade=document.getElementById('gradeSel').value;if(!grade)return;document.getElementById('status').innerText='⏳ Loading...';await loadSchoolAndPeriods();await loadTeachersRobust();document.getElementById('teacherPrintSel').innerHTML='<option value="">-- Teacher ('+teachers.length+') --</option>'+teachers.map(x=>`<option value="${x.username}">${x.name}</option>`).join('');await loadSubjectsForGrade(grade);
-let dataRes=await apiGet('gettimetable',{className:grade});existingData=toArray(dataRes.timetable||[]).map(r=>({Day:(r.day||'').toUpperCase(),Period_No:String(r.periodNo||r.Period_No),Subject:String(r.subject||'').trim(),TeacherUsername:String(r.teacherUsername||r.teacherUser||'').toUpperCase().trim(),TeacherName:String(r.teacher||r.teacherName||'').toUpperCase().trim(),TeacherNameOrig:r.teacher||'',Group:String(r.group||r.Group||''),IsElective:String(r.isElective||r.IsElective||'').toUpperCase()}));
-let mRes=await apiGet('getoccupiedmap');occupiedMap=mRes.map||{};electiveLookup=mRes.electiveLookup||{};
-let eRes=await apiGet('getelectivemap',{grade:grade});let electivesRaw=toArray(eRes.electives||eRes.groups||[]);let electives=electivesRaw.filter(el=>{let g=String(el.grade||el.Grade||'').toUpperCase().trim();return !g||g==grade.toUpperCase().trim();});
-electiveByPeriod={};electiveGroups={};electives.forEach(el=>{let gname=String(el.groupName||el.GroupName||'Elective-1');if(!electiveGroups[gname])electiveGroups[gname]=[];electiveGroups[gname].push(el);});
-renderGrid(grade);document.getElementById('status').innerText=`✅ ${grade} - Teachers: ${teachers.length} | Subjects: ${subjects.length} | Elective Groups: ${Object.keys(electiveGroups).join(',')||'None'}`;
-if(document.getElementById('eleRows').children.length==0){document.getElementById('eleRows').innerHTML='';addEleRow();addEleRow();addEleRow();}}
+
+$('wName').innerText = 'Welcome, ' + (USER.name || USER.username || 'User');
+$('avatarLetter').innerText = String(USER.name || USER.username || 'U').trim().charAt(0).toUpperCase();
+$('roleBadge').innerText = USER.role === 'admin' ? 'ADMIN' : 'OFFICE STAFF';
+
+async function loadSchoolAndPeriods(){
+  let res = await apiGet('getfullsettings'), m = res.settings || res || {};
+  schoolInfo.name = m['School_Name'] || ''; schoolInfo.address = m['School_Address'] || ''; schoolInfo.logo = m['Logo Path'] || '';
+  let total = parseInt(m['Total_Periods'] || 8) || 8, list = [];
+  for(let i = 1; i <= total; i++) list.push(normalizePeriod({no:i, time:m['Period_' + i] || '', type:m['Period_' + i + '_Type'] || 'Teaching', label:m['Period_' + i + '_Label'] || ('P-' + i)}));
+  cfg.list = list;
+  $('schoolHeaderPreview').innerText = total + ' periods a day: ' + cfg.list.map(p => p.label + (p.isTeaching ? '' : ' (break)')).join(' · ') + '. Period times come from Settings → School.';
+}
+function getSchoolHeaderHTML(){ return '<b>' + esc((schoolInfo.name || '').toUpperCase()) + '</b>'; }
+async function loadClasses(){
+  try{
+    await loadSchoolAndPeriods();
+    let res = await apiGet('getallclasses'), cls = res.classes || [];
+    $('gradeSel').innerHTML = '<option value="">- Choose a class -</option>' + cls.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+    let q = new URLSearchParams(location.search).get('class'); if(q && cls.indexOf(q) > -1){ $('gradeSel').value = q; loadBuilder(); }
+    loadTeachersRobust().then(fillTeacherPrint).catch(function(){});
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check the internet and reload.', 'err'); }
+}
+async function loadTeachersRobust(){
+  let r = await apiGet('getallteachers'), raw = r.teachers || r.users || r.list || r.data || [];
+  if(!Array.isArray(raw) || !raw.length){ let u = await apiGet('getusers'); raw = u.users || u.teachers || u.list || []; }
+  let seen = {};
+  teachers = toArray(raw).filter(t => String(t.status || 'Active').toLowerCase() !== 'inactive').map(t => { let un = String(t.username || t.user || '').trim().toUpperCase(), n = String(t.name || t.Name || un).trim(); return {username:un, name:n, nameU:n.toUpperCase()}; })
+    .filter(t => t.username && !seen[t.username] && (seen[t.username] = 1));
+  return teachers;
+}
+function fillTeacherPrint(){ $('teacherPrintSel').innerHTML = '<option value="">- Teacher (' + teachers.length + ') -</option>' + teachers.map(x => '<option value="' + esc(x.username) + '">' + esc(x.name) + '</option>').join(''); }
+async function loadSubjectsForGrade(grade){
+  let r = await apiGet('getsubjectsforclass', {grade:grade});
+  electiveSubjects = toArray(r.electiveSubjects || []);
+  subjects = normalizeSubjects(r.subjects || r.subjectList || r.list || []);
+  return subjects;
+}
+async function classChanged(){
+  if(DIRTY && !(await UI.ask('You have timetable changes that are not saved. Change the class and lose them?'))){ $('gradeSel').value = LOADED; return; }
+  DIRTY = false; loadBuilder();
+}
+async function loadBuilder(){
+  let grade = $('gradeSel').value; $('eleGrade').value = grade;
+  if(!grade){ $('builderBox').style.display = 'none'; $('eleRows').innerHTML = '<div class="empty-note">Choose a class first.</div>'; return; }
+  show($('gMsg'), 'Loading class ' + grade + '…', 'load'); hide($('status'));
+  try{
+    await Promise.all([loadSchoolAndPeriods(), loadTeachersRobust(), loadSubjectsForGrade(grade)]);
+    fillTeacherPrint();
+    let [dataRes, mRes, eRes] = await Promise.all([apiGet('gettimetable', {className:grade}), apiGet('getoccupiedmap'), apiGet('getelectivemap', {grade:grade})]);
+    existingData = toArray(dataRes.timetable || []).map(r => ({Day:String(r.day || '').toUpperCase(), Period_No:String(r.periodNo || r.Period_No), Subject:String(r.subject || '').trim(), TeacherUsername:String(r.teacherUsername || r.teacherUser || '').toUpperCase().trim(), TeacherName:String(r.teacher || r.teacherName || '').toUpperCase().trim(), TeacherNameOrig:r.teacher || '', Group:String(r.group || r.Group || ''), IsElective:String(r.isElective || r.IsElective || '').toUpperCase()}));
+    occupiedMap = mRes.map || {}; electiveLookup = mRes.electiveLookup || {};
+    takeGroups(eRes, grade);
+  }catch(e){ show($('gMsg'), '❌ Could not load class ' + grade + '. Check the internet and try again.', 'err'); return; }
+  LOADED = grade; DIRTY = false; hide($('gMsg'));
+  if(!subjects.length) show($('gMsg'), '⚠️ Class ' + grade + ' has no subjects in Subject Master yet. Add them there first.', 'warn');
+  $('builderBox').style.display = '';
+  drawEle(); renderGrid(grade);
+}
+function takeGroups(eRes, grade){
+  electiveGroups = {};
+  toArray(eRes.electives || eRes.groups || []).filter(el => { let g = String(el.grade || el.Grade || '').toUpperCase().trim(); return !g || g === grade.toUpperCase(); })
+    .forEach(el => { let g = String(el.groupName || el.GroupName || ''); if(!g) return; (electiveGroups[g] = electiveGroups[g] || []).push(el); });
+}
+/* ---- 🔷 Elective teachers (F17) ---- */
+function drawEle(){
+  let names = Object.keys(electiveGroups), grade = LOADED;
+  if(!names.length){ $('eleRows').innerHTML = '<div class="empty-note">No elective groups in this class. Make them in Subject Master.</div>'; $('eleGroupBox').style.display = 'none'; return; }
+  $('eleRows').innerHTML = names.map((g, gi) => '<div class="eg" data-g="' + esc(g) + '"><h5>🔷 ' + esc(g) + ' <small style="color:var(--muted)">· class ' + esc(grade) + '</small></h5>' +
+    electiveGroups[g].map(el => '<div class="erow"><b>' + esc(el.subject) + '</b><select class="eT" data-s="' + esc(el.subject) + '" aria-label="Teacher of ' + esc(el.subject) + '"><option value="">- Teacher -</option>' +
+      teachers.map(t => '<option value="' + esc(t.username) + '"' + (String(el.teacherUsername || '').toUpperCase() === t.username ? ' selected' : '') + '>' + esc(t.name) + '</option>').join('') + '</select><input class="eR" maxlength="20" placeholder="Room" value="' + esc(el.room || '') + '"></div>').join('') +
+    '<div class="btnrow"><button class="btn b-purple" onclick="saveEleTeachers(' + gi + ',this)">💾 Save teachers of ' + esc(g) + '</button></div><div class="msg" id="egMsg' + gi + '"></div></div>').join('');
+  let cur = $('eleGroup').value;
+  $('eleGroup').innerHTML = names.map(g => '<option' + (g === cur ? ' selected' : '') + '>' + esc(g) + '</option>').join('');
+  $('eleGroupBox').style.display = names.length > 1 ? '' : 'none';
+}
+async function saveEleTeachers(gi, btn){
+  let box = document.querySelectorAll('#eleRows .eg')[gi], g = box.dataset.g, m = $('egMsg' + gi), grade = LOADED;
+  let rows = [...box.querySelectorAll('.erow')].map(r => ({subject:r.querySelector('.eT').dataset.s, teacherUsername:r.querySelector('.eT').value, room:r.querySelector('.eR').value.trim()}));
+  try{
+    let res = await apiPost('saveelectivemap', {grade:grade, groupName:g, electives:rows, teachersOnly:'1'});
+    if(!res || !res.success){ show(m, '❌ ' + ((res && res.error) || 'Could not save.'), 'err'); return; }
+    let e = await apiGet('getelectivemap', {grade:grade}); captureGrid(); takeGroups(e, grade); drawEle(); renderGrid(grade);
+    show($('egMsg' + gi), '✅ ' + (res.message || 'Saved.'), 'ok');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); }
+}
+// old names kept (the old box is gone): they lead to the new box
+function addEleRow(){ $('eleBox').scrollIntoView({block:'start'}); }
+function loadEleForGrade(){ return loadBuilder(); }
+function saveElectiveGroup(){ let b = document.querySelector('#eleRows .eg .btn'); if(b) b.click(); }
+function deleteElectiveGroup(){ show($('gMsg'), 'Elective groups are made and removed in Subject Master.', 'warn'); }
+/* ---- the builder: one day at a time ---- */
 function getElectiveForCell(day,period){let rows=existingData.filter(r=>r.Day==day&&String(r.Period_No)==String(period)&&r.IsElective=='YES');if(rows.length>0)return rows;let anyGroup=existingData.filter(r=>r.Day==day&&String(r.Period_No)==String(period)&&r.Group);if(anyGroup.length>0&&anyGroup[0].IsElective!='NO')return anyGroup;return null;}
-function renderGrid(grade){let days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];let html=`<h3>${grade} - Builder (Teachers ${teachers.length} | Subjects ${subjects.length})</h3><table><tr><th>Day</th>`;cfg.list.forEach(p=>{html+=`<th>${p.display}<br><small>${p.time||''}<br>${p.type}</small></th>`;});html+=`</tr>`;
-days.forEach(day=>{html+=`<tr><td><b>${day}</b></td>`;cfg.list.forEach(p=>{if(!p.isTeaching){html+=`<td class="leisure-cell">${p.label}<br><small>${p.time||''}</small></td>`;return;}
-let cellElective=getElectiveForCell(day,p.no);
-if(cellElective&&cellElective.length>0){let gname=cellElective[0].Group||'Elective-1';let present=cellElective.filter(r=>r.IsElective=='YES');let allOpts=electiveGroups[gname]||[];
-html+=`<td class="elective-cell"><span class="ele-header">${gname} - P${p.no}</span><button class="mini-btn2" onclick="makeNormal('${day}','${p.no}')">↩ Make Normal</button>`;
-present.forEach(r=>{let el=allOpts.find(o=>String(o.subject).toUpperCase()==String(r.Subject).toUpperCase())||{};html+=`<div class="ele-item" data-day="${day}" data-period="${p.no}" data-subject="${r.Subject}" data-group="${gname}"><div class="ele-sub-badge">${r.Subject}</div><div class="ele-room">${el.teacherName||'?'}${el.room?' · '+el.room:''}</div><button class="mini-btn2" onclick="dropOption('${day}','${p.no}','${r.Subject}')">✕</button></div>`;});
-let missing=allOpts.filter(o=>!present.some(r=>String(r.Subject).toUpperCase()==String(o.subject).toUpperCase()));
-if(missing.length>0){html+=`<select onchange="addOption('${day}','${p.no}',this.value)"><option value="">➕ Add option</option>`+missing.map(o=>`<option value="${o.subject}">${o.subject}</option>`).join('')+`</select>`;
-let rest=existingData.find(r=>r.Day==day&&String(r.Period_No)==String(p.no)&&r.IsElective!='YES');let rs=rest?rest.Subject:'',rt=rest?rest.TeacherUsername:'';
-html+=`<div class="rest-box" style="margin-top:4px;padding-top:3px;border-top:1px dashed #999"><small>Rest of class:</small><select class="rest-sub" data-day="${day}" data-period="${p.no}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option value="${nm}" ${nm==rs?'selected':''}>${nm}</option>`).join('')+`</select><select class="rest-teach"><option value="">--Tea--</option>`+teachers.map(t=>`<option value="${t.username}|${t.name}" ${t.username==rt?'selected':''}>${t.name}</option>`).join('')+`</select></div>`;}
-html+=`</td>`;}else{let found=existingData.find(r=>r.Day==day&&String(r.Period_No)==String(p.no));let subVal=found?found.Subject:'';let tUser=found?found.TeacherUsername:'';let tNameU=found?found.TeacherName:'';let busy=occupiedMap[day+'-'+p.no]||[];busy=busy.map(b=>String(b).toUpperCase());
-html+=`<td class="builder-cell"><select class="sub" data-day="${day}" data-period="${p.no}"><option value="">--Sub--</option>`+subjects.map(nm=>`<option value="${nm}" ${nm==subVal?'selected':''}>${nm}</option>`).join('')+`</select><select class="teach" data-day="${day}" data-period="${p.no}"><option value="">--Tea--</option>`;
-teachers.forEach(t=>{let isBusy=busy.indexOf(t.username)!=-1&&t.username!=tUser&&t.nameU!=tNameU;let match=t.username==tUser||t.nameU==tUser||t.nameU==tNameU||t.username==tNameU;let label=isBusy?t.name+' (Busy)':t.name;html+=`<option value="${t.username}|${t.name}" ${match?'selected':''} style="${isBusy?'background:#ffcccc':''}">${label}</option>`;});html+=`</select><br><button class="mini-btn" onclick="makeElective('${day}','${p.no}')">⚡ Make Elective</button></td>`;}});html+=`</tr>`;});html+=`</table>`;document.getElementById('builder').innerHTML=html;}
-// Keeps what is chosen in the dropdowns (not saved yet) before the grid is redrawn,
-// so Make Elective / Make Normal / Add option / remove option never wipe other cells.
+function teacherOf(g, sub){ let el = (electiveGroups[g] || []).find(o => String(o.subject).toUpperCase() === String(sub).toUpperCase()) || {}; return el; }
+function tOpts(day, per, cur, curName){
+  let busy = (occupiedMap[day + '-' + per] || []).map(b => String(b).toUpperCase());
+  return '<option value="">- Teacher -</option>' + teachers.map(t => { let isBusy = busy.indexOf(t.username) > -1 && t.username !== cur && t.nameU !== curName, match = t.username === cur || t.nameU === cur || t.nameU === curName || t.username === curName;
+    return '<option value="' + esc(t.username + '|' + t.name) + '"' + (match ? ' selected' : '') + (isBusy ? ' style="background:#ffcccc"' : '') + '>' + esc(t.name) + (isBusy ? ' (busy in another class)' : '') + '</option>'; }).join('');
+}
+function sOpts(cur){ return '<option value="">- Subject -</option>' + subjects.map(n => '<option value="' + esc(n) + '"' + (n === cur ? ' selected' : '') + '>' + esc(n) + '</option>').join(''); }
+function renderGrid(grade){
+  $('dayChips').innerHTML = DAYS.map(d => '<button class="chip' + (d === DAY ? ' on' : '') + '" type="button" data-nofb onclick="pickDay(\'' + d + '\')">' + d.charAt(0) + d.slice(1, 3).toLowerCase() + '</button>').join('');
+  let day = DAY, h = '';
+  cfg.list.forEach(p => {
+    if(!p.isTeaching){ h += '<div class="brk">' + esc(p.label) + (p.time ? ' · ' + esc(p.time) : '') + '</div>'; return; }
+    let head = '<h4>' + esc(p.display) + ' <small>' + esc(p.time || '') + '</small></h4>', ce = getElectiveForCell(day, p.no);
+    if(ce && ce.length){
+      let g = ce[0].Group || '', present = ce.filter(r => r.IsElective === 'YES'), all = electiveGroups[g] || [];
+      let missing = all.filter(o => !present.some(r => String(r.Subject).toUpperCase() === String(o.subject).toUpperCase()));
+      let rest = existingData.find(r => r.Day === day && String(r.Period_No) === String(p.no) && r.IsElective !== 'YES');
+      h += '<div class="per ele">' + head + '<span class="pill">🔷 ' + esc(g) + '</span>' +
+        present.map(r => { let el = teacherOf(g, r.Subject); return '<div class="opt ele-item" data-day="' + day + '" data-period="' + p.no + '" data-subject="' + esc(r.Subject) + '" data-group="' + esc(g) + '"><span><b>' + esc(r.Subject) + '</b><br>' + (el.teacherName ? '<small>' + esc(el.teacherName) + (el.room ? ' · ' + esc(el.room) : '') + '</small>' : '<small class="nt">⚠ no teacher – choose in 🔷 Elective teachers</small>') + '</span><button class="ax" type="button" data-nofb title="Remove" onclick="dropOption(\'' + day + '\',\'' + p.no + '\',\'' + esc(r.Subject) + '\')">✕</button></div>'; }).join('') +
+        (missing.length ? '<select style="margin-top:6px" onchange="addOption(\'' + day + '\',\'' + p.no + '\',this.value)"><option value="">➕ Add a subject of ' + esc(g) + '</option>' + missing.map(o => '<option value="' + esc(o.subject) + '">' + esc(o.subject) + '</option>').join('') + '</select>' +
+          '<div class="rest rest-box"><label>Rest of the class (optional)</label><div class="g2"><select class="rest-sub" data-day="' + day + '" data-period="' + p.no + '" onchange="markDirty()">' + sOpts(rest ? rest.Subject : '') + '</select><select class="rest-teach" onchange="markDirty()">' + tOpts(day, p.no, rest ? rest.TeacherUsername : '', rest ? rest.TeacherName : '') + '</select></div></div>' : '') +
+        '<button class="mini n" type="button" data-nofb onclick="makeNormal(\'' + day + '\',\'' + p.no + '\')">↩ Make Normal</button></div>';
+    }else{
+      let f = existingData.find(r => r.Day === day && String(r.Period_No) === String(p.no));
+      h += '<div class="per builder-cell">' + head + '<div class="g2"><select class="sub" data-day="' + day + '" data-period="' + p.no + '" onchange="markDirty()" aria-label="Subject">' + sOpts(f ? f.Subject : '') + '</select><select class="teach" data-day="' + day + '" data-period="' + p.no + '" onchange="markDirty()" aria-label="Teacher">' + tOpts(day, p.no, f ? f.TeacherUsername : '', f ? f.TeacherName : '') + '</select></div>' +
+        '<button class="mini" type="button" data-nofb onclick="makeElective(\'' + day + '\',\'' + p.no + '\')">⚡ Make Elective</button></div>';
+    }
+  });
+  $('builder').innerHTML = h || '<div class="box"><div class="empty-note">No periods set. Set them in Settings → School.</div></div>';
+  if($('weekFold').open) drawWeek();
+}
+function pickDay(d){ captureGrid(); DAY = d; renderGrid(LOADED); }
+function markDirty(){ DIRTY = true; $('saveBox').classList.add('dirty'); }
+// keeps what is chosen on the screen (not saved yet) before the day changes or the cards are drawn again
 function captureGrid(){
-  function put(day,period,sub,teaVal){
-    existingData=existingData.filter(r=>!(r.Day==day&&String(r.Period_No)==String(period)&&r.IsElective!='YES'));
-    if(!sub)return;
-    let uname='',tname='';
-    if(teaVal){let a=teaVal.split('|');uname=String(a[0]||'').toUpperCase();tname=String(a[1]||'').toUpperCase();}
-    existingData.push({Day:day,Period_No:String(period),Subject:sub,TeacherUsername:uname,TeacherName:tname,TeacherNameOrig:tname,Group:'',IsElective:'NO'});
+  function put(day, period, sub, teaVal){
+    existingData = existingData.filter(r => !(r.Day == day && String(r.Period_No) == String(period) && r.IsElective != 'YES'));
+    if(!sub) return;
+    let a = String(teaVal || '').split('|');
+    existingData.push({Day:day, Period_No:String(period), Subject:sub, TeacherUsername:String(a[0] || '').toUpperCase(), TeacherName:String(a[1] || '').toUpperCase(), TeacherNameOrig:a[1] || '', Group:'', IsElective:'NO'});
   }
-  document.querySelectorAll('td.builder-cell').forEach(td=>{let sub=td.querySelector('.sub'),tea=td.querySelector('.teach');if(sub)put(sub.dataset.day,sub.dataset.period,sub.value,tea?tea.value:'');});
-  document.querySelectorAll('.rest-box').forEach(b=>{let sub=b.querySelector('.rest-sub'),tea=b.querySelector('.rest-teach');if(sub)put(sub.dataset.day,sub.dataset.period,sub.value,tea?tea.value:'');});
+  document.querySelectorAll('#builder .builder-cell').forEach(td => { let s = td.querySelector('.sub'), t = td.querySelector('.teach'); if(s) put(s.dataset.day, s.dataset.period, s.value, t ? t.value : ''); });
+  document.querySelectorAll('#builder .rest-box').forEach(b => { let s = b.querySelector('.rest-sub'), t = b.querySelector('.rest-teach'); if(s) put(s.dataset.day, s.dataset.period, s.value, t ? t.value : ''); });
 }
-function makeElective(day,period){
+function makeElective(day, period){
   captureGrid();
-  let grade=document.getElementById('gradeSel').value;
-  let gname=document.getElementById('eleGroup').value||'Elective-1';
-  let defList=electiveGroups[gname]||[];
-  if(defList.length==0){
-    let names=Object.keys(electiveGroups);
-    if(names.length>0){ gname=names[0]; defList=electiveGroups[gname]; }
-  }
-  if(defList.length==0){
-    alert('First create the Elective Group in the top box and Save Elective, then click Load Builder');
-    return;
-  }
-  let existing=existingData.filter(r=>!(r.Day==day&&String(r.Period_No)==String(period)));
-  defList.forEach(el=>{
-    existing.push({Day:day,Period_No:String(period),Subject:el.subject,TeacherUsername:String(el.teacherUsername||'').toUpperCase(),TeacherName:String(el.teacherName||'').toUpperCase(),Group:gname,IsElective:'YES'});
-  });
-  existingData=existing;renderGrid(grade);
+  let names = Object.keys(electiveGroups);
+  if(!names.length){ show($('status'), '⚠️ No elective groups in class ' + LOADED + '. Make them in Subject Master first (two or more subjects with the same Elective group).', 'warn'); return; }
+  let g = names.length > 1 ? ($('eleGroup').value || names[0]) : names[0];
+  existingData = existingData.filter(r => !(r.Day == day && String(r.Period_No) == String(period)));
+  electiveGroups[g].forEach(el => existingData.push({Day:day, Period_No:String(period), Subject:String(el.subject).toUpperCase(), TeacherUsername:String(el.teacherUsername || '').toUpperCase(), TeacherName:String(el.teacherName || '').toUpperCase(), Group:g, IsElective:'YES'}));
+  markDirty(); renderGrid(LOADED);
 }
-function makeNormal(day,period){captureGrid();let grade=document.getElementById('gradeSel').value;existingData=existingData.filter(r=>!(r.Day==day&&String(r.Period_No)==String(period)&&r.IsElective=='YES'));renderGrid(grade);}
-function addEleRow(data){let row=document.createElement('div');row.className='ele-create-row';row.innerHTML=`<select class="eleSub" style="width:110px"><option value="">--Subject--</option>${(electiveSubjects.length?electiveSubjects:subjects).map(s=>`<option ${data&&data.subject==s?'selected':''}>${s}</option>`).join('')}</select><select class="eleTeach" style="width:130px"><option value="">--Teacher--</option>${teachers.map(t=>`<option value="${t.username}|${t.name}" ${data&&String(data.teacherUsername).toUpperCase()==t.username?'selected':''}>${t.name}</option>`).join('')}</select><input class="eleRoom" placeholder="Room" style="width:60px;padding:4px" value="${data?data.room||'':''}"><input class="eleMax" placeholder="Max" style="width:45px;padding:4px" value="${data?data.maxStudents||'30':''}"><button onclick="this.parentElement.remove()" style="background:#ccc;color:#000;padding:2px 6px">x</button>`;document.getElementById('eleRows').appendChild(row);}
-async function loadEleForGrade(){let grade=document.getElementById('eleGrade').value||document.getElementById('gradeSel').value;document.getElementById('status').innerText='⏳ Loading Elective...';await loadTeachersRobust();await loadSubjectsForGrade(grade);let res=await apiGet('getelectivemap',{grade:grade});let list=toArray(res.electives||[]);document.getElementById('eleRows').innerHTML='';if(list.length>0){document.getElementById('eleGroup').value=list[0].groupName;list.forEach(el=>addEleRow(el));}else{addEleRow();addEleRow();addEleRow();}document.getElementById('status').innerText=`✅ Elective loaded - Subjects: ${subjects.length} | Teachers: ${teachers.length}`;}
-async function saveElectiveGroup(){
-  let grade=document.getElementById('eleGrade').value.trim().toUpperCase();
-  let groupName=document.getElementById('eleGroup').value.trim();
-  let rows=[];
-  document.querySelectorAll('.ele-create-row').forEach(div=>{
-    let sub=div.querySelector('.eleSub').value;
-    let tea=div.querySelector('.eleTeach').value;
-    let room=div.querySelector('.eleRoom').value;
-    let max=div.querySelector('.eleMax').value;
-    if(!sub||!tea)return;
-    let [uname,tname]=tea.split('|');
-    rows.push({subject:sub,teacherUsername:uname,teacherName:tname,room:room,maxStudents:max});
+function makeNormal(day, period){ captureGrid(); existingData = existingData.filter(r => !(r.Day == day && String(r.Period_No) == String(period) && r.IsElective == 'YES')); markDirty(); renderGrid(LOADED); }
+function dropOption(day, period, subject){ captureGrid(); existingData = existingData.filter(r => !(r.Day == day && String(r.Period_No) == String(period) && r.IsElective == 'YES' && String(r.Subject).toUpperCase() == String(subject).toUpperCase())); markDirty(); renderGrid(LOADED); }
+function addOption(day, period, subject){ if(!subject) return; captureGrid(); let g = (existingData.find(r => r.Day == day && String(r.Period_No) == String(period) && r.IsElective == 'YES') || {}).Group || ''; existingData.push({Day:day, Period_No:String(period), Subject:subject, TeacherUsername:'', TeacherName:'', Group:g, IsElective:'YES'}); markDirty(); renderGrid(LOADED); }
+function drawWeek(){
+  captureGrid();
+  let h = '<table><tr><th>Day</th>' + cfg.list.map(p => '<th>' + esc(p.label) + '</th>').join('') + '</tr>';
+  DAYS.forEach(d => {
+    h += '<tr><th>' + d.slice(0, 3) + '</th>' + cfg.list.map(p => {
+      if(!p.isTeaching) return '<td class="b">–</td>';
+      let e = existingData.filter(r => r.Day === d && String(r.Period_No) === String(p.no));
+      if(!e.length) return '<td></td>';
+      let ele = e.filter(r => r.IsElective === 'YES');
+      return ele.length ? '<td class="e">🔷 ' + esc(ele.map(r => r.Subject).join(' / ')) + '</td>' : '<td>' + esc(e[0].Subject) + '<br><small>' + esc(e[0].TeacherNameOrig || e[0].TeacherName || '') + '</small></td>';
+    }).join('') + '</tr>';
   });
-  if(rows.length==0){alert('Add at least 1 subject+teacher');return;}
-  let res=await apiPost('saveelectivemap',{grade:grade,groupName:groupName,electives:rows});
-  if(!res || !res.ok){
-    alert('NOT SAVED: ' + ((res&&res.error)||JSON.stringify(res)));
-    return;
-  }
-  alert('Saved '+rows.length+' elective subjects for '+grade+' - '+groupName);
-  loadBuilder();
+  $('weekTable').innerHTML = h + '</table>';
 }
- async function deleteElectiveGroup(){let grade=document.getElementById('eleGrade').value;let groupName=document.getElementById('eleGroup').value.trim();if(!(await UI.ask('Delete elective group '+groupName+' of '+grade+' ?')))return;let res=await apiPost('deleteelectivemap',{grade:grade,groupName:groupName});if(res&&res.success){alert('Deleted');loadBuilder();}else{alert('NOT DELETED: '+((res&&res.error)||'error'));}}
-async function saveAll(){let rows=[];let grade=document.getElementById('gradeSel').value;document.querySelectorAll('td.builder-cell').forEach(td=>{let sub=td.querySelector('.sub');let tea=td.querySelector('.teach');if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname,Group:'',IsElective:'NO'});}});document.querySelectorAll('.ele-item').forEach(div=>{rows.push({Day:div.dataset.day,Grade:grade,className:grade,Period_No:div.dataset.period,Subject:div.dataset.subject,TeacherUsername:'',TeacherName:'',Group:div.dataset.group,IsElective:'YES'});});document.querySelectorAll('.rest-box').forEach(b=>{let sub=b.querySelector('.rest-sub'),tea=b.querySelector('.rest-teach');if(sub&&tea&&sub.value&&tea.value){let[uname,tname]=tea.value.split('|');rows.push({Day:sub.dataset.day,Grade:grade,className:grade,Period_No:sub.dataset.period,Subject:sub.value,TeacherUsername:uname,TeacherName:tname,Group:'',IsElective:'NO'});}});let res=await apiPost('savetimetable',{rows:rows,grade:grade});if(res&&res.success){alert('Saved '+rows.length+' entries');loadBuilder();}else{alert('NOT SAVED: '+((res&&res.error)||'error'));}}
-function dropOption(day,period,subject){captureGrid();let grade=document.getElementById('gradeSel').value;existingData=existingData.filter(r=>!(r.Day==day&&String(r.Period_No)==String(period)&&r.IsElective=='YES'&&String(r.Subject).toUpperCase()==String(subject).toUpperCase()));renderGrid(grade);}
-function addOption(day,period,subject){if(!subject)return;captureGrid();let grade=document.getElementById('gradeSel').value;let g=(existingData.find(r=>r.Day==day&&String(r.Period_No)==String(period)&&r.IsElective=='YES')||{}).Group||'Elective-1';existingData.push({Day:day,Period_No:String(period),Subject:subject,TeacherUsername:'',TeacherName:'',Group:g,IsElective:'YES'});renderGrid(grade);}
-function getSchoolHeaderHTML(){let logoHTML=schoolInfo.logo?`<img src="${schoolInfo.logo}" style="height:45px;max-width:80px;object-fit:contain" onerror="this.style.display='none'">`:'';return `<div style="display:flex; align-items:center; justify-content:center; gap:12px; text-align:center">${logoHTML}<div><div style="font-weight:900; font-size:15px">${(schoolInfo.name||'').toUpperCase()}</div><div style="font-size:11px; white-space:pre-line">${schoolInfo.address||''}</div></div></div>`;}
-async function printClassReport(){let grade=document.getElementById('gradeSel').value;if(!grade){alert('Select class');return;}TTP_printClass(grade);}
-async function printTeacherReport(){let sel=document.getElementById('teacherPrintSel');if(!sel.value){alert('Select Teacher');return;}TTP_printTeacher(sel.value,sel.options[sel.selectedIndex].text);}
-async function printDayReport(){TTP_printDay(document.getElementById('dayPrintSel').value||'MONDAY');}
-</script></body></html>
+async function saveAll(){
+  let grade = LOADED, m = $('status');
+  if(!grade){ show(m, '❌ Choose a class first.', 'err'); return; }
+  captureGrid();
+  let rows = [], noT = [];
+  existingData.forEach(r => {
+    if(r.IsElective === 'YES'){ rows.push({Day:r.Day, Grade:grade, className:grade, Period_No:r.Period_No, Subject:r.Subject, TeacherUsername:'', TeacherName:'', Group:r.Group, IsElective:'YES'}); return; }
+    if(!r.Subject) return;
+    if(!r.TeacherUsername){ noT.push(r.Day.slice(0, 3) + ' ' + ((cfg.list.find(p => p.no === String(r.Period_No)) || {}).label || 'P-' + r.Period_No)); return; }
+    rows.push({Day:r.Day, Grade:grade, className:grade, Period_No:r.Period_No, Subject:r.Subject, TeacherUsername:r.TeacherUsername, TeacherName:r.TeacherNameOrig || r.TeacherName, Group:'', IsElective:'NO'});
+  });
+  if(noT.length){ show(m, '❌ Choose the teacher for: ' + noT.join(', ') + '. Nothing was saved.', 'err'); return; }
+  try{
+    let res = await apiPost('savetimetable', {rows:rows, grade:grade});
+    if(!res || !res.success){ show(m, '❌ ' + ((res && res.error) || 'Could not save.'), 'err'); return; }
+    DIRTY = false; $('saveBox').classList.remove('dirty');
+    await loadBuilder(); show($('status'), '✅ Saved ' + (res.saved !== undefined ? res.saved : rows.length) + ' periods of class ' + grade + '.', 'ok');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); }
+}
+async function printClassReport(){ let g = $('gradeSel').value; if(!g){ show($('pMsg'), 'Choose a class at the top first.', 'warn'); return; } hide($('pMsg')); TTP_printClass(g); }
+async function printTeacherReport(){ let s = $('teacherPrintSel'); if(!s.value){ show($('pMsg'), 'Choose the teacher first.', 'warn'); return; } hide($('pMsg')); TTP_printTeacher(s.value, s.options[s.selectedIndex].text); }
+async function printDayReport(){ hide($('pMsg')); TTP_printDay($('dayPrintSel').value || 'MONDAY'); }
+(function(){ let d = new Date().getDay(); DAY = DAYS[d >= 1 && d <= 6 ? d - 1 : 0]; })();
+loadClasses();
+</script>
+</body></html>

@@ -1,5 +1,5 @@
 /* profile.js - S21 shared "Profile" screen for every staff user (teacher app, admin Profile tab, accountant My Profile).
-   <meta name="app-version" content="2026.11.21-S23">
+   <meta name="app-version" content="2026.11.24-S26">
    Needs on the page: config.js, ui.js, photo.js. Use: PROFILE.mount(document.getElementById('box'), {back:function(){...}})
    Teachers / accountant: only EMPTY fields can be typed; 'Send to office' → the admin accepts each field; accepted = locked.
    Admin: his own values are saved at once (he is the one who accepts). Password change for everybody. */
@@ -14,7 +14,7 @@ var PROFILE = (function(){
     '.pf-st.REFUSED{background:#fee2e2;color:#991b1b}.pf-st.EMPTY{background:#e5e7eb;color:#374151}.pf-st.OPEN{background:#e0f2fe;color:#075985}' +
     '.pf-pw{position:relative}.pf-show{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#0b2a5c;margin-top:8px;min-height:36px}.pf-show input{width:22px;height:22px;min-height:0}';
   var W = {LOCKED:'🔒 Accepted', WAITING:'⏳ Waiting for the admin', REFUSED:'✖ Not accepted', EMPTY:'Not filled', OPEN:'🔓 Unlocked – you may change it'};
-  var ROLE = {admin:'Admin', accountant:'Accountant', classTeacher:'Class teacher', subjectTeacher:'Subject teacher'};
+  var ROLE = {admin:'Admin', accountant:'Office Staff', classTeacher:'Class teacher', subjectTeacher:'Subject teacher'};
   var S = {el:null, data:null, opt:{}};
   function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
   function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }

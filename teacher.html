@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b2a5c">
@@ -77,6 +77,12 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
 .call{margin-left:auto;flex-shrink:0;text-decoration:none;background:#dcfce7;color:#166534;font-weight:800;border-radius:12px;padding:0 12px;min-height:46px;display:flex;align-items:center;font-size:13px}
 .search{margin-bottom:8px}
 @media(max-width:360px){.big{grid-template-columns:1fr}}
+/* S25 (F20): the same card style as the admin and Office Staff apps (icon, name, one grey line) */
+.tabHead{margin:2px 2px 10px}.tabHead h3{margin:0;font-size:19px;color:#0b2a5c}.tabHead p{margin:3px 0 0;color:var(--muted);font-size:12.5px}
+.cardList{display:grid;grid-template-columns:1fr;gap:8px}@media(min-width:760px){.cardList{grid-template-columns:1fr 1fr}}
+button.cbtn{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;margin:0;padding:10px 12px;background:#fff;color:#0b2a5c;border:1px solid #e5e7eb;border-left:5px solid var(--c,#1976d2);border-radius:14px;text-align:left;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.05);cursor:pointer;font-family:inherit}
+button.cbtn .ci{font-size:24px;width:32px;text-align:center;flex-shrink:0}button.cbtn b{display:block;font-size:15px;line-height:1.2}button.cbtn small{display:block;color:#64748b;font-size:12.5px;font-weight:600;margin-top:3px;line-height:1.3}
+button.cbtn.off{opacity:.55}
 </style><script src="config.js"></script><script src="ui.js"></script><script src="photo.js"></script><script src="profile.js"></script></head>
 <body>
 <div class="top">
@@ -85,7 +91,7 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
     <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">-</div></div>
   </div>
   <div class="top-right">
-    <div class="badge" id="roleBadge">TEACHER</div>
+    <div class="badge" id="roleBadge">SUBJECT TEACHER</div>
     <button class="btn-logout" onclick="doLogout()">Logout</button>
   </div>
 </div>
@@ -95,7 +101,8 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
   <div class="view" id="vHome"><div class="empty-note">⏳ Loading your day...</div></div>
 
   <div class="view" id="vClass">
-    <div class="big" id="classTiles"></div>
+    <div class="tabHead"><h3>🏫 My Class</h3><p>Everyday work of your class.</p></div>
+    <div class="cardList" id="classTiles"></div>
     <div class="box" style="margin-top:12px;border-left-color:var(--green)">
       <div class="title">🎓 My class list</div>
       <div class="meta">Read only. To correct a student's details, tell the office.</div>
@@ -106,13 +113,15 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
   </div>
 
   <div class="view" id="vMarks">
-    <div class="big" id="markTiles"></div>
+    <div class="tabHead"><h3>✏️ My Work</h3><p>Lessons and homework of my schedules, class tests and exam marks.</p></div>
+    <div class="cardList" id="markTiles"></div>
     <div class="box" style="margin-top:12px;border-left-color:var(--purple)"><div class="title">🧪 Class test marks still to enter</div><div id="testsLeft"><div class="empty-note">⏳ Loading...</div></div></div>
     <div class="box" style="margin-top:12px;border-left-color:var(--orange)"><div class="title">📝 Exam marks still to enter</div><div id="marksLeft"><div class="empty-note">⏳ Loading...</div></div></div>
   </div>
 
   <div class="view" id="vTT">
-    <div class="big" id="ttTiles"></div>
+    <div class="tabHead"><h3>📅 Timetable</h3><p>Print my week or my class; see one day of the whole school.</p></div>
+    <div class="cardList" id="ttTiles"></div>
     <div class="box" style="margin-top:12px;border-left-color:var(--purple)"><div class="title">📅 Day-wise timetable</div><div class="meta">All periods of every teacher on one day – useful to find free periods.</div>
       <div class="chips" id="dayChips" style="margin-top:10px"></div></div>
     <div class="box" id="todayBox" style="border-left-color:var(--blue)"><div class="title">🕘 My Schedule Today</div><div id="ttToday"></div></div>
@@ -123,7 +132,7 @@ h4.g{margin:16px 0 0;color:var(--purple);font-size:13.5px;border-bottom:2px soli
 <div class="tabs" id="tabs">
   <button class="tabBtn" id="tHome" onclick="openTab('home')"><span class="tabIco">🏠</span>Home</button>
   <button class="tabBtn" id="tClass" onclick="openTab('class')" style="display:none"><span class="tabIco">🏫</span>My Class</button>
-  <button class="tabBtn" id="tMarks" onclick="openTab('marks')"><span class="tabIco">📝</span>Marks</button>
+  <button class="tabBtn" id="tMarks" onclick="openTab('marks')"><span class="tabIco">✏️</span>My Work</button>
   <button class="tabBtn" id="tTT" onclick="openTab('tt')"><span class="tabIco">📅</span>Timetable</button>
   <button class="tabBtn" id="tProfile" onclick="openTab('profile')"><span class="tabIco">👤</span>Profile</button>
 </div>
@@ -146,7 +155,10 @@ function $(id){ return document.getElementById(id); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 var H = null, CL = null, CUR = '', PROF = false;
 var DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-function isCT(){ return !!(H && H.me && H.me.classes && H.me.classes.length); }
+/* S24 (F24): until the server answers, the login's saved flag decides (cvse_isClassTeacher / cvse_classes), so a slow or failed
+   'teacherhome' never hides My Class; once the server answers, it decides. */
+function ctSaved(){ return String(ls('cvse_isClassTeacher')) === 'true'; }
+function isCT(){ return H && H.me ? !!(H.me.classes && H.me.classes.length) : ctSaved(); }
 function exOk(){ return USER.role === 'admin' || (H && H.me ? H.me.examAccess : String(ls('cvse_examAccess')).toUpperCase() === 'YES'); }
 function go(page, view){ if(view) setLs('cvse_view', view); window.location.href = page; }
 
@@ -155,7 +167,7 @@ $('avatarLetter').innerText = String(USER.name || USER.username || 'T').trim().c
 $('wSub').innerText = new Date().toLocaleDateString('en-GB', {weekday:'long'}) + ' · ' + (function(d){ return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear(); })(new Date());
 
 function openTab(t){
-  if(t === 'class' && H && !isCT()) t = 'home';
+  if(t === 'class' && !isCT()) t = 'home';
   ['home', 'class', 'marks', 'tt', 'profile'].forEach(function(x){
     var v = {home:'vHome', class:'vClass', marks:'vMarks', tt:'vTT', profile:'vProfile'}[x], b = {home:'tHome', class:'tClass', marks:'tMarks', tt:'tTT', profile:'tProfile'}[x];
     $(v).classList.toggle('on', x === t); $(b).classList.toggle('active', x === t);
@@ -175,8 +187,8 @@ async function loadHome(fresh){
   if(!j || !j.success){ $('vHome').innerHTML = '<div class="box"><div class="msg show err">❌ ' + esc((j && j.error) || 'Could not load.') + '</div></div>'; return; }
   H = j;
   $('tClass').style.display = isCT() ? '' : 'none';
-  $('roleBadge').innerText = isCT() ? 'CLASS TEACHER' : (USER.role === 'admin' ? 'ADMIN' : 'TEACHER');
-  $('wSub').innerText = (isCT() ? 'Class ' + H.me.classes.join(', ') + ' · ' : '') + H.day.charAt(0) + H.day.slice(1).toLowerCase() + ' ' + H.today;
+  $('roleBadge').innerText = isCT() ? 'CLASS TEACHER' : (USER.role === 'admin' ? 'ADMIN' : 'SUBJECT TEACHER');   // S25: the same words as the other pages
+  $('wSub').innerText = (isCT() && H.me.classes ? 'Class ' + H.me.classes.join(', ') + ' · ' : '') + H.day.charAt(0) + H.day.slice(1).toLowerCase() + ' ' + H.today;
   drawHome(); drawMarks(); drawTT();
   if(document.querySelector('.view.on') === null) openTab('home');
   if(!isCT() && $('vClass').classList.contains('on')) openTab('home');
@@ -193,13 +205,13 @@ function drawHome(){
   });
   (td.tests || []).slice(0, 4).forEach(function(t){ items.push(line('🧪 Class test ' + esc(t.subject) + ' · ' + esc(t.name) + ' · <b>' + esc(t.cls) + '</b> <small>' + esc(t.date) + '</small>', pill(t.left + ' left', 'warn'))); });
   if((td.tests || []).length){ first = first || ['🧪 Enter class test marks', "go('classtest.html','subject')", 'b-purple']; }
-  if((td.tests || []).length > 4) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.tests.length - 4) + ' more class tests in the Marks tab</div>');
+  if((td.tests || []).length > 4) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.tests.length - 4) + ' more class tests in the My Work tab</div>');
   (td.testsToday || []).filter(function(t){ return !t.left; }).forEach(function(t){ items.push(line('🧪 Class test today: ' + esc(t.subject) + ' · <b>' + esc(t.cls) + '</b>', pill('Marks done', 'ok'))); });
   (td.homework || []).forEach(function(h){ items.push(line('📒 Homework due today: ' + esc(h.subject) + ' · <b>' + esc(h.cls) + '</b><br><small>' + esc(h.text) + '</small>', pill('Check', 'warn'))); });
   (H.elMissing || []).forEach(function(e){ items.push(line('📚 <b>' + e.n + '</b> student' + (e.n > 1 ? 's' : '') + ' of <b>' + esc(e.cls) + '</b> ha' + (e.n > 1 ? 've' : 's') + ' no elective chosen yet', pill('Choose', 'warn'))); first = first || ['📚 Give elective subjects', "go('electives.html','class')", 'b-purple']; });   // S23 (L11)
   (td.marks || []).slice(0, 6).forEach(function(m){ items.push(line('📝 ' + esc(m.subject) + ' · ' + esc(m.exam) + ' · <b>' + esc(m.cls) + '</b>', pill(m.left + ' left', 'warn'))); });
-  if((td.marks || []).length){ first = first || ['📝 Enter exam marks', "go('exam-marks.html','subject')", 'b-orange']; }
-  if((td.marks || []).length > 6) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.marks.length - 6) + ' more in the Marks tab</div>');
+  if((td.marks || []).length){ first = first || ['✏️ Enter Exam Marks', "go('exam-marks.html','subject')", 'b-orange']; }
+  if((td.marks || []).length > 6) items.push('<div class="meta" style="padding-top:6px">+ ' + (td.marks.length - 6) + ' more in the My Work tab</div>');
   h += '<div class="box todo"><div class="title">🧾 To do today</div>' + (items.length ? items.join('') + (first ? '<div class="btnrow"><button class="btn ' + first[2] + '" data-nofb onclick="' + first[1] + '">' + first[0] + '</button></div>' : '') :
     '<div class="allok">✔ Nothing pending' + (H.noSchool ? '' : ' – well done!') + '</div>') + '</div>';
   if(H.errors && H.errors.todo) h += '<div class="msg show warn">Could not check: ' + esc(H.errors.todo) + '</div>';
@@ -220,12 +232,14 @@ function drawHome(){
   $('vHome').innerHTML = h;
 }
 function greet(){ var hr = new Date().getHours(); return hr < 12 ? 'Good morning' : (hr < 17 ? 'Good afternoon' : 'Good evening'); }
-function tile(ic, t, s, on, color){ return '<button class="tile' + (on === false ? ' off' : '') + '" type="button" data-nofb style="border-top-color:' + (color || 'var(--blue)') + '" onclick="' + on + '"><span class="ic">' + ic + '</span><b>' + t + '</b><span>' + s + '</span></button>'; }
+function tile(ic, t, s, on, color, off){ return '<button class="cbtn' + (off ? ' off' : '') + '" type="button" data-nofb style="--c:' + (color || 'var(--blue)') + '" onclick="' + on + '"><span class="ci">' + ic + '</span><span><b>' + t + '</b><small>' + s + '</small></span></button>'; }   // S25 (F20): admin card style
 function examTile(page, view){ return exOk() ? "go('" + page + "','" + view + "')" : 'noExam()'; }
 function noExam(){ var m = $('gMsg'); m.className = 'msg show err'; m.innerText = '⛔ Your Exam Access is switched off. Please ask the admin.'; window.scrollTo(0, 0); }
 function drawMarks(){
-  $('markTiles').innerHTML = tile('📝', 'Class tests', 'Make a test, enter its marks', "go('classtest.html','subject')", 'var(--blue)') +
-    tile('🎓', 'Exam marks', exOk() ? 'Marks for the subjects given to you' : 'Exam Access is off – ask the admin', examTile('exam-marks.html', 'subject'), 'var(--orange)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"');
+  // S25 (F20): the same names + order as the admin app; Daily update – My Schedules for EVERY teacher (lessons + homework of own schedules)
+  $('markTiles').innerHTML = tile('📚', 'Daily update – My Schedules', 'Lessons and homework of my schedules today', "go('daily.html?tab=mine','subject')", 'var(--blue)') +
+    tile('🧪', 'Class tests', 'Book a test, enter its marks', "go('classtest.html','subject')", 'var(--purple)') +
+    tile('✏️', 'Enter Exam Marks', exOk() ? 'Marks for the subjects given to you' : 'Exam Access is off – ask the admin', examTile('exam-marks.html', 'subject'), 'var(--orange)', !exOk());
   var ct = (H.todo && H.todo.tests) || [];
   $('testsLeft').innerHTML = ct.length ? ct.map(function(x){ return line(esc(x.subject) + ' · ' + esc(x.name) + ' · <b>' + esc(x.cls) + '</b> <small>' + esc(x.date) + '</small>', pill(x.left + ' of ' + x.count + ' left', 'warn')); }).join('') +
     '<div class="btnrow"><button class="btn b-purple" data-nofb onclick="go(\'classtest.html\',\'subject\')">🧪 Open class tests</button></div>' : '<div class="allok">✔ All your class tests up to today have marks.</div>';
@@ -233,8 +247,8 @@ function drawMarks(){
   $('marksLeft').innerHTML = !exOk() ? '<div class="empty-note">Exam Access is off.</div>' : (m.length ? m.map(function(x){ return line(esc(x.subject) + ' · ' + esc(x.exam) + ' · <b>' + esc(x.cls) + '</b>', pill(x.left + ' of ' + x.count + ' left', 'warn')); }).join('') : '<div class="allok">✔ No marks waiting in the open exams.</div>');
 }
 function drawTT(){
-  var t = tile('👨‍🏫', 'My timetable', 'My week, day by day', 'TTP_printTeacher(USER.username, USER.name || USER.username)', 'var(--purple)');
-  if(isCT()) t += tile('🏫', 'Class timetable', 'Class ' + esc(H.me.classes[0]), "TTP_printClass('" + esc(H.me.classes[0]) + "')", 'var(--green)');
+  var t = tile('👨‍🏫', 'My timetable', 'My week, day by day: print', 'TTP_printTeacher(USER.username, USER.name || USER.username)', 'var(--purple)');
+  if(isCT() && H && H.me && H.me.classes) t += tile('🏫', 'Class timetable', 'Class ' + esc(H.me.classes[0]) + ': print', "TTP_printClass('" + esc(H.me.classes[0]) + "')", 'var(--green)');
   $('ttTiles').innerHTML = t;
   var today = H.day;
   $('dayChips').innerHTML = DAYS.map(function(d){ return '<button class="chip' + (d === today ? ' on' : '') + '" type="button" onclick="TTP_printDay(\'' + d + '\')">' + d.charAt(0) + d.slice(1, 3).toLowerCase() + '</button>'; }).join('');
@@ -242,21 +256,24 @@ function drawTT(){
   $('ttToday').innerHTML = H.noSchool ? '<div class="empty-note">No school today.</div>' : (per.length ? per.map(function(p){ return line('<b>' + esc(p.label || ('P-' + p.no)) + '</b>' + (p.time ? ' <small>' + esc(p.time) + '</small>' : ''), esc(p.cls) + ' · ' + esc(p.subject)); }).join('') : '<div class="empty-note">No periods for you today.</div>');
 }
 function drawClassTiles(){
+  // S25 (F20): the same names, grey lines and order as the admin app (Daily, then Exams, then Students)
+  var off = !exOk();
   $('classTiles').innerHTML = tile('✅', 'Attendance', 'Present / absent, late, uniform', "go('daily.html?tab=att','class')", 'var(--green)') +
-    tile('📚', 'Daily update', 'Periods, lessons, homework', "go('daily.html?tab=class','class')", 'var(--blue)') +
-    tile('📈', 'Monthly performance', 'Attendance % + class tests', "go('performance.html','class')", 'var(--purple)') +
-    tile('📊', 'Class report', exOk() ? 'Results, remarks, finalise' : 'Exam Access is off', examTile('class-report.html', 'class'), 'var(--orange)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"') +
-    tile('🖨️', 'Report cards', 'View / print', examTile('report-card.html', 'class'), 'var(--navy)').replace('class="tile"', exOk() ? 'class="tile"' : 'class="tile off"') +
-    tile('📅', 'Class events', 'PTM, picnic, programme', "go('events.html','class')", 'var(--red)') +
-    tile('📒', 'Exam register', 'Whole class marks: print', "go('exam-register.html','class')", 'var(--green)') +
-    tile('📚', 'Elective subjects', 'Who takes which elective', "go('electives.html','class')", 'var(--purple)');     // S23 (L11)
+    tile('📚', 'Daily update', 'Periods, lessons and homework of my class', "go('daily.html?tab=class','class')", 'var(--blue)') +
+    tile('📈', 'Monthly performance', 'Attendance % + class tests of my class', "go('performance.html','class')", 'var(--navy)') +
+    tile('📅', 'Calendar & events', 'Class events: PTM, picnic, programme', "go('events.html','class')", 'var(--orange)') +
+    tile('📋', 'Class Report', off ? 'Exam Access is off – ask the admin' : 'Attendance, remarks, results; finalise', examTile('class-report.html', 'class'), 'var(--navy)', off) +
+    tile('🖨️', 'View / Print Report Cards', off ? 'Exam Access is off – ask the admin' : 'My class or one student', examTile('report-card.html', 'class'), 'var(--green)', off) +
+    tile('📒', 'Exam Register', 'Whole class marks: print', "go('exam-register.html','class')", 'var(--navy)') +
+    tile('📚', 'Elective subjects', 'Who takes which elective (whole class)', "go('electives.html','class')", 'var(--purple)');     // S23 (L11)
 }
 async function loadClass(cls){
   drawClassTiles();
   $('stuList').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
   var j;
-  try{ j = await apiGet('teacherclass', cls ? {cls:cls} : {}); }catch(e){ $('stuList').innerHTML = '<div class="msg show err">❌ Could not connect. Check the internet.</div>'; return; }
-  if(!j || !j.success){ $('stuList').innerHTML = '<div class="msg show err">❌ ' + esc((j && j.error) || 'Could not load.') + '</div>'; return; }
+  var again = '<div class="btnrow"><button class="btn b-blue" type="button" onclick="loadClass(' + (cls ? "'" + esc(cls) + "'" : '') + ')">🔄 Try again</button></div>';     // S24 (F24)
+  try{ j = await apiGet('teacherclass', cls ? {cls:cls} : {}); }catch(e){ $('stuList').innerHTML = '<div class="msg show err">❌ Could not connect – check the internet.</div>' + again; return; }
+  if(!j || !j.success){ $('stuList').innerHTML = '<div class="msg show err">❌ ' + esc((j && j.error) || 'Could not load.') + '</div>' + again; return; }
   CL = j; CUR = j.cls;
   $('clsChips').innerHTML = (j.classes || []).length > 1 ? j.classes.map(function(c){ return '<button class="chip' + (c === CUR ? ' on' : '') + '" type="button" onclick="loadClass(\'' + esc(c) + '\')">' + esc(c) + '</button>'; }).join('') : '';
   drawClass();
@@ -274,8 +291,9 @@ function drawClass(){
 }
 
 var want = new URLSearchParams(location.search).get('tab') || (function(){ try{ return sessionStorage.getItem('cvse_ttab'); }catch(e){ return ''; } })() || 'home';
-openTab(want === 'class' ? 'home' : want);
-loadHome().then(function(){ if(want === 'class' && isCT()) openTab('class'); });
+$('tClass').style.display = isCT() ? '' : 'none';      // S24 (F24): shown at once from the login's saved flag
+openTab(want);                                         // S24 (F24): My Class opens at once, no wait for Home
+loadHome();
 </script>
 </body>
 </html>

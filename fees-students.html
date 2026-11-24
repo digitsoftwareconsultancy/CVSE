@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S19">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S24">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Fees</title>
@@ -299,7 +299,7 @@ function drawEdit(){
    '<label class="chk"><input type="checkbox" id="e_sibOff"'+(u.siblingOff?' checked':'')+'> No sibling discount for this student</label>'+
    '<h3 class="g">Bus</h3><div id="e_bus">'+busRows()+'</div><div class="btnrow"><button class="btn b-blue" type="button" id="perAdd" onclick="addPer()">'+(ED.periods.length?'🔁 Change the route from a month':'🚌 Give the bus')+'</button></div>'+
    '<div class="help">One route for each month. Empty "from" = start of the session, empty "until" = end of the session. A month already paid cannot change.'+paidNote(r.transportHeadId)+'</div>'+
-   (r.transportHeadId?'':'<div class="help">⚠ No bus fee head is chosen in Fees Settings → Receipt &amp; Rules, so the bus is not charged.</div>')+
+   (r.transportHeadId?'':'<div class="help">⚠ No fee head is ticked as the bus fee (Fees Settings → Fee Heads → 🚌 This is the bus fee), so the bus is not charged.</div>')+
    '<h3 class="g">Optional fees</h3>'+(optHeads.length?'<div id="e_opt">'+optHeads.map(x=>optRow(x, opt.indexOf(x.id)>-1)).join('')+'</div>':'<div class="meta">No optional fee heads are set.</div>')+
    '<h3 class="g">Concessions</h3><div id="concs">'+ED.concessions.map(concRow).join('')+'</div><div class="btnrow"><button class="btn b-blue" onclick="addConc()">+ Add concession</button></div>'+
    '<h3 class="g">Previous dues (before this session or before the app)</h3><input id="e_ob" inputmode="decimal" value="'+esc(u.openingBalance||'')+'" placeholder="0">'+

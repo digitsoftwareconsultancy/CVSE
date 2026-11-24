@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.15-S13">
+<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Collect Fees</title>
@@ -209,7 +209,7 @@ var PRIV = [];
 function lockHtml(){
   let L = G.lock; if(!L || !L.on) return '';
   let can = PRIV.indexOf('UNLOCK') > -1;
-  if(L.locked) return '<div class="probs" style="background:#fdecea;border-color:#ef9a9a;color:#7f1d1d">🔒 Result tab is closed for this student: '+rs(L.amount)+' overdue for '+L.days+' days.'+(can?'<div class="btnrow"><button class="btn b-purple" onclick="openUnlock()">🔓 Unlock for some days</button></div>':'<br><small>Ask the admin or an accountant with the Unlock permission to open it.</small>')+'</div>';
+  if(L.locked) return '<div class="probs" style="background:#fdecea;border-color:#ef9a9a;color:#7f1d1d">🔒 Result tab is closed for this student: '+rs(L.amount)+' overdue for '+L.days+' days.'+(can?'<div class="btnrow"><button class="btn b-purple" onclick="openUnlock()">🔓 Unlock for some days</button></div>':'<br><small>Ask the admin or an Office Staff user with the Unlock permission to open it.</small>')+'</div>';
   if(L.unlocked) return '<div class="probs" style="background:#e8f5e9;border-color:#a5d6a7;color:#14532d">🔓 Result tab is unlocked until '+esc(L.unlockedUntil)+'. Overdue: '+rs(L.amount)+'.'+(can?'<div class="btnrow"><button class="btn b-navy" onclick="saveUnlock(0)">Remove the unlock</button></div>':'')+'</div>';
   return '';
 }

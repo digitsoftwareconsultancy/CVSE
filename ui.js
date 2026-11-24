@@ -1,5 +1,5 @@
 /* ui.js - one shared helper for every page (button feedback, messages, confirm box, date fields).
-   <meta name="app-version" content="2026.11.21-S23">
+   <meta name="app-version" content="2026.11.24-S24">
    Load it with <script src="ui.js"></script> before the page's own script.
 
    1. BUTTON FEEDBACK: when a button is tapped and the page asks the server, the button changes at once
@@ -106,8 +106,13 @@
     // own = ui.js greys the button itself. When the page has already greyed it (it saves on its own), the page also
     // decides when it comes back, so ui.js never touches it (fix of 14-11-2026: a button stayed grey after a failed save).
     var lab = labelFor(btn), job = {btn:btn, load:lab.load, html:btn.innerHTML, val:btn.value, own:!btn.disabled, busy:'⏳ ' + lab.text};
-    btn.__uiBusy = true; if(job.own) btn.disabled = true; btn.classList.add('ui-busy');
-    if(btn.tagName === 'INPUT') btn.value = job.busy; else btn.innerHTML = job.busy;
+    // S24 (F11): when the page greyed the button AND wrote its own busy label ("⏳ Saving..."), the page owns the label
+    // (it puts its own result back): ui.js does not touch it at all (no busy text, no Done/Failed, no restore), only its message.
+    // (Before, ui.js stored "⏳ Saving..." as the original label and put it back for ever after a failed save.)
+    job.pageLabel = !job.own && /^\s*⏳/.test(btn.tagName === 'INPUT' ? String(btn.value || '') : String(btn.textContent || ''));
+    btn.__uiBusy = true;
+    if(job.own) btn.disabled = true;
+    if(!job.pageLabel){ btn.classList.add('ui-busy'); if(btn.tagName === 'INPUT') btn.value = job.busy; else btn.innerHTML = job.busy; }
     job.busyHtml = btn.tagName === 'INPUT' ? null : btn.innerHTML;
     job.page = pageMsg(btn);
     job.msg = job.page ? null : UI.msgAt(btn, 'Working... please wait', 'load');
@@ -141,7 +146,8 @@
       }else if(!ok && !job.page) UI.toast('✖ ' + ((j && (j.error || j.message)) || 'Could not finish. Please try again.'), 'err');
       return;
     }
-    if(b.isConnected){
+    if(job.pageLabel) b.__uiBusy = false;            // S24 (F11): the page owns this button's label
+    if(b.isConnected && !job.pageLabel){
       b.classList.remove('ui-busy'); b.classList.add(ok ? 'ui-done' : 'ui-fail');
       if(job.own) b.disabled = false;
       if(b.tagName === 'INPUT') b.value = text; else b.innerHTML = text;
@@ -149,16 +155,16 @@
     }
     if(job.page){                                   // S23 (F6): the page shows its own message
       if(job.msg && job.msg.isConnected) job.msg.style.display = 'none';
-      setTimeout(function(){ restore(job); }, ok ? (job.load ? 700 : 2000) : 2200);
+      if(!job.pageLabel) setTimeout(function(){ restore(job); }, ok ? (job.load ? 700 : 2000) : 2200);
       return;
     }
     if(ok){
       if(job.load) UI.msgAt(b, 'Done', 'ok', 600);
       else UI.msgAt(b, '✔ ' + ((j && (j.message || j.msg)) || 'Done'), 'ok', 6000);
-      setTimeout(function(){ restore(job); }, job.load ? 700 : 2000);
+      if(!job.pageLabel) setTimeout(function(){ restore(job); }, job.load ? 700 : 2000);
     }else{
       UI.msgAt(b, '✖ ' + ((j && (j.error || j.message)) || 'Could not finish. Please try again.'), 'err', 20000);
-      setTimeout(function(){ restore(job); }, 2200);
+      if(!job.pageLabel) setTimeout(function(){ restore(job); }, 2200);
     }
   }
   function isServer(url){
