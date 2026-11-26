@@ -1,5 +1,5 @@
 /* ui.js - one shared helper for every page (button feedback, messages, confirm box, date fields).
-   <meta name="app-version" content="2026.11.24-S24">
+   <meta name="app-version" content="2026.11.27-S31">
    Load it with <script src="ui.js"></script> before the page's own script.
 
    1. BUTTON FEEDBACK: when a button is tapped and the page asks the server, the button changes at once
@@ -9,6 +9,17 @@
    2. NO POP-UPS: alert() shows an in-page message near the button you tapped. UI.ask() is the in-page Yes / Cancel box.
    3. DATE FIELDS: every DD-MM-YYYY box gets automatic dashes, a calendar button and a clear message when it is not a real date.
    Nothing here changes any data. */
+/* SP5: phone settings that must survive a logout (keys starting with cvse_keep_, e.g. the last payment mode in Collect Fees).
+   Every page clears the phone storage at logout; this keeps only those keys. Logins / tokens are still cleared. */
+(function(){
+  try{
+    var clear0 = Storage.prototype.clear;
+    if(clear0 && !clear0.__keep){
+      var c = function(){ var keep = {}, i, k; try{ for(i = 0; i < this.length; i++){ k = this.key(i); if(k && k.indexOf('cvse_keep_') === 0) keep[k] = this.getItem(k); } }catch(e){} clear0.call(this); for(k in keep){ try{ this.setItem(k, keep[k]); }catch(e){} } };
+      c.__keep = true; Storage.prototype.clear = c;
+    }
+  }catch(e){}
+})();
 (function(){
   if(window.UI) return;
   var UI = window.UI = {};
@@ -84,7 +95,7 @@
   function skipBtn(b){
     if(!b || b.__uiBusy) return true;
     if(b.hasAttribute('data-nofb')) return true;
-    if(b.closest && b.closest('.tabs,.top,.setBar,.chips,.chip,nav,[data-nofb]')) return true;
+    if(b.closest && b.closest('.tabs,.top,.topbar,.setBar,.chips,.chip,nav,[data-nofb]')) return true;
     if(/tabBtn|btn-logout|chip/.test(b.className || '')) return true;
     return false;
   }
@@ -174,9 +185,21 @@
       return /script\.google(usercontent)?\.com/.test(u);
     }catch(e){ return false; }
   }
+  /* S31 (stage 5): Archive Viewer – a page opened with ?arch=<file id> reads a yearly archive copy (admin, read only).
+     Every request of the page carries arch=…; the server refuses every save. UI.archUrl(u) keeps the archive on a link. */
+  var AQ = new URLSearchParams(location.search);
+  UI.arch = AQ.get('arch') || ''; UI.archSession = AQ.get('as') || '';
+  UI.archUrl = function(u){ if(!UI.arch) return u; return u + (u.indexOf('?') > -1 ? '&' : '?') + 'arch=' + encodeURIComponent(UI.arch) + (UI.archSession ? '&as=' + encodeURIComponent(UI.archSession) : ''); };
+  function archReq(url, opt){
+    if(!UI.arch || typeof url !== 'string' || !isServer(url)) return [url, opt];
+    if(opt && opt.body && typeof opt.body === 'string'){ try{ var b = JSON.parse(opt.body); b.arch = UI.arch; opt = Object.assign({}, opt, {body:JSON.stringify(b)}); }catch(e){} }
+    else url = url + (url.indexOf('?') > -1 ? '&' : '?') + 'arch=' + encodeURIComponent(UI.arch);
+    return [url, opt];
+  }
   var origFetch = window.fetch;
   if(origFetch){
     window.fetch = function(url, opt){
+      var ax = archReq(url, opt); url = ax[0]; opt = ax[1]; arguments[0] = url; if(arguments.length > 1 || opt) arguments[1] = opt;
       var btn = (last.el && Date.now() - last.t < 700 && last.el.isConnected) ? last.el : null;
       var job = (btn && isServer(url) && !skipBtn(btn)) ? start(btn) : null;
       if(job) last = {el:null, t:0};
@@ -202,7 +225,7 @@
       var w = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || '', ls = function(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } };
       var stu = who === 'student' || (!ls('cvse_token') && !!ls('cvse_stoken')), key = (stu ? 'S|' : 'T|') + (cls || '');
       if(!SIGNS[key]){
-        var url = w + '?action=' + (stu ? 'studentsigns' : 'signget') + '&token=' + encodeURIComponent(stu ? ls('cvse_stoken') : ls('cvse_token')) + (cls && !stu ? '&cls=' + encodeURIComponent(cls) : '');
+        var url = w + '?action=' + (stu ? 'studentsigns' : 'signget') + '&token=' + encodeURIComponent(stu ? ls('cvse_stoken') : ls('cvse_token')) + (cls && !stu ? '&cls=' + encodeURIComponent(cls) : '') + (UI.arch && !stu ? '&arch=' + encodeURIComponent(UI.arch) : '');
         SIGNS[key] = origFetch ? origFetch(url).then(function(r){ return r.json(); }).catch(function(){ return {}; }) : Promise.resolve({});
       }
       var j = await SIGNS[key];
@@ -372,8 +395,123 @@
   function dsOff(){ if(!DSAVED) return; DSAVED.forEach(function(x){ try{ x[0].nodeValue = x[1]; }catch(e){} }); DSAVED = null; }
   try{ window.addEventListener('beforeprint', dsOn); window.addEventListener('afterprint', dsOff); }catch(e){}
   UI._dsOn = dsOn; UI._dsOff = dsOff;
+  /* ---------- S27 (b) + R7: the phone Back button ----------
+     An app with bottom tabs calls UI.tabsBack({key, home, current(), open(id)}) once and UI.tabOpened(id) whenever a tab is shown:
+     Back walks back through the tabs opened; from Home it leaves the app.
+     Every other page: the phone Back does what the page's own Back does (its goBack(), wired automatically).
+     A page with an inner screen (one report, one student) calls UI.innerOpen(closeFn) when it opens it and UI.innerClosed() when the
+     page closes it itself: Back closes the inner screen first.
+     UI.goBack(url) = the page's Back: closes an inner screen first; returns to the app entry it came from (no extra history), else opens url. */
+  var NAV = {tabs:null, page:null, inner:null, skip:0, guard:false, pushed:0, quiet:false, leaving:false};
+  function navPush(kind){ try{ history.pushState({uiNav:kind}, ''); NAV.pushed++; }catch(e){} }
+  function navKey(){ return 'cvse_nav_' + NAV.tabs.key; }
+  function navGet(){ try{ return JSON.parse(sessionStorage.getItem(navKey()) || '[]'); }catch(e){ return []; } }
+  function navSet(a){ try{ sessionStorage.setItem(navKey(), JSON.stringify(a.slice(-30))); }catch(e){} }
+  function navGuard(){ if(!NAV.guard){ NAV.guard = true; navPush('guard'); } }
+  function navType(){ try{ var n = performance.getEntriesByType && performance.getEntriesByType('navigation')[0]; return n ? n.type : ''; }catch(e){ return ''; } }
+  UI.tabsBack = function(o){
+    NAV.tabs = o;
+    if(navType() === 'navigate' && !/[?&]tab=last/.test(location.search)) navSet([]);     // a fresh start (login) begins a new trail
+    navGuard();
+    window.addEventListener('pageshow', function(e){ if(e.persisted) location.reload(); });  // back from a page: fresh numbers
+  };
+  UI.tabOpened = function(id){ if(!NAV.tabs || NAV.quiet) return; if(NAV.inner) UI.innerClosed();   /* another tab: an open inner screen is left */ var a = navGet(); if(a[a.length - 1] !== id) a.push(id); navSet(a); };
+  /* S27 (R10): turn a House text box into the House drop-down (list from Student record settings > Drop-down lists).
+     An old typed House that is not in the list stays shown until another is chosen. No list / no internet = the box stays as it is. */
+  UI.houseSelect = async function(id, cur, get){
+    var el = doc.getElementById(id); if(!el) return;
+    try{ if(!UI._houses){ var r = await get('houselist', {}); if(r && r.success) UI._houses = r.houses || []; } }catch(e){}
+    el = doc.getElementById(id); if(!el || !UI._houses) return;
+    cur = String(cur === undefined || cur === null ? (el.value || '') : cur).trim();
+    var sel = el.tagName === 'SELECT' ? el : doc.createElement('select');
+    var h = '<option value="">Choose</option>' + UI._houses.map(function(x){ return '<option' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('');
+    if(cur && UI._houses.indexOf(cur) < 0) h += '<option selected>' + esc(cur) + '</option>';
+    sel.innerHTML = h;
+    if(sel !== el){ sel.id = el.id; sel.className = el.className; if(el.getAttribute('style')) sel.setAttribute('style', el.getAttribute('style')); el.parentNode.replaceChild(sel, el); }
+  };
+  UI.pageBack = function(fn){ NAV.page = fn; navGuard(); };
+  UI.innerOpen = function(close){ if(NAV.inner){ NAV.inner = close; return; } NAV.inner = close; navPush('inner'); };
+  UI.innerClosed = function(){ if(!NAV.inner) return; NAV.inner = null; NAV.skip++; NAV.pushed = Math.max(0, NAV.pushed - 1); try{ history.back(); }catch(e){ NAV.skip--; } };
+  UI.innerBack = function(){ if(!NAV.inner) return false; var c = NAV.inner; UI.innerClosed(); try{ c(); }catch(e){} return true; };
+  UI.goBack = function(url){
+    if(UI.innerBack()) return;
+    if(UI.arch) url = 'archive.html' + (UI.archSession ? '?s=' + encodeURIComponent(UI.archSession) : '');   // S31: back to the Archive Viewer
+    try{
+      var r = doc.referrer ? new URL(doc.referrer) : null, t = new URL(url, location.href);
+      if(r && r.origin === location.origin && r.pathname === t.pathname && history.length > NAV.pushed + 1){
+        var tm = setTimeout(function(){ location.replace(url); }, 1200);
+        window.addEventListener('pagehide', function(){ clearTimeout(tm); }, {once:true});
+        history.go(-(NAV.pushed + 1)); return;
+      }
+    }catch(e){}
+    location.replace(url);
+  };
+  window.addEventListener('popstate', function(){
+    if(NAV.skip > 0){ NAV.skip--; return; }
+    if(NAV.leaving){ if(history.state && history.state.uiNav){ try{ history.back(); }catch(e){} } else { NAV.leaving = false; last.el = null; UI.toast('Press Back again to close the app.', 'warn'); } return; }
+    NAV.pushed = Math.max(0, NAV.pushed - 1);
+    if(NAV.inner){ var c = NAV.inner; NAV.inner = null; try{ c(); }catch(e){} return; }
+    NAV.guard = false;
+    if(NAV.page){ try{ NAV.page(); }catch(e){} return; }
+    if(!NAV.tabs) return;
+    var a = navGet(), cur = NAV.tabs.current();
+    if(a.length && a[a.length - 1] === cur) a.pop();
+    var prev = a.length ? a[a.length - 1] : (cur && cur !== NAV.tabs.home ? NAV.tabs.home : '');
+    if(prev){
+      NAV.quiet = true; try{ NAV.tabs.open(prev); }catch(e){} NAV.quiet = false;
+      navSet(a.length ? a : [prev]); navGuard(); return;
+    }
+    navSet([]);                                                         // on Home: Back leaves the app
+    if(history.state && history.state.uiNav){ NAV.leaving = true; try{ history.back(); }catch(e){} }
+    else { last.el = null; UI.toast('Press Back again to close the app.', 'warn'); }
+  });
+
+  /* S30 (stage 4): the 📢 icon in an app header, LEFT of Logout. list = active notices [{id,title}] (they come with the Home
+     answer). The red number = notices NOT opened yet on this phone (remembered in localStorage cvse_keep_ntc_<who>, which
+     survives Logout). UI.bell({who, list, open:function(){…}, before:logoutButton})  ·  UI.bellSeen(who, ids) after the list was shown. */
+  function bellKey(who){ return 'cvse_keep_ntc_' + String(who || '').toLowerCase(); }
+  function bellSeenSet(who){ try{ return JSON.parse(localStorage.getItem(bellKey(who)) || '[]') || []; }catch(e){ return []; } }
+  UI.bellNew = function(who, list){ var s = bellSeenSet(who); return (list || []).filter(function(n){ return s.indexOf(String(n.id)) < 0; }).length; };
+  UI.bellSeen = function(who, ids){
+    try{ var s = bellSeenSet(who); (ids || []).forEach(function(i){ i = String(i); if(s.indexOf(i) < 0) s.push(i); }); localStorage.setItem(bellKey(who), JSON.stringify(s.slice(-300))); }catch(e){}
+    var b = doc.getElementById('uiBell'); if(b) UI.bell({who:who, list:UI._bellList || [], open:UI._bellOpen, before:null});
+  };
+  UI.bell = function(o){
+    UI._bellList = o.list || []; UI._bellOpen = o.open;
+    var b = doc.getElementById('uiBell');
+    if(!b){
+      if(!doc.getElementById('uiBellCss')){ var st = doc.createElement('style'); st.id = 'uiBellCss';
+        st.textContent = '.uiBell{position:relative;width:44px;height:44px;min-width:44px;border-radius:50%;border:1.5px solid #e2e8f0;background:#fff;font-size:20px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;margin:0 6px 0 0;flex-shrink:0;box-shadow:none}.uiBell b{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#c62828;color:#fff;font-size:11.5px;font-weight:900;line-height:20px;text-align:center;border:2px solid #fff}.uiBellRow{display:flex;align-items:center;justify-content:flex-end}@media print{.uiBell{display:none!important}}';
+        doc.head.appendChild(st); }
+      b = doc.createElement('button'); b.type = 'button'; b.id = 'uiBell'; b.className = 'uiBell'; b.setAttribute('data-nofb', ''); b.setAttribute('aria-label', 'Notices');
+      b.onclick = function(){ if(typeof UI._bellOpen === 'function') UI._bellOpen(); };
+      var ref = o.before;
+      if(ref && ref.parentNode){
+        var par = ref.parentNode, cs = window.getComputedStyle ? getComputedStyle(par) : null;
+        if(cs && cs.flexDirection === 'column'){                         // badge above Logout: put 📢 + Logout in one row
+          var row = doc.createElement('div'); row.className = 'uiBellRow'; par.insertBefore(row, ref); row.appendChild(b); row.appendChild(ref);
+        } else par.insertBefore(b, ref);
+      }
+    }
+    var n = UI.bellNew(o.who, UI._bellList);
+    b.innerHTML = '📢' + (n ? '<b>' + (n > 99 ? '99+' : n) + '</b>' : '');
+    b.title = n ? n + ' new notice' + (n === 1 ? '' : 's') : 'Notices';
+    b.setAttribute('aria-label', b.title);
+    return n;
+  };
+
   function boot(){
     showFlash();
+    if(UI.arch){                                                          // S31: archive banner on every page opened from the Archive Viewer
+      try{
+        var bn = doc.createElement('div'); bn.className = 'uiArch noprint';
+        bn.style.cssText = 'background:#fff7ed;border-bottom:2px solid #ef6c00;color:#9a3412;font-weight:800;font-size:13px;padding:9px 12px;text-align:center;position:sticky;top:0;z-index:60;line-height:1.4';
+        bn.innerHTML = '🗄️ ARCHIVE ' + esc(UI.archSession || '') + ' – read only, nothing can be changed here. <a href="archive.html' + (UI.archSession ? '?s=' + encodeURIComponent(UI.archSession) : '') + '" style="color:#1976d2">Back to the Archive Viewer</a>';
+        var top = doc.querySelector('body > .top, body > .topbar'); if(top && top.nextSibling) top.parentNode.insertBefore(bn, top.nextSibling); else doc.body.insertBefore(bn, doc.body.firstChild);
+        var st2 = doc.createElement('style'); st2.textContent = '@media print{.uiArch{display:none!important}}'; doc.head.appendChild(st2);
+      }catch(e){}
+    }
+    try{ if(!NAV.tabs && !NAV.page && typeof window.goBack === 'function' && !doc.body.hasAttribute('data-noback')) UI.pageBack(function(){ window.goBack(); }); }catch(e){}
     UI.enhanceDates();
     try{
       var obs = new MutationObserver(function(list){

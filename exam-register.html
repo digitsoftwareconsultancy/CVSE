@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Register</title>
@@ -124,9 +124,9 @@ function $(id){ return document.getElementById(id); }
 function show(el, t, k){ el.className = 'msg show ' + k; el.innerText = t; }
 function hide(el){ el.className = 'msg'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : (USER.role === 'accountant' ? 'accountant.html' : 'teacher.html'); }
+function goBack(){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=last' : (USER.role === 'accountant' ? 'accountant.html' : 'teacher.html')); }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('avatarLetter').innerText = String(USER.name || USER.username || 'U').trim().charAt(0).toUpperCase();
-$('roleBadge').innerText = USER.role === 'admin' ? 'ADMIN' : (USER.role === 'accountant' ? 'ACCOUNTANT' : 'CLASS TEACHER');
+$('roleBadge').innerText = USER.role === 'admin' ? 'ADMIN' : (USER.role === 'accountant' ? 'OFFICE STAFF' : 'CLASS TEACHER');
 var O = null, D = null, VIEW = 'TERM';
 async function boot(){
   show($('gMsg'), 'Loading...', 'load');

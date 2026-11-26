@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b2a5c">
@@ -143,7 +143,8 @@ function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return '';
 function setLs(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
-if(USER.role === 'accountant'){ window.location.href = 'accountant.html'; }
+if(USER.role === 'accountant'){ window.location.replace('accountant.html'); }
+else if(USER.role === 'admin'){ window.location.replace('admin.html?tab=last'); }   // S27 (a): the admin never works in the teacher app
 function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} try{ sessionStorage.setItem('cvse_flash', JSON.stringify({m:'Session expired. Please login again.', t:Date.now()})); }catch(e){} window.location.href = 'index.html'; } return j; }
 async function apiGet(action, params){
   let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
@@ -172,20 +173,24 @@ function openTab(t){
     var v = {home:'vHome', class:'vClass', marks:'vMarks', tt:'vTT', profile:'vProfile'}[x], b = {home:'tHome', class:'tClass', marks:'tMarks', tt:'tTT', profile:'tProfile'}[x];
     $(v).classList.toggle('on', x === t); $(b).classList.toggle('active', x === t);
   });
-  try{ sessionStorage.setItem('cvse_ttab', t); }catch(e){}
+  try{ sessionStorage.setItem('cvse_ttab', t); }catch(e){} try{ UI.tabOpened(t); }catch(e){}
   if(t === 'class' && !CL) loadClass();
   if(t === 'profile' && !PROF){ PROF = true; PROFILE.mount($('vProfile')); }
   window.scrollTo(0, 0);
 }
+try{ UI.tabsBack({key:'teacher', home:'home', current:function(){ try{ return sessionStorage.getItem('cvse_ttab') || 'home'; }catch(e){ return 'home'; } }, open:openTab}); }catch(e){}   // S27 (b)
 function line(left, right){ return '<div class="line"><span>' + left + '</span><span>' + right + '</span></div>'; }
 function pill(t, k){ return '<span class="pill ' + (k || '') + '">' + t + '</span>'; }
 function whenTxt(d){ return d === 0 ? '🎉 Today' : (d === 1 ? 'Tomorrow' : 'in ' + d + ' days'); }
 
+/* S30 (stage 4): 📢 notices icon left of Logout */
+function bellSet(list){ try{ UI.bell({who:USER.username, list:list || [], open:function(){ go('notices.html'); }, before:document.querySelector('.btn-logout')}); }catch(e){} }
 async function loadHome(fresh){
   var j;
   try{ j = await apiGet('teacherhome', fresh ? {fresh:1} : {}); }catch(e){ $('vHome').innerHTML = '<div class="box"><div class="msg show err">❌ Could not connect. Check the internet.</div><div class="btnrow"><button class="btn b-blue" onclick="loadHome(1)">🔄 Try again</button></div></div>'; return; }
   if(!j || !j.success){ $('vHome').innerHTML = '<div class="box"><div class="msg show err">❌ ' + esc((j && j.error) || 'Could not load.') + '</div></div>'; return; }
   H = j;
+  bellSet(j.notices);   // S30: 📢
   $('tClass').style.display = isCT() ? '' : 'none';
   $('roleBadge').innerText = isCT() ? 'CLASS TEACHER' : (USER.role === 'admin' ? 'ADMIN' : 'SUBJECT TEACHER');   // S25: the same words as the other pages
   $('wSub').innerText = (isCT() && H.me.classes ? 'Class ' + H.me.classes.join(', ') + ' · ' : '') + H.day.charAt(0) + H.day.slice(1).toLowerCase() + ' ' + H.today;
@@ -262,6 +267,7 @@ function drawClassTiles(){
     tile('📚', 'Daily update', 'Periods, lessons and homework of my class', "go('daily.html?tab=class','class')", 'var(--blue)') +
     tile('📈', 'Monthly performance', 'Attendance % + class tests of my class', "go('performance.html','class')", 'var(--navy)') +
     tile('📅', 'Calendar & events', 'Class events: PTM, picnic, programme', "go('events.html','class')", 'var(--orange)') +
+    tile('📢', 'Notices', 'Write a notice for my class (students and parents)', "go('notices.html','class')", 'var(--red)') +
     tile('📋', 'Class Report', off ? 'Exam Access is off – ask the admin' : 'Attendance, remarks, results; finalise', examTile('class-report.html', 'class'), 'var(--navy)', off) +
     tile('🖨️', 'View / Print Report Cards', off ? 'Exam Access is off – ask the admin' : 'My class or one student', examTile('report-card.html', 'class'), 'var(--green)', off) +
     tile('📒', 'Exam Register', 'Whole class marks: print', "go('exam-register.html','class')", 'var(--navy)') +

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -150,7 +150,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+function goBack(){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -159,7 +159,7 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 var D = null, TAB = 'settings';
@@ -190,6 +190,8 @@ var SETF = [
  ['Receipt_ResetEachSession','Restart numbers every session','yn'],
  ['Receipt_Style','Receipt layout','sel',[['FORM','Form (boxes like the paper receipt)'],['LIST','Simple list']]],
  ['Receipt_Copies','Receipt copies when printing','sel',[['ONE_PAGE','Parent copy + office copy on one page'],['TWO_PAGES','Two pages'],['ONE_COPY','One copy only']]],
+ ['Receipt_Paper','Receipt paper','sel',[['A4','A4 (as now)'],['A5','A5 – parent copy on page 1, office copy on page 2']],'A5 = half of A4. On A5 the two copies are never on one sheet, so no cutting.'],
+ ['NoDues_Paper','No Dues certificate paper','sel',[['HALF','Half A4 (A5)'],['A4','Full A4']]],
  ['Receipt_ShowWords','Show amount in words','yn'],
  ['Receipt_BackDays','How many days back can a receipt be dated?','num','','0 = today only (safest). 3 = today or up to 3 days back. Older dates: only the admin, or an Office Staff user with the Users permission "Back-date receipts beyond the limit", and a reason is asked.'],
  ['Payment',null],

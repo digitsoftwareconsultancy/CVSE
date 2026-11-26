@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S24">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S29">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Settings</title>
@@ -46,6 +46,8 @@ input[readonly]{background:#f1f5f9;color:#475569}
 .preview{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:10px;font-size:13px;font-weight:700;color:var(--navy);margin-top:10px;line-height:1.5}
 .wrow{display:flex;gap:8px;align-items:center;margin-top:6px}.wrow span{flex:1;font-weight:700;font-size:13px}.wrow input{width:100px;text-align:center}
 .grow{display:grid;grid-template-columns:70px 70px 70px 1fr 46px;gap:6px;align-items:center;margin-bottom:6px}
+.drow{display:grid;grid-template-columns:1fr 90px 46px;gap:6px;align-items:center;margin-bottom:6px}
+.dnote{background:#f5f3ff;border-left:4px solid var(--purple);border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.45;margin:8px 0}
 .grow input{padding:8px;text-align:center}.grow input.rem{text-align:left}
 .xbtn{border:1px solid #fecaca;background:#fff;color:var(--red);border-radius:10px;min-height:46px;font-weight:900;cursor:pointer}
 .prow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
@@ -120,22 +122,22 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = 'admin.html?tab=last'; }
+function goBack(){ UI.goBack('admin.html?tab=last'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 /* ===== state ===== */
-var ROWS = {exams:[], reports:[], grades:[], areas:[], letters:[], results:[], assign:[]};
+var ROWS = {exams:[], reports:[], grades:[], areas:[], letters:[], results:[], assign:[], divisions:[]};
 var SAVED = {};          // JSON of each section as last loaded/saved, to know what is unsaved
 var REF = {classes:[], levels:[], subjects:[], teachers:[], hasMarks:false, problems:[]};
 var CUR = 'exams';
-var SECS = ['exams', 'reports', 'grades', 'areas', 'letters', 'results', 'assign'];
+var SECS = ['exams', 'reports', 'grades', 'areas', 'letters', 'results', 'assign', 'divisions'];   // S29 (D): divisions live in the Grades tab
 
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function csv(v){ return String(v || '').split(',').map(x => x.trim()).filter(Boolean); }
 function dirty(sec){ return JSON.stringify(ROWS[sec]) !== SAVED[sec]; }
 function markDirty(){
   SECS.forEach(s => {
-    let tb = $('tab_' + s); if(tb) tb.classList.toggle('dirty', s === 'areas' ? (dirty('areas') || dirty('letters')) : dirty(s));
+    let tb = $('tab_' + s); if(tb) tb.classList.toggle('dirty', s === 'areas' ? (dirty('areas') || dirty('letters')) : s === 'grades' ? (dirty('grades') || dirty('divisions')) : dirty(s));
     let p = $('pill_' + s); if(p){ p.className = 'pill ' + (dirty(s) ? 'p-dirty' : 'p-ok'); p.innerText = dirty(s) ? 'Unsaved changes' : 'Saved'; }
   });
 }
@@ -199,7 +201,7 @@ function secHead(title, note, sec){
 function saveBar(sec, addLabel, addFn){
   return '<div class="box"><div class="msg" id="msg_' + sec + '"></div><div class="btnrow">' +
     (addFn ? '<button class="btn b-blue" onclick="' + addFn + '">' + addLabel + '</button>' : '') +
-    '<button class="btn b-green" id="save_' + sec + '" onclick="saveSec(\'' + sec + '\')">💾 Save ' + ({exams:'Exams', reports:'Reports', grades:'Grade scale', areas:'Extra areas', letters:'Letter grades', results:'Result choices', assign:'Access'})[sec] + '</button></div></div>';
+    '<button class="btn b-green" id="save_' + sec + '" onclick="saveSec(\'' + sec + '\')">💾 Save ' + ({exams:'Exams', reports:'Reports', grades:'Grade scale', areas:'Extra areas', letters:'Letter grades', results:'Result choices', assign:'Access', divisions:'Division bands'})[sec] + '</button></div></div>';
 }
 // S13: 'X (all sections)' = one tick for every section of X; a section ticked on its own is also fine
 function clsOpts(){ return REF.levels.map(l => ({value:l, label:l + ' (all sections)'})).concat(REF.classes); }
@@ -228,7 +230,7 @@ function toggleChip(sec, i, field, val, on){
 }
 function setF(sec, i, f, v){ ROWS[sec][i][f] = v; markDirty(); if(sec === 'reports' || sec === 'exams') refreshPreview(sec, i); }
 function setYN(sec, i, f, on){ ROWS[sec][i][f] = on ? 'YES' : 'NO'; markDirty(); }
-function redraw(sec){ let y = window.scrollY; ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, letters:drawAreas, results:drawResults, assign:drawAssign})[sec](); window.scrollTo(0, y); }
+function redraw(sec){ let y = window.scrollY; ({exams:drawExams, reports:drawReports, grades:drawGrades, areas:drawAreas, letters:drawAreas, results:drawResults, assign:drawAssign, divisions:drawGrades})[sec](); window.scrollTo(0, y); }
 async function delRow(sec, i){
   if(!(await UI.ask('Remove this row? It is only removed for good when you press Save.'))) return;
   ROWS[sec].splice(i, 1); redraw(sec);
@@ -274,7 +276,7 @@ function addExam(){ ROWS.exams.push({ExamID:'', ExamName:'', ShortName:'', ExamT
 function moveRow(sec, i, d){ let j = i + d; if(j < 0 || j >= ROWS[sec].length) return; let t = ROWS[sec][i]; ROWS[sec][i] = ROWS[sec][j]; ROWS[sec][j] = t; redraw(sec); }
 
 /* ===== REPORTS ===== */
-var LAYOUTS = {A:'A - one exam', B:'B - theory + I/A', C:'C - combined exams'};
+var LAYOUTS = {A:'A - one exam', B:'B - theory + I/A', C:'C - combined exams', D:'D - Marks sheet (full / pass marks, division)'};
 var RULES = ['Single', 'Add marks', 'Weighted percentage'];
 function examShort(id){ let e = ROWS.exams.find(x => String(x.ExamID).toUpperCase() === String(id).toUpperCase()); return e ? (e.ShortName || e.ExamName || e.ExamID) : id; }
 function weightMap(r){ let m = {}; csv(r.Weights).forEach(p => { let a = p.split(':'); if(a.length === 2) m[a[0].trim().toUpperCase()] = a[1].trim(); }); return m; }
@@ -299,12 +301,19 @@ function drawReports(){
     h += '<div class="card rep"><div class="ch"><b>' + esc(r.ReportName || 'New report') + '</b>' + (yn(r.Published) ? '<span class="pill p-ok">Published</span>' : '') + (yn(r.Locked) ? '<span class="pill p-lock">Locked</span>' : '') + '</div>' +
       '<div class="row"><div><label>Report ID</label><input ' + (r._new ? '' : 'readonly') + ' maxlength="10" value="' + esc(r.ReportID) + '" placeholder="e.g. R1" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,\'\');setF(\'reports\',' + i + ',\'ReportID\',this.value)"></div>' +
       '<div style="flex:2"><label>Report name</label><input value="' + esc(r.ReportName) + '" placeholder="e.g. Half Yearly Report" oninput="setF(\'reports\',' + i + ',\'ReportName\',this.value)"></div></div>' +
-      '<div class="row"><div><label>Layout</label><select onchange="setF(\'reports\',' + i + ',\'Layout\',this.value)">' + Object.keys(LAYOUTS).map(k => '<option value="' + k + '"' + (String(r.Layout).toUpperCase() === k ? ' selected' : '') + '>' + LAYOUTS[k] + '</option>').join('') + '</select></div>' +
+      '<div class="row"><div><label>Layout</label><select onchange="setF(\'reports\',' + i + ',\'Layout\',this.value);redraw(\'reports\')">' + Object.keys(LAYOUTS).map(k => '<option value="' + k + '"' + (String(r.Layout).toUpperCase() === k ? ' selected' : '') + '>' + LAYOUTS[k] + '</option>').join('') + '</select></div>' +
       '<div><label>How exams are combined</label><select onchange="setF(\'reports\',' + i + ',\'CombineRule\',this.value);redraw(\'reports\')">' + RULES.map(k => '<option' + (rule === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div></div>' +
       '<label>Exams used</label>' + (examOpts.length ? chipsHtml('reports', i, 'Exams', examOpts, r.Exams) : '<div class="meta">No exams yet. Add them in the Exams section.</div>');
     if(rule === 'Weighted percentage'){
       let w = weightMap(r);
       h += '<label>Weight of each exam (must total 100)</label>' + csv(r.Exams).map(x => '<div class="wrow"><span>' + esc(examShort(x)) + '</span><input type="number" inputmode="decimal" min="0" max="100" value="' + esc(w[x.toUpperCase()] === undefined ? '' : w[x.toUpperCase()]) + '" oninput="setWeight(' + i + ',\'' + esc(x) + '\',this.value)"><b>%</b></div>').join('');
+    }
+    if(String(r.Layout).toUpperCase() === 'D'){        // S29 (D)
+      let gs = String(r.GradeSubjects || 'LAST').toUpperCase() === 'EACH' ? 'EACH' : 'LAST';
+      h += '<div class="dnote"><b>📋 Marks sheet:</b> Full and pass marks come from Subject Master; a mark below its pass mark prints red. ' +
+        (rule === 'Weighted percentage' ? 'All <b>PT</b> exams together make ONE <b>UT</b> column (their weights are added). ' : '') +
+        'Division bands: <b>Grades</b> tab. Performance words (e.g. Duly Passed / PUSC / Detained): <b>Results</b> tab, picked by the class teacher.</div>' +
+        '<label>Grade-only subjects (Abacus, Karbi …)</label><select onchange="setF(\'reports\',' + i + ',\'GradeSubjects\',this.value)"><option value="LAST"' + (gs === 'LAST' ? ' selected' : '') + '>Grade of the last exam only</option><option value="EACH"' + (gs === 'EACH' ? ' selected' : '') + '>A grade in each exam column</option></select>';
     }
     h += '<label>Classes</label>' + chipsHtml('reports', i, 'Classes', clsOpts(), r.Classes, 'None ticked = all classes') +
       '<label>Pass rule (note for your own reference)</label><input value="' + esc(r.PassRule) + '" oninput="setF(\'reports\',' + i + ',\'PassRule\',this.value)" placeholder="e.g. each subject pass marks from SubjectMaster">' +
@@ -345,8 +354,30 @@ function drawGrades(){
   });
   h += '<div class="preview" id="gradeNote">' + esc(gradeCheck()) + '</div></div>';
   h += saveBar('grades', '➕ Add Grade', 'addGrade()');
+  h += drawDivisions();
   $('secGrades').innerHTML = h; markDirty();
 }
+/* ===== S29 (D): DIVISION BANDS (Marks sheet card) ===== */
+function divCheck(){
+  let t = ROWS.divisions.map(d => ({f:Number(d.FromPercent), n:String(d.Division || '').trim(), raw:String(d.FromPercent).trim()}));
+  if(!t.length) return 'No division bands yet. The Marks sheet card then prints "–" for Division.';
+  if(t.some(x => !x.n || x.raw === '' || isNaN(x.f) || x.f < 0 || x.f > 100)) return '⚠️ Fill the name and a From % (0 to 100) in every row.';
+  t.sort((a, b) => b.f - a.f);
+  return '✅ ' + t.map((x, k) => x.n + ' ' + x.f + (k ? ' to below ' + t[k - 1].f : ' and above')).join(' · ') + '. Below ' + t[t.length - 1].f + ' % = "–". Any failed subject = "Nil".';
+}
+function drawDivisions(){
+  let h = secHead('🏅 Division bands (Marks sheet card)', 'Only for reports with layout <b>D - Marks sheet</b>. Each division starts at its <b>From %</b> and uses the EXACT percentage (59.5 stays 59.5, no rounding). Decimals allowed. A pupil who failed any subject gets "Nil".', 'divisions');
+  h += '<div class="box"><div class="drow" style="font-size:11px;font-weight:800;color:var(--muted)"><span>Division</span><span>From %</span><span></span></div>';
+  ROWS.divisions.forEach((d, i) => {
+    h += '<div class="drow"><input maxlength="30" value="' + esc(d.Division) + '" placeholder="e.g. First" oninput="setF(\'divisions\',' + i + ',\'Division\',this.value);divNote()">' +
+      '<input type="number" inputmode="decimal" step="0.01" min="0" max="100" value="' + esc(d.FromPercent) + '" oninput="setF(\'divisions\',' + i + ',\'FromPercent\',this.value);divNote()">' +
+      '<button class="xbtn" onclick="delRow(\'divisions\',' + i + ')">✕</button></div>';
+  });
+  h += '<div class="preview" id="divNote">' + esc(divCheck()) + '</div></div>';
+  return h + saveBar('divisions', '➕ Add Division', 'addDivision()');
+}
+function divNote(){ let el = $('divNote'); if(el) el.innerText = divCheck(); }
+function addDivision(){ ROWS.divisions.push({Division:'', FromPercent:''}); redraw('divisions'); }
 function gradeNote(){ let el = $('gradeNote'); if(el) el.innerText = gradeCheck(); }
 function addGrade(){ ROWS.grades.push({FromPercent:'', ToPercent:'', Grade:'', Remark:''}); redraw('grades'); }
 

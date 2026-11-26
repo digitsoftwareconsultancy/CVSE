@@ -1,3 +1,4 @@
+/* app-version 2026.11.26-S29 (S29: Marks sheet card, layout D) */
 /* report card drawing - shared by report-card.html (staff) and student.html (student / parent)   (S17: photos, rcPhotos)
    cardHtml(model, student) -> the A4 card as HTML.   rcFit(container) -> shrinks every .cw card to the screen width. */
 function rcEsc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -46,6 +47,7 @@ function perExamTable(title, rows, ex){
 function decoBox(dc){ return '<div class="deco"><img src="' + rcEsc(dc.image) + '" alt="">' + (dc.caption ? '<span>' + rcEsc(dc.caption) + '</span>' : '') + '</div>'; }
 
 function cardHtml(d, s){
+  if(d.cfg.layout === 'D' && d.report.ms) return msCardHtml(d, s);          // S29 (D): Marks sheet
   let P = d.cfg.parts, sc = d.school, ex = d.report.exams, h = '<div class="page">';
   if(d.draft) h += '<div class="wm">DRAFT</div>';
   h += '<div class="hdr">' + (sc.header ? '<img src="' + rcEsc(sc.header) + '" alt="">' : '<div class="logo">' + (sc.logo ? '<img src="' + rcEsc(sc.logo) + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover" alt="">' : 'LOGO') + '</div><div class="ph">' + rcEsc(sc.name) + '<small>' + rcEsc(sc.address) + '</small></div>') + '</div>';
@@ -79,6 +81,76 @@ function cardHtml(d, s){
   return h + '</div>';
 }
 
+
+/* ================= S29 (D): the "Marks sheet" card =================
+   Numbers come ready from the server (ENG_markSheet_): parts, totals, red flags, division, position. Only drawing here. */
+function msNum(v){ if(v === null || v === undefined || v === '') return '-'; let n = Number(v); if(isNaN(n)) return rcEsc(v); return String(Math.round(n * 100) / 100); }
+function msCell(v, red, absent){ let t = absent ? 'AB' : msNum(v); return '<td' + (red ? ' class="red"' : '') + '>' + t + '</td>'; }
+function msToday(){ let d = new Date(), p = n => String(n).padStart(2, '0'); return p(d.getDate()) + '-' + p(d.getMonth() + 1) + '-' + d.getFullYear(); }
+function msTable(d, s){
+  let ms = d.report.ms, K = ms.kind, cols = ms.cols, ex = d.report.exams, rows = '', head = '';
+  let caption = K === 'ADD' ? (d.cfg.title || d.report.name) : (ex.length ? ex[ex.length - 1].name : d.report.name);
+  let nCols = K === 'SINGLE' ? 3 : K === 'SINGLE_IA' ? 5 : K === 'ADD' ? cols.length + 3 : cols.length + 1;
+  head = '<tr><th class="sa">Scholastic<br>Areas</th><th colspan="' + nCols + '" class="cap">' + rcEsc(caption) + '</th></tr><tr><th>Subjects</th>';
+  if(K === 'SINGLE') head += '<th>Full Marks</th><th>Pass Marks</th><th>Marks Secured</th>';
+  else if(K === 'SINGLE_IA') head += '<th>Full Marks</th><th>Pass Marks</th><th>Theory</th><th>I/A</th><th>Total</th>';
+  else if(K === 'ADD') head += '<th>Full Marks</th><th>Pass Marks</th>' + cols.map(c => '<th>' + rcEsc(c.label) + '</th>').join('') + '<th>Total</th>';
+  else head += cols.map(c => '<th>' + rcEsc(String(c.label).toUpperCase()) + '<br>(' + msNum(c.weight) + '%)</th>').join('') + '<th>TOTAL</th>';
+  head += '</tr>';
+  s.subjects.filter(x => !x.notTaken && x.ms).forEach(x => {
+    let m = x.ms, p = m.parts || [];
+    rows += '<tr><td class="sub">' + rcEsc(x.name) + '</td>';
+    if(K === 'SINGLE') rows += '<td>' + msNum(m.full) + '</td><td>' + msNum(m.pass) + '</td>' + msCell(m.total, m.red, m.absent);
+    else if(K === 'SINGLE_IA') rows += '<td>' + msNum(m.full) + '</td><td>' + msNum(m.pass) + '</td><td>' + (m.absent ? 'AB' : msNum(m.theory)) + '</td><td>' + (m.absent ? 'AB' : (m.iaMax ? msNum(m.ia) : '-')) + '</td>' + msCell(m.total, m.red, m.absent);
+    else if(K === 'ADD') rows += '<td>' + msNum(m.full) + '</td><td>' + msNum(m.pass) + '</td>' + cols.map((c, i) => p[i] ? msCell(p[i].v, false, p[i].absent) : '<td>-</td>').join('') + msCell(m.total, m.red, false);
+    else rows += cols.map((c, i) => p[i] ? msCell(p[i].v, p[i].red, false) : '<td>-</td>').join('') + msCell(m.total, m.red, false);
+    rows += '</tr>';
+  });
+  (s.msGrades || []).forEach(g => {
+    rows += '<tr><td class="sub">' + rcEsc(g.name) + '</td>';
+    if(K === 'SINGLE') rows += '<td>–</td><td>–</td><td>' + dash(g.total) + '</td>';
+    else if(K === 'SINGLE_IA') rows += '<td>–</td><td>–</td><td></td><td></td><td>' + dash(g.total) + '</td>';
+    else if(K === 'ADD') rows += '<td>–</td><td>–</td>' + cols.map((c, i) => '<td>' + rcEsc(g.parts[i] || '') + '</td>').join('') + '<td>' + dash(g.total) + '</td>';
+    else rows += cols.map((c, i) => '<td>' + rcEsc(g.parts[i] || '') + '</td>').join('') + '<td>' + dash(g.total) + '</td>';
+    rows += '</tr>';
+  });
+  let t = s.msTotals || {};
+  let foot = '<tr class="tot"><td class="sub">Total Marks</td>';
+  if(K === 'SINGLE') foot += '<td>' + msNum(t.full) + '</td><td>' + msNum(t.pass) + '</td><td>' + msNum(t.total) + '</td>';
+  else if(K === 'SINGLE_IA') foot += '<td>' + msNum(t.full) + '</td><td>' + msNum(t.pass) + '</td><td></td><td></td><td>' + msNum(t.total) + '</td>';
+  else if(K === 'ADD') foot += '<td>' + msNum(t.full) + '</td><td>' + msNum(t.pass) + '</td>' + cols.map(() => '<td></td>').join('') + '<td>' + msNum(t.total) + '</td>';
+  else foot += cols.map(() => '<td></td>').join('') + '<td>' + msNum(t.total) + '</td>';
+  foot += '</tr>';
+  return '<table class="mt">' + head + rows + foot + '</table>';
+}
+function msCardHtml(d, s){
+  let sc = d.school, f = s.final || {}, pl = d.place || {}, P = d.cfg.parts || {};
+  let h = '<div class="page ms">';
+  if(sc.logo) h += '<img class="mswm" src="' + rcEsc(sc.logo) + '" alt="">';
+  if(d.draft) h += '<div class="wm">DRAFT</div>';
+  h += '<div class="mshdr"><div class="mslogo">' + (sc.logo ? '<img src="' + rcEsc(sc.logo) + '" alt="">' : 'LOGO') + '</div><div class="mstxt"><div class="n">' + rcEsc(String(sc.name || '').toUpperCase()) + '</div>' +
+    (sc.address ? '<div class="a">' + rcEsc(sc.address) + '</div>' : '') + '<div class="r">' + rcEsc(d.cfg.title || d.report.name) + '</div></div></div>';
+  let bits = ['<span><b>Class:</b> ' + rcEsc(pl.level || d.className) + '</span>'];
+  if(pl.streamClass){
+    if(pl.section) bits.push('<span><b>Section:</b> ' + rcEsc(pl.section) + '</span>');
+    bits.push('<span><b>Stream:</b> ' + rcEsc(s.stream || '') + '</span>');
+  } else bits.push('<span><b>Section:</b> ' + rcEsc(pl.section || '') + '</span>');
+  bits.push('<span><b>Roll No:</b> ' + rcEsc(s.rollNo || '') + '</span>');
+  h += '<div class="msname"><b>Name:</b> ' + rcEsc(String(s.name || '').toUpperCase()) + '</div><div class="msplace">' + bits.join('') + '</div>';
+  h += msTable(d, s);
+  let w = f.workingDays, pr = f.presentDays, pos = s.position === 'Nil' ? 'Nil' : (s.position ? ordinal(s.position) : '-');
+  h += '<table class="mb"><tr><td class="l">Attendance</td><td>' + dash(pr) + '</td><td>' + dash(w) + '</td><td class="l">Percentage</td><td>' + msNum(s.pct) + '</td></tr>' +
+    '<tr><td colspan="5" class="l"><b>Division :</b> ' + rcEsc(s.division || '-') + '</td></tr>' +
+    (d.cfg.showRank ? '<tr><td colspan="5" class="l"><b>Position :</b> ' + rcEsc(pos) + '</td></tr>' : '') +
+    '<tr><td colspan="5" class="l"><b>Performance:</b> ' + rcEsc(f.result || '') + '</td></tr>' +
+    '<tr><td colspan="5" class="l cm"><b>Comment:</b> ' + rcEsc(f.remark || '') + '</td></tr></table>';
+  if(P.signs !== false){
+    let ct = d.classTeacher || {};
+    h += '<div class="mssign"><div>' + rcSignImg(ct.sign) + '<span>Class Teacher</span></div><div class="dt">Date: ' + rcEsc(d.cfg.resultDate || msToday()) + '</div><div>' + rcSignImg(sc.principalSign) + '<span>' + rcEsc(sc.principalName || 'Principal') + '</span></div></div>';
+  }
+  if(sc.footer) h += '<div class="foot">' + rcEsc(sc.footer) + '</div>';
+  return h + '</div>';
+}
 
 /* auto-fit: shrink each A4 page to the width of its container, never enlarge */
 function rcFit(container, pad){

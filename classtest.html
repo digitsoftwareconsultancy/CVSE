@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Class Test</title>
@@ -206,7 +206,7 @@ function fillSubjects(){
 
 function goBack(){
   let v = ls('cvse_view');
-  window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html';   // S25: straight to the teacher app (last tab)
+  UI.goBack(IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html');   // S25: straight to the teacher app (last tab)
 }
 function goDaily(){ window.location.href = 'daily.html?tab=' + (IS_ADMIN ? 'all' : (IS_CT && ls('cvse_view') === 'class' ? 'class' : 'mine')); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }

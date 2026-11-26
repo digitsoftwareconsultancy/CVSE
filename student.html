@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S24">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="rc-card.css">
+<link rel="stylesheet" href="rc-card.css?v=35">
 <style>
 *{box-sizing:border-box}
 :root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b;--frame:#1a4bb5;--cream:#fdf6d0}
@@ -130,6 +130,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 .rgf textarea{min-height:80px}.rgf input:disabled,.rgf select:disabled{background:#f1f5f9;color:#334155}.rgf .req{color:var(--red)}
 .fhead{font-weight:900;color:var(--navy);font-size:13px;margin:12px 0 2px;border-bottom:2px solid var(--line);padding-bottom:3px}
 .gdChips{margin:12px 0 4px}.gdT{font-size:12px;font-weight:800;color:#0b2a5c;margin-bottom:6px}.gdRow{display:flex;gap:6px;flex-wrap:wrap}.gdC{flex:1;min-width:90px;min-height:46px;border:1.5px solid #cbd5e1;background:#fff;border-radius:12px;font-weight:800;color:#334155;cursor:pointer;font-size:13.5px}.gdC.on{background:#1976d2;border-color:#1976d2;color:#fff}.gdLock{background:#f1f5f9!important;color:#475569}
+.ntcI{border-top:1px solid var(--line);padding:2px 0}.ntcI:first-of-type{border-top:none}.ntcT{display:block;width:100%;text-align:left;background:none;border:none;padding:10px 2px;min-height:46px;font-size:14.5px;color:var(--navy);cursor:pointer;font-family:inherit}.ntcNew{font-size:10.5px;font-weight:900;color:#fff;background:#c62828;padding:2px 7px;border-radius:999px;vertical-align:1px}.ntcX{display:none;font-size:14px;line-height:1.55;padding:0 2px 10px;color:#111827}.ntcI.on .ntcX{display:block}.ntcM{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:6px}
 </style>
 <script src="config.js"></script><script src="ui.js"></script></head>
 <body>
@@ -179,6 +180,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 
   <div class="scr" id="s_home">
     <div class="inst noprint" id="instHome" style="display:none"></div>
+    <div id="ntcBox"></div>
     <div id="regCard"></div>
     <div id="dBody"></div>
     <div class="pwr"><span>Powered by</span><img src="icons/digit-logo.png" alt="DiGit Software Consultancy"></div>
@@ -215,7 +217,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
 </div>
 </div>
 
-<script src="rc-render.js"></script>
+<script src="rc-render.js?v=35"></script>
 <script>
 const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
@@ -228,7 +230,7 @@ function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText =
 function hide(el){ el.className = 'msg'; }
 
 async function api(action, params, post){
-  let r;
+  let r, sentTk = ls('cvse_stoken');   // S27 (R8): a late answer of an older login cannot end the new one
   if(post) r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_stoken')}, params || {}))});
   else{
     let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_stoken'));
@@ -236,6 +238,7 @@ async function api(action, params, post){
     r = await fetch(url);
   }
   let j = await r.json();
+  if(j && j.code === 'AUTH' && sentTk !== ls('cvse_stoken')) throw new Error('AUTH');
   if(j && j.code === 'AUTH'){ clearStudent(); showLogin('Your session has ended. Please login again.'); throw new Error('AUTH'); }
   if(j && j.code === 'MUSTCHANGE'){ showSetPw(true); throw new Error('AUTH'); }
   return j;
@@ -301,6 +304,7 @@ async function startApp(){
     let r = await api('studenthome');
     if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); return; }
     HOME = r; hide($('gMsg'));
+    drawNotices();   // S30: 📢
     if(r.school.session){ $('wPill').innerText = 'Session ' + r.school.session; $('wPill').style.display = ''; }
     document.querySelectorAll('#tabsBar .tabBtn').forEach(b => { let i = b.dataset.t === 'result' ? {open:resParts().length > 0} : tabInfo(b.dataset.t); b.style.opacity = i.open ? '' : '.55'; if(b.dataset.t === 'fees' && !i.open) b.style.display = 'none';
       if(r.limited && b.dataset.t !== 'fees' && b.dataset.t !== 'result') b.style.display = 'none'; });   // S14: a student who left: only Fees + Previous results
@@ -312,7 +316,7 @@ async function startApp(){
 function tabInfo(k){ return (HOME && HOME.tabs || []).find(t => t.key === k) || {open:true}; }
 function openTab(k){
   if(k === 'performance'){ RES_CHIP = 'perf'; k = 'result'; }                     // S19: Progress lives inside Result
-  CUR = k;
+  CUR = k; try{ UI.tabOpened(k); }catch(e){}
   document.querySelectorAll('.scr').forEach(s => s.style.display = 'none');
   $('s_' + k).style.display = '';
   document.querySelectorAll('#tabsBar .tabBtn').forEach(b => b.classList.toggle('active', b.dataset.t === k));
@@ -321,6 +325,7 @@ function openTab(k){
   if(k === 'registration'){ loadReg(); return; }                                   // S16
   if(k === 'home') loadDaily(''); else if(k === 'events') loadCal(''); else if(k === 'timetable') loadTT(); else if(k === 'profile') loadProfile(); else if(k === 'result') loadResults(); else if(k === 'fees') loadFees();
 }
+try{ UI.tabsBack({key:'student', home:'home', current:function(){ return CUR || 'home'; }, open:openTab}); }catch(e){}   // S27 (b)
 function lockHtml(m){ return '<div class="lock"><b>🔒</b>' + esc(m || 'This section is not available right now. Please contact the school office.') + '</div>'; }
 function failHtml(retry){ return '<div class="msg show err">❌ Network problem. Please check the internet and <a href="#" onclick="' + retry + ';return false">try again</a>.</div>'; }
 function pc(v){ return v === null || v === undefined ? '-' : v + '%'; }
@@ -566,14 +571,14 @@ async function openCard(id){
     let r = await api('studentreportcard', {reportId:id});
     if(r.closed){ hide($('resMsg')); $('resList').innerHTML = lockHtml(r.message); return; }
     if(!r.success){ show($('resMsg'), '❌ ' + (r.error || 'Could not open.'), 'err'); return; }
-    hide($('resMsg')); $('resList').style.display = 'none'; $('cardBar').style.display = '';
+    hide($('resMsg')); $('resList').style.display = 'none'; $('cardBar').style.display = ''; try{ UI.innerOpen(function(){ backToList(); }); }catch(e){}   // S27 (R7): Back = the report list
     $('fit').innerHTML = rcCardsHtml(r, r.students); rcFit($('fit'));
     if(window.UI && UI.fillSigns) UI.fillSigns($('fit'), '', 'student');   // S23 (L4)
     window.scrollTo({top:0});
     rcPhotos($('fit'), () => api('studentphoto', {}).then(x => { let o = {}; if(x && x.success && x.photo) o[r.students[0].admissionNo] = x.photo; return {photos:o}; }));   // S17: own photo
   }catch(e){ if(e.message !== 'AUTH') show($('resMsg'), '❌ Network problem. Please try again.', 'err'); }
 }
-function backToList(quiet){ $('fit').innerHTML = ''; $('cardBar').style.display = 'none'; $('resList').style.display = ''; if(!quiet) hide($('resMsg')); }
+function backToList(quiet){ try{ UI.innerClosed(); }catch(e){} $('fit').innerHTML = ''; $('cardBar').style.display = 'none'; $('resList').style.display = ''; if(!quiet) hide($('resMsg')); }
 window.addEventListener('resize', () => { if($('fit').innerHTML) rcFit($('fit')); });
 window.addEventListener('beforeprint', () => { $('fit').querySelectorAll('.cw').forEach(c => { c.style.width = ''; c.style.height = ''; }); });
 window.addEventListener('afterprint', () => { if($('fit').innerHTML) rcFit($('fit')); });
@@ -624,6 +629,27 @@ function openReceipt(no){ window.open('fees-receipt.html?stu=1&no=' + encodeURIC
 var DEFER = null;
 /* ---------- S16: registration form (parents) ---------- */
 var REG = null, REGP = 1;
+/* S30 (stage 4): 📢 notices at the top of Home. A tap on a title opens it (and it is no longer new on this phone);
+   the 📢 icon opens Home and every notice. */
+function ntcWho(){ return 's_' + ls('cvse_sadm'); }
+function drawNotices(openAll){
+  let list = (HOME && HOME.notices) || [], box = $('ntcBox');
+  try{ UI.bell({who:ntcWho(), list:list, open:function(){ if(CUR !== 'home') openTab('home'); drawNotices(true); setTimeout(function(){ $('ntcBox').scrollIntoView({block:'start', behavior:'smooth'}); }, 80); }, before:document.querySelector('.btn-logout')}); }catch(e){}
+  if(!list.length){ box.innerHTML = ''; return; }
+  let seen = []; try{ seen = JSON.parse(localStorage.getItem('cvse_keep_ntc_' + ntcWho().toLowerCase()) || '[]') || []; }catch(e){}
+  box.innerHTML = '<div class="box ntc" style="border-left-color:var(--red)"><div class="title">📢 Notices</div>' + list.map(n => {
+    let isNew = seen.indexOf(String(n.id)) < 0, open = openAll === true;
+    return '<div class="ntcI' + (open ? ' on' : '') + '" id="ntc_' + esc(n.id) + '"><button type="button" class="ntcT" data-nofb onclick="ntcOpen(\'' + esc(n.id) + '\')">' + (n.pinned ? '📌 ' : '') + '<b>' + esc(n.title) + '</b>' + (isNew ? ' <span class="ntcNew">NEW</span>' : '') + '</button>' +
+      '<div class="ntcX">' + esc(n.text).replace(/\n/g, '<br>') + '<div class="ntcM">' + esc(n.byName || '') + ' · until ' + esc(n.until || '') + '</div></div></div>';
+  }).join('') + '</div>';
+  if(openAll === true){ try{ UI.bellSeen(ntcWho(), list.map(n => n.id)); }catch(e){} }
+}
+function ntcOpen(id){
+  let el = $('ntc_' + id); if(!el) return;
+  el.classList.toggle('on');
+  try{ UI.bellSeen(ntcWho(), [id]); }catch(e){}
+  let t = el.querySelector('.ntcNew'); if(t) t.remove();
+}
 function drawRegCard(){
   let i = tabInfo('registration');
   $('regCard').innerHTML = i.open && !(HOME && HOME.limited) ? '<div class="box" style="border-left-color:var(--purple)"><div class="title">📝 Registration form</div><div class="meta">The school asks parents to fill in or check the student\'s details.</div><div class="btnrow"><button class="btn b-purple" onclick="openTab(\'registration\')">Open the registration form</button></div></div>' : '';

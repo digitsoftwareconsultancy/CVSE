@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S25">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student record</title>
@@ -90,11 +90,11 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ if(el) el.className = 'msg'; }
-function goBack(){ if(Q.get('new') && !Q.get('class')){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; return; }     // S24 (F19): Add student from the Students tab returns there
-  window.location.href = 'students.html' + (R && R.Class ? '?class=' + encodeURIComponent(R.Class) : (Q.get('class') ? '?class=' + encodeURIComponent(Q.get('class')) : '')); }
+function goBack(){ if(Q.get('new') && !Q.get('class')){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'); return; }     // S24 (F19): Add student from the Students tab returns there
+  UI.goBack('students.html' + (R && R.Class ? '?class=' + encodeURIComponent(R.Class) : (Q.get('class') ? '?class=' + encodeURIComponent(Q.get('class')) : ''))); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 var Q = new URLSearchParams(location.search), ADM = Q.get('adm') || '', ISNEW = !ADM && Q.get('new') === '1';
@@ -202,7 +202,15 @@ function elHtml(cls, chosen, ro){
   let g = (D.allGroups || {})[cls] || {}, ks = Object.keys(g); if(!ks.length) return '';
   return '<h4 class="g">Elective subjects</h4><div class="help">You can choose later (also for the whole class in 📚 Elective subjects).</div>' + ks.map(k=>{ let c = (chosen||[]).find(x=>x.group===k); return '<label>'+esc(k)+(c||g[k].length<2?'':' <span class="pill" style="background:#fff7ed;color:#c2410c">Elective not chosen</span>')+'</label><select class="el" data-g="'+esc(k)+'"'+(ro?' disabled':'')+'><option value="">Not chosen yet</option>'+g[k].map(s=>'<option'+(c&&c.subject===s?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'; }).join('');   // S23 (L11): optional
 }
-function clsChange(){ let b = $('elBox'); if(b) b.innerHTML = elHtml(val('Class'), D.electives, !D.canEdit); }
+function clsChange(){ let b = $('elBox'); if(b) b.innerHTML = elHtml(val('Class'), D.electives, !D.canEdit);  streamVis(); }
+// S29 (D): the Stream box only for the Stream classes (Student record settings, default XI, XII)
+function streamVis(){
+  let sel = $('f_Stream'); if(!sel) return;
+  let c = String(val('Class') || (R && R.Class) || '').trim().toUpperCase(), lvl = c.replace(/\s*-\s*[A-Z0-9]+$/, '');
+  let sc = (D.meta && D.meta.streamClasses) || [], on = sc.indexOf(lvl) > -1 || sc.indexOf(c) > -1;
+  let lab = document.querySelector('label[for="f_Stream"]');
+  sel.style.display = on ? '' : 'none'; if(lab) lab.style.display = on ? '' : 'none';
+}
 function electives(){ return [...document.querySelectorAll('.el')].map(x=>({group:x.dataset.g, subject:x.value})); }
 async function addStu(flags){
   if(window.UI && !UI.checkDates(['f_DOB','f_AdmissionDate'])){ show($('addMsg'), '❌ Please correct the dates first.', 'err'); return; }
@@ -235,7 +243,7 @@ function headBox(){
   if(noEl.length && R.StatusShow === 'ACTIVE') warn += '<div class="msg show warn">📚 Elective not chosen: '+esc(noEl.join(', '))+'. Choose it in section 4 (Class) or in 📚 Elective subjects.</div>';   // S23 (L11)
   return '<div class="box"><div class="title">'+esc(R.Name || '(no name)')+'</div><div class="meta">Adm '+esc(R.AdmissionNo)+' · Class '+esc(R.Class || '-')+(R.RollNo?' · Roll '+esc(R.RollNo):'')+' &nbsp;'+pill+'</div>'+warn+
    '<div id="phArea">'+photoArea()+'</div>'+
-   '<div class="btnrow"><button class="btn b-purple" onclick="printIt(\'form\')">🖨️ Registration form</button><button class="btn b-navy" onclick="printIt(\'profile\')">🖨️ Student profile</button></div></div>';
+   '<div class="btnrow"><button class="btn b-purple" onclick="printIt(\'form\')">🖨️ Registration form</button><button class="btn b-navy" onclick="printIt(\'profile\')">🖨️ Student profile</button>' + (USER.role === 'admin' || USER.role === 'accountant' ? '<button class="btn b-green" data-nofb onclick="window.location.href=\'nodues.html?adm=\' + encodeURIComponent(ADM)">📄 No Dues certificate</button>' : '') + '</div></div>';
 }
 function secHtml(n){
   let keys = D.meta.fields.filter(f=>f.section===n).map(f=>f.key), ro = !D.canEdit, body = '';

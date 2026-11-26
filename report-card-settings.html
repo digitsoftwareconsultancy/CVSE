@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S29">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Report Card Settings</title>
@@ -152,12 +152,12 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-async function goBack(){ if(DIRTY && !(await UI.ask('You have unsaved changes. Leave them?'))) return; window.location.href = 'admin.html?tab=last'; }
+async function goBack(){ if(DIRTY && !(await UI.ask('You have unsaved changes. Leave them?'))) return; UI.goBack('admin.html?tab=last'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 var S = null, CUR = null, DIRTY = false;
 var GK = ['RC_Principal_Name','RC_Principal_Sign','RC_Footer','RC_Photo_Pattern','RC_Deco1_Image','RC_Deco1_Caption','RC_Deco1_Side','RC_Deco2_Image','RC_Deco2_Caption','RC_Deco2_Side'];
-var LAYOUT_NAME = {A:'A - one exam, marks only', B:'B - one exam, written + I/A', C:'C - several exams combined'};
+var LAYOUT_NAME = {A:'A - one exam, marks only', B:'B - one exam, written + I/A', C:'C - several exams combined', D:'D - Marks sheet'};
 
 async function init(){
   $('wName').innerText = 'Welcome, ' + (USER.name || USER.username);
@@ -188,6 +188,7 @@ function drawReport(){
   let r = CUR, used = {}; r.fields.forEach(f => used[f.key] = 1);
   let free = S.catalog.filter(c => !used[c.key]);
   let h = '<div class="meta" style="margin-top:8px">Layout: <b>' + esc(LAYOUT_NAME[r.layout] || r.layout) + '</b> (change it in Exam Settings) · ' + (r.published ? 'Published to students' : 'Not published') + '</div>';
+  if(r.layout === 'D') h += '<div class="warnbox" style="background:#f5f3ff;border-color:#c4b5fd;color:#3b0764">📋 <b>Marks sheet</b> has a fixed look: header box with the logo, Name · Class · Section (or Stream) · Roll No, the marks table, then Attendance · Percentage · Division · Position · Performance · Comment and the signatures. Here only <b>Signatures</b>, <b>Print position</b>, <b>Card heading</b> and <b>Result date</b> change it; the other parts, student details and decoration images are not used by this layout.</div>';   // S29 (D)
   h += '<div class="card"><div class="ch"><b>Parts of the card</b></div><div class="chips">' + S.parts.map(p => `<label class="chip ${r.parts[p.key] ? 'on' : ''}"><input type="checkbox" ${r.parts[p.key] ? 'checked' : ''} onchange="setPart('${p.key}',this.checked)">${esc(p.label)}</label>`).join('') + '</div></div>';
   h += '<div class="card rep"><div class="ch"><b>Rank</b></div><label class="sw"><input type="checkbox" ' + (r.showRank ? 'checked' : '') + ' onchange="CUR.showRank=this.checked;mark()">Print position (rank) on the card</label><div class="hint">Off by default. Rank is only worked out for students whose marks are complete.</div></div>';
   h += '<div class="card area"><div class="ch"><b>Student details</b></div><div class="hint" style="margin:0 0 8px">Name is always printed. Choose the others and their order. The list comes from the columns of your current student list (sheet tab "Students"), so a school without House or Mother\'s name never sees them. A student with no value for a field simply does not print that line.</div>';
@@ -197,6 +198,7 @@ function drawReport(){
   h += '<div class="card"><div class="ch"><b>Decoration images</b></div><label class="sw"><input type="checkbox" ' + (r.deco1 ? 'checked' : '') + ' onchange="CUR.deco1=this.checked;mark();drawReport()">Show decoration image 1</label>' + (r.deco1 && !d1 ? '<div class="warnbox">Image 1 has no link yet (School items above), so nothing will print.</div>' : '') +
     '<label class="sw"><input type="checkbox" ' + (r.deco2 ? 'checked' : '') + ' onchange="CUR.deco2=this.checked;mark();drawReport()">Show decoration image 2</label>' + (r.deco2 && !d2 ? '<div class="warnbox">Image 2 has no link yet (School items above), so nothing will print.</div>' : '') + '</div>';
   h += '<div class="card"><div class="ch"><b>Card heading</b></div><input value="' + esc(r.title) + '" maxlength="80" placeholder="Leave empty to use the report name (' + esc(r.name) + ')" oninput="CUR.title=this.value;mark()"></div>';
+  h += '<div class="card"><div class="ch"><b>Result date</b></div><input id="rDate" data-date inputmode="numeric" maxlength="10" placeholder="DD-MM-YYYY" value="' + esc(r.resultDate || '') + '" oninput="CUR.resultDate=this.value;mark()" onchange="CUR.resultDate=this.value;mark()"><div class="hint">Printed at the bottom of the Marks sheet card. Leave empty to print the day of printing.</div></div>';   // S29 (D)
   h += '<div class="msg" id="rMsg"></div><div class="btnrow"><button class="btn b-green" id="btnRep" onclick="saveReport()">💾 Save Report Card Options</button><button class="btn b-blue" onclick="preview()">👁️ Preview / Print</button></div>';
   $('repBody').innerHTML = h;
 }
@@ -209,7 +211,7 @@ async function preview(){ if(DIRTY && !(await UI.ask('Unsaved changes will not s
 async function saveReport(){
   let b = $('btnRep'); b.disabled = true; show($('rMsg'), 'Saving...', 'load');
   try{
-    let r = await apiPost('savereportcardsettings', {report:{reportId:CUR.reportId, parts:CUR.parts, showRank:CUR.showRank, fields:CUR.fields, deco1:CUR.deco1, deco2:CUR.deco2, title:CUR.title}});
+    let r = await apiPost('savereportcardsettings', {report:{reportId:CUR.reportId, parts:CUR.parts, showRank:CUR.showRank, fields:CUR.fields, deco1:CUR.deco1, deco2:CUR.deco2, title:CUR.title, resultDate:($('rDate') ? $('rDate').value.trim() : (CUR.resultDate || ''))}});
     if(!r.success){ show($('rMsg'), '❌ ' + (r.error || 'Could not save.'), 'err'); return; }
     let i = S.reports.findIndex(x => x.reportId === CUR.reportId); S.reports[i] = JSON.parse(JSON.stringify(CUR)); DIRTY = false;
     show($('rMsg'), '✅ ' + (r.message || 'Saved.'), 'ok');

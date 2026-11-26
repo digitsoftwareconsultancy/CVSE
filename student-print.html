@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student print</title>
@@ -31,7 +31,13 @@ h1{text-align:center;font-size:17px;margin:4px 0 8px;font-weight:700;letter-spac
 .ph2 h3{font-size:13px;color:#0b2a5c;margin:10px 0 3px;border-bottom:1.5px solid #0b2a5c;padding-bottom:2px}
 table.pt{width:100%;border-collapse:collapse;font-size:11.5px}table.pt td{border:1px solid #bbb;padding:3px 6px;vertical-align:top}table.pt td.k{width:19%;color:#333;background:#f6f7f9;font-size:10.5px}table.pt td{width:31%}
 .foot{font-size:10px;color:#555;margin-top:8px;text-align:right}
+/* S27 (R9): the registration form fills the whole A4 page (rows spread evenly, a little taller) and leaves room to sign */
+.page.reg{display:flex;flex-direction:column;justify-content:space-between}
+.page.reg>*{margin-top:0}   /* in a column the gaps add up (no margin collapsing) – keep the old row spacing, the free space is shared out */
+.page.reg .sig{margin-top:12mm}
 @media print{
+  .page.reg{box-sizing:border-box}   /* the 10 mm edge stays free on paper */
+  .page.reg .ln,.page.reg .grp .l0{line-height:1.8}
   @page{size:A4;margin:0}
   body{background:#fff;padding:0}
   .bar,.msg{display:none!important}
@@ -100,7 +106,7 @@ function person(title, p, rel){
 function form(){
   let corr = R.SameAddress === 'YES' ? 'Same as permanent' : v('CorrespondenceAddress');
   let tc = R.TCBrought ? (R.TCBrought === 'YES' ? 'Yes' : 'No') : '';
-  return '<div class="page">' + head() + '<h1>Student’s Registration Form</h1><div class="topb"><div class="lft">' +
+  return '<div class="page reg">' + head() + '<h1>Student’s Registration Form</h1><div class="topb"><div class="lft">' +
     fr('Admission No. (Office use only)', v('AdmissionNo')) + fr('Full Name', v('Name')) + fr('Phone No.', v('Phone')) + fr('Date of Birth', v('DOB')) +
     frs([['Category', v('Category')], ['Community', v('Community')]]) + '</div>'+phHtml()+'</div>' +
     frs([['Religion', v('Religion')], ['Gender', v('Gender')], ['Blood group', v('BloodGroup')]]) +

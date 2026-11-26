@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Office</title>
@@ -217,6 +217,7 @@ var CARDS = [
  ['DAILY','📚','Daily update','Periods, lessons and homework of every class','daily.html','daily','#1976d2'],
  ['ATTENDANCE','📈','Monthly performance','Attendance % + class tests of a class','performance.html','daily','#0b2a5c'],
  ['CALENDAR','📅','Calendar & events','Holidays, exams, programmes, meetings','events.html','daily','#ef6c00'],
+ ['NOTICES','📢','Notices','Write a notice for students or staff','notices.html','daily','#c62828'],   // S30
  ['EXAMREG','📒','Exam Register','Whole class marks: print','exam-register.html','exams','#0b2a5c'],   // S22
  ['TIMETABLE','🗓️','Timetable','Build and print the timetable','timetable-builder.html','more','#7c3aed'],
  ['STUDPW','🔑','Student passwords','Reset a student\'s app password','student-access.html','more','#c62828'] ];
@@ -225,9 +226,13 @@ function rs(n){ return '₹' + (Math.round((Number(n)||0) * 100) / 100).toLocale
 function hMoney(n,d){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
 function withTimeout(p, ms){ return new Promise(function(res, rej){ var t = setTimeout(function(){ rej(new Error('TIMEOUT')); }, ms); p.then(function(v){ clearTimeout(t); res(v); }, function(e){ clearTimeout(t); rej(e); }); }); }
 function hErr(h,k){ return h.errors && h.errors[k] ? '<div class="hrow"><span class="ic">⚠️</span><span class="herr">Could not load this card: '+esc(h.errors[k])+'</span></div>' : ''; }
+/* S30 (stage 4): 📢 notices icon left of Logout */
+function bellSet(list){ try{ UI.bell({who:USER.username, list:list || [], open:function(){ location.href = 'notices.html'; }, before:document.querySelector('.btn-logout')}); }catch(e){} }
+async function bellLoad(){ bellSet([]); try{ var r = await apiGet('noticelist', {bell:1}); if(r && r.success) bellSet(r.notices); }catch(e){} }
 async function loadHome(me){
   try{
     let h = await withTimeout(apiGet('homesummary',{}), 60000);
+    if(h && h.success) bellSet(h.notices); else bellLoad();   // S30: 📢
     if(!h.success){
       if(me.privileges.indexOf('COLLECT') > -1){ let t = await apiGet('feereceipts',{}); if(t.success){ let s = t.summary; $('today').innerHTML = '<div class="box" style="border-left-color:var(--green)"><div class="title">Today’s collection</div><div class="big"><div><b>'+rs(s.total)+'</b><span>'+s.count+' receipts</span></div><div><b>'+Object.keys(s.byMode).map(k=>esc(k)+' '+rs(s.byMode[k])).join('<br>')+(Object.keys(s.byMode).length?'':'—')+'</b><span>By payment mode</span></div></div></div>'; } }
       return;
@@ -282,8 +287,9 @@ function openPane(k){
     var p = $('pane'+n.charAt(0).toUpperCase()+n.slice(1)); if(p) p.style.display = (n===k ? 'block' : 'none');
     var b = $('tab_'+n); if(b) b.classList.toggle('active', n===k);
   });
-  ssSet(k); window.scrollTo(0,0);
+  ssSet(k); try{ UI.tabOpened(k); }catch(e){} window.scrollTo(0,0);
 }
+try{ UI.tabsBack({key:'office', home:'home', current:function(){ return ssGet() || 'home'; }, open:openPane}); }catch(e){}   // S27 (b)
 /* S25 (F20): the same tabs as the admin app (Home · Students · Fees · Daily · 🎓 Exams) + ⋯ More (Timetable, Student passwords) – a tab only when it has cards */
 function buildTabs(by){
   TABS_SHOWN = ['home'];

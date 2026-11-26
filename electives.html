@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Elective Subjects</title>
@@ -174,9 +174,9 @@ function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=students' : USER.role === 'accountant' ? 'accountant.html' : 'teacher.html?tab=class'; }
+function goBack(){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=students' : USER.role === 'accountant' ? 'accountant.html' : 'teacher.html?tab=class'); }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'admin' ? 'ADMIN' : USER.role === 'accountant' ? 'ACCOUNTANT' : 'CLASS TEACHER';
+$('roleBadge').innerText = USER.role === 'admin' ? 'ADMIN' : USER.role === 'accountant' ? 'OFFICE STAFF' : 'CLASS TEACHER';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 /* S23 (L11): give an elective subject to many students of a class at once */
 let D = null;

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.24-S26"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>DiGit ERP Login</title><meta name="theme-color" content="#0b2a5c"><link rel="manifest" href="manifest-staff.webmanifest"><link rel="icon" href="icons/staff-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon-staff.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Staff">
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.26-S27"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>DiGit ERP Login</title><meta name="theme-color" content="#0b2a5c"><link rel="manifest" href="manifest-staff.webmanifest"><link rel="icon" href="icons/staff-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon-staff.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Staff">
 <style>body{font-family:Arial;background:#eef2f7;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)} .card{background:#fff;padding:28px 22px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:100%;max-width:360px;margin:16px;box-sizing:border-box;text-align:center} .input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;margin:8px 0;background:#eef6ff;box-sizing:border-box;min-height:46px;font-size:16px} .btn{width:100%;padding:12px;border:none;border-radius:25px;font-weight:800;cursor:pointer;margin:6px 0;min-height:46px;font-size:15px} .btn-login{background:#0b2a5c;color:#fff} .btn-class{background:#0b2a5c;color:#fff} .btn-sub{background:#16a34a;color:#fff} .btn-back{background:#e5e7eb;color:#333}.pwr{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;color:#64748b;font-size:11px;font-weight:700}.pwr img,#login .pwr img{height:44px;width:auto;max-width:none;max-height:none;margin:0;border-radius:0;display:block}</style><script src="config.js"></script><script src="ui.js"></script></head><body>
 <div class="card">
 <div id="loginForm"><h2 style="color:#0b2a5c">DiGit School Management<br>System . ERP</h2>
@@ -112,9 +112,9 @@ function enterRole(role){
   localStorage.setItem('cvse_role', role);
   localStorage.setItem('cvs_role', role);
   
-  if(role=='admin') window.location.href = 'admin.html';
-  else if(role=='accountant') window.location.href = 'accountant.html';
-  else window.location.href = 'teacher.html';   // S21: one teacher app for class + subject teachers
+  if(role=='admin') window.location.replace('admin.html');
+  else if(role=='accountant') window.location.replace('accountant.html');
+  else window.location.replace('teacher.html');   // S21: one teacher app for class + subject teachers
 }
 
 function backToLogin(){
@@ -129,11 +129,14 @@ function backToLogin(){
     if(u && u.token){
       CAP = u;
       var view = localStorage.getItem('cvse_view');
-      if(view=='class' || view=='subject') window.location.href='teacher.html';   // S21
-      else if(view=='admin') window.location.href='admin.html';
-      else if(view=='accountant') window.location.href='accountant.html';
+      if(view=='class' || view=='subject') window.location.replace('teacher.html');   // S21
+      else if(view=='admin') window.location.replace('admin.html');
+      else if(view=='accountant') window.location.replace('accountant.html');
     }
   }catch(e){}
 })();
 if('serviceWorker' in navigator && location.protocol === 'https:'){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
+/* S27 (R8): "Session expired" is shown here, on the login screen, and never again after the next login */
+(function(){ try{ var f = JSON.parse(sessionStorage.getItem('cvse_flash') || 'null'); sessionStorage.removeItem('cvse_flash');
+  if(f && f.m){ var m = document.getElementById('msg'); if(m) m.innerText = f.m; } }catch(e){} })();
 </script></body></html>

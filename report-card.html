@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S29">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Report Cards</title>
-<link rel="stylesheet" href="rc-card.css">
+<link rel="stylesheet" href="rc-card.css?v=35">
 <style>
 
 *{box-sizing:border-box}
@@ -122,7 +122,7 @@ input[readonly]{background:#f1f5f9;color:#475569}
   <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
 </div>
 
-<script src="rc-render.js"></script>
+<script src="rc-render.js?v=35"></script>
 <script>
 const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
@@ -140,7 +140,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html'; }   // S25
+function goBack(){ UI.goBack(IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html'); }   // S25
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 var OPTS = [], DATA = null;

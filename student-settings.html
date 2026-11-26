@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S29">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Settings – Student record</title>
@@ -81,7 +81,7 @@ function hide(el){ if(el) el.className = 'msg'; }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
-var LIST_LABEL = {Gender:'Gender', BloodGroup:'Blood group', Category:'Category', Community:'Community', Religion:'Religion'};
+var LIST_LABEL = {Gender:'Gender', BloodGroup:'Blood group', Category:'Category', Community:'Community', Religion:'Religion', House:'House', Stream:'Stream'};
 var D = null;
 
 async function load(keepMsg){
@@ -119,7 +119,10 @@ function draw(){
         '<button onclick="opt(\''+k+'\',\'rename\',this.dataset.v)" data-v="'+esc(o.v)+'">Rename</button>'+
         '<button onclick="opt(\''+k+'\',\''+(o.hidden?'show':'hide')+'\',this.dataset.v)" data-v="'+esc(o.v)+'">'+(o.hidden?'Show':'Hide')+'</button>'+
         (n ? '' : '<button class="d" onclick="opt(\''+k+'\',\'delete\',this.dataset.v)" data-v="'+esc(o.v)+'">Delete</button>')+'</div>'; }).join('') +
-      '<div style="display:flex;gap:8px;margin-top:8px"><input id="new_'+k+'" placeholder="New option" maxlength="40" style="flex:1;min-width:0"><button class="btn b-blue" style="width:auto;min-width:90px" onclick="opt(\''+k+'\',\'add\',$(\'new_'+k+'\').value)">Add</button></div>';
+      '<div style="display:flex;gap:8px;margin-top:8px"><input id="new_'+k+'" placeholder="New option" maxlength="40" style="flex:1;min-width:0"><button class="btn b-blue" style="width:auto;min-width:90px" onclick="opt(\''+k+'\',\'add\',$(\'new_'+k+'\').value)">Add</button></div>' +
+      (k === 'Stream' ? '<label for="streamCls" style="margin-top:10px">Stream classes</label><input id="streamCls" maxlength="80" placeholder="XI, XII" value="'+esc((D.meta.streamClasses || []).join(', '))+'">'+
+        '<div class="meta">Only pupils of these classes (class level like XI, or one class like XI-A) get the Stream box in the record, and their Marks sheet card prints "Stream". Separate with commas. Empty = no streams.</div>'+
+        '<div class="btnrow"><button class="btn b-green" id="bStream" onclick="saveStream()">Save stream classes</button></div><div class="msg" id="mStream"></div>' : '');   // S29 (D)
   });
   h += '<div class="msg" id="m4"></div></div>';
   h += '<div id="regBox"></div>';                                   // S16: 4. Parent registration (drawn by loadReg)
@@ -259,6 +262,7 @@ async function post(action, payload, btn, m, okReload){
 }
 function saveAdm(){ post('mrsettingssave', {admPrefix:$('a_pre').value.trim(), admUseYear:$('a_year').value, admDigits:$('a_dig').value.trim(), admRestart:$('a_rs').value}, $('b1'), $('m1'), true); }
 function saveReq(){ post('mrsettingssave', {required:[...document.querySelectorAll('.rq:checked:not(:disabled)')].map(x=>x.value).join(',')}, $('b2'), $('m2'), true); }
+function saveStream(){ post('mrsettingssave', {streamClasses:$('streamCls').value.trim()}, $('bStream'), $('mStream'), true); }   // S29 (D)
 function saveDaily(){ post('mrsettingssave', {daily:[...document.querySelectorAll('.dl:checked')].map(x=>x.value).join(',')}, $('b3'), $('m3'), true); }
 async function opt(list, op, value){
   let m = $('m4'), nv = '';

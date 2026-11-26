@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S22">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fee Reports</title>
@@ -143,7 +143,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+function goBack(){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -152,7 +152,7 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 var M = null, DEF = null, OUT = null, BUSY = false, ICON = {DAILY:'💵', RECEIPTS:'🧾', HEADWISE:'🧩', CLASSDUES:'🏫', DEFAULTERS:'⏰', CONCESSIONS:'🎁', LEDGER:'📒', ALLDATA:'📦', LEFTDUES:'🚪', BUSLIST:'🚌'};
@@ -173,7 +173,7 @@ async function init(){
 }
 function opts(list, all, allLabel){ return (all ? '<option value="">' + allLabel + '</option>' : '') + list.map(x => '<option value="' + esc(x[0]) + '">' + esc(x[1]) + '</option>').join(''); }
 function openReport(key){
-  DEF = M.reports.find(x => x.key === key); OUT = null;
+  DEF = M.reports.find(x => x.key === key); OUT = null; try{ UI.innerOpen(closeReport); }catch(e){}   // S27 (R7): Back = the report list
   $('pickBox').style.display = 'none'; $('fBox').style.display = ''; $('rBox').style.display = 'none'; $('pick').innerHTML = ''; hide($('gMsg'));
   $('fTitle').innerText = DEF.title; $('fDesc').innerText = DEF.desc;
   let f = DEF.filters, h = '';
@@ -199,7 +199,7 @@ function quick(k){
   else if(k === 'month'){ a = new Date(t.getFullYear(), t.getMonth(), 1); }
   $('f_from').value = ddmm(a); $('f_to').value = ddmm(b);
 }
-function closeReport(){ DEF = null; OUT = null; $('fBox').style.display = 'none'; $('rBox').style.display = 'none'; $('pickBox').style.display = ''; $('pick').innerHTML = ''; hide($('gMsg')); }
+function closeReport(){ try{ UI.innerClosed(); }catch(e){} DEF = null; OUT = null; $('fBox').style.display = 'none'; $('rBox').style.display = 'none'; $('pickBox').style.display = ''; $('pick').innerHTML = ''; hide($('gMsg')); }
 function params(adm){
   let p = {report:DEF.key};
   ['session', 'from', 'to', 'class', 'mode', 'user', 'status', 'minDays', 'minAmount', 'sort', 'q'].forEach(k => { let e = $('f_' + k); if(e && e.value.trim() !== '') p[k] = e.value.trim(); });

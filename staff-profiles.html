@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Staff profiles</title>
@@ -110,8 +110,8 @@ if(!ls('cvse_token') || USER.role !== 'admin'){ window.location.href = 'index.ht
 $('roleBadge').innerText = 'ADMIN';
 var ROLE = {admin:'Admin', accountant:'Office Staff', classTeacher:'Class teacher', subjectTeacher:'Subject teacher'};
 var LIST = null, ONE = null, FILTER = 'wait';
-function goBack(){ window.location.href = 'admin.html?tab=last'; }
-function toList(){ ONE = null; loadList(); }
+function goBack(){ UI.goBack('admin.html?tab=last'); }
+function toList(){ try{ UI.innerClosed(); }catch(e){} ONE = null; loadList(); }
 async function loadList(){
   $('main').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
   var j; try{ j = await apiGet('staffprofiles'); }catch(e){ $('main').innerHTML = '<div class="msg show err">❌ Could not connect. Check the internet.</div>'; return; }
@@ -133,7 +133,7 @@ async function openOne(u){
   $('main').innerHTML = '<div class="empty-note">⏳ Loading...</div>'; window.scrollTo(0, 0);
   var j; try{ j = await apiGet('staffprofile', {username:u}); }catch(e){ $('main').innerHTML = '<div class="msg show err">❌ Could not connect.</div>'; return; }
   if(!j || !j.success){ $('main').innerHTML = '<div class="msg show err">❌ ' + esc((j && j.error) || 'Could not load.') + '</div>'; return; }
-  ONE = j; drawOne(); photos();
+  ONE = j; drawOne(); photos(); try{ UI.innerOpen(toList); }catch(e){}   // S27 (R7): Back = the staff list
 }
 function stTxt(f){ return {LOCKED:'<span class="pill ok">🔒 Accepted</span>', WAITING:'<span class="pill warn">⏳ Waiting</span>', REFUSED:'<span class="pill bad">✖ Not accepted</span>', EMPTY:'<span class="pill grey">Not filled</span>', OPEN:'<span class="pill">🔓 Unlocked</span>'}[f.state]; }
 function drawOne(){

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Registration requests</title>
@@ -109,10 +109,10 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ if(el) el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'accountant' ? 'accountant.html' : 'admin.html?tab=last'; }
+function goBack(){ UI.goBack(USER.role === 'accountant' ? 'accountant.html' : 'admin.html?tab=last'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 var Q = new URLSearchParams(location.search), L = null, V = null, FILTER = 'SUBMITTED', SEARCH = '';
@@ -131,7 +131,7 @@ async function loadList(msg){
     drawList();
   }catch(e){ show($('gMsg'), '❌ Could not connect. Check internet and try again.', 'err'); $('main').innerHTML = '<div class="btnrow"><button class="btn b-navy" onclick="loadList()">Try again</button></div>'; }
 }
-function toList(){ if(V){ history.replaceState(null, '', 'registration-requests.html'); loadList(); } }
+function toList(){ try{ UI.innerClosed(); }catch(e){} if(V){ history.replaceState(null, '', 'registration-requests.html'); loadList(); } }
 function drawList(){
   let r = L, n = k => k === 'ALL' ? r.items.length : (r.counts[k] || 0);
   let h = '<div class="box" style="border-left-color:var(--purple)"><div class="title">📝 Registration requests</div><div class="meta">Forms filled by parents in the student app. Nothing reaches the student record until you accept it.' +
@@ -154,6 +154,7 @@ function drawItems(){
 
 /* ---------- one form ---------- */
 async function openReq(adm, msg){
+  try{ UI.innerOpen(toList); }catch(e){}   // S27 (R7): Back = the list
   history.replaceState(null, '', 'registration-requests.html?adm=' + encodeURIComponent(adm));
   show($('gMsg'), 'Opening the form... please wait', 'load'); window.scrollTo({top:0});
   try{

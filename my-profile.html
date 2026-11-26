@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.17-S21">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>My profile</title>
@@ -91,8 +91,8 @@ function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
 $('avatarLetter').innerText = String(USER.name || USER.username || 'U').trim().charAt(0).toUpperCase();
 if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : (USER.role === 'admin' ? 'ADMIN' : 'TEACHER');
-function goBack(){ window.location.href = USER.role === 'accountant' ? 'accountant.html' : (USER.role === 'admin' ? 'admin.html?tab=last' : 'teacher.html'); }
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : (USER.role === 'admin' ? 'ADMIN' : 'TEACHER');
+function goBack(){ UI.goBack(USER.role === 'accountant' ? 'accountant.html' : (USER.role === 'admin' ? 'admin.html?tab=last' : 'teacher.html')); }
 PROFILE.mount($('pf'));
 </script>
 </body>

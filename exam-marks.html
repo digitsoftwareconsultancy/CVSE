@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.24-S26">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Exam Marks</title>
@@ -135,7 +135,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html'; }   // S25: straight to the teacher app (last tab)
+function goBack(){ UI.goBack(IS_ADMIN ? 'admin.html?tab=last' : 'teacher.html'); }   // S25: straight to the teacher app (last tab)
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 
 var OPTS = [];           // exams -> classes -> subjects

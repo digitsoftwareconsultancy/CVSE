@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.13-S7">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Receipts</title>
@@ -154,8 +154,8 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 </div>
 <div class="wrap">
  <div class="box"><div class="title">Receipts</div><div class="meta">Day book. Tap Print to reprint. Cancelled receipts stay in the list.</div>
-  <div class="row2"><div><label>Date</label><input id="dt" inputmode="numeric" maxlength="10" oninput="maskD(this)" placeholder="DD-MM-YYYY"></div><div><label>Search (no, name, adm)</label><input id="q" placeholder="Search"></div></div>
-  <div class="btnrow"><button class="btn b-blue" onclick="load()">Show</button><button class="btn b-navy" onclick="$('dt').value='';$('q').value='';load('ALL')">All dates</button></div></div>
+  <div class="row2"><div><label>Date <button type="button" data-nofb aria-label="Clear the date" onclick="$('dt').value=''" style="border:none;background:#e5e7eb;border-radius:999px;padding:2px 9px;font-weight:800;cursor:pointer;margin-left:4px">✕</button></label><input id="dt" inputmode="numeric" maxlength="10" oninput="maskD(this)" placeholder="DD-MM-YYYY"></div><div><label>Search (no, name, adm)</label><input id="q" placeholder="Search" onkeydown="if(event.key==='Enter')load()"></div></div>
+  <div class="btnrow"><button class="btn b-blue" onclick="load()">Show</button><button class="btn b-navy" onclick="$('dt').value='';load('ALL')">All dates</button></div></div>
  <div class="msg" id="gMsg"></div>
  <div id="sumBox"></div>
  <div id="list"></div>
@@ -180,7 +180,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+function goBack(){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -189,7 +189,7 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 
@@ -197,7 +197,8 @@ $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperC
 var CAN = false, CUR = null;
 function rs(n){ return '₹' + (Math.round((Number(n)||0) * 100) / 100).toLocaleString('en-IN'); }
 async function load(all){
-  let d = all === 'ALL' ? 'ALL' : $('dt').value.trim(), q = $('q').value.trim();
+  let q = $('q').value.trim(), d = all === 'ALL' ? 'ALL' : $('dt').value.trim();
+  if(!d && q) d = 'ALL';     // S27 (R6): a search with no date looks at every date
   show($('gMsg'),'Loading receipts... please wait','load'); $('list').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
   try{
     if(!CUR){ let me = await apiGet('feeme',{}); CAN = me.success && me.privileges.indexOf('CANCEL') > -1; CUR = me.success ? me : {}; }
@@ -206,9 +207,9 @@ async function load(all){
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); $('list').innerHTML=''; return; }
     hide($('gMsg')); if(!$('dt').value && r.date !== 'ALL') $('dt').value = r.date;
     let s = r.summary;
-    $('sumBox').innerHTML = '<div class="box" style="border-left-color:var(--green)"><div class="title">'+(r.date==='ALL'?'All dates':esc(r.date))+'</div><div class="big"><div><b>'+rs(s.total)+'</b><span>'+s.count+' receipts</span></div><div><b>'+(Object.keys(s.byMode).map(k=>esc(k)+' '+rs(s.byMode[k])).join('<br>')||'—')+'</b><span>By payment mode'+(s.cancelled?' · '+s.cancelled+' cancelled':'')+'</span></div></div></div>';
+    $('sumBox').innerHTML = '<div class="box" style="border-left-color:var(--green)"><div class="title">'+(r.date==='ALL'?'All dates':esc(r.date))+(q?' · search '+esc(q):'')+'</div><div class="big"><div><b>'+rs(s.total)+'</b><span>'+s.count+' receipts</span></div><div><b>'+(Object.keys(s.byMode).map(k=>esc(k)+' '+rs(s.byMode[k])).join('<br>')||'—')+'</b><span>By payment mode'+(s.cancelled?' · '+s.cancelled+' cancelled':'')+'</span></div></div></div>';
     $('list').innerHTML = r.receipts.length ? r.receipts.map(x=>'<div class="srow" style="cursor:default;border-left-color:'+(x.status==='CANCELLED'?'#94a3b8':'var(--green)')+'"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.no)+' · '+esc(x.name)+'</b><span class="pill '+(x.status==='CANCELLED'?'o':'g')+'">'+(x.status==='CANCELLED'?'CANCELLED':rs(x.total))+'</span></div><div class="meta">'+esc(x.date)+(x.time?' '+esc(x.time):'')+' · Class '+esc(x.cls)+' · Adm '+esc(x.adm)+' · '+esc(x.mode)+' · by '+esc(x.by)+(r.date==='ALL'?' · '+esc(x.session):'')+'</div>'+(x.reason?'<div class="meta">Reason: '+esc(x.reason)+'</div>':'')+
-      '<div class="btnrow" style="margin-top:8px"><button class="btn b-blue" onclick="window.location.href=\'fees-receipt.html?no='+encodeURIComponent(x.no)+'&s='+encodeURIComponent(x.session)+'\'">🖨 Print</button>'+(CAN&&x.status!=='CANCELLED'?'<button class="btn" style="background:var(--red)" onclick="askCancel(\''+esc(x.no)+'\',\''+esc(x.session)+'\')">Cancel</button>':'')+'</div></div>').join('')+(r.more?'<div class="meta">Showing the latest 200. Use the date or search to narrow down.</div>':'') : '<div class="empty-note">No receipts found.</div>';
+      '<div class="btnrow" style="margin-top:8px"><button class="btn b-blue" onclick="window.location.href=UI.archUrl(\'fees-receipt.html?no='+encodeURIComponent(x.no)+'&s='+encodeURIComponent(x.session)+'\')">🖨 Print</button>'+(CAN&&!UI.arch&&x.status!=='CANCELLED'?'<button class="btn" style="background:var(--red)" onclick="askCancel(\''+esc(x.no)+'\',\''+esc(x.session)+'\')">Cancel</button>':'')+'</div></div>').join('')+(r.more?'<div class="meta">Showing the latest 200. Use the date or search to narrow down.</div>':'') : '<div class="empty-note">No receipts found.</div>';
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); $('list').innerHTML=''; }
 }
 var CNO = '', CSES = '';

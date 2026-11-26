@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.21-S23">
+<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Students</title>
@@ -122,7 +122,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 <div class="wrap">
  <div id="vList">
   <div class="box"><div class="title">Students</div><div class="meta">Choose a class, tap a student to change the details, or add a new student.</div>
-   <label>Search (name or admission no)</label><input id="q" oninput="drawList()" placeholder="Type to filter">
+   <label>Search (name or admission no)</label><div class="row2" style="grid-template-columns:1fr auto"><input id="q" oninput="SRES=null;drawList()" onkeydown="if(event.key==='Enter')searchAll()" placeholder="Type, then Search = whole school"><button class="btn b-blue" style="width:auto" onclick="searchAll()">🔍 Search</button></div>
    <div class="btnrow"><button class="btn b-green" id="addBtn" onclick="newStu()">+ Add new student</button></div><div class="btnrow" id="recRow" style="display:none"><button class="btn b-purple" onclick="window.open('student-print.html?blank=1','_blank')">🖨️ Blank registration form</button><button class="btn b-navy" id="setBtn" style="display:none" onclick="location.href='student-settings.html'">⚙️ Student record settings</button></div></div>
   <div class="chips" id="chips"></div>
   <div class="msg" id="gMsg"></div>
@@ -150,7 +150,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ window.location.href = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'; }
+function goBack(){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'); }
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;
@@ -159,7 +159,7 @@ function maskD(el){
   el.value = o;
 }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'accountant' ? 'ACCOUNTANT' : 'ADMIN';
+$('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 
 
@@ -176,14 +176,27 @@ async function load(){
     if((!CLS || r.classes.indexOf(CLS) < 0) && r.classes.length){ CLS = r.classes[0]; return load(); }
     $('addBtn').style.display = (r.recordsEdit || r.quickEdit) ? '' : 'none';
     $('recRow').style.display = r.records ? '' : 'none'; $('setBtn').style.display = USER.role === 'admin' ? '' : 'none';
-    $('chips').innerHTML = r.classes.map(c=>'<button class="chip'+(c===CLS?' on':'')+'" onclick="CLS=\''+esc(c)+'\';load()">'+esc(c)+'</button>').join('');
+    $('chips').innerHTML = r.classes.map(c=>'<button class="chip'+(c===CLS?' on':'')+'" onclick="$(\'q\').value=\'\';SRES=null;CLS=\''+esc(c)+'\';load()">'+esc(c)+'</button>').join('');
     drawList();
   }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); $('list').innerHTML=''; }
 }
+/* S27 (R5): 🔍 Search looks in EVERY class (as Collect Fees); typing alone still filters the open class */
+var SALL = null, SRES = null;
+async function searchAll(){
+  let q = $('q').value.trim().toLowerCase();
+  if(!q){ show($('gMsg'),'Type a name or admission number first.','warn'); return; }
+  show($('gMsg'),'Searching the whole school... please wait','load');
+  try{
+    if(!SALL){ let r = await apiGet('liststudents', {}); if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not search.'),'err'); return; } SALL = r.students || []; }
+    SRES = SALL.filter(s=>(s.Name+' '+s.AdmissionNo).toLowerCase().indexOf(q) > -1);
+    hide($('gMsg')); drawList();
+  }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); }
+}
 function drawList(){
   if(!D) return; let q = $('q').value.trim().toLowerCase();
-  let a = D.students.filter(s=>!q || (s.Name+' '+s.AdmissionNo).toLowerCase().indexOf(q) > -1);
-  $('list').innerHTML = a.length ? a.map((s,i)=>'<div class="srow" onclick="editStu(\''+esc(s.AdmissionNo)+'\')"'+(s.Status&&s.Status!=='ACTIVE'?' style="border-left-color:#94a3b8;opacity:.8"':'')+'><b>'+esc(s.Name)+'</b><div class="meta">Class '+esc(s.Class)+(s.RollNo?' · Roll '+esc(s.RollNo):'')+' · Adm '+esc(s.AdmissionNo)+(s.DOB?' · DOB '+esc(s.DOB):'')+'</div>'+pills(s)+'</div>').join('') : '<div class="empty-note">No students found.</div>';
+  if(!q) SRES = null;
+  let a = SRES ? SRES : D.students.filter(s=>!q || (s.Name+' '+s.AdmissionNo).toLowerCase().indexOf(q) > -1);
+  $('list').innerHTML = (SRES ? '<div class="empty-note" style="padding:6px 0;text-align:left">🔍 Whole school · '+a.length+' found</div>' : '') + (a.length ? a.map((s,i)=>'<div class="srow" onclick="editStu(\''+esc(s.AdmissionNo)+'\')"'+(s.Status&&s.Status!=='ACTIVE'?' style="border-left-color:#94a3b8;opacity:.8"':'')+'><b>'+esc(s.Name)+'</b><div class="meta">Class '+esc(s.Class)+(s.RollNo?' · Roll '+esc(s.RollNo):'')+' · Adm '+esc(s.AdmissionNo)+(s.DOB?' · DOB '+esc(s.DOB):'')+'</div>'+pills(s)+'</div>').join('') : '<div class="empty-note">No students found.</div>');
 }
 function pills(s){
   let h = '';
@@ -194,7 +207,7 @@ function pills(s){
   return h ? '<div class="l2">'+h+'</div>' : '';
 }
 function grp(cls){ let g = (D.groups||{})[cls] || {}; return Object.keys(g).map(k=>({group:k,subjects:g[k]})); }
-function editStu(adm){ if(D.records){ location.href = 'student-record.html?adm=' + encodeURIComponent(adm) + '&class=' + encodeURIComponent(CLS || ''); return; } EDIT = D.students.find(s=>s.AdmissionNo===adm); ISNEW = false; drawEdit(); }
+function editStu(adm){ let hit = D.students.find(s=>s.AdmissionNo===adm) || (SRES||[]).find(s=>s.AdmissionNo===adm); if(D.records){ location.href = 'student-record.html?adm=' + encodeURIComponent(adm) + '&class=' + encodeURIComponent((hit && hit.Class) || CLS || ''); return; } EDIT = hit; ISNEW = false; drawEdit(); }
 function newStu(){ if(D && D.recordsEdit){ location.href = 'student-record.html?new=1&class=' + encodeURIComponent(CLS || ''); return; } EDIT = {AdmissionNo:'',Name:'',RollNo:'',Class:CLS||'',DOB:'',FatherName:'',MotherName:'',House:'',electives:[]}; ISNEW = true; drawEdit(); }
 function elHtml(cls, chosen){
   let gs = grp(cls); if(!gs.length) return '';
@@ -213,9 +226,10 @@ function drawEdit(){
    '<div class="btnrow"><button class="btn b-green" id="saveBtn" onclick="saveStu()">Save</button><button class="btn b-navy" onclick="closeEdit()">Back to list</button></div>'+
    (!ISNEW && D.canDelete?'<div class="btnrow"><button class="btn" style="background:var(--red)" onclick="askDelete()">Delete this student</button></div>':'')+
    '<div class="msg" id="sMsg"></div></div>';
+  try{ UI.houseSelect('f_ho', s.House || '', apiGet); UI.innerOpen(closeEdit); }catch(e){}   // S27 (R10 House drop-down, R7 Back = list)
 }
 function clsChange(){ $('elBox').innerHTML = elHtml($('f_cls').value, EDIT.electives); }
-function closeEdit(){ $('vEdit').style.display = 'none'; $('vList').style.display = 'block'; load(); }
+function closeEdit(){ try{ UI.innerClosed(); }catch(e){} $('vEdit').style.display = 'none'; $('vList').style.display = 'block'; load(); }
 async function saveStu(){
   if(window.UI && !UI.checkDates(['f_dob'])){ show($('sMsg'),'❌ Please correct the date of birth first.','err'); return; }
   let b = $('saveBtn'), m = $('sMsg'); b.disabled = true; show(m,'Saving... please wait','load');
