@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S32">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student record</title>
@@ -172,7 +172,7 @@ function drawNew(){
    (D.nextSession ? '<h4 class="g">The child joins</h4>'+
    '<label class="chk"><input type="radio" name="jn" id="jnNow" checked onchange="joinMode()"> Now, in this session</label>'+
    '<label class="chk"><input type="radio" name="jn" id="jnNext" onchange="joinMode()"> In the next session ('+esc(D.nextSession)+') – admission taken early<small>Not in any class list now. Fees of '+esc(D.nextSession)+' can be taken in Collect Fees. Class and roll number are given at the promotion.</small></label>' : '')+
-   '<h4 class="g">Student</h4>' + keys.map(k=>{ let v = k==='Class' ? c : ''; return input(k, v, false); }).join('') +
+   '<h4 class="g">Student</h4>' + keys.map(k=>{ if(k==='Stream') return streamHtml('', false); let v = k==='Class' ? c : ''; return input(k, v, false); }).join('') +
    '<div id="elBox"></div>'+
    '<div class="btnrow"><button class="btn b-green" id="addBtn" onclick="addStu()">Add student</button><button class="btn b-navy" onclick="goBack()">Cancel</button></div><div class="msg" id="addMsg"></div></div>';
   $('main').innerHTML = h; R = {Class:c}; clsChange(); nextNo();
@@ -181,7 +181,7 @@ function drawNew(){
 // S23 (L9): always Name, DOB, Class, Roll no, Admission date, Student type + every ticked daily field + every compulsory field
 function addKeys(){
   let ok = k => D.meta.fields.some(f => f.key === k && ['family','history'].indexOf(f.type) < 0);
-  let keys = ['Name','DOB','Class','RollNo','AdmissionDate','StudentType'];
+  let keys = ['Name','DOB','Class','RollNo','Stream','AdmissionDate','StudentType'];   // S32 (R1): + Stream (shown only for the Stream classes)
   (D.daily || []).concat(D.meta.required || []).forEach(k => { if(keys.indexOf(k) < 0 && ok(k)) keys.push(k); });
   return keys.filter(ok);
 }
@@ -203,13 +203,19 @@ function elHtml(cls, chosen, ro){
   return '<h4 class="g">Elective subjects</h4><div class="help">You can choose later (also for the whole class in 📚 Elective subjects).</div>' + ks.map(k=>{ let c = (chosen||[]).find(x=>x.group===k); return '<label>'+esc(k)+(c||g[k].length<2?'':' <span class="pill" style="background:#fff7ed;color:#c2410c">Elective not chosen</span>')+'</label><select class="el" data-g="'+esc(k)+'"'+(ro?' disabled':'')+'><option value="">Not chosen yet</option>'+g[k].map(s=>'<option'+(c&&c.subject===s?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'; }).join('');   // S23 (L11): optional
 }
 function clsChange(){ let b = $('elBox'); if(b) b.innerHTML = elHtml(val('Class'), D.electives, !D.canEdit);  streamVis(); }
-// S29 (D): the Stream box only for the Stream classes (Student record settings, default XI, XII)
+// S29 (D) + S32 (R1): the Stream box. A stream class (Classes & Streams: XI-SCI = Science) shows its stream, nothing to choose;
+// a Stream class without its own stream (Student record settings "Stream classes", default XI, XII) shows the drop-down.
+function streamHtml(v, ro){ return F('Stream') ? '<div id="stBox">' + input('Stream', v, ro) + '<div class="stFix" id="stFix" style="display:none"></div></div>' : ''; }
 function streamVis(){
   let sel = $('f_Stream'); if(!sel) return;
-  let c = String(val('Class') || (R && R.Class) || '').trim().toUpperCase(), lvl = c.replace(/\s*-\s*[A-Z0-9]+$/, '');
-  let sc = (D.meta && D.meta.streamClasses) || [], on = sc.indexOf(lvl) > -1 || sc.indexOf(c) > -1;
-  let lab = document.querySelector('label[for="f_Stream"]');
+  let c = String(val('Class') || (R && R.Class) || '').trim().toUpperCase(), lvl = c.replace(/\s*\(\d{4}[^()]*\)$/, '').replace(/\s*-\s*[A-Z0-9]+$/, '');
+  let base = c.replace(/\s*\(\d{4}[^()]*\)$/, '');
+  let cs = ((D.meta && D.meta.classStreams) || {})[base] || '';
+  let sc = (D.meta && D.meta.streamClasses) || [], on = !cs && (sc.indexOf(lvl) > -1 || sc.indexOf(base) > -1);
+  let lab = document.querySelector('label[for="f_Stream"]'), fix = $('stFix');
   sel.style.display = on ? '' : 'none'; if(lab) lab.style.display = on ? '' : 'none';
+  if(fix){ fix.style.display = cs ? '' : 'none'; fix.innerHTML = cs ? '<label>Stream</label><div class="stVal"><b>' + esc(cs) + '</b> <span>(from the class ' + esc(base) + ')</span></div>' : ''; }
+  if(cs){ if(![...sel.options].some(o => o.value === cs)){ let o = document.createElement('option'); o.value = cs; o.textContent = cs; sel.appendChild(o); } sel.value = cs; }
 }
 function electives(){ return [...document.querySelectorAll('.el')].map(x=>({group:x.dataset.g, subject:x.value})); }
 async function addStu(flags){
@@ -260,7 +266,7 @@ function secHtml(n){
       (ro ? '' : '<label for="pmFrom">Use as primary mobile</label><select id="pmFrom" onchange="pmCopy()"><option value="">Copy a number…</option><option value="Phone">Phone no (family)</option><option value="FatherMobile">Father’s contact</option><option value="MotherMobile">Mother’s contact</option><option value="GuardianMobile">Guardian’s contact</option></select>') +
       input('Email', R.Email, ro) + input('Location', R.Location, ro);
   } else if(n === 4){
-    body = '<div class="row2"><div>'+input('Class', R.Class, ro)+'</div><div>'+input('RollNo', R.RollNo, ro)+'</div></div>' + '<div id="elBox"></div>' +
+    body = '<div class="row2"><div>'+input('Class', R.Class, ro)+'</div><div>'+input('RollNo', R.RollNo, ro)+'</div></div>' + streamHtml(R.Stream, ro) + '<div id="elBox"></div>' +
       input('ClassApplied', R.ClassApplied, ro) + '<div class="row2"><div>'+input('AdmissionYear', R.AdmissionYear, ro)+'</div><div>'+input('AdmissionDate', R.AdmissionDate, ro)+'</div></div>' +
       input('StudentType', R.StudentType, ro) + input('Status', R.Status, ro) + '<div class="row2"><div>'+input('StatusDate', R.StatusDate, ro)+'</div><div>'+input('StatusNote', R.StatusNote, ro)+'</div></div>' +
       '<h4 class="g">Brothers and sisters (family)</h4><div id="famBox">'+famHtml()+'</div>' +

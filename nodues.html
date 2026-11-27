@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S32">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>No Dues certificate</title>
@@ -119,7 +119,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 .pl span.bus{background:#fff3e0;color:#9a3412}.pl span.ch{background:#ef6c00;color:#fff}.pl span.none{background:#f1f5f9;color:#64748b}.paid{font-size:11.5px;color:#166534;margin-top:4px;font-weight:700}
 .apply{border-left-color:var(--orange)!important}.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .savebar{position:sticky;bottom:80px;z-index:40}
-</style><script src="config.js"></script><script src="ui.js"></script><style>
+</style><script src="config.js"></script><script src="ui.js"></script><script src="idcard.js"></script><style>
 .b-orange{background:linear-gradient(135deg,#ef6c00,#fb923c)}.b-grey{background:#e5e7eb;color:#475569!important}.b-red{background:linear-gradient(135deg,#c62828,#ef5350)}
 textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:70px}
 .dl{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}.dl td{padding:7px 4px;border-bottom:1px solid var(--line)}.dl td:last-child{text-align:right;font-weight:800;white-space:nowrap}
@@ -148,6 +148,8 @@ textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;fon
 .cert .sg div{min-width:55mm;text-align:center}.cert .sg img{display:block;height:13mm;max-width:52mm;object-fit:contain;margin:0 auto 2px}
 .cert .sg span{display:block;border-top:1px solid #111;padding-top:3px}
 .cert .dup{position:absolute;right:8mm;top:6mm;font-family:Arial,sans-serif;font-weight:900;font-size:11px;color:#c62828;border:1.5px solid #c62828;padding:2px 8px;border-radius:4px;background:#fff}
+.cert .sg .qr{min-width:0;width:22mm;text-align:center;font-size:8px;color:#64748b;font-weight:600}.cert .sg .qr svg{width:22mm;height:22mm;display:block;margin:0 auto 1px}.cert.A4 .sg .qr,.cert.A4 .sg .qr svg{width:30mm}.cert.A4 .sg .qr svg{height:30mm}
+.cert .sg .onl{font-size:11px;color:#334155;font-weight:700;line-height:1.4}
 .cert .wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-size:60px;font-weight:900;color:rgba(198,40,40,.10);transform:rotate(-20deg);pointer-events:none}
 @media print{
   body{background:#fff!important;padding:0!important}
@@ -208,32 +210,36 @@ textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;fon
 <script>
 const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
-var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
-if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
-function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+var STU = new URLSearchParams(location.search).get('stu') === '1';     // S32: the student app's own certificate
+var USER = STU ? {username:ls('cvse_sadm'), name:ls('cvse_sname'), role:'student'} : {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+var TOKEN = STU ? ls('cvse_stoken') : ls('cvse_token');
+if(!TOKEN || !USER.username){ window.location.href = STU ? 'student.html' : 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ if(STU){ window.location.href = 'student.html'; return; } try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
 async function apiGet(action, params){
-  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(TOKEN);
   for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
   let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
 }
 async function apiPost(action, payload){
-  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:TOKEN}, payload || {}))});
   let j = await r.json(); authCheck(j); return j;
 }
 function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+function doLogout(){ if(STU){ window.location.href = 'student.html'; return; } try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 var Q = new URLSearchParams(location.search), ADM = Q.get('adm') || '', SESS = Q.get('s') || '';
 function goBack(){
+  if(STU){ UI.goBack('student.html'); return; }
   if(UI.innerBack()) return;
   let app = USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html';
   if(Q.get('from') === 'collect') UI.goBack('fees-collect.html'); else if(ADM) UI.goBack('student-record.html?adm=' + encodeURIComponent(ADM)); else UI.goBack(app);
 }
-if(USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
+if(!STU && USER.role !== 'admin' && USER.role !== 'accountant'){ window.location.href = 'index.html'; }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
-$('roleBadge').innerText = USER.role === 'admin' ? 'ADMIN' : 'OFFICE STAFF';
+$('roleBadge').innerText = STU ? 'STUDENT' : USER.role === 'admin' ? 'ADMIN' : 'OFFICE STAFF';
+if(STU){ $('wSub').innerText = 'Admission No: ' + USER.username; }
 $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
 /* S30 (stage 4): check the dues "up to" a month (or the whole session), give the certificate, reprint from the register */
 let C = null, REG = null, CERT_OPEN = false;
@@ -350,7 +356,8 @@ function certHtml(c){
     '<h1>NO DUES CERTIFICATE</h1><div class="h1s">(Fee clearance)</div>' +
     '<div class="nr"><span>Certificate No: ' + esc(c.no) + '</span><span>Date: ' + esc(c.issuedOn) + '</span></div>' +
     '<div class="bd">' + body + '</div>' + sp +
-    '<div class="sg"><div>' + sign(c.issuer.sign) + '<span>Office Staff' + (c.issuer.name ? ' (' + esc(c.issuer.name) + ')' : '') + '</span></div><div>' + sign(c.principalSign) + '<span>Principal</span></div></div>' +
+    '<div class="sg">' + (c.online ? '<div class="onl">Issued online from the student / parent app.<br>No office signature needed.</div>' : '<div>' + sign(c.issuer.sign) + '<span>Office Staff' + (c.issuer.name ? ' (' + esc(c.issuer.name) + ')' : '') + '</span></div>') +
+    (c.qr && window.IDCARD && IDCARD.qr ? '<div class="qr">' + IDCARD.qr(c.qr) + 'Certificate details</div>' : '') + '<div>' + sign(c.principalSign) + '<span>Principal</span></div></div>' +
     (c.duplicate ? '<div style="font-family:Arial;font-size:10px;color:#64748b;margin-top:6px">Duplicate printed on ' + esc(c.printedOn) + '</div>' : '') + '</div>';
 }
 function openCert(c){
@@ -359,10 +366,10 @@ function openCert(c){
   ps.textContent = c.paper === 'A4' ? '@page{size:A4 portrait;margin:6mm}' : '@page{size:A5 landscape;margin:0}';
   $('certBox').innerHTML = certHtml(c);
   $('certTitle').innerText = '📄 ' + c.no + (c.duplicate ? ' – duplicate copy' : '');
-  $('certHint').innerText = 'In the print window choose ' + (c.paper === 'A4' ? 'A4, portrait' : 'A5, landscape (half of A4)') + ', margins None, scale 100%, and turn off "Headers and footers". Change the size in Fees Settings → Receipt & Rules.';
+  $('certHint').innerText = (STU ? 'To keep it, choose "Save as PDF" in the print window. ' : '') + 'In the print window choose ' + (c.paper === 'A4' ? 'A4, portrait' : 'A5, landscape (half of A4)') + ', margins None, scale 100%, and turn off "Headers and footers". Change the size in Fees Settings → Receipt & Rules.';
   $('main').style.display = 'none'; $('reg').style.display = 'none'; $('certWrap').style.display = 'block'; window.scrollTo(0, 0);
   fitCert();
-  if(!CERT_OPEN){ CERT_OPEN = true; try{ UI.innerOpen(function(){ closeCert(true); }); }catch(e){} }
+  if(!CERT_OPEN && !STU){ CERT_OPEN = true; try{ UI.innerOpen(function(){ closeCert(true); }); }catch(e){} }
 }
 function fitCert(){
   let el = document.querySelector('#certBox .cert'); if(!el) return;
@@ -373,10 +380,21 @@ window.addEventListener('resize', fitCert);
 window.addEventListener('beforeprint', function(){ let el = document.querySelector('#certBox .cert'); if(el) el.style.zoom = 1; });
 window.addEventListener('afterprint', fitCert);
 function closeCert(fromBack){
+  if(STU){ UI.goBack('student.html'); return; }
   $('certWrap').style.display = 'none'; $('main').style.display = '';
   if($('chReg').classList.contains('on')){ $('reg').style.display = ''; regDraw(); }
   if(CERT_OPEN){ CERT_OPEN = false; if(!fromBack){ try{ UI.innerClosed(); }catch(e){} } }
 }
-if(ADM) check(); else { $('chStu').style.display = 'none'; showPart('reg'); }
+/* S32: the student app – one call gives the certificate (new, or the duplicate copy of this month's) */
+async function stuRun(){
+  $('main').style.display = 'none'; $('reg').style.display = 'none';
+  show($('gMsg'), 'Checking your fees and preparing the certificate... please wait', 'load');
+  try{
+    let r = await apiPost('studentnodues', {});
+    if(r.success){ hide($('gMsg')); openCert(r.certificate); return; }
+    $('gMsg').className = 'msg show ' + (r.code === 'DUES' ? 'warn' : 'err'); $('gMsg').innerText = (r.code === 'DUES' ? '⚠️ ' : '❌ ') + (r.error || 'Could not make the certificate.');
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check the internet and try again.', 'err'); }
+}
+if(STU) stuRun(); else if(ADM) check(); else { $('chStu').style.display = 'none'; showPart('reg'); }
 </script>
 </body></html>

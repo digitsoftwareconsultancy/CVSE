@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S32">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student Portal</title>
@@ -601,6 +601,12 @@ async function loadFees(){
     else if(s.totalDue <= 0) h += '<div class="msg show ok" style="margin:6px 0">✅ All fees are paid. Thank you!</div>';
     if(s.nextDue) h += '<div class="meta">Next: <b>' + esc(s.nextDue.label) + '</b>' + (s.nextDue.due ? ' · due ' + esc(s.nextDue.due) : '') + ' · ' + frs(s.nextDue.amount, d) + '</div>';
     h += '<div class="meta" style="margin-top:8px">Fees are paid at the school office. This page shows your account.</div></div>';
+    if(r.nodues){                                   // S32: No Dues certificate (switched on in Student App Access)
+      let n = r.nodues;
+      h += '<div class="box" style="border-left-color:var(--green)"><div class="title">📄 No Dues certificate</div>' + (n.clear
+        ? '<div class="meta">All fees are paid up to <b>' + esc(n.upText) + '</b>. You can print or save the certificate.</div><div class="btnrow"><button class="btn b-green" data-nofb onclick="openNoDues()" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff">📄 Get the No Dues certificate</button></div>'
+        : '<div class="msg show warn" style="margin:6px 0">Fees of <b>' + frs(n.owed, d) + '</b> are pending up to ' + esc(n.upText) + '. The certificate can be printed after they are paid at the school office.</div>') + '</div>';
+    }
     if(s.previous > 0 || s.fine > 0){
       h += '<div class="box"><div class="title">Other amounts</div>' + (s.previous > 0 ? '<div class="frow"><div class="l"><b>Previous dues</b><small>Brought forward from earlier</small></div><div class="r"><b>' + frs(s.previous, d) + '</b></div></div>' : '') +
         (s.fine > 0 ? ((r.fines || []).filter(f => f.unpaid > 0).map(f => '<div class="frow"><div class="l"><b>Late fine – ' + esc(f.label) + '</b><small>' + (f.due ? 'Due ' + esc(f.due) : '') + (f.paid > 0 ? ' · paid ' + frs(f.paid, d) : '') + (f.waived > 0 ? ' · waived ' + frs(f.waived, d) : '') + '</small></div><div class="r"><b>' + frs(f.unpaid, d) + '</b></div></div>').join('') ||
@@ -624,6 +630,7 @@ async function loadFees(){
   }catch(e){ if(e.message !== 'AUTH') $('feeBody').innerHTML = failHtml('loadFees()'); }
 }
 function openReceipt(no){ window.open('fees-receipt.html?stu=1&no=' + encodeURIComponent(no), '_blank'); }
+function openNoDues(){ window.open('nodues.html?stu=1', '_blank'); }   // S32
 
 /* ---------- install help ---------- */
 var DEFER = null;

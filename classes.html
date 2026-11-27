@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="app-version" content="2026.11.27-S32">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Classes & Streams</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#0b2a5c;--blue:#1976d2;--orange:#ef6c00;--green:#16a34a;--purple:#7c3aed;--red:#c62828;--bg:#eef2f7;--line:#e5e7eb;--text:#111827;--muted:#64748b;--frame:#1a4bb5;--cream:#fdf6d0}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--text);padding-bottom:96px}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px}
+.top-left{display:flex;gap:10px;align-items:center;min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#0d47a1;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welcome{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.badge{background:#e8f5e9;color:#14532d;border:1px solid #a5d6a7;padding:5px 10px;border-radius:999px;font-weight:800;font-size:10.5px;min-width:90px;text-align:center}
+.btn-logout{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;min-height:34px}
+.wrap{max-width:760px;margin:12px auto;padding:0 12px}
+.box{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:4px solid var(--navy);margin-bottom:12px}
+.title{font-size:17px;font-weight:800;color:var(--navy);margin:0 0 6px}
+.meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+label{font-size:12px;font-weight:700;color:var(--navy);display:block;margin:10px 0 4px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;font-family:inherit;min-height:46px;background:#fff}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;min-height:46px;color:#fff;width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.b-blue{background:linear-gradient(135deg,#1976d2,#42a5f5)}.b-green{background:linear-gradient(135deg,#16a34a,#22c55e)}.b-purple{background:linear-gradient(135deg,#7c3aed,#8b5cf6)}.b-navy{background:linear-gradient(135deg,#0b2a5c,#1e4a8f)}.b-grey{background:#e5e7eb;color:#475569}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btnrow .btn{flex:1;min-width:120px}
+.msg{padding:12px;border-radius:12px;font-weight:700;font-size:13.5px;margin:10px 0;display:none;line-height:1.45}
+.msg.show{display:block}.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}.msg.load{background:#e0f2fe;color:#075985}.msg.warn{background:#fff7ed;color:#9a3412}
+.lock{background:#fff7ed;border:1px solid #ffcc80;border-radius:16px;padding:18px;text-align:center;color:#9a3412;font-weight:700;line-height:1.5}
+.lock b{display:block;font-size:30px;margin-bottom:6px}
+.empty-note{text-align:center;color:var(--muted);padding:22px 10px;font-weight:700}
+.school{display:flex;gap:12px;align-items:center}
+.school img{width:56px;height:56px;border-radius:12px;object-fit:contain;background:#fff;border:1px solid var(--line)}
+.school b{font-size:16px;color:var(--navy)}
+.drow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.drow:last-child{border-bottom:none}.drow span{color:var(--muted);font-weight:700}.drow b{text-align:right}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.go{background:#fff;border-radius:16px;border:1px solid #eef0f3;box-shadow:0 4px 18px rgba(0,0,0,.06);padding:14px 10px;text-align:center;font-weight:800;color:var(--navy);cursor:pointer;min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-left:4px solid var(--blue)}
+.go .ic{font-size:28px}.go small{font-size:11px;color:var(--muted);font-weight:700}
+.go.closed{opacity:.6;border-left-color:#f59e0b}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px}
+.chip{flex-shrink:0;border:1px solid #cbd5e1;border-radius:999px;padding:0 14px;min-height:40px;font-weight:700;font-size:13px;color:var(--navy);background:#fff;cursor:pointer}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.item{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:10px}
+.item h4{margin:0 0 6px;color:var(--navy);font-size:15px;display:flex;justify-content:space-between;gap:8px}
+.item h4 small{color:var(--muted);font-weight:700;font-size:11.5px;white-space:nowrap}
+.line{font-size:13.5px;line-height:1.5;margin:3px 0}.line span{color:var(--muted);font-weight:700}
+.hw{background:#fff7ed;border-left:3px solid var(--orange);padding:6px 8px;border-radius:6px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--navy)}.stat span{font-size:10.5px;color:var(--muted);font-weight:700}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.dchip{font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:#fee2e2;color:#991b1b}.dchip.l{background:#fff3e0;color:#9a3412}.dchip.u{background:#ede9fe;color:#5b21b6}
+.tag{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;background:#e0f2fe;color:#075985}.tag.up{background:#fff3e0;color:#9a3412}
+.score{font-size:22px;font-weight:900;color:var(--navy)}.score small{font-size:13px;color:var(--muted)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+@media(min-width:761px){.tabs{left:50%;transform:translateX(-50%);right:auto;width:min(620px,calc(100% - 24px));bottom:12px;border-radius:999px;border:1px solid var(--line);padding:6px}}
+.tabBtn{flex:1;padding:7px 2px 6px;border:none;border-radius:12px;cursor:pointer;background:transparent;font-weight:700;font-size:10.5px;color:#64748b;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;line-height:1.1}
+.tabBtn .tabIco{font-size:20px;line-height:1}.tabBtn.active{background:#e3f2fd;color:var(--blue)}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+#login .card{background:#fff;border-radius:20px;padding:22px;max-width:380px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.1);border-top:5px solid var(--navy)}
+#login h1{margin:8px 0 2px;font-size:20px;color:var(--navy);text-align:center}
+#login .sch{text-align:center;color:var(--muted);font-weight:700;font-size:13px;margin-bottom:8px}
+#login img{display:block;margin:0 auto;max-width:90px;max-height:90px;border-radius:12px}
+
+@media print{
+  body{background:#fff;padding:0}
+  body>.top,body>.tabs,.noprint,#screens>.scr:not(#s_result),#resList,#resMsg,#cardBar{display:none!important}
+  .wrap{margin:0;padding:0;max-width:none}
+}
+.card{background:#fff;border-radius:14px;padding:10px 12px;border:1px solid #eef0f3;border-left:5px solid var(--blue);margin-bottom:8px;box-shadow:0 2px 10px rgba(0,0,0,.05);display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:start}
+.card.chg{border-left-color:var(--orange);background:#fff7ed}.card input[type=checkbox]{width:24px;height:24px;min-height:0;margin-top:2px}
+.card b{color:var(--navy)}.pl{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.pl span{font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;background:#e3f2fd;color:#0d47a1}
+.pl span.bus{background:#fff3e0;color:#9a3412}.pl span.ch{background:#ef6c00;color:#fff}.pl span.none{background:#f1f5f9;color:#64748b}.paid{font-size:11.5px;color:#166534;margin-top:4px;font-weight:700}
+.apply{border-left-color:var(--orange)!important}.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.b-orange{background:linear-gradient(135deg,#ef6c00,#fb923c)}.msg.info{background:#e0f2fe;color:#075985}
+.savebar{position:sticky;bottom:80px;z-index:40}
+</style><script src="config.js"></script><script src="ui.js"></script><style>
+.chk2{display:flex;align-items:center;gap:10px;border:1px solid #cbd5e1;border-radius:12px;padding:8px 10px;margin-top:8px;background:#fff}
+.chk2 input[type=checkbox]{width:24px;height:24px;min-height:0;flex-shrink:0}.chk2 b{flex:1;color:var(--navy);font-size:14.5px}
+.chk2 input.code{width:110px;flex-shrink:0;text-transform:uppercase;font-weight:800;letter-spacing:1px}
+.cls{background:#fff;border-radius:14px;border:1px solid #eef0f3;border-left:5px solid var(--blue);padding:10px 12px;margin-bottom:8px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.cls.st{border-left-color:var(--purple)}.cls.fin{border-left-color:#94a3b8}
+.cls .h{display:flex;justify-content:space-between;align-items:center;gap:8px}.cls .h b{color:var(--navy);font-size:15.5px}
+.cls .l{font-size:12px;color:var(--muted);font-weight:700;margin-top:4px;line-height:1.45}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#e0f2fe;color:#075985;white-space:nowrap}.pill.p{background:#ede9fe;color:#5b21b6}.pill.g{background:#e5e7eb;color:#374151}
+.rm{background:#fee2e2;color:#991b1b;border:none;border-radius:10px;min-height:40px;padding:0 12px;font-weight:800;cursor:pointer;font-size:13px}
+.prev{font-size:13px;font-weight:700;color:var(--navy);margin-top:8px;line-height:1.6}.prev span{display:inline-block;background:#ede9fe;color:#5b21b6;border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0}
+.help{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+.cp{background:#f3e8ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:10px;margin-top:10px}
+.cp b{color:#5b21b6}
+.probs{background:#fff7ed;border:1px solid #ffcc80;border-radius:12px;padding:10px;font-size:13px;color:#9a3412;font-weight:700;line-height:1.5}
+.note{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:10px;color:#475569;font-size:12.5px;font-weight:600;line-height:1.5;margin-top:8px}
+</style></head>
+<body>
+<div class="top">
+  <div class="top-left">
+    <div class="avatar" id="avatarLetter">A</div>
+    <div style="min-width:0"><div class="welcome" id="wName">Welcome</div><div class="sub" id="wSub">Username: -</div></div>
+  </div>
+  <div class="top-right">
+    <div class="badge" id="roleBadge">ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="box" style="border-left-color:var(--navy)">
+    <div class="title">🏫 Classes &amp; Streams</div>
+    <div class="meta">Add a class, its sections (X-A, X-B) or its streams (XI-SCI = Science). The app writes the names, so they are always right. A class can be removed only while it is empty.</div>
+    <div class="msg" id="gMsg"></div>
+    <div id="probBox"></div>
+  </div>
+  <div class="box" style="border-left-color:var(--green)" id="addBox">
+    <div class="title">➕ Add</div>
+    <div class="chips" style="margin-top:6px"><button class="chip on" id="k_STREAMS" onclick="kind('STREAMS')">Streams</button><button class="chip" id="k_SECTIONS" onclick="kind('SECTIONS')">Sections</button><button class="chip" id="k_CLASS" onclick="kind('CLASS')">A new class</button></div>
+    <div id="f_STREAMS">
+      <label for="sBase">Class</label><input id="sBase" list="baseList" maxlength="20" placeholder="for example XI" autocapitalize="characters" oninput="baseMask(this);prev()">
+      <div class="help">The class that is split into streams. Each stream becomes its own class with its own subjects, timetable and class teacher; fees and exams set for the class (for example XI) count for every stream.</div>
+      <label>Streams</label><div id="sList"></div>
+      <div class="help">Short code after the hyphen: letters only (up to 8). Streams come from Student record settings → Lists → Stream.</div>
+      <div class="prev" id="sPrev"></div>
+      <div class="btnrow"><button class="btn b-green" id="bSTREAMS" data-nofb onclick="add('STREAMS', this)">➕ Add streams</button></div><div class="msg" id="mSTREAMS"></div>
+    </div>
+    <div id="f_SECTIONS" style="display:none">
+      <label for="cBase">Class</label><input id="cBase" list="baseList" maxlength="20" placeholder="for example X" autocapitalize="characters" oninput="baseMask(this);prev()">
+      <label for="cCodes">Sections</label><input id="cCodes" maxlength="40" placeholder="for example A, B" autocapitalize="characters" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z, ]/g,'');prev()">
+      <div class="help">Letters only, separated by commas: A, B, C.</div>
+      <div class="prev" id="cPrev"></div>
+      <div class="btnrow"><button class="btn b-green" id="bSECTIONS" data-nofb onclick="add('SECTIONS', this)">➕ Add sections</button></div><div class="msg" id="mSECTIONS"></div>
+    </div>
+    <div id="f_CLASS" style="display:none">
+      <label for="nName">Class name</label><input id="nName" maxlength="20" placeholder="for example XI or JUNIOR KG" autocapitalize="characters" oninput="baseMask(this)">
+      <div class="help">Letters and numbers only (no hyphen). Sections or streams are added in the other two chips.</div>
+      <label for="nAfter">Place</label><select id="nAfter"></select>
+      <div class="btnrow"><button class="btn b-green" id="bCLASS" data-nofb onclick="add('CLASS', this)">➕ Add class</button></div><div class="msg" id="mCLASS"></div>
+    </div>
+    <datalist id="baseList"></datalist>
+    <div id="copyBox"></div>
+  </div>
+  <div class="box" style="border-left-color:var(--blue)">
+    <div class="title">📋 The classes</div>
+    <div class="meta">In the order the app shows them.</div>
+    <div id="list" style="margin-top:10px"><div class="msg show load">Loading...</div></div>
+    <div class="note">Names like <b>IX (2026-27)</b> are made by the promotion for a class still finishing the old session: do not type, rename or delete them. In the Google Sheet the Class column refuses a badly typed name.</div>
+  </div>
+</div>
+<div class="tabs" id="tabsBar">
+  <button class="tabBtn active"><span class="tabIco">🏫</span>Classes</button>
+  <button class="tabBtn" onclick="goBack()"><span class="tabIco">⬅️</span>Back</button>
+</div>
+<script>
+const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || ""; if(!WEB_URL){ document.addEventListener("DOMContentLoaded", function(){ var d=document.createElement("div"); d.style.cssText="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#fee2e2;border:2px solid #c62828;color:#7f1d1d;border-radius:12px;padding:14px;font:700 14px Arial"; d.textContent="Setup file (config.js) is missing or empty. Reload the page. If it still shows, tell your admin."; document.body.appendChild(d); }); }
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+var USER = {username:ls('cvse_username'), name:ls('cvse_name'), role:ls('cvse_role')};
+if(!ls('cvse_token') || !USER.username){ window.location.href = 'index.html'; }
+function authCheck(j){ if(j && j.code === 'AUTH'){ try{ localStorage.clear(); }catch(e){} alert('Session expired. Please login again.'); window.location.href = 'index.html'; } }
+async function apiGet(action, params){
+  let url = WEB_URL + '?action=' + action + '&token=' + encodeURIComponent(ls('cvse_token'));
+  for(let k in (params || {})) url += '&' + k + '=' + encodeURIComponent(params[k]);
+  let r = await fetch(url); let j = await r.json(); authCheck(j); return j;
+}
+async function apiPost(action, payload){
+  let r = await fetch(WEB_URL, {method:'POST', body:JSON.stringify(Object.assign({action:action, token:ls('cvse_token')}, payload || {}))});
+  let j = await r.json(); authCheck(j); return j;
+}
+function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
+function hide(el){ el.className = 'msg'; }
+function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
+function goBack(){ UI.goBack('admin.html?tab=last'); }
+if(USER.role !== 'admin'){ window.location.href = 'index.html'; }
+$('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
+$('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperCase();
+/* S32: Classes & Streams – add a class / sections / streams (names made by the app), remove an empty class, copy subjects */
+let D = null, KIND = 'STREAMS', CODES = {};
+function baseMask(el){ let v = el.value.toUpperCase().replace(/[^A-Z0-9 .&]/g, ''); if(v !== el.value) el.value = v; }
+function kind(k){ KIND = k; ['STREAMS','SECTIONS','CLASS'].forEach(x => { $('k_' + x).classList.toggle('on', x === k); $('f_' + x).style.display = x === k ? '' : 'none'; }); }
+async function load(keepMsg){
+  if(!keepMsg) show($('gMsg'), 'Loading the classes...', 'load');
+  try{
+    let r = await apiGet('classesget', {});
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); $('list').innerHTML = '<div class="empty-note">Could not load the classes.</div>'; return; }
+    D = r; if(!keepMsg) hide($('gMsg')); draw();
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check the internet and try again.', 'err'); $('list').innerHTML = '<div class="empty-note">Could not load the classes.</div>'; }
+}
+function draw(){
+  $('probBox').innerHTML = (D.problems || []).length ? '<div class="probs" style="margin-top:10px">⚠️ Please check:<br>' + D.problems.map(p => esc(p.problem)).join('<br>') + '</div>' : '';
+  $('baseList').innerHTML = (D.bases || []).map(b => '<option value="' + esc(b) + '">').join('');
+  if(!$('sList').dataset.done){
+    $('sList').innerHTML = D.streams.length ? D.streams.map((s, i) => '<label class="chk2"><input type="checkbox" class="sTick" data-s="' + esc(s) + '" onchange="prev()"><b>' + esc(s) + '</b><input class="code" data-s="' + esc(s) + '" maxlength="8" value="' + esc(D.codes[i] || '') + '" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,\'\').slice(0,8);prev()"></label>').join('')
+      : '<div class="empty-note">The Stream list is empty. Add streams in Students → ⚙️ Student record settings → Lists.</div>';
+    $('sList').dataset.done = 1;
+  }
+  $('nAfter').innerHTML = '<option value="">At the end</option><option value="FIRST">At the beginning</option>' + D.classes.filter(c => !c.finishing).map(c => '<option value="' + esc(c.cls) + '">After ' + esc(c.cls) + '</option>').join('');
+  $('list').innerHTML = D.classes.length ? D.classes.map(c => {
+    let pills = (c.stream ? '<span class="pill p">' + esc(c.stream) + '</span> ' : '') + (c.finishing ? '<span class="pill g">made by the promotion</span>' : '');
+    let line = (c.subjects ? c.subjects + ' subjects' : 'no subjects yet') + (c.use.length ? ' · ' + c.use.map(esc).join(' · ') : ' · empty');
+    return '<div class="cls' + (c.stream ? ' st' : '') + (c.finishing ? ' fin' : '') + '"><div class="h"><b>' + esc(c.cls) + '</b><span>' + pills + '</span></div><div class="l">' + line + '</div>' +
+      (c.canRemove ? '<div class="btnrow" style="margin-top:8px"><button class="rm" data-nofb onclick="removeCls(\'' + esc(c.cls) + '\', this)">🗑 Remove ' + esc(c.cls) + '</button></div><div class="msg" id="rm_' + esc(c.cls) + '"></div>' : '') + '</div>';
+  }).join('') : '<div class="empty-note">No classes yet. Add the first one above.</div>';
+  prev();
+}
+function picked(){ return [...document.querySelectorAll('.sTick:checked')].map(t => ({stream:t.dataset.s, code:(document.querySelector('.code[data-s="' + CSS.escape(t.dataset.s) + '"]') || {}).value || ''})); }
+function prev(){
+  let b = $('sBase').value.trim(), l = picked();
+  $('sPrev').innerHTML = b && l.length ? 'Will add: ' + l.map(x => '<span>' + esc(b + '-' + (x.code || '?')) + ' = ' + esc(x.stream) + '</span>').join('') : '';
+  let c = $('cBase').value.trim(), cs = $('cCodes').value.split(/[,\s]+/).filter(String);
+  $('cPrev').innerHTML = c && cs.length ? 'Will add: ' + cs.map(x => '<span>' + esc(c + '-' + x) + '</span>').join('') : '';
+}
+async function add(k, b){
+  let m = $('m' + k), p = {kind:k};
+  if(k === 'STREAMS'){ p.base = $('sBase').value.trim(); let l = picked(); if(!p.base){ show(m, '❌ Type the class first (for example XI).', 'err'); return; } if(!l.length){ show(m, '❌ Tick at least one stream.', 'err'); return; } if(l.some(x => !x.code)){ show(m, '❌ Every ticked stream needs a short code (letters only).', 'err'); return; } p.streams = JSON.stringify(l); }
+  else if(k === 'SECTIONS'){ p.base = $('cBase').value.trim(); p.codes = $('cCodes').value.trim(); if(!p.base || !p.codes){ show(m, '❌ Type the class and the sections (for example X and A, B).', 'err'); return; } }
+  else { p.name = $('nName').value.trim(); p.after = $('nAfter').value; if(!p.name){ show(m, '❌ Type the class name.', 'err'); return; } }
+  b.disabled = true; let old = b.textContent; b.textContent = '⏳ Saving...'; show(m, 'Adding... please wait', 'load');
+  try{
+    let r = await apiPost('classadd', p);
+    if(r.success){
+      b.textContent = '✅ Added'; show(m, '✅ ' + r.message + (r.note ? '\n⚠️ ' + r.note : ''), r.note ? 'warn' : 'ok');
+      setTimeout(() => { b.textContent = old; b.disabled = false; }, 1800);
+      await load(true); copyOffer(r.added); return;
+    }
+    show(m, '❌ ' + (r.error || 'Could not save.'), 'err'); b.textContent = '❌ Not saved'; setTimeout(() => { b.textContent = old; b.disabled = false; }, 1800); return;
+  }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); }
+  b.disabled = false; b.textContent = old;
+}
+function copyOffer(list){
+  let src = D.classes.filter(c => c.subjects > 0).map(c => c.cls);
+  if(!list || !list.length){ $('copyBox').innerHTML = ''; return; }
+  $('copyBox').innerHTML = '<div class="cp"><b>📋 Copy subjects into the new class' + (list.length > 1 ? 'es' : '') + '</b><div class="help">Every subject with its type, full marks, pass marks and order is copied; you then change only what is different (for example History → Physics). A subject the class already has is left as it is. Elective groups are not copied.</div>' +
+    (src.length ? list.map(c => '<div class="row2" style="margin-top:8px;align-items:end"><div><label>Into ' + esc(c) + ', copy from</label><select id="cf_' + esc(c) + '"><option value="">Choose a class</option>' + src.filter(x => x !== c).map(x => '<option>' + esc(x) + '</option>').join('') + '</select></div>' +
+      '<div><button class="btn b-purple" data-nofb onclick="copySubj(\'' + esc(c) + '\', this)">📋 Copy</button></div></div><div class="msg" id="cm_' + esc(c) + '"></div>').join('')
+      : '<div class="note">No class has subjects yet. Add them in Exams → ⚙️ Setup → Subject Master.</div>') + '</div>';
+}
+async function copySubj(to, b){
+  let from = $('cf_' + to).value, m = $('cm_' + to);
+  if(!from){ show(m, '❌ Choose the class to copy from.', 'err'); return; }
+  b.disabled = true; let old = b.textContent; b.textContent = '⏳ Copying...'; show(m, 'Copying the subjects... please wait', 'load');
+  try{
+    let r = await apiPost('subjectcopy', {from:from, to:to});
+    if(r.success){ b.textContent = '✅ Copied'; show(m, '✅ ' + r.message, 'ok'); setTimeout(() => { b.textContent = old; b.disabled = false; }, 1800); load(true); return; }
+    show(m, '❌ ' + (r.error || 'Could not copy.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was copied. Try again.', 'err'); }
+  b.disabled = false; b.textContent = old;
+}
+async function removeCls(c, b){
+  let m = $('rm_' + c);
+  if(!(await UI.ask('Remove class ' + c + '? Its subjects (and elective groups) are removed with it. This cannot be undone.', 'Yes, remove', true))) return;
+  b.disabled = true; let old = b.textContent; b.textContent = '⏳ Removing...'; show(m, 'Removing... please wait', 'load');
+  try{
+    let r = await apiPost('classremove', {cls:c});
+    if(r.success){ show($('gMsg'), '✅ ' + r.message, 'ok'); await load(true); return; }
+    show(m, '❌ ' + (r.error || 'Could not remove.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was changed. Try again.', 'err'); }
+  b.disabled = false; b.textContent = old;
+}
+load();
+</script>
+</body></html>
