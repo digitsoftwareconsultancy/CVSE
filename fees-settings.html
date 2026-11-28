@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fees Settings</title>
@@ -326,7 +326,7 @@ function orderLink(){
   let f = function(){ let on = a.value === 'YES'; if(on) b.value = 'OLDEST_FIRST'; b.disabled = on; };
   a.onchange = f; f();
 }
-function preview(){ window.open('fees-receipt.html?sample=1','_blank'); }
+function preview(){ location.href = 'fees-receipt.html?sample=1'; }   // S33a (F9): same window, Back returns to Fees Settings
 function rSettings(){ return SETF.filter(f=>f[1]!==null && f[0].indexOf('__')!==0).map(f=>({key:f[0],value:f[2]==='headticks'?headTicks(f[0]):$('s_'+f[0]).value})); }
 /* S11: which fees get a late fine (all ticked = ALL) */
 function headTicks(k){ let box = $('s_'+k); if(!box) return 'ALL'; let all = [...box.querySelectorAll('input')], on = all.filter(i=>i.checked).map(i=>i.value); return on.length === all.length ? 'ALL' : (on.length ? on.join(',') : 'NONE'); }

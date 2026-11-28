@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S32">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33b">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student record</title>
@@ -103,8 +103,8 @@ var STATUS_LABEL = {ACTIVE:'Active', LEFT:'Left (TC)', DROPOUT:'Drop out', PASSE
 function F(k){ return D.meta.fields.find(f=>f.key===k); }
 function req(k){ return D.meta.required.indexOf(k) > -1; }
 function printIt(type){
-  if(ISNEW || !ADM){ window.open('student-print.html?blank=1', '_blank'); return; }
-  window.open('student-print.html?adm=' + encodeURIComponent(ADM) + '&type=' + type, '_blank');
+  if(ISNEW || !ADM){ location.href = 'student-print.html?blank=1'; return; }                    // S33a (F9): same window, Back returns here
+  location.href = 'student-print.html?adm=' + encodeURIComponent(ADM) + '&type=' + type;
 }
 
 async function load(){
@@ -151,6 +151,16 @@ function input(k, val, ro){
         (has ? '<div class="btnrow"><button class="btn b-grey" type="button" id="aShow" onclick="showAadhaar()">👁 Show the full number (logged)</button></div><div class="msg" id="aMsg"></div>' +
           (ro ? '' : '<label class="chk"><input type="checkbox" id="aClear"> Remove the saved Aadhaar number</label>') : '') +
         '<div class="help">Shown masked everywhere. Never shown in the student app, to teachers, on receipts or report cards.</div>';
+    }
+    case 'digits': return lab + '<input id="'+id+'" inputmode="numeric" maxlength="'+(f.max+3)+'" placeholder="'+f.max+' digits" value="'+esc(v)+'"'+dis+' oninput="this.value=this.value.replace(/[^0-9 ]/g,\'\')">';   // S33b
+    case 'ifsc': return lab + '<input id="'+id+'" maxlength="11" autocapitalize="characters" placeholder="for example SBIN0001234" value="'+esc(v)+'"'+dis+' oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,\'\')">';
+    case 'num': return lab + '<input id="'+id+'" inputmode="decimal" maxlength="10" placeholder="'+(f.range?f.range[0]+' – '+f.range[1]:'')+'" value="'+esc(v)+'"'+dis+'>';
+    case 'pick': { let o = (f.pick || []), h2 = '<option value="">Choose</option>' + o.map(x=>'<option'+(x===v?' selected':'')+'>'+esc(x)+'</option>').join(''); if(v && o.indexOf(v) < 0) h2 += '<option selected>'+esc(v)+'</option>'; return lab + '<select id="'+id+'"'+dis+'>'+h2+'</select>'; }
+    case 'bankac': {                                                 // S33b: like Aadhaar – masked, Show is logged
+      let has = R && R.hasBank;
+      return lab + '<input id="'+id+'" inputmode="numeric" maxlength="22" autocomplete="off" placeholder="'+(has?esc(R.BankAccount)+' (saved) – type the number to change':'9 to 18 digits')+'"'+dis+' oninput="this.value=this.value.replace(/[^0-9 ]/g,\'\')">' +
+        (has ? '<div class="btnrow"><button class="btn b-grey" type="button" id="bShowAc" onclick="showBank()">👁 Show the full number (logged)</button></div><div class="msg" id="bMsg"></div>' +
+          (ro ? '' : '<label class="chk"><input type="checkbox" id="bClear"> Remove the saved account number</label>') : '');
     }
     case 'family': return '';
     case 'history': return '';
@@ -271,6 +281,14 @@ function secHtml(n){
       input('StudentType', R.StudentType, ro) + input('Status', R.Status, ro) + '<div class="row2"><div>'+input('StatusDate', R.StatusDate, ro)+'</div><div>'+input('StatusNote', R.StatusNote, ro)+'</div></div>' +
       '<h4 class="g">Brothers and sisters (family)</h4><div id="famBox">'+famHtml()+'</div>' +
       '<h4 class="g">Class history</h4><div class="hist">'+(R.ClassHistory ? R.ClassHistory.split('; ').map(esc).join('<br>') : '—')+'</div>';
+  } else if(n === 7){                                                // S33b: Government & bank, in 4 groups
+    let g = (t, ks, help) => '<h4 class="g">'+t+'</h4>' + (help ? '<div class="help">'+help+'</div>' : '') + ks.map(k=>input(k, R[k], ro)).join('');
+    body = '<div class="help">Office only. For UDISE+, APAAR and scholarships. Parents give only the bank details (registration form).</div>' +
+      g('Government IDs', ['PEN','BoardRegNo','NameAsAadhaar']) +
+      g('APAAR', ['ApaarID','ApaarConsent','ApaarConsentDate'], 'An APAAR ID is made on the UDISE+ portal after the parents give consent. It needs the PEN and the name exactly as on the Aadhaar.') +
+      g('Bank account', ['BankAccount','BankIFSC','BankName','BankHolder'], 'Shown masked. The full number only with 👁 Show (logged).') +
+      g('UDISE+ details', ['Pincode','BPL','AAY','EWS','CWSN','Impairment','DisabilityCert','DisabilityPct','IndianNational','OutOfSchool','Mainstreamed','Medium','LanguageGroup','PrevYearStatus','PrevYearClass','RTE','RTEAmount','PrevYearResult','PrevYearPct','PrevYearDays'],
+        'Used by the 📤 UDISE+ Excel. Last year\'s status and class may stay empty for a pupil who was in this school last year: the Excel fills them from the class history.');
   } else body = keys.map(k=>input(k, R[k], ro)).join('');
   return '<div class="sec'+(OPEN[n]?' open':'')+'" id="sec'+n+'"><div class="sech" onclick="tog('+n+')"><span>'+n+'. '+esc(D.meta.sections[n])+(miss.length?' <span class="pill warn">'+miss.length+' missing</span>':'')+'</span><span class="arr">▶</span></div>'+
     '<div class="secb">'+body+(ro?'':'<div class="btnrow"><button class="btn b-green" id="sv'+n+'" onclick="saveSec('+n+')">Save '+esc(D.meta.sections[n])+'</button></div>')+'<div class="msg" id="sm'+n+'"></div></div></div>';
@@ -321,7 +339,7 @@ async function delRec(){
   b.disabled = false;
 }
 function drawRecord(){
-  let h = headBox() + regBox(); for(let n = 1; n <= 6; n++) h += secHtml(n);
+  let h = headBox() + regBox(); for(let n = 1; n <= ((D.meta.sections || []).length - 1 || 6); n++) h += secHtml(n);   // S33b: + 7. Government & bank
   h += delBox();
   $('main').innerHTML = h;
   clsChange();
@@ -336,7 +354,7 @@ function photoArea(){
   let btns = '';
   if(p.canAdd) btns += '<button class="btn b-blue" id="phCam" onclick="phTake(true)">📷 Take photo</button><button class="btn b-grey" id="phGal" onclick="phTake(false)">🖼 Choose from gallery</button>';
   if(p.canRemove && p.has) btns += '<button class="btn b-red" id="phDel" onclick="phRemove()">🗑 Remove photo</button>';
-  if(p.canAdd) btns += '<button class="btn b-navy" id="phCard" data-nofb onclick="window.open(\'idcards.html?adm=\'+encodeURIComponent(ADM),\'_blank\')">🪪 Print ID card</button>';
+  if(p.canAdd) btns += '<button class="btn b-navy" id="phCard" data-nofb onclick="location.href=\'idcards.html?adm=\'+encodeURIComponent(ADM)">🪪 Print ID card</button>';   // S33a (F9) same window
   return '<div style="display:flex;gap:12px;align-items:center;margin-top:10px"><div id="phBox">'+PHOTO.box(p.has ? PH_URL : '')+'</div><div style="min-width:0;flex:1"><div class="meta" id="phInfo">'+info+'</div>'+
     (p.has && !PH_URL ? '<div class="help" id="phLoad">Loading the photo…</div>' : '')+(p.canAdd ? '<div class="help">The same photo is used on the report card, ID card, prints and the student app.</div>' : '')+'</div></div>'+
     (btns ? '<div class="btnrow">'+btns+'</div>' : '')+'<div class="msg" id="phMsg"></div>';
@@ -380,6 +398,12 @@ async function showAadhaar(){
   catch(e){ show(m, '❌ Could not connect. Try again.', 'err'); }
   b.disabled = false;
 }
+async function showBank(){                                          // S33b
+  let b = $('bShowAc'), m = $('bMsg'); b.disabled = true; show(m, 'Opening... please wait', 'load');
+  try{ let r = await apiGet('mrbank', {adm:ADM}); if(r.success){ show(m, 'Account: ' + r.account + '  (this Show was written in the log)', 'ok'); setTimeout(()=>hide(m), 20000); } else show(m, '❌ ' + (r.error || 'Could not open.'), 'err'); }
+  catch(e){ show(m, '❌ Could not connect. Try again.', 'err'); }
+  b.disabled = false;
+}
 async function saveSec(n, flags){
   let m = $('sm'+n), b = $('sv'+n);
   let dates = D.meta.fields.filter(f=>f.section===n && f.type==='date').map(f=>'f_'+f.key).filter(id=>$(id));
@@ -389,6 +413,7 @@ async function saveSec(n, flags){
   if(n === 3){ data.SameAddress = $('f_SameAddressBox').checked ? 'YES' : 'NO'; if(data.SameAddress === 'YES') data.CorrespondenceAddress = data.PermanentAddress; }
   if(n === 1 && data.Aadhaar !== undefined) data.Aadhaar = data.Aadhaar.replace(/\s/g, '');
   let payload = Object.assign({adm:ADM, section:n, data:JSON.stringify(data)}, flags || {});
+  if(n === 7 && $('bClear') && $('bClear').checked){ payload.clearBank = 1; data.BankAccount = ''; payload.data = JSON.stringify(data); }
   if(n === 1 && $('aClear') && $('aClear').checked){ payload.clearAadhaar = 1; data.Aadhaar = ''; payload.data = JSON.stringify(data); }
   if(n === 4 && document.querySelector('.el')) payload.electives = JSON.stringify(electives());
   b.disabled = true; show(m, 'Saving... please wait', 'load');

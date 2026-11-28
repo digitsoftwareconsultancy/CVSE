@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.27-S32"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
+<!DOCTYPE html><html><head><meta name="app-version" content="2026.11.28-S33b"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>
 *{box-sizing:border-box}
 :root{--blue:#1976d2;--blue2:#0d47a1;--green:#2e7d32;--orange:#ef6c00;--red:#c62828;--bg:#eef2f7;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#64748b;--radius:16px}
 html{-webkit-tap-highlight-color:transparent}
@@ -234,7 +234,7 @@ button.cbtn.flash{box-shadow:0 0 0 3px #ef6c00}
 <div class="box" style="background:#fff"><h4>🏫 School info (prints, receipts, report cards)</h4>
 <label>School Name</label><br><input id="s_SchoolName" style="width:100%"><br>
 <label>School Address</label><br><input id="s_Address" style="width:100%"><br>
-<label>Affiliation No</label><br><input id="s_Affiliation" style="width:100%"><br>
+<label>Affiliation No</label><br><input id="s_Affiliation" style="width:100%"><br><label>UDISE code (11 digits)</label><br><input id="s_Udise" inputmode="numeric" maxlength="11" placeholder="for example 18120400101" style="width:100%" oninput="this.value=this.value.replace(/\D/g,'').substring(0,11)"><br>
 <label>School Phone</label><br><input id="s_Phone" style="width:100%"><br>
 <label>Logo Path (URL)</label><br><input id="s_Logo" style="width:100%"><br>
 <label>Report card header image (URL)</label><br><input id="s_Header" style="width:100%" placeholder="https://…/icons/report-header.png">
@@ -490,6 +490,7 @@ async function loadAllSettings(){
     s_SchoolName.value=gv(map,'School_Name','School Name','SCHOOL_NAME')||'';
     s_Address.value=gv(map,'School_Address','School Address','SCHOOL_ADDRESS')||'';
     s_Affiliation.value=gv(map,'Affiliation_No','Affiliation No','Affiliation')||'';
+    s_Udise.value=gv(map,'UDISE_Code','UDISE Code')||'';   // S33b
     s_Phone.value=gv(map,'School_Phone','School Phone','Phone')||'';
     s_Header.value=gv(map,'Header Path','Header_Path','HeaderPath')||'';
     s_Logo.value=gv(map,'Logo Path','Logo_Path','LogoPath')||'';
@@ -526,7 +527,7 @@ function advMark(id){
   var info = box.querySelector('.advInfo'); if(info) info.innerHTML = '– ' + n + ' setting' + (n === 1 ? '' : 's') + (ch ? ', <span style="color:#ef6c00">' + ch + ' changed</span>' : '');
 }
 async function saveAllSettings(){
-  var payload={ Academic_Session: s_Session.value.trim(), 'Print Header Path': s_PrintHeader.value.trim(), Date_Style: s_DateStyle.value, Session_StartMonth: s_StartMonth.value, Active_Term: s_ActiveTerm.value, Publish_Result: s_PublishResult.value, Publish_Term_I: s_PubT1.value, Publish_Term_II: s_PubT2.value, Enable_DailyUpdate: s_EnableDaily.value, School_Name: s_SchoolName.value.trim(), School_Address: s_Address.value.trim(), Affiliation_No: s_Affiliation.value.trim(), School_Phone: s_Phone.value.trim(), 'Header Path': s_Header.value.trim(), 'Logo Path': s_Logo.value.trim(), Total_Periods: String(s_TotalPeriods.value) };
+  var payload={ Academic_Session: s_Session.value.trim(), 'Print Header Path': s_PrintHeader.value.trim(), Date_Style: s_DateStyle.value, Session_StartMonth: s_StartMonth.value, Active_Term: s_ActiveTerm.value, Publish_Result: s_PublishResult.value, Publish_Term_I: s_PubT1.value, Publish_Term_II: s_PubT2.value, Enable_DailyUpdate: s_EnableDaily.value, School_Name: s_SchoolName.value.trim(), School_Address: s_Address.value.trim(), Affiliation_No: s_Affiliation.value.trim(), UDISE_Code: s_Udise.value.trim(), School_Phone: s_Phone.value.trim(), 'Header Path': s_Header.value.trim(), 'Logo Path': s_Logo.value.trim(), Total_Periods: String(s_TotalPeriods.value) };
   var tot = parseInt(s_TotalPeriods.value||6);
   for(var i=1;i<=tot;i++){ var typeEl=document.getElementById('p_type_'+i); var timeEl=document.getElementById('p_'+i); var labelEl=document.getElementById('p_label_'+i); payload['Period_'+i]= timeEl ? timeEl.value.trim() : ''; payload['Period_'+i+'_Type']= typeEl ? typeEl.value : 'Teaching'; payload['Period_'+i+'_Label']= labelEl ? labelEl.value.trim() : (i+'th Period'); }
   for(var j=tot+1;j<=10;j++){ payload['Period_'+j]=''; payload['Period_'+j+'_Type']=''; payload['Period_'+j+'_Label']=''; }
@@ -761,7 +762,8 @@ var CARDS = {
     ['btnBlankForm','🖨️','Blank registration form','Print an empty form','open:student-print.html?blank=1','#64748b'],
     ['btnPromo','🎓','Promotion / new session','Once a year: start the new session, promote classes','go:promotion.html','#ef6c00']],
   studentsSetup:[['btnIdDesign','🎨','ID card design','Sides, shape, fields, colours','go:idcard-settings.html'],
-    ['btnStuSettings','⚙️','Student record settings','Admission number, compulsory fields, lists, register columns','go:student-settings.html']],
+    ['btnStuSettings','⚙️','Student record settings','Admission number, compulsory fields, lists, register columns','go:student-settings.html'],
+    ['btnUdise','📤','UDISE+ and APAAR','UDISE+ Excel of a class, APAAR to-do list','go:udise.html']],   // S33b
   fees:[['btnCollect','💵','Collect Fees','Take a payment, print the receipt','go:fees-collect.html','#ef6c00'],
     ['btnReceipts','🧾','Receipts','Day book, reprint or cancel a receipt','go:fees-receipts.html','#0b2a5c'],
     ['btnFeeReports','📊','Fee Reports','Dues, collection, student ledger, bus list','go:fees-reports.html','#0b2a5c'],
@@ -786,7 +788,7 @@ var CARDS = {
 function cardGo(a){
   var k = a.split(':')[0], v = a.slice(k.length + 1);
   if(k === 'go') window.location.href = v;
-  else if(k === 'open') window.open(v, '_blank');
+  else if(k === 'open') window.location.href = v;     // S33a (F9): same window (the installed app stays the app)
   else if(k === 'tab'){ openTab(v); if(v === 'subjectMasterTab'){ try{ loadSM(); }catch(e){} } }
 }
 function drawCards(){
@@ -1093,11 +1095,11 @@ async function runSpeedCheck(){
 }
 
 var SYS_PAGES = ["accountant.html", "admin.html", "class-dashboard.html", "class-report.html", "classtest.html", "daily.html", "events.html", "exam-marks.html", "exam-settings.html", "fees-collect.html", "fees-opening.html", "fees-optional.html", "fees-receipt.html", "fees-receipts.html", "fees-reports.html", "fees-settings.html", "fees-students.html", "index.html", "performance.html", "promotion.html", "report-card-preview.html", "report-card-settings.html", "report-card.html", "student-access.html", "student.html", "students.html", "subject-dashboard.html", "timetable-builder.html"];
-function verOk(v,min){
-  var re=/^(\d{4})\.(\d{2})\.(\d{2})-S(\d+)$/, a=re.exec(v||''), b=re.exec(min||'');
+function verOk(v,min){   // S33a: a delivery may end with a small letter (S33 < S33a < S33b)
+  var re=/^(\d{4})\.(\d{2})\.(\d{2})-S(\d+)([a-z]?)$/, a=re.exec(v||''), b=re.exec(min||'');
   if(!a||!b) return false;
   for(var i=1;i<=4;i++){ var x=+a[i], y=+b[i]; if(x!==y) return x>y; }
-  return true;
+  return a[5]>=b[5];
 }
 /* ---------- S13: Pause all saves ---------- */
 function drawPause(pz){

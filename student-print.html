@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Student print</title>
@@ -50,12 +50,20 @@ table.pt{width:100%;border-collapse:collapse;font-size:11.5px}table.pt td{border
   <button class="btn g" id="bPrint" onclick="window.print()">🖨️ Print</button>
   <button class="btn p" id="bForm" onclick="setType('form')">Registration form</button>
   <button class="btn p" id="bProf" onclick="setType('profile')">Student profile</button>
-  <button class="btn" onclick="history.length>1?history.back():window.close()">⬅️ Back</button>
+  <button class="btn" onclick="goBack()">⬅️ Back</button>
 </div>
 <div class="msg" id="msg">Loading... please wait</div>
 <div id="out"></div>
 <script>
 const WEB_URL = (window.CVSE_CONFIG && window.CVSE_CONFIG.WEB_URL) || "";
+// S33a (F9): opened in the same window – Back returns to the page it came from (record, Students, admin card)
+function goBack(){
+  let to = '';
+  try{ let r = new URL(document.referrer); if(r.origin === location.origin && !/student-print\.html$/.test(r.pathname)) to = r.pathname.split('/').pop() + r.search; }catch(e){}
+  let adm = new URLSearchParams(location.search).get('adm');
+  if(!to) to = adm ? 'student-record.html?adm=' + encodeURIComponent(adm) : (ls('cvse_role') === 'admin' ? 'admin.html?tab=last' : 'accountant.html');
+  UI.goBack(to);
+}
 function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
 if(!ls('cvse_token') || (ls('cvse_role') !== 'admin' && ls('cvse_role') !== 'accountant')){ window.location.href = 'index.html'; }
 async function apiGet(action, params){

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S32">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Classes & Streams</title>
@@ -118,7 +118,7 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
       <label for="sBase">Class</label><input id="sBase" list="baseList" maxlength="20" placeholder="for example XI" autocapitalize="characters" oninput="baseMask(this);prev()">
       <div class="help">The class that is split into streams. Each stream becomes its own class with its own subjects, timetable and class teacher; fees and exams set for the class (for example XI) count for every stream.</div>
       <label>Streams</label><div id="sList"></div>
-      <div class="help">Short code after the hyphen: letters only (up to 8). Streams come from Student record settings → Lists → Stream.</div>
+      <div class="help">Short code after the hyphen: letters only (up to 8). The streams come from the 🎓 Stream list below.</div>
       <div class="prev" id="sPrev"></div>
       <div class="btnrow"><button class="btn b-green" id="bSTREAMS" data-nofb onclick="add('STREAMS', this)">➕ Add streams</button></div><div class="msg" id="mSTREAMS"></div>
     </div>
@@ -137,6 +137,13 @@ input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px
     </div>
     <datalist id="baseList"></datalist>
     <div id="copyBox"></div>
+  </div>
+  <div class="box" style="border-left-color:var(--purple)" id="streamBox">
+    <div class="title">🎓 Stream list</div>
+    <div class="meta">The streams a class can be split into (Arts, Science, Commerce …). Add or hide a stream any time. A stream that a class uses (XI-SCI) cannot be renamed or deleted; hidden = not offered for new streams, the class keeps its name.</div>
+    <div id="stList" style="margin-top:8px"><div class="msg show load">Loading...</div></div>
+    <div style="display:flex;gap:8px;margin-top:8px"><input id="stNew" placeholder="New stream, for example Vocational" maxlength="40" style="flex:1;min-width:0"><button class="btn b-blue" id="bStAdd" data-nofb style="width:auto;min-width:90px" onclick="stOpt('add', $('stNew').value, this)">Add</button></div>
+    <div class="msg" id="mSt"></div>
   </div>
   <div class="box" style="border-left-color:var(--blue)">
     <div class="title">📋 The classes</div>
@@ -181,18 +188,19 @@ async function load(keepMsg){
   if(!keepMsg) show($('gMsg'), 'Loading the classes...', 'load');
   try{
     let r = await apiGet('classesget', {});
-    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); $('list').innerHTML = '<div class="empty-note">Could not load the classes.</div>'; return; }
+    if(!r.success){ show($('gMsg'), '❌ ' + (r.error || 'Could not load.'), 'err'); $('list').innerHTML = '<div class="empty-note">Could not load the classes.</div>'; $('stList').innerHTML = '<div class="empty-note">Could not load the streams.</div>'; return; }
     D = r; if(!keepMsg) hide($('gMsg')); draw();
-  }catch(e){ show($('gMsg'), '❌ Could not connect. Check the internet and try again.', 'err'); $('list').innerHTML = '<div class="empty-note">Could not load the classes.</div>'; }
+  }catch(e){ show($('gMsg'), '❌ Could not connect. Check the internet and try again.', 'err'); $('list').innerHTML = '<div class="empty-note">Could not load the classes.</div>'; $('stList').innerHTML = '<div class="empty-note">Could not load the streams.</div>'; }
 }
 function draw(){
   $('probBox').innerHTML = (D.problems || []).length ? '<div class="probs" style="margin-top:10px">⚠️ Please check:<br>' + D.problems.map(p => esc(p.problem)).join('<br>') + '</div>' : '';
   $('baseList').innerHTML = (D.bases || []).map(b => '<option value="' + esc(b) + '">').join('');
   if(!$('sList').dataset.done){
     $('sList').innerHTML = D.streams.length ? D.streams.map((s, i) => '<label class="chk2"><input type="checkbox" class="sTick" data-s="' + esc(s) + '" onchange="prev()"><b>' + esc(s) + '</b><input class="code" data-s="' + esc(s) + '" maxlength="8" value="' + esc(D.codes[i] || '') + '" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,\'\').slice(0,8);prev()"></label>').join('')
-      : '<div class="empty-note">The Stream list is empty. Add streams in Students → ⚙️ Student record settings → Lists.</div>';
+      : '<div class="empty-note">The Stream list is empty. Add a stream in the 🎓 Stream list below.</div>';
     $('sList').dataset.done = 1;
   }
+  drawStreams();
   $('nAfter').innerHTML = '<option value="">At the end</option><option value="FIRST">At the beginning</option>' + D.classes.filter(c => !c.finishing).map(c => '<option value="' + esc(c.cls) + '">After ' + esc(c.cls) + '</option>').join('');
   $('list').innerHTML = D.classes.length ? D.classes.map(c => {
     let pills = (c.stream ? '<span class="pill p">' + esc(c.stream) + '</span> ' : '') + (c.finishing ? '<span class="pill g">made by the promotion</span>' : '');
@@ -201,6 +209,31 @@ function draw(){
       (c.canRemove ? '<div class="btnrow" style="margin-top:8px"><button class="rm" data-nofb onclick="removeCls(\'' + esc(c.cls) + '\', this)">🗑 Remove ' + esc(c.cls) + '</button></div><div class="msg" id="rm_' + esc(c.cls) + '"></div>' : '') + '</div>';
   }).join('') : '<div class="empty-note">No classes yet. Add the first one above.</div>';
   prev();
+}
+// S33a (F1): the Stream list (was in Student record settings → Drop-down lists); same route mroption, list Stream
+function drawStreams(){
+  let L = D.streamList || [];
+  $('stList').innerHTML = L.length ? L.map(o => {
+    let used = (o.classes || []).length, line = used ? 'used by ' + o.classes.map(esc).join(', ') : 'not used by a class';
+    return '<div class="cls st' + (o.hidden ? ' fin' : '') + '"><div class="h"><b>' + esc(o.v) + (o.hidden ? ' (hidden)' : '') + '</b></div><div class="l">' + line + '</div>' +
+      '<div class="btnrow" style="margin-top:8px">' +
+      (used ? '' : '<button class="rm" style="background:#e0f2fe;color:#075985" data-nofb data-v="' + esc(o.v) + '" onclick="stOpt(\'rename\', this.dataset.v, this)">✏️ Rename</button>') +
+      '<button class="rm" style="background:#ede9fe;color:#5b21b6" data-nofb data-v="' + esc(o.v) + '" onclick="stOpt(\'' + (o.hidden ? 'show' : 'hide') + '\', this.dataset.v, this)">' + (o.hidden ? '👁 Show' : '🙈 Hide') + '</button>' +
+      (used ? '' : '<button class="rm" data-nofb data-v="' + esc(o.v) + '" onclick="stOpt(\'delete\', this.dataset.v, this)">🗑 Delete</button>') + '</div></div>';
+  }).join('') : '<div class="empty-note">No streams yet. Add the first one below.</div>';
+}
+async function stOpt(op, value, b){
+  let m = $('mSt'), nv = ''; value = String(value || '').trim();
+  if(op === 'add' && !value){ show(m, '❌ Type the new stream first.', 'err'); return; }
+  if(op === 'rename'){ nv = await UI.prompt('New name for the stream "' + value + '":', value); if(nv === null || !nv.trim() || nv.trim() === value) return; }
+  if(op === 'delete' && !(await UI.ask('Delete the stream "' + value + '" from the list?', 'Delete', true))) return;
+  b.disabled = true; let old = b.textContent; b.textContent = '⏳'; show(m, 'Saving... please wait', 'load');
+  try{
+    let r = await apiPost('mroption', {list:'Stream', op:op, value:value, newValue:nv.trim()});
+    if(r.success){ if(op === 'add') $('stNew').value = ''; $('sList').dataset.done = ''; await load(true); show($('mSt'), '✅ ' + r.message, 'ok'); return; }
+    show(m, '❌ ' + (r.error || 'Could not save.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was changed. Try again.', 'err'); }
+  b.disabled = false; b.textContent = old;
 }
 function picked(){ return [...document.querySelectorAll('.sTick:checked')].map(t => ({stream:t.dataset.s, code:(document.querySelector('.code[data-s="' + CSS.escape(t.dataset.s) + '"]') || {}).value || ''})); }
 function prev(){

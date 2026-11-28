@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Receipts</title>
@@ -138,6 +138,7 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
  .copy{break-inside:avoid;margin-bottom:6mm}
  .pgbreak{break-after:page}
 }
+.hint{font-size:12px;color:var(--muted);font-weight:600;margin-top:8px;line-height:1.6}   /* S33a (F3/F4) */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:300;padding:16px}.modal.on{display:flex}
 .modal .mb{background:#fff;border-radius:16px;padding:16px;max-width:380px;width:100%}
 </style><script src="config.js"></script><script src="ui.js"></script></head>
@@ -154,8 +155,10 @@ h3.g{margin:14px 0 4px;color:var(--navy);font-size:14px;border-bottom:2px solid 
 </div>
 <div class="wrap">
  <div class="box"><div class="title">Receipts</div><div class="meta">Day book. Tap Print to reprint. Cancelled receipts stay in the list.</div>
-  <div class="row2"><div><label>Date <button type="button" data-nofb aria-label="Clear the date" onclick="$('dt').value=''" style="border:none;background:#e5e7eb;border-radius:999px;padding:2px 9px;font-weight:800;cursor:pointer;margin-left:4px">✕</button></label><input id="dt" inputmode="numeric" maxlength="10" oninput="maskD(this)" placeholder="DD-MM-YYYY"></div><div><label>Search (no, name, adm)</label><input id="q" placeholder="Search" onkeydown="if(event.key==='Enter')load()"></div></div>
-  <div class="btnrow"><button class="btn b-blue" onclick="load()">Show</button><button class="btn b-navy" onclick="$('dt').value='';load('ALL')">All dates</button></div></div>
+  <div class="row2"><div><label for="df">From</label><input id="df" data-date inputmode="numeric" maxlength="10" oninput="maskD(this)" placeholder="DD-MM-YYYY"></div><div><label for="dt">To</label><input id="dt" data-date inputmode="numeric" maxlength="10" oninput="maskD(this)" placeholder="DD-MM-YYYY"></div></div>
+  <label for="q">Search (receipt no, name, adm no)</label><input id="q" placeholder="Search" onkeydown="if(event.key==='Enter')load()">
+  <div class="hint">Both dates today = today's day book. Empty dates + search = all dates. <button type="button" data-nofb onclick="$('df').value='';$('dt').value=''" style="border:none;background:#e5e7eb;border-radius:999px;padding:4px 10px;font-weight:800;cursor:pointer;font-size:12px">✕ Clear dates</button></div>
+  <div class="btnrow"><button class="btn b-blue" id="bShow" onclick="load()">Show</button></div></div>
  <div class="msg" id="gMsg"></div>
  <div id="sumBox"></div>
  <div id="list"></div>
@@ -194,23 +197,29 @@ $('avatarLetter').innerText = String(USER.name || 'U').trim().charAt(0).toUpperC
 
 
 
-var CAN = false, CUR = null;
+var CAN = false, CUR = null, LOADED = false;
 function rs(n){ return '₹' + (Math.round((Number(n)||0) * 100) / 100).toLocaleString('en-IN'); }
+// S33a (F4): From + To dates (the "All dates" button is gone; load('ALL') stays for old callers)
 async function load(all){
-  let q = $('q').value.trim(), d = all === 'ALL' ? 'ALL' : $('dt').value.trim();
-  if(!d && q) d = 'ALL';     // S27 (R6): a search with no date looks at every date
+  let q = $('q').value.trim(), f = $('df').value.trim(), t = $('dt').value.trim();
+  if(all === 'ALL'){ f = ''; t = ''; }
+  if(!f && !t && !q && all === 'ALL'){ show($('gMsg'),'Type a name, adm no or receipt no to search all dates.','warn'); return; }
+  let first = !LOADED;
   show($('gMsg'),'Loading receipts... please wait','load'); $('list').innerHTML = '<div class="empty-note">⏳ Loading...</div>';
+  let b = $('bShow'); if(b) b.disabled = true;
   try{
     if(!CUR){ let me = await apiGet('feeme',{}); CAN = me.success && me.privileges.indexOf('CANCEL') > -1; CUR = me.success ? me : {}; }
-    let p = {q:q}; if(d) p.date = d;
+    let p = {q:q, from:f, to:t};
     let r = await apiGet('feereceipts',p);
+    if(b) b.disabled = false;
     if(!r.success){ show($('gMsg'),'❌ '+(r.error||'Could not load.'),'err'); $('list').innerHTML=''; return; }
-    hide($('gMsg')); if(!$('dt').value && r.date !== 'ALL') $('dt').value = r.date;
+    LOADED = true;
+    hide($('gMsg')); if(r.date !== 'ALL' && (first || (!f && !t))){ $('df').value = r.from; $('dt').value = r.to; }
     let s = r.summary;
     $('sumBox').innerHTML = '<div class="box" style="border-left-color:var(--green)"><div class="title">'+(r.date==='ALL'?'All dates':esc(r.date))+(q?' · search '+esc(q):'')+'</div><div class="big"><div><b>'+rs(s.total)+'</b><span>'+s.count+' receipts</span></div><div><b>'+(Object.keys(s.byMode).map(k=>esc(k)+' '+rs(s.byMode[k])).join('<br>')||'—')+'</b><span>By payment mode'+(s.cancelled?' · '+s.cancelled+' cancelled':'')+'</span></div></div></div>';
-    $('list').innerHTML = r.receipts.length ? r.receipts.map(x=>'<div class="srow" style="cursor:default;border-left-color:'+(x.status==='CANCELLED'?'#94a3b8':'var(--green)')+'"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.no)+' · '+esc(x.name)+'</b><span class="pill '+(x.status==='CANCELLED'?'o':'g')+'">'+(x.status==='CANCELLED'?'CANCELLED':rs(x.total))+'</span></div><div class="meta">'+esc(x.date)+(x.time?' '+esc(x.time):'')+' · Class '+esc(x.cls)+' · Adm '+esc(x.adm)+' · '+esc(x.mode)+' · by '+esc(x.by)+(r.date==='ALL'?' · '+esc(x.session):'')+'</div>'+(x.reason?'<div class="meta">Reason: '+esc(x.reason)+'</div>':'')+
-      '<div class="btnrow" style="margin-top:8px"><button class="btn b-blue" onclick="window.location.href=UI.archUrl(\'fees-receipt.html?no='+encodeURIComponent(x.no)+'&s='+encodeURIComponent(x.session)+'\')">🖨 Print</button>'+(CAN&&!UI.arch&&x.status!=='CANCELLED'?'<button class="btn" style="background:var(--red)" onclick="askCancel(\''+esc(x.no)+'\',\''+esc(x.session)+'\')">Cancel</button>':'')+'</div></div>').join('')+(r.more?'<div class="meta">Showing the latest 200. Use the date or search to narrow down.</div>':'') : '<div class="empty-note">No receipts found.</div>';
-  }catch(e){ show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); $('list').innerHTML=''; }
+    $('list').innerHTML = r.receipts.length ? r.receipts.map(x=>'<div class="srow" style="cursor:default;border-left-color:'+(x.status==='CANCELLED'?'#94a3b8':'var(--green)')+'"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.no)+' · '+esc(x.name)+'</b><span class="pill '+(x.status==='CANCELLED'?'o':'g')+'">'+(x.status==='CANCELLED'?'CANCELLED':rs(x.total))+'</span></div><div class="meta">'+esc(x.date)+(x.time?' '+esc(x.time):'')+' · Class '+esc(x.cls)+' · Adm '+esc(x.adm)+' · '+esc(x.mode)+' · by '+esc(x.by)+(r.date==='ALL'||r.range?' · '+esc(x.session):'')+'</div>'+(x.reason?'<div class="meta">Reason: '+esc(x.reason)+'</div>':'')+
+      '<div class="btnrow" style="margin-top:8px"><button class="btn b-blue" onclick="window.location.href=UI.archUrl(\'fees-receipt.html?no='+encodeURIComponent(x.no)+'&s='+encodeURIComponent(x.session)+'\')">🖨 Print</button>'+(CAN&&!UI.arch&&x.status!=='CANCELLED'?'<button class="btn" style="background:var(--red)" onclick="askCancel(\''+esc(x.no)+'\',\''+esc(x.session)+'\')">Cancel</button>':'')+'</div></div>').join('')+(r.more?'<div class="meta">Showing the newest 200. More receipts – narrow the dates or search.</div>':'') : '<div class="empty-note">No receipts found.</div>';
+  }catch(e){ if(b) b.disabled = false; show($('gMsg'),'❌ Could not connect. Check internet and try again.','err'); $('list').innerHTML=''; }
 }
 var CNO = '', CSES = '';
 function askCancel(no, ses){ CNO = no; CSES = ses; $('cNo').innerText = no; $('cWhy').value = ''; hide($('cMsg')); $('cm').classList.add('on'); }
@@ -218,7 +227,7 @@ async function doCancel(){
   let b = $('cBtn'); b.disabled = true; show($('cMsg'),'Cancelling... please wait','load');
   try{
     let r = await apiPost('feecancel',{no:CNO,session:CSES,reason:$('cWhy').value});
-    if(r.success){ $('cm').classList.remove('on'); await load($('dt').value ? '' : 'ALL'); show($('gMsg'),'✅ '+r.message,'ok'); }
+    if(r.success){ $('cm').classList.remove('on'); await load(); show($('gMsg'),'✅ '+r.message,'ok'); }
     else show($('cMsg'),'❌ '+(r.error||'Could not cancel.'),'err');
   }catch(e){ show($('cMsg'),'❌ Could not connect. Nothing was changed. Try again.','err'); }
   b.disabled = false;

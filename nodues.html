@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S32">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>No Dues certificate</title>
@@ -128,13 +128,16 @@ textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;fon
 .nobox{background:#fee2e2;border:1.5px solid #fca5a5;border-radius:12px;padding:12px;color:#7f1d1d;font-weight:800;line-height:1.5}
 .spbox{background:#fff7ed;border:1.5px solid #fdba74;border-radius:12px;padding:12px;margin-top:12px}
 .rrow{background:#fff;border-radius:12px;border:1px solid #eef0f3;border-left:5px solid var(--green);padding:10px 12px;margin-bottom:8px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-.rrow.sp{border-left-color:var(--orange)}.rrow b{color:var(--navy)}.rrow .mt{font-size:12px;color:var(--muted);font-weight:700;line-height:1.5;margin-top:3px}
+.rrow.sp{border-left-color:var(--orange)}.rrow.cx{border-left-color:#94a3b8;background:#f8fafc}.rrow b{color:var(--navy)}.rrow .mt{font-size:12px;color:var(--muted);font-weight:700;line-height:1.5;margin-top:3px}
 .rrow .btn{min-height:44px;padding:8px 10px;font-size:13px;margin-top:8px}
 .search{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;min-height:46px}
 /* the certificate */
 #certWrap{display:none}.certZoom{overflow-x:auto}
 .cert{background:#fff;color:#111;font-family:Georgia,'Times New Roman',serif;border:3px double #0b2a5c;padding:9mm 11mm;position:relative;box-sizing:border-box;margin:0 auto}
-.cert{display:flex;flex-direction:column}.cert.HALF{width:210mm;min-height:146mm}.cert.A4{width:200mm;min-height:280mm;padding:16mm 15mm;font-size:17px}
+/* S33a (F8): a FIXED-size certificate a little smaller than the paper, centred on its page with the same white margin on all 4 sides;
+   @page margin 0 (A5 and A4) so the browser has no room for header / footer text. Nothing inside can make it taller. */
+.cert{display:flex;flex-direction:column;overflow:hidden}.cert.HALF{width:196mm;height:134mm;padding:7mm 10mm}.cert.A4{width:192mm;height:279mm;padding:16mm 15mm;font-size:17px}
+.sheet{margin:0 auto}
 .cert .hdi img{display:block;width:100%;max-height:30mm;object-fit:contain}.cert.A4 .hdi img{max-height:42mm}
 .cert .hd{display:flex;align-items:center;gap:12px;border-bottom:2px solid #0b2a5c;padding-bottom:6px}.cert .hd img{width:20mm;height:20mm;object-fit:contain}
 .cert .hd .ph{flex:1;text-align:center}.cert .hd .ph b{font-size:22px;color:#0b2a5c;display:block;font-family:Arial,sans-serif}.cert .hd .ph span{display:block;font-size:11.5px;color:#334155;font-family:Arial,sans-serif}
@@ -144,11 +147,12 @@ textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;fon
 .cert .bd{font-size:15.5px;line-height:1.9;text-align:justify}.cert.A4 .bd{font-size:18px;line-height:2.1}
 .cert .bd b{border-bottom:1px dotted #333;padding:0 3px}
 .cert .sp{margin-top:10px;background:#f1f5f9;color:#475569;font-family:Arial,sans-serif;font-size:12px;padding:6px 9px;border-left:3px solid #94a3b8;line-height:1.5}
-.cert .sg{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700}.cert.A4{min-height:283mm}.cert.A4 .sg{font-size:14px}
-.cert .sg div{min-width:55mm;text-align:center}.cert .sg img{display:block;height:13mm;max-width:52mm;object-fit:contain;margin:0 auto 2px}
+.cert .sg{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:10px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;flex-shrink:0}.cert.A4 .sg{font-size:14px}
+.cert .dpl{font-family:Arial;font-size:10px;color:#64748b;margin-top:4px;flex-shrink:0}
+.cert .sg div{width:55mm;text-align:center}.cert .sg img{display:block;height:13mm;max-width:52mm;object-fit:contain;margin:0 auto 2px}.cert .sg .sgi{height:13mm;margin:0 auto 2px}
 .cert .sg span{display:block;border-top:1px solid #111;padding-top:3px}
 .cert .dup{position:absolute;right:8mm;top:6mm;font-family:Arial,sans-serif;font-weight:900;font-size:11px;color:#c62828;border:1.5px solid #c62828;padding:2px 8px;border-radius:4px;background:#fff}
-.cert .sg .qr{min-width:0;width:22mm;text-align:center;font-size:8px;color:#64748b;font-weight:600}.cert .sg .qr svg{width:22mm;height:22mm;display:block;margin:0 auto 1px}.cert.A4 .sg .qr,.cert.A4 .sg .qr svg{width:30mm}.cert.A4 .sg .qr svg{height:30mm}
+.cert .sg .qr{min-width:0;width:22mm!important;text-align:center;font-size:8px;color:#64748b;font-weight:600}.cert .sg .qr svg{width:22mm;height:22mm;display:block;margin:0 auto 1px}.cert.A4 .sg .qr,.cert.A4 .sg .qr svg{width:30mm}.cert.A4 .sg .qr svg{height:30mm}
 .cert .sg .onl{font-size:11px;color:#334155;font-weight:700;line-height:1.4}
 .cert .wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-size:60px;font-weight:900;color:rgba(198,40,40,.10);transform:rotate(-20deg);pointer-events:none}
 @media print{
@@ -157,6 +161,9 @@ textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;fon
   .wrap{margin:0!important;padding:0!important;max-width:none!important}
   #certWrap{display:block!important}.certZoom{overflow:visible}
   .cert{margin:0;zoom:1!important}
+  /* S33a (F8): one page box = the paper; the certificate sits in its middle */
+  .sheet{display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0;break-after:avoid;break-inside:avoid}
+  .sheet.HALF{width:210mm;height:147.5mm}.sheet.A4{width:210mm;height:296.5mm}
 }
 </style></head>
 <body>
@@ -297,9 +304,30 @@ function drawMine(){
   $('mine').innerHTML = l.length ? '<div class="box" style="border-left-color:var(--navy)"><div class="title" style="font-size:15px">Certificates given to this student</div>' + l.map(rowHtml).join('') + '</div>' : '';
 }
 function rowHtml(x){
-  return '<div class="rrow' + (x.special ? ' sp' : '') + '"><b>' + esc(x.no) + '</b> · ' + esc(x.on) + '<div class="mt">' + esc(x.name) + ' · ' + esc(x.adm) + ' · Class ' + esc(x.cls) + '<br>Up to ' + esc(x.upTo) + ' · by ' + esc(x.by) +
-    (x.special ? '<br>⚠️ Special approval: ₹' + esc(x.pending) + ' pending, to be paid by ' + esc(x.promise) + (x.reason ? ' – ' + esc(x.reason) : '') : '') + '</div>' +
-    '<button class="btn b-navy" data-nofb onclick="reprint(\'' + esc(x.no) + '\', this)">🖨 Reprint (duplicate copy)</button></div>';
+  let id = 'cx_' + String(x.no).replace(/[^A-Za-z0-9]/g, '_');
+  return '<div class="rrow' + (x.special ? ' sp' : '') + (x.cancelled ? ' cx' : '') + '"><b>' + esc(x.no) + '</b> · ' + esc(x.on) + (x.cancelled ? ' <span class="pill d">CANCELLED</span>' : '') + '<div class="mt">' + esc(x.name) + ' · ' + esc(x.adm) + ' · Class ' + esc(x.cls) + '<br>Up to ' + esc(x.upTo) + ' · by ' + esc(x.by) +
+    (x.special ? '<br>⚠️ Special approval: ₹' + esc(x.pending) + ' pending, to be paid by ' + esc(x.promise) + (x.reason ? ' – ' + esc(x.reason) : '') : '') +
+    (x.cancelled ? '<br>❌ Cancelled ' + esc(x.cancelledAt) + ' by ' + esc(x.cancelledBy) + ' – ' + esc(x.cancelReason) : '') + '</div>' +
+    (x.cancelled ? '' : '<div class="btnrow" style="margin-top:0"><button class="btn b-navy" data-nofb onclick="reprint(\'' + esc(x.no) + '\', this)">🖨 Reprint (duplicate copy)</button>' +
+      (USER.role === 'admin' && !STU && !UI.arch ? '<button class="btn b-red" data-nofb style="flex:0 1 130px;min-width:110px" onclick="cancelCert(\'' + esc(x.no) + '\', this, \'' + id + '\')">❌ Cancel</button>' : '') + '</div><div class="msg" id="' + id + '"></div>') + '</div>';
+}
+/* S33a (F6): admin only – the line stays as CANCELLED with the reason; the number is never used again */
+async function cancelCert(no, btn, id){
+  let m = $(id);
+  let why = await UI.prompt('Cancel No Dues certificate ' + no + '?\nThe line stays in the register as CANCELLED, the number is never used again, and it cannot be reprinted. A paper already given keeps its QR text.\n\nWrite the reason (at least 5 letters):', '');
+  if(why === null) return;
+  why = why.trim();
+  if(why.replace(/[^A-Za-z]/g, '').length < 5){ show(m, '❌ Please write the reason (at least 5 letters). Nothing was changed.', 'err'); return; }
+  btn.disabled = true; let old = btn.textContent; btn.textContent = '⏳ Cancelling...'; show(m, 'Cancelling... please wait', 'load');
+  try{
+    let r = await apiPost('ndcancel', {no:no, reason:why});
+    if(r.success){
+      show(m, '✅ ' + r.message, 'ok'); REG = null;
+      setTimeout(async function(){ if($('chReg').classList.contains('on')){ await loadReg(); } if(ADM) await check(); }, 1200); return;
+    }
+    show(m, '❌ ' + (r.error || 'Could not cancel.'), 'err');
+  }catch(e){ show(m, '❌ Could not connect. Nothing was changed. Try again.', 'err'); }
+  btn.disabled = false; btn.textContent = old;
 }
 async function issue(special){
   let b = $('issueBtn'), m = $('iMsg'), p = {adm:C.student.adm, session:C.session, upto:C.upto};
@@ -314,6 +342,12 @@ async function issue(special){
   try{
     let r = await apiPost('ndissue', p);
     if(r.success){ b.textContent = '✅ Saved'; show(m, '✅ ' + (r.message || 'Saved.'), 'ok'); REG = null; openCert(r.certificate); check(); return; }
+    if(r.code === 'ALREADY' && r.already){            // S33a (F5): one number per student and month – offer the reprint
+      show(m, 'ℹ️ ' + r.error, 'warn'); b.textContent = old;
+      let rb = document.createElement('div'); rb.className = 'btnrow'; rb.id = 'alreadyRow';
+      rb.innerHTML = '<button class="btn b-navy" data-nofb onclick="reprint(\'' + esc(r.already.no) + '\', this)">🖨 Reprint ' + esc(r.already.no) + ' (duplicate copy)</button>';
+      let o = $('alreadyRow'); if(o) o.remove(); m.parentNode.insertBefore(rb, m.nextSibling); return;
+    }
     show(m, '❌ ' + (r.error || 'Could not save.'), 'err');
   }catch(e){ show(m, '❌ Could not connect. Nothing was saved. Try again.', 'err'); }
   b.disabled = false; b.textContent = old;
@@ -351,22 +385,22 @@ function certHtml(c){
     ? 'This certificate for the fees ' + upTo + ' is given to ' + who + '.'
     : 'This is to certify that ' + who + ', has paid all fees due ' + upTo + '. No dues are pending.';
   let sp = c.special ? '<div class="sp">Issued with special approval. ' + esc(c.special.realPaidUpTo) + '; dues of ' + rs(c.special.pending, dec) + ' pending; to be cleared by ' + esc(c.special.promise) + '.</div>' : '';
-  let sign = (src) => src ? '<img src="' + esc(src) + '" alt="">' : '';
-  return '<div class="cert ' + (c.paper === 'A4' ? 'A4' : 'HALF') + '">' + (c.duplicate ? '<div class="dup">DUPLICATE COPY</div><div class="wm">DUPLICATE</div>' : '') + hd +
+  let sign = (src) => src ? '<img src="' + esc(src) + '" alt="">' : '<div class="sgi"></div>';   // S33a (F8): same height with or without a signature
+  return '<div class="sheet ' + (c.paper === 'A4' ? 'A4' : 'HALF') + '"><div class="cert ' + (c.paper === 'A4' ? 'A4' : 'HALF') + '">' + (c.duplicate ? '<div class="dup">DUPLICATE COPY</div><div class="wm">DUPLICATE</div>' : '') + hd +
     '<h1>NO DUES CERTIFICATE</h1><div class="h1s">(Fee clearance)</div>' +
     '<div class="nr"><span>Certificate No: ' + esc(c.no) + '</span><span>Date: ' + esc(c.issuedOn) + '</span></div>' +
     '<div class="bd">' + body + '</div>' + sp +
     '<div class="sg">' + (c.online ? '<div class="onl">Issued online from the student / parent app.<br>No office signature needed.</div>' : '<div>' + sign(c.issuer.sign) + '<span>Office Staff' + (c.issuer.name ? ' (' + esc(c.issuer.name) + ')' : '') + '</span></div>') +
     (c.qr && window.IDCARD && IDCARD.qr ? '<div class="qr">' + IDCARD.qr(c.qr) + 'Certificate details</div>' : '') + '<div>' + sign(c.principalSign) + '<span>Principal</span></div></div>' +
-    (c.duplicate ? '<div style="font-family:Arial;font-size:10px;color:#64748b;margin-top:6px">Duplicate printed on ' + esc(c.printedOn) + '</div>' : '') + '</div>';
+    (c.duplicate ? '<div class="dpl">Duplicate printed on ' + esc(c.printedOn) + '</div>' : '') + '</div></div>';
 }
 function openCert(c){
   UI.printDates(c.school && c.school.dateStyle);
   let ps = document.getElementById('paperCss'); if(!ps){ ps = document.createElement('style'); ps.id = 'paperCss'; document.head.appendChild(ps); }
-  ps.textContent = c.paper === 'A4' ? '@page{size:A4 portrait;margin:6mm}' : '@page{size:A5 landscape;margin:0}';
+  ps.textContent = c.paper === 'A4' ? '@page{size:A4 portrait;margin:0}' : '@page{size:A5 landscape;margin:0}';   // S33a (F8): margin 0 for both
   $('certBox').innerHTML = certHtml(c);
   $('certTitle').innerText = '📄 ' + c.no + (c.duplicate ? ' – duplicate copy' : '');
-  $('certHint').innerText = (STU ? 'To keep it, choose "Save as PDF" in the print window. ' : '') + 'In the print window choose ' + (c.paper === 'A4' ? 'A4, portrait' : 'A5, landscape (half of A4)') + ', margins None, scale 100%, and turn off "Headers and footers". Change the size in Fees Settings → Receipt & Rules.';
+  $('certHint').innerText = (STU ? 'To keep it, choose "Save as PDF" in the print window. ' : '') + 'In the print window choose paper ' + (c.paper === 'A4' ? 'A4, portrait' : 'A5, landscape (half of A4)') + ' and scale 100% (or Default). The certificate is centred with a white margin. The paper size is set in Fees Settings → Receipt & Rules.';
   $('main').style.display = 'none'; $('reg').style.display = 'none'; $('certWrap').style.display = 'block'; window.scrollTo(0, 0);
   fitCert();
   if(!CERT_OPEN && !STU){ CERT_OPEN = true; try{ UI.innerOpen(function(){ closeCert(true); }); }catch(e){} }

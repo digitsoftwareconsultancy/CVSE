@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.26-S29">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Settings – Student record</title>
@@ -111,8 +111,8 @@ function draw(){
   }
   h += '<div class="btnrow"><button class="btn b-green" id="b2" onclick="saveReq()">Save compulsory fields</button></div><div class="msg" id="m2"></div></div>';
   // 4. lists
-  h += '<div class="box" style="border-left-color:var(--purple)"><div class="title">3. Drop-down lists</div><div class="meta">An option used by a student can only be hidden (old records keep it, new forms do not offer it). Renaming also changes the old records. An unused option can be deleted.</div>';
-  Object.keys(D.meta.lists).forEach(k=>{
+  h += '<div class="box" style="border-left-color:var(--purple)"><div class="title">3. Drop-down lists</div><div class="meta">The Stream list is in Settings → 🏫 Classes &amp; Streams. An option used by a student can only be hidden (old records keep it, new forms do not offer it). Renaming also changes the old records. An unused option can be deleted.</div>';
+  Object.keys(D.meta.lists).filter(k=>k !== 'Stream').forEach(k=>{      // S33a (F1): the Stream list lives in Settings → Classes & Streams
     let c = D.counts[k] || {};
     h += '<h4 class="g">'+esc(LIST_LABEL[k] || k)+'</h4>' + D.meta.lists[k].map(o=>{ let n = c[o.v] || 0;
       return '<div class="opt'+(o.hidden?' hid':'')+'"><b>'+esc(o.v)+(o.hidden?' (hidden)':'')+'</b><small>'+n+' used</small>'+
@@ -120,9 +120,7 @@ function draw(){
         '<button onclick="opt(\''+k+'\',\''+(o.hidden?'show':'hide')+'\',this.dataset.v)" data-v="'+esc(o.v)+'">'+(o.hidden?'Show':'Hide')+'</button>'+
         (n ? '' : '<button class="d" onclick="opt(\''+k+'\',\'delete\',this.dataset.v)" data-v="'+esc(o.v)+'">Delete</button>')+'</div>'; }).join('') +
       '<div style="display:flex;gap:8px;margin-top:8px"><input id="new_'+k+'" placeholder="New option" maxlength="40" style="flex:1;min-width:0"><button class="btn b-blue" style="width:auto;min-width:90px" onclick="opt(\''+k+'\',\'add\',$(\'new_'+k+'\').value)">Add</button></div>' +
-      (k === 'Stream' ? '<label for="streamCls" style="margin-top:10px">Stream classes</label><input id="streamCls" maxlength="80" placeholder="XI, XII" value="'+esc((D.meta.streamClasses || []).join(', '))+'">'+
-        '<div class="meta">Only pupils of these classes (class level like XI, or one class like XI-A) get the Stream box in the record, and their Marks sheet card prints "Stream". Separate with commas. Empty = no streams.</div>'+
-        '<div class="btnrow"><button class="btn b-green" id="bStream" onclick="saveStream()">Save stream classes</button></div><div class="msg" id="mStream"></div>' : '');   // S29 (D)
+      '';   // S33a (F1): "Stream classes" box removed (a pupil's stream = his class's stream)
   });
   h += '<div class="msg" id="m4"></div></div>';
   h += '<div id="regBox"></div>';                                   // S16: 4. Parent registration (drawn by loadReg)

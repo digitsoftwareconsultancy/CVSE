@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33b">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Registration requests</title>
@@ -149,7 +149,7 @@ function drawItems(){
   $('items').innerHTML = list.map(x => '<div class="ritem ' + (ST_CLASS[x.status] || '') + '" onclick="openReq(\'' + esc(x.adm) + '\')"><b>' + esc(x.name) + '</b> · Class ' + esc(x.cls) + ' · ' + esc(x.adm) +
     '<div class="s"><span class="pill ' + (ST_CLASS[x.status] || '') + '">' + esc(x.statusText) + '</span>' +
     (x.status === 'SUBMITTED' ? ' · sent ' + esc(x.submittedAt) + ' · ' + x.changes + ' change(s)' + (x.note ? ' · 💬 note' : '') : '') +
-    (x.decidedAt && x.status !== 'SUBMITTED' ? ' · checked ' + esc(x.decidedAt) : '') + (x.status === 'DRAFT' ? ' · part ' + x.step + ' of 4 saved' : '') + '</div></div>').join('');
+    (x.decidedAt && x.status !== 'SUBMITTED' ? ' · checked ' + esc(x.decidedAt) : '') + (x.status === 'DRAFT' ? ' · part ' + x.step + ' of 5 saved' : '') + '</div></div>').join('');
 }
 
 /* ---------- one form ---------- */
@@ -197,7 +197,7 @@ function drawReq(){
     let ch = r.fields.filter(f => f.changed);
     h += '<div class="box" style="border-left-color:var(--orange)"><div class="title">Changes made by the parent (' + ch.length + ')</div>' +
       (ch.length ? '<div class="meta">Old value crossed out, new value below. For each change: accept, accept with your correction, or do not accept (the parent sees your reason).</div>' : '<div class="meta">The parent changed nothing: the record is confirmed as it is. Tap Accept.</div>');
-    [1, 2, 3, 4].forEach(p => {
+    [1, 2, 3, 4, 5].forEach(p => {   // S33b: + 5. Bank details
       let fs = ch.filter(f => f.part === p); if(!fs.length) return;
       h += '<h4 class="g">' + p + '. ' + esc(r.partNames[p]) + '</h4>' + fs.map(f => '<div class="fld ch" id="fl_' + f.key + '"><div class="lab">' + esc(f.label) + '</div>' +
         '<div class="ov">' + (f.old ? esc(f.old) : '(empty)') + '</div><div class="nv">' + (f.now ? esc(f.now) : '(empty)') + '</div>' +

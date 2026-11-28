@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Money Receipt</title>
@@ -181,7 +181,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ el.className = 'msg'; }
-function goBack(){ UI.goBack(STU ? 'student.html' : (USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html')); }
+function goBack(){ UI.goBack(STU ? 'student.html' : new URLSearchParams(location.search).get('sample') ? 'fees-settings.html' : (USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html')); }   // S33a (F9)
 function doLogout(){ if(STU){ window.location.href = 'student.html'; return; } try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 function maskD(el){
   let d = el.value.replace(/[^0-9]/g, '').substring(0, 8), o = d;

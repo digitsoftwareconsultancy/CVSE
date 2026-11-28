@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.26-S27">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Print ID cards</title>
@@ -124,7 +124,7 @@ function esc(s){ return String(s === null || s === undefined ? '' : s).replace(/
 function $(id){ return document.getElementById(id); }
 function show(el, text, kind){ if(!el) return; el.className = 'msg show ' + kind; el.innerText = text; }
 function hide(el){ if(el) el.className = 'msg'; }
-function goBack(){ UI.goBack(USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html'); }
+function goBack(){ let a = new URLSearchParams(location.search).get('adm'); UI.goBack(a ? 'student-record.html?adm=' + encodeURIComponent(a) : (USER.role === 'admin' ? 'admin.html?tab=last' : 'accountant.html')); }   // S33a (F9): opened from a record → back to it
 function doLogout(){ try{ localStorage.clear(); }catch(e){} window.location.href = 'index.html'; }
 $('wName').innerText = 'Welcome, ' + (USER.name || 'User'); $('wSub').innerText = 'Username: ' + USER.username;
 $('roleBadge').innerText = USER.role === 'accountant' ? 'OFFICE STAFF' : 'ADMIN';

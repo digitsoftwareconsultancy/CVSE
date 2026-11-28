@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33a">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Collect Fees</title>
@@ -372,6 +372,7 @@ function draw(){
   let showSession = G.sessions.length > 1;
   let h = '<div class="msg" id="vMsg"></div><div class="box"><div class="title">'+esc(G.student.name)+(G.student.left?' <span class="pill" style="background:#e5e7eb;color:#374151;font-size:12px">'+esc(G.student.left)+'</span>':'')+'</div>'+(G.student.left?'<div class="meta" style="color:#374151">No longer studying here. Only what was due up to the leaving date is shown.</div>':'')+'<div class="meta">Class '+esc(G.student.cls)+(G.student.roll?' · Roll '+esc(G.student.roll):'')+' · Adm '+esc(G.student.adm)+'</div>'+
    '<div class="big"><div><b>'+rs(G.totals.payableNow)+'</b><span>Overdue today</span></div><div><b>'+rs(G.totals.totalDue)+'</b><span>Total unpaid ('+esc(G.session)+')</span></div></div>'+
+   (G.totals.advance>0?'<div class="msg show info">💳 Paid in advance: <b>'+rs(G.totals.advance)+'</b> for months after the leaving date – refund or adjust it.</div>':'')+   // S33a (F10)
    lockHtml()+(G.warnings.length?'<div class="probs">⚠ '+G.warnings.map(esc).join('<br>⚠ ')+'</div>':'')+
    (showSession?'<label>Pay for session</label><select id="c_sess" onchange="pick(\''+esc(G.student.adm)+'\',this.value,\'\')">'+G.sessions.map(s=>'<option'+(s===G.session?' selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'+(G.asClass!==G.student.cls||true?'<label>Class in that session</label><select id="c_cls" onchange="pick(\''+esc(G.student.adm)+'\',$(\'c_sess\').value,this.value)">'+G.classes.map(c=>'<option'+(c===G.asClass?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select><div class="help">Use this to take the next session’s fees in advance. Choose the class the child will be in.</div>':''):'')+
    '<div class="btnrow"><button class="btn b-navy" onclick="back()">⬅ Choose another student</button>'+(USER.role==='admin'||USER.role==='accountant'?'<button class="btn b-green" data-nofb onclick="window.location.href=\'nodues.html?adm=\'+encodeURIComponent(G.student.adm)+\'&s=\'+encodeURIComponent(G.session||\'\')+\'&from=collect\'">📄 No Dues certificate</button>':'')+(PRIV.indexOf('CORRECT')>-1?'<button class="btn b-purple" onclick="openFix(G.details,G.student.adm,function(d){G.details=d;G.student.name=d.name;draw();})">✏ Correct name / parents</button>':'')+'</div></div>';

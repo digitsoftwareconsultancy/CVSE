@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta name="app-version" content="2026.11.27-S31">
+<html lang="en"><head><meta name="app-version" content="2026.11.28-S33b">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Office</title>
@@ -153,7 +153,7 @@ button.pCircle{border:2px solid #bbdefb;cursor:pointer;padding:0;font-family:inh
   <div id="homeCards"></div>
   <div id="homeEmpty"></div>
  </div>
- <div id="paneStudents" class="pane" style="display:none"><div class="tabHead"><h3>🧑‍🎓 Students</h3><p>Everyday work with students.</p></div><div class="cardList" id="cardsStudents"></div></div>
+ <div id="paneStudents" class="pane" style="display:none"><div class="tabHead"><h3>🧑‍🎓 Students</h3><p>Everyday work with students.</p></div><div class="cardList" id="cardsStudents"></div><div class="setupBox" id="studentsSetupBox" style="display:none"><h4>⚙️ Setup</h4><div class="cardList" id="cardsStudentsSetup"></div></div></div>
  <div id="paneFees" class="pane" style="display:none"><div class="tabHead"><h3>💰 Fees</h3><p>Collect fees, receipts, reports and fee setup of students. Setup is at the bottom.</p></div><div class="cardList" id="cardsFees"></div><div class="setupBox" id="feesSetupBox" style="display:none"><h4>⚙️ Setup</h4><div class="cardList" id="cardsFeesSetup"></div></div></div>
  <div id="paneDaily" class="pane" style="display:none"><div class="tabHead"><h3>📝 Daily</h3><p>Attendance, daily updates and the calendar.</p></div><div class="cardList" id="cardsDaily"></div></div>
  <div id="paneExams" class="pane" style="display:none"><div class="tabHead"><h3>🎓 Exams</h3><p>The exam register of a class.</p></div><div class="cardList" id="cardsExams"></div></div>
@@ -206,6 +206,7 @@ var CARDS = [
  ['PHOTOS','📷','Class photo day','Take the student photos','photos.html','students','#16a34a'],
  ['PHOTOS','🪪','Print ID cards','A class or one student','idcards.html','students','#0b2a5c'],
  ['RECVIEW','📒','Admission Register','Every student ever, print','student-register.html','students','#0b2a5c'],
+ ['RECVIEW|RECEDIT','📤','UDISE+ and APAAR','UDISE+ Excel of a class, APAAR to-do list','udise.html','studentsSetup',''],      // S33b
  ['COLLECT','💵','Collect Fees','Take a payment, print the receipt','fees-collect.html','fees','#ef6c00'],
  ['COLLECT','🧾','Receipts','Day book, reprint or cancel a receipt','fees-receipts.html','fees','#0b2a5c'],
  ['REPORTS','📊','Fee Reports','Dues, collection, student ledger, bus list','fees-reports.html','fees','#0b2a5c'],
@@ -294,7 +295,7 @@ try{ UI.tabsBack({key:'office', home:'home', current:function(){ return ssGet() 
 function buildTabs(by){
   TABS_SHOWN = ['home'];
   var defs = {home:['🏠','Home'], students:['🧑‍🎓','Students'], fees:['💰','Fees'], daily:['📝','Daily'], exams:['🎓','Exams'], more:['⋯','More']};
-  PANES.slice(1).forEach(function(n){ if(by[n].length || (n === 'fees' && by.feesSetup.length)) TABS_SHOWN.push(n); });
+  PANES.slice(1).forEach(function(n){ if(by[n].length || (n === 'fees' && by.feesSetup.length) || (n === 'students' && by.studentsSetup.length)) TABS_SHOWN.push(n); });
   var bar = $('tabsBar');
   if(TABS_SHOWN.length < 2){ bar.style.display = 'none'; document.body.style.paddingBottom = '24px'; return; }
   bar.innerHTML = TABS_SHOWN.map(function(n){ return '<button class="tabBtn" id="tab_'+n+'" data-nofb onclick="openPane(\''+n+'\')"><span class="tabIco">'+defs[n][0]+'</span>'+defs[n][1]+'</button>'; }).join('');
@@ -309,10 +310,11 @@ async function init(){
     $('hi').innerText = (r.school || 'School') + ' — Office'; $('sub').innerText = 'Session ' + (r.session || '-');
     if(USER.role === 'admin') $('adminBack').style.display = 'block';
     let mine = CARDS.filter(c=>c[0].split('|').some(t=>r.privileges.indexOf(t) > -1));   // one 'Current student list' card for Students OR Student records view
-    let by = {students:[], fees:[], feesSetup:[], daily:[], exams:[], more:[]};
+    let by = {students:[], studentsSetup:[], fees:[], feesSetup:[], daily:[], exams:[], more:[]};   // S33b: + Students ⚙️ Setup
     mine.forEach(c=>by[c[5]].push(c));
     ['students','fees','daily','exams','more'].forEach(n=>{ $('cards'+n.charAt(0).toUpperCase()+n.slice(1)).innerHTML = by[n].map(cardHtml).join(''); });
     $('cardsFeesSetup').innerHTML = by.feesSetup.map(cardHtml).join(''); $('feesSetupBox').style.display = by.feesSetup.length ? 'block' : 'none';
+    $('cardsStudentsSetup').innerHTML = by.studentsSetup.map(cardHtml).join(''); $('studentsSetupBox').style.display = by.studentsSetup.length ? 'block' : 'none';
     if(!mine.length) $('homeEmpty').innerHTML = '<div class="box empty-note">No pages are allowed for you yet. Please ask the admin.</div>';
     buildTabs(by);
     openPane(ssGet() || 'home');
